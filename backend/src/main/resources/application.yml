@@ -7,7 +7,7 @@ spring:
   # ============================================================
   datasource:
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-    url: ${DATABASE_URL:jdbc:sqlserver://127.0.0.1:1433;databaseName=hotel_management;encrypt=true;trustServerCertificate=true}
+    url: ${DATABASE_URL:jdbc:sqlserver://127.0.0.1:1433;databaseName=hotel_management;encrypt=false;trustServerCertificate=true}
     username: ${DATABASE_USER:hotel_app}
     password: ${DATABASE_PASSWORD:HotelApp@12345}
 
@@ -16,10 +16,11 @@ spring:
   # ============================================================
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: none
     open-in-view: false
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.SQLServerDialect
         jdbc:
           time_zone: Asia/Kolkata
 

@@ -3,20 +3,93 @@ import { ApiResponse } from '../types/api';
 
 export * from '../types/api';
 
-const resolveBaseUrl = (): string => {
-  if (import.meta.env.VITE_API_BASE_URL) {
-    return import.meta.env.VITE_API_BASE_URL;
+export const DEFAULT_CENTRAL_HOST = '192.168.1.51';
+
+export const getCentralServerHost = (): string => {
+  if (typeof window !== 'undefined') {
+    // 1. Check custom saved host in localStorage
+    const saved = localStorage.getItem('ajalkar_server_host');
+    if (saved && saved.trim()) {
+      return saved.trim();
+    }
+
+    // 2. If loaded over network IP/hostname in browser (e.g. http://192.168.1.51:5173)
+    const hn = window.location?.hostname;
+    if (hn && hn !== 'localhost' && hn !== '127.0.0.1' && hn !== '::1') {
+      return hn;
+    }
   }
-  if (
-    typeof window !== 'undefined' &&
-    window.location &&
-    window.location.hostname &&
-    window.location.hostname !== 'localhost' &&
-    window.location.hostname !== '127.0.0.1'
-  ) {
-    return `http://${window.location.hostname}:8080/api/v1`;
+
+  // 3. Fallback to authoritative central host IP
+  return DEFAULT_CENTRAL_HOST;
+};
+
+export const setCentralServerHost = (host: string): void => {
+  if (typeof window !== 'undefined') {
+    if (host && host.trim()) {
+      localStorage.setItem('ajalkar_server_host', host.trim());
+    } else {
+      localStorage.removeItem('ajalkar_server_host');
+    }
   }
-  return 'http://localhost:8080/api/v1';
+};
+
+export const resolveBaseUrl = (): string => {
+  if (typeof window !== 'undefined') {
+    // 1. Check custom saved host
+    const saved = localStorage.getItem('ajalkar_server_host');
+    if (saved && saved.trim()) {
+      const trimmed = saved.trim();
+      return trimmed.startsWith('http') ? trimmed : `http://${trimmed}:8080/api/v1`;
+    }
+
+    // 2. If loaded over network IP/hostname
+    const hn = window.location?.hostname;
+    if (hn && hn !== 'localhost' && hn !== '127.0.0.1' && hn !== '::1') {
+      return `http://${hn}:8080/api/v1`;
+    }
+  }
+
+  // 3. Check environment variable if valid non-localhost
+  const envUrl = import.meta.env.VITE_API_BASE_URL;
+  if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
+    return envUrl;
+  }
+
+  // 4. Default to authoritative central host IP
+  return `http://${DEFAULT_CENTRAL_HOST}:8080/api/v1`;
+};
+
+export const testServerConnection = async (
+  customHost?: string
+): Promise<{ success: boolean; message: string; latencyMs: number }> => {
+  const host = customHost?.trim() || getCentralServerHost();
+  const targetUrl = host.startsWith('http') ? `${host}/actuator/health` : `http://${host}:8080/actuator/health`;
+  const startTime = Date.now();
+  try {
+    const res = await axios.get(targetUrl, { timeout: 3500 });
+    const latencyMs = Date.now() - startTime;
+    if (res.status === 200 && res.data?.status === 'UP') {
+      return { success: true, message: `Connected to Central Hotel Server (${host}:8080)`, latencyMs };
+    }
+    return { success: true, message: `Server responded from ${host}`, latencyMs };
+  } catch (err: any) {
+    const altUrl = host.startsWith('http') ? `${host}/api/v1/industries` : `http://${host}:8080/api/v1/industries`;
+    try {
+      const altRes = await axios.get(altUrl, { timeout: 3500 });
+      const latencyMs = Date.now() - startTime;
+      if (altRes.status === 200) {
+        return { success: true, message: `Connected to Central Hotel Server (${host}:8080)`, latencyMs };
+      }
+    } catch (_) {
+      // ignore
+    }
+    return {
+      success: false,
+      message: err.message || `Cannot connect to server at ${host}:8080`,
+      latencyMs: 0,
+    };
+  }
 };
 
 const api = axios.create({
@@ -50,9 +123,10 @@ export const clearAuthTokens = (): void => {
   localStorage.removeItem('ajalkar_business');
 };
 
-// Request interceptor to attach JWT token
+// Request interceptor to attach JWT token and ensure dynamic baseURL
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
+    config.baseURL = resolveBaseUrl();
     const token = getAuthToken();
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -161,7 +235,7 @@ api.interceptors.response.use(
 
       try {
         const refreshResponse = await axios.post<ApiResponse<{ token: string; refreshToken?: string }>>(
-          `${api.defaults.baseURL}/auth/refresh`,
+          `${resolveBaseUrl()}/auth/refresh`,
           { refreshToken },
           { headers: { 'Content-Type': 'application/json' } }
         );
@@ -207,10 +281,11 @@ api.interceptors.response.use(
 
     // Network error (no response)
     if (!error.response && error.request) {
-      console.error('Network Error: Unable to reach backend at ' + api.defaults.baseURL);
+      const currentBaseUrl = resolveBaseUrl();
+      console.error('Network Error: Unable to reach backend at ' + currentBaseUrl);
       (error as any).userFriendlyMessage =
-        'Unable to connect to the server. Please ensure the backend is running at ' +
-        api.defaults.baseURL;
+        'Unable to connect to the central server. Please ensure the central backend is running at ' +
+        currentBaseUrl;
     }
 
     return Promise.reject(error);
