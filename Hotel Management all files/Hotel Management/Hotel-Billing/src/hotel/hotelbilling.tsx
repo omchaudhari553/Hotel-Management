@@ -1,3 +1,5 @@
+import { PrintInvoiceModal } from '../components/PrintInvoiceModal';
+import { UniversalInvoicePrintData } from '../types/printing';
 
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
@@ -788,6 +790,8 @@ export const HotelBilling: React.FC = () => {
   const [payment, setPayment] =
     useState<Payment | null>(null);
 
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+  const [printModalData, setPrintModalData] = useState<UniversalInvoicePrintData | null>(null);
   const [previewInvoiceNumber, setPreviewInvoiceNumber] =
     useState("");
 
@@ -2395,6 +2399,60 @@ export const HotelBilling: React.FC = () => {
     );
 
   const printInvoice = () => {
+    if (!invoice) {
+      dialogService.alert({
+        title: "Invoice Required",
+        message: "Generate bill first.",
+        type: "warning",
+      });
+      return;
+    }
+
+    const printData: UniversalInvoicePrintData = {
+      invoiceNumber: invoice.invoiceNumber || String(invoice.id || 'INV-001'),
+      invoiceDate: invoice.createdAt?.split('T')[0] || new Date().toISOString().split('T')[0],
+      dueDate: invoice.createdAt?.split('T')[0] || new Date().toISOString().split('T')[0],
+      hotelName: "AJALKAR HOTEL & RESTAURANT",
+      hotelAddress: "Hotel Premises, Pune, Maharashtra - 411004",
+      hotelPhone: "+91 98765 43210",
+      hotelEmail: "hotel@ajalkarpos.com",
+      gstin: "27AAKCA1234F1Z5",
+      fssai: "11521034000123",
+      customerName: invoice.customerName || "Walk-in Guest",
+      customerPhone: invoice.customerMobile || "",
+      tableName: formatTableName(invoice.tableNumber || "Table", language),
+      orderNumber: invoice.orderId ? `ORD-${invoice.orderId}` : (invoice.kotNumber || ""),
+      items: (invoice.items || []).map((it, idx) => ({
+        id: it.id || idx,
+        name: it.itemName || "Dish",
+        quantity: it.quantity,
+        unitPrice: it.price,
+        totalPrice: it.quantity * it.price,
+      })),
+      subtotal: invoice.itemTotal || 0,
+      discountAmount: invoice.discountAmount || 0,
+      taxableAmount: invoice.taxableAmount || ((invoice.itemTotal || 0) - (invoice.discountAmount || 0)),
+      cgstRate: invoice.cgstRate || 2.5,
+      cgstAmount: invoice.cgst || (invoice.taxAmount ? invoice.taxAmount / 2 : 0),
+      sgstRate: invoice.sgstRate || 2.5,
+      sgstAmount: invoice.sgst || (invoice.taxAmount ? invoice.taxAmount / 2 : 0),
+      igstRate: invoice.igstRate || 0,
+      igstAmount: invoice.igst || 0,
+      totalTax: invoice.taxAmount || 0,
+      grandTotal: invoice.grandTotal || 0,
+      paymentMethod: invoice.paymentMethod || "CASH",
+      paymentStatus: invoice.status || "PAID",
+      paidAmount: invoice.paidAmount ?? (invoice.status === "PAID" ? invoice.grandTotal : 0),
+      outstandingAmount: invoice.remainingAmount || invoice.dueAmount || 0,
+      footerMessage: "Thank you for dining with us! Please visit again.",
+      language,
+    };
+
+    setPrintModalData(printData);
+    setIsPrintModalOpen(true);
+  };
+
+  const oldPrintInvoiceLegacy = () => {
     if (!invoice) {
       dialogService.alert({
         title: "Invoice Required",
@@ -7848,6 +7906,12 @@ export const HotelBilling: React.FC = () => {
         }
 
       `}</style>
+      {/* Complete Multi-Size Bluetooth & System Print Dialog */}
+      <PrintInvoiceModal
+        isOpen={isPrintModalOpen}
+        onClose={() => setIsPrintModalOpen(false)}
+        invoiceData={printModalData}
+      />
     </div>
   );
 };
