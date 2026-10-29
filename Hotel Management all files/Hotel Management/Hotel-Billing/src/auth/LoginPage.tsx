@@ -1,8 +1,9 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useSearchParams, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useLanguage, LanguageCode } from '../context/LanguageContext';
+import CentralServerBadge from '../components/CentralServerBadge';
 import {
   Lock,
   Mail,
@@ -398,6 +399,10 @@ export const LoginPage: React.FC = () => {
           <Link to="/get-started?step=1" style={{ color: '#64748B', fontSize: '0.84rem', textDecoration: 'none', fontWeight: 600 }}>
             {t('backToBusinessSelection', 'â† Back to Business Selection')}
           </Link>
+        </div>
+        {/* Central Database Status Badge */}
+        <div style={{ textAlign: 'center', marginTop: '16px', paddingTop: '12px', borderTop: '1px dashed #E2E8F0' }}>
+          <CentralServerBadge variant="login" />
         </div>
       </div>
 

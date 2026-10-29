@@ -8,6 +8,7 @@ import notificationService, { AppNotification } from '../services/notificationSe
 import { licenceService, LicenceInfo } from '../services/licenceService';
 import { settingsService } from '../services/settingsService';
 import SubscriptionModal from '../components/SubscriptionModal';
+import CentralServerBadge from '../components/CentralServerBadge';
 import { LocalizedDatePicker } from './LocalizedDatePicker';
 import {
   LogOut,
@@ -1154,6 +1155,9 @@ export const Navbar: React.FC = () => {
             </div>
           )}
         </div>
+
+        {/* Central Server & Database Connection Status */}
+        <CentralServerBadge variant="navbar" />
 
         {/* Current Date Chip (Display Only - No Filtering) */}
         <div style={{ position: 'relative' }}>
