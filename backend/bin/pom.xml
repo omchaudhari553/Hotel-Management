@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="
+            http://maven.apache.org/POM/4.0.0
+            https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- ========================================================= -->
+    <!-- SPRING BOOT -->
+    <!-- ========================================================= -->
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.5.6</version>
+        <relativePath/>
+    </parent>
+
+
+    <!-- ========================================================= -->
+    <!-- PROJECT INFORMATION -->
+    <!-- ========================================================= -->
+
+    <groupId>com.hotelmanagement</groupId>
+    <artifactId>hotel-backend</artifactId>
+    <version>1.0.0</version>
+
+    <name>hotel-backend</name>
+    <description>Production-oriented Hotel Management backend</description>
+
+
+    <!-- ========================================================= -->
+    <!-- PROPERTIES -->
+    <!-- ========================================================= -->
+
+    <properties>
+
+        <!-- Java 21 -->
+        <java.version>21</java.version>
+
+        <!-- JWT -->
+        <jjwt.version>0.12.6</jjwt.version>
+
+        <!-- Encoding -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+    </properties>
+
+
+    <!-- ========================================================= -->
+    <!-- DEPENDENCIES -->
+    <!-- ========================================================= -->
+
+    <dependencies>
+
+        <!-- ===================================================== -->
+        <!-- WEB / REST API                                       -->
+        <!-- ===================================================== -->
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+
+        <!-- ===================================================== -->
+        <!-- SPRING DATA JPA                                      -->
+        <!-- ===================================================== -->
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+
+        <!-- ===================================================== -->
+        <!-- SPRING SECURITY                                      -->
+        <!-- ===================================================== -->
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+
+        <!-- ===================================================== -->
+        <!-- VALIDATION                                           -->
+        <!-- ===================================================== -->
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+
+        <!-- ===================================================== -->
+        <!-- ACTUATOR                                             -->
+        <!-- ===================================================== -->
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+
+        <!-- ===================================================== -->
+        <!-- FLYWAY CORE                                          -->
+        <!-- ===================================================== -->
+
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+
+
+        <!-- ===================================================== -->
+        <!-- FLYWAY SQL SERVER SUPPORT                            -->
+        <!-- ===================================================== -->
+
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-sqlserver</artifactId>
+        </dependency>
+
+
+        <!-- ===================================================== -->
+        <!-- MICROSOFT SQL SERVER JDBC DRIVER                     -->
+        <!-- ===================================================== -->
+
+        <dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>mssql-jdbc</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+
+        <!-- ===================================================== -->
+        <!-- SWAGGER / OPENAPI                                    -->
+        <!-- ===================================================== -->
+
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.8.13</version>
+        </dependency>
+
+
+        <!-- ===================================================== -->
+        <!-- JWT API                                               -->
+        <!-- ===================================================== -->
+
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>${jjwt.version}</version>
+        </dependency>
+
+
+        <!-- ===================================================== -->
+        <!-- JWT IMPLEMENTATION                                    -->
+        <!-- ===================================================== -->
+
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+
+        <!-- ===================================================== -->
+        <!-- JWT JACKSON                                           -->
+        <!-- ===================================================== -->
+
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+
+        <!-- ===================================================== -->
+        <!-- LOMBOK                                               -->
+        <!-- ===================================================== -->
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+
+        <!-- ===================================================== -->
+        <!-- TESTING                                               -->
+        <!-- ===================================================== -->
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+
+    <!-- ========================================================= -->
+    <!-- BUILD                                                     -->
+    <!-- ========================================================= -->
+
+    <build>
+
+        <plugins>
+
+            <!-- ================================================= -->
+            <!-- SPRING BOOT MAVEN PLUGIN                         -->
+            <!-- ================================================= -->
+
+            <!-- ================================================= -->
+            <!-- FLYWAY MAVEN PLUGIN                               -->
+            <!-- IMPORTANT: uses the same SQL Server connection    -->
+            <!-- as application.yml, so mvn flyway:repair works.  -->
+            <!-- ================================================= -->
+            <plugin>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-maven-plugin</artifactId>
+                <version>11.7.2</version>
+                <configuration>
+                    <url>jdbc:sqlserver://127.0.0.1:1433;databaseName=hotel_management;encrypt=true;trustServerCertificate=true;loginTimeout=30</url>
+                    <user>hotel_app</user>
+                    <password>HotelApp@12345</password>
+                    <locations>
+                        <location>filesystem:src/main/resources/db/migration</location>
+                    </locations>
+                    <connectRetries>3</connectRetries>
+                    <connectRetriesInterval>5</connectRetriesInterval>
+                </configuration>
+            </plugin>
+
+            <!-- ================================================= -->
+            <!-- JAVA COMPILER - FORCE FULL RECOMPILATION          -->
+            <!-- Prevents stale/incremental target/classes issues  -->
+            <!-- such as missing FinancialCalculator.class.       -->
+            <!-- ================================================= -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.14.0</version>
+                <configuration>
+                    <release>21</release>
+                    <useIncrementalCompilation>false</useIncrementalCompilation>
+                </configuration>
+            </plugin>
+
+            <!-- ================================================= -->
+            <!-- SPRING BOOT MAVEN PLUGIN                         -->
+            <!-- ================================================= -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+
+        </plugins>
+
+    </build>
+
+</project>

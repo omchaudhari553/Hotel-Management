@@ -1,0 +1,5 @@
+package com.hotelmanagement.enums;
+
+public enum KotStatus {
+    PENDING, SENT_TO_KITCHEN, ACCEPTED, PREPARING, READY, SERVED, BILL_REQUESTED, BILLED, CANCELLED, COMPLETED
+}
