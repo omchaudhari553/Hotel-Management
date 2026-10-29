@@ -1,8 +1,13 @@
 ﻿.idea/
+.vscode/
 **/node_modules/
 **/dist/
 **/target/
+**/bin/
+**/.expo/
 .env
 .env.*
 !.env.example
 *.log
+*.class
+scratch/
