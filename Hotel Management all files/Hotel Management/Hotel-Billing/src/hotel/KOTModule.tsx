@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Receipt,
+  ReceiptIndianRupee,
   CalendarDays,
   ChevronDown,
   ChevronLeft,
@@ -544,7 +544,7 @@ export const KOTModule = () => {
     return {
       label: t("proceedToBilling", "Proceed to Billing"),
       nextStatus: "BILLING",
-      icon: Receipt,
+      icon: ReceiptIndianRupee,
       bg: "#8B3E16",
       isLink: true,
     };
@@ -1625,7 +1625,7 @@ export const KOTModule = () => {
               boxShadow: "0 2px 8px rgba(139, 62, 22, 0.25)",
             }}
           >
-            <Receipt size={25} />
+            <ReceiptIndianRupee size={25} />
           </div>
 
           <div>
@@ -2600,7 +2600,7 @@ export const KOTModule = () => {
                       }}
                       title={t("printBillThermal", "Print Bill Receipt (80mm)")}
                     >
-                      <Receipt size={15} strokeWidth={2.4} color="#059669" />
+                      <ReceiptIndianRupee size={15} strokeWidth={2.4} color="#059669" />
                     </button>
                   )}
 
@@ -2731,7 +2731,7 @@ export const KOTModule = () => {
                     justifyContent: "center",
                   }}
                 >
-                  <Receipt size={22} />
+                  <ReceiptIndianRupee size={22} />
                 </div>
                 <div>
                   <h2
@@ -3222,7 +3222,7 @@ export const KOTModule = () => {
                           }}
                         >
                           <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                            <Receipt size={18} color="#D97706" />
+                            <ReceiptIndianRupee size={18} color="#D97706" />
                             <span
                               style={{
                                 fontSize: "14px",
@@ -3633,7 +3633,7 @@ export const KOTModule = () => {
                   cursor: "pointer",
                 }}
               >
-                <Receipt size={15} strokeWidth={2.4} color="#059669" />
+                <ReceiptIndianRupee size={15} strokeWidth={2.4} color="#059669" />
                 <span>{t("printBill80mm", "Print Bill (80mm)")}</span>
               </button>
 

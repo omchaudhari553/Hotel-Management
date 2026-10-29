@@ -1,3 +1,5 @@
+import { MobilePrintInvoiceModal } from '../../components/MobilePrintInvoiceModal';
+import { UniversalInvoicePrintData } from '../../types/printing';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
@@ -85,6 +87,8 @@ export const HotelBillingScreen: React.FC<{ route?: any; navigation?: any }> = (
   const [finalPaidOrder, setFinalPaidOrder] = useState<ActiveOrder | null>(null);
 
   // Success Confirmation Pop-up Modal State
+  const [isPrintModalVisible, setIsPrintModalVisible] = useState<boolean>(false);
+  const [activePrintData, setActivePrintData] = useState<UniversalInvoicePrintData | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
   const [successPaymentData, setSuccessPaymentData] = useState<{
     invoiceNumber: string;
@@ -1003,39 +1007,45 @@ export const HotelBillingScreen: React.FC<{ route?: any; navigation?: any }> = (
               onPress={() => {
                 const invNumber = generatedInvoiceNumber || finalPaidOrder?.invoiceNumber || '#INV-101';
                 const table = finalPaidOrder?.tableNumber || selectedOrder?.tableNumber || 'Table';
-                const items = (finalPaidOrder?.items || orderItemsList || []).map((dish) => ({
+                const items = (finalPaidOrder?.items || orderItemsList || []).map((dish, idx) => ({
+                  id: idx,
                   name: dish.name,
                   quantity: dish.quantity,
-                  price: dish.price,
+                  unitPrice: dish.price,
+                  totalPrice: dish.price * dish.quantity,
                 }));
                 const subtotal = Number(finalPaidOrder?.subtotal || calculatedSubtotal || 0);
-                const cgst = finalPaidOrder?.cgst || calculatedCGST || '0.00';
-                const sgst = finalPaidOrder?.sgst || calculatedSGST || '0.00';
+                const cgst = Number(finalPaidOrder?.cgst || calculatedCGST || 0);
+                const sgst = Number(finalPaidOrder?.sgst || calculatedSGST || 0);
                 const discount = Number(finalPaidOrder?.discountAmount || rawDiscount || 0);
                 const total = Number(finalPaidOrder?.total || calculatedGrandTotal || 0);
 
-                printCustomerBill80mm({
+                setActivePrintData({
                   invoiceNumber: invNumber,
-                  hotelName: activeBranch?.name || 'Royal Palace Hotel',
+                  invoiceDate: finalPaidOrder?.date || new Date().toLocaleDateString('en-IN'),
+                  hotelName: activeBranch?.name || 'AJALKAR HOTEL MANAGEMENT',
                   hotelAddress: activeBranch?.address || 'Shop No. 12, Shree Complex, Pune - 411028',
+                  hotelPhone: '+91 98765 43210',
                   gstin: '27AAKCA1234F1Z5',
                   fssai: '11521034000123',
                   tableName: table,
                   customerName: finalPaidOrder?.customer || selectedOrder?.customer || 'Walk-in Guest',
-                  date: finalPaidOrder?.date || new Date().toLocaleDateString('en-IN'),
-                  time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
-                  paymentMode: finalPaidOrder?.paymentMode || paymentMode,
                   items,
                   subtotal,
-                  cgst,
-                  sgst,
-                  discount,
-                  total,
-                  footerNote: 'Thank you for dining with Royal Palace Hotel!',
+                  cgstAmount: cgst,
+                  sgstAmount: sgst,
+                  cgstRate: 2.5,
+                  sgstRate: 2.5,
+                  totalTax: cgst + sgst,
+                  discountAmount: discount,
+                  grandTotal: total,
+                  paymentMethod: finalPaidOrder?.paymentMode || paymentMode,
+                  paymentStatus: 'PAID',
+                  footerMessage: 'Thank you for dining with us! Please visit again.',
                 });
+                setIsPrintModalVisible(true);
               }}
-              activeOpacity={0.85}
-            >
+              activeOpacity={0.85}>
               <Printer size={15} color="#FFFFFF" />
               <Text style={styles.printReceiptText}>{t('print80mmBill', 'Print')}</Text>
             </TouchableOpacity>
@@ -1380,6 +1390,13 @@ export const HotelBillingScreen: React.FC<{ route?: any; navigation?: any }> = (
           </View>
         </View>
       </Modal>
+
+      {/* Multi-Size Bluetooth & Spooler Print Modal */}
+      <MobilePrintInvoiceModal
+        visible={isPrintModalVisible}
+        onClose={() => setIsPrintModalVisible(false)}
+        invoiceData={activePrintData}
+      />
     </View>
   );
 };

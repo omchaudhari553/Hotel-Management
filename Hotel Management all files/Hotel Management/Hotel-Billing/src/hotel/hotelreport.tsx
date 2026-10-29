@@ -20,7 +20,7 @@ import {
   X,
   Wallet,
   BarChart3,
-  Receipt,
+  ReceiptIndianRupee,
   ShoppingCart,
   Utensils,
   Users,
@@ -8619,7 +8619,7 @@ export default function ExpensesReports() {
             }
             onClick={() => setActiveSection("gst-report")}
           >
-            <Receipt size={16} />
+            <ReceiptIndianRupee size={16} />
             {t('scaleSummaryGstReport', 'Scale Summary GST Report')}
           </button>
 
@@ -8705,7 +8705,7 @@ export default function ExpensesReports() {
                         <td>
                           <div className="er-name-cell">
                             <div className="er-small-icon">
-                              <Receipt size={15} />
+                              <ReceiptIndianRupee size={15} />
                             </div>
                             <span>{t(expense.name, expense.name)}</span>
                           </div>
@@ -9260,7 +9260,7 @@ export default function ExpensesReports() {
                 type="button"
                 onClick={() => setGstReportTab("sales-summary")}
               >
-                <Receipt size={15} />
+                <ReceiptIndianRupee size={15} />
                 A. {t('gstSalesSummary', 'GST Sales Summary')}
               </button>
               <button

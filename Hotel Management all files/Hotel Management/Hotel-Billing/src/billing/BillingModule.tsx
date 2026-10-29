@@ -1,3 +1,5 @@
+import { PrintInvoiceModal } from '../components/PrintInvoiceModal';
+import { UniversalInvoicePrintData } from '../types/printing';
 import React, { useState, useEffect } from 'react';
 import { billingService } from '../services/billingService';
 import { customerService } from '../services/customerService';
@@ -7,6 +9,44 @@ import { StatusBadge } from '../common/StatusBadge';
 import { Modal } from '../common/Modal';
 import { useToast } from '../context/ToastContext';
 import { FileText, Plus, Printer, Search, Download } from 'lucide-react';
+
+
+function mapInvoiceToUniversalPrintData(inv: Invoice): UniversalInvoicePrintData {
+  return {
+    invoiceNumber: inv.invoiceNumber || String(inv.id || 'INV-101'),
+    invoiceDate: inv.createdAt?.split('T')[0] || new Date().toISOString().split('T')[0],
+    dueDate: inv.dueDate,
+    hotelName: 'AJALKAR HOTEL MANAGEMENT',
+    hotelAddress: 'Hotel Premises, Pune, Maharashtra - 411004',
+    hotelPhone: '+91 98765 43210',
+    hotelEmail: 'billing@ajalkarpos.com',
+    gstin: '27AAACA9999P1Z1',
+    fssai: '11521034000123',
+    customerName: inv.customerName || 'Walk-in Guest',
+    tableName: inv.tableName || inv.tableNumber || '',
+    orderNumber: inv.orderId ? 'ORD-' + inv.orderId : '',
+    items: (inv.items || []).map((it, idx) => ({
+      id: it.id || idx,
+      name: it.description || 'Item',
+      quantity: it.quantity,
+      unitPrice: it.unitPrice,
+      taxRate: it.taxRate,
+      totalPrice: it.totalPrice,
+    })),
+    subtotal: inv.subtotal || 0,
+    discountAmount: inv.discountAmount || 0,
+    taxableAmount: inv.taxableAmount || (inv.subtotal - (inv.discountAmount || 0)),
+    cgstRate: 2.5,
+    cgstAmount: (inv.taxAmount || 0) / 2,
+    sgstRate: 2.5,
+    sgstAmount: (inv.taxAmount || 0) / 2,
+    totalTax: inv.taxAmount || 0,
+    grandTotal: inv.grandTotal || 0,
+    paymentMethod: inv.paymentMode || 'CASH',
+    paymentStatus: inv.status || 'PAID',
+    footerMessage: 'Thank you for your patronage! Visit again.',
+  };
+}
 
 export const BillingModule: React.FC = () => {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -288,65 +328,12 @@ export const BillingModule: React.FC = () => {
         </form>
       </Modal>
 
-      {/* Print Preview Modal */}
-      <Modal isOpen={isPrintModalOpen} onClose={() => setIsPrintModalOpen(false)} title="Tax Invoice Receipt" maxWidth="600px">
-        {selectedInvoice && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div style={{ textAlign: 'center', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '16px' }}>
-              <h2 style={{ fontSize: '1.4rem', fontWeight: 800 }}>Ajalkar POS Billing Group</h2>
-              <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>GSTIN: 27AAACA9999P1Z1 • Pune, Maharashtra</p>
-              <div style={{ marginTop: '8px', fontSize: '0.9rem', fontWeight: 700 }}>
-                INVOICE #{selectedInvoice.invoiceNumber}
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-              <div>
-                <span style={{ color: 'var(--text-muted)' }}>Billed To:</span>
-                <div style={{ fontWeight: 700 }}>{selectedInvoice.customerName}</div>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Date:</span>
-                <div style={{ fontWeight: 700 }}>{selectedInvoice.createdAt?.split('T')[0]}</div>
-              </div>
-            </div>
-
-            <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {selectedInvoice.items?.map((item, i) => (
-                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-                  <span>{item.quantity}x {item.description}</span>
-                  <span style={{ fontWeight: 600 }}>₹{item.totalPrice?.toFixed(2)}</span>
-                </div>
-              ))}
-            </div>
-
-            <div style={{ borderTop: '1px dashed var(--border-subtle)', paddingTop: '12px', display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.85rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)' }}>
-                <span>Subtotal:</span>
-                <span>₹{selectedInvoice.subtotal?.toFixed(2)}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)' }}>
-                <span>Tax:</span>
-                <span>₹{selectedInvoice.taxAmount?.toFixed(2)}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: '1.15rem', color: 'var(--text-main)', marginTop: '6px' }}>
-                <span>Grand Total:</span>
-                <span>₹{selectedInvoice.grandTotal?.toFixed(2)}</span>
-              </div>
-            </div>
-
-            <div className="modal-footer" style={{ margin: '0 -24px -24px -24px', padding: '16px 24px' }}>
-              <button onClick={() => window.print()} className="btn btn-secondary">
-                <Printer size={16} />
-                <span>Print Invoice</span>
-              </button>
-              <button onClick={() => setIsPrintModalOpen(false)} className="btn btn-primary">
-                Close
-              </button>
-            </div>
-          </div>
-        )}
-      </Modal>
+      {/* Multi-Size Bluetooth & System Print Invoice Modal */}
+      <PrintInvoiceModal
+        isOpen={isPrintModalOpen}
+        onClose={() => setIsPrintModalOpen(false)}
+        invoiceData={selectedInvoice ? mapInvoiceToUniversalPrintData(selectedInvoice) : null}
+      />
     </div>
   );
 };
