@@ -1,0 +1,84 @@
+spring:
+  application:
+    name: hotel-backend
+
+  # ============================================================
+  # DATABASE - SINGLE APPLICATION DATASOURCE (SQL SERVER)
+  # ============================================================
+  datasource:
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    url: ${DATABASE_URL:jdbc:sqlserver://127.0.0.1:1433;databaseName=hotel_management;encrypt=true;trustServerCertificate=true}
+    username: ${DATABASE_USER:hotel_app}
+    password: ${DATABASE_PASSWORD:HotelApp@12345}
+
+  # ============================================================
+  # JPA / HIBERNATE
+  # ============================================================
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: Asia/Kolkata
+
+  # ============================================================
+  # FLYWAY DATABASE MIGRATION
+  # ============================================================
+  flyway:
+    enabled: false
+    locations: classpath:db/migration
+
+  # ============================================================
+  # JACKSON
+  # ============================================================
+  jackson:
+    default-property-inclusion: non_null
+
+# ============================================================
+# SERVER
+# ============================================================
+server:
+  port: 8080
+
+# ============================================================
+# JWT SECURITY
+# ============================================================
+security:
+  jwt:
+    secret: ${JWT_SECRET:change_this_secret_in_environment}
+    expiration-ms: ${JWT_EXPIRATION:86400000}
+    refresh-expiration-ms: ${REFRESH_EXPIRATION:2592000000}
+
+# ============================================================
+# APPLICATION
+# ============================================================
+app:
+  frontend-url: ${FRONTEND_URL:http://localhost:5173}
+  integration-secret: ${INTEGRATION_SECRET:${JWT_SECRET:change_this_secret_in_environment}}
+
+  subscription:
+    trial-days: 28
+    gst-rate: 18.0
+
+  razorpay:
+    key-id: ${RAZORPAY_KEY_ID:}
+    key-secret: ${RAZORPAY_KEY_SECRET:}
+    webhook-secret: ${RAZORPAY_WEBHOOK_SECRET:}
+
+# ============================================================
+# SWAGGER / OPENAPI
+# ============================================================
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+# ============================================================
+# ACTUATOR
+# ============================================================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
