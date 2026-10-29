@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useSearchParams, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -123,8 +123,8 @@ export const LoginPage: React.FC = () => {
           <div style={{ display: 'flex', gap: '4px' }}>
             {[
               { code: 'en' as LanguageCode, label: 'English' },
-              { code: 'mr' as LanguageCode, label: 'मराठी' },
-              { code: 'hi' as LanguageCode, label: 'हिन्दी' },
+              { code: 'mr' as LanguageCode, label: 'à¤®à¤°à¤¾à¤ à¥€' },
+              { code: 'hi' as LanguageCode, label: 'à¤¹à¤¿à¤¨à¥à¤¦à¥€' },
             ].map((lang) => (
               <button
                 key={lang.code}
@@ -215,10 +215,10 @@ export const LoginPage: React.FC = () => {
           </div>
 
           <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#090040', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
-            {language === 'mr' ? `${industryName} कार्यक्षेत्रात लॉगिन करा` : language === 'hi' ? `${industryName} कार्यक्षेत्र में लॉगिन करें` : `Login to ${industryName} Workspace`}
+            {language === 'mr' ? `${industryName} à¤•à¤¾à¤°à¥à¤¯à¤•à¥à¤·à¥‡à¤¤à¥à¤°à¤¾à¤¤ à¤²à¥‰à¤—à¤¿à¤¨ à¤•à¤°à¤¾` : language === 'hi' ? `${industryName} à¤•à¤¾à¤°à¥à¤¯à¤•à¥à¤·à¥‡à¤¤à¥à¤° à¤®à¥‡à¤‚ à¤²à¥‰à¤—à¤¿à¤¨ à¤•à¤°à¥‡à¤‚` : `Login to ${industryName} Workspace`}
           </h2>
           <p style={{ fontSize: '0.9rem', color: '#475569', marginTop: '6px' }}>
-            {language === 'mr' ? `तुमच्या ${industryName.toLowerCase()} व्यवस्थापनासाठी लॉगिन माहिती प्रविष्ट करा` : language === 'hi' ? `अपने ${industryName.toLowerCase()} संचालन का प्रबंधन करने के लिए अपना विवरण दर्ज करें` : `Enter your credentials to manage your ${industryName.toLowerCase()} operations`}
+            {language === 'mr' ? `à¤¤à¥à¤®à¤šà¥à¤¯à¤¾ ${industryName.toLowerCase()} à¤µà¥à¤¯à¤µà¤¸à¥à¤¥à¤¾à¤ªà¤¨à¤¾à¤¸à¤¾à¤ à¥€ à¤²à¥‰à¤—à¤¿à¤¨ à¤®à¤¾à¤¹à¤¿à¤¤à¥€ à¤ªà¥à¤°à¤µà¤¿à¤·à¥à¤Ÿ à¤•à¤°à¤¾` : language === 'hi' ? `à¤…à¤ªà¤¨à¥‡ ${industryName.toLowerCase()} à¤¸à¤‚à¤šà¤¾à¤²à¤¨ à¤•à¤¾ à¤ªà¥à¤°à¤¬à¤‚à¤§à¤¨ à¤•à¤°à¤¨à¥‡ à¤•à¥‡ à¤²à¤¿à¤ à¤…à¤ªà¤¨à¤¾ à¤µà¤¿à¤µà¤°à¤£ à¤¦à¤°à¥à¤œ à¤•à¤°à¥‡à¤‚` : `Enter your credentials to manage your ${industryName.toLowerCase()} operations`}
           </p>
         </div>
 
@@ -389,14 +389,14 @@ export const LoginPage: React.FC = () => {
               textDecoration: 'none',
             }}
           >
-            {t('startBusinessRegistration', 'Start Business Registration (4 Steps) →')}
+            {t('startBusinessRegistration', 'Start Business Registration (4 Steps) â†’')}
           </Link>
         </div>
 
         {/* Back Link to Welcome */}
         <div style={{ textAlign: 'center', marginTop: '14px' }}>
           <Link to="/get-started?step=1" style={{ color: '#64748B', fontSize: '0.84rem', textDecoration: 'none', fontWeight: 600 }}>
-            {t('backToBusinessSelection', '← Back to Business Selection')}
+            {t('backToBusinessSelection', 'â† Back to Business Selection')}
           </Link>
         </div>
       </div>
@@ -422,6 +422,8 @@ export const LoginPage: React.FC = () => {
               padding: '28px',
               maxWidth: '420px',
               width: '100%',
+              maxHeight: '90vh',
+              overflowY: 'auto',
               boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
             }}
           >
@@ -443,7 +445,7 @@ export const LoginPage: React.FC = () => {
                 <CheckCircle2 size={42} color="#10B981" style={{ margin: '0 auto 12px' }} />
                 <h4 style={{ fontWeight: 800, color: '#090040' }}>{t('success', 'Instructions Sent!')}</h4>
                 <p style={{ fontSize: '0.85rem', color: '#475569', marginTop: '6px' }}>
-                  {language === 'mr' ? `आम्ही पासवर्ड रीसेट सूचना ${forgotEmail} वर पाठवल्या आहेत. कृपया तुमचा इनबॉक्स तपासा.` : language === 'hi' ? `हमने पासवर्ड रीसेट निर्देश ${forgotEmail} पर भेज दिए हैं। कृपया अपना इनबॉक्स देखें।` : `We have sent password reset instructions to ${forgotEmail}. Please check your inbox.`}
+                  {language === 'mr' ? `à¤†à¤®à¥à¤¹à¥€ à¤ªà¤¾à¤¸à¤µà¤°à¥à¤¡ à¤°à¥€à¤¸à¥‡à¤Ÿ à¤¸à¥‚à¤šà¤¨à¤¾ ${forgotEmail} à¤µà¤° à¤ªà¤¾à¤ à¤µà¤²à¥à¤¯à¤¾ à¤†à¤¹à¥‡à¤¤. à¤•à¥ƒà¤ªà¤¯à¤¾ à¤¤à¥à¤®à¤šà¤¾ à¤‡à¤¨à¤¬à¥‰à¤•à¥à¤¸ à¤¤à¤ªà¤¾à¤¸à¤¾.` : language === 'hi' ? `à¤¹à¤®à¤¨à¥‡ à¤ªà¤¾à¤¸à¤µà¤°à¥à¤¡ à¤°à¥€à¤¸à¥‡à¤Ÿ à¤¨à¤¿à¤°à¥à¤¦à¥‡à¤¶ ${forgotEmail} à¤ªà¤° à¤­à¥‡à¤œ à¤¦à¤¿à¤ à¤¹à¥ˆà¤‚à¥¤ à¤•à¥ƒà¤ªà¤¯à¤¾ à¤…à¤ªà¤¨à¤¾ à¤‡à¤¨à¤¬à¥‰à¤•à¥à¤¸ à¤¦à¥‡à¤–à¥‡à¤‚à¥¤` : `We have sent password reset instructions to ${forgotEmail}. Please check your inbox.`}
                 </p>
                 <button
                   onClick={() => setShowForgotModal(false)}
@@ -493,4 +495,5 @@ export const LoginPage: React.FC = () => {
     </>
   );
 };
+
 

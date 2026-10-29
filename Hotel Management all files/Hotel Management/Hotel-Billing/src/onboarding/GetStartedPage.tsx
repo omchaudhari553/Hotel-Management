@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useIndustry } from '../context/IndustryContext';
 import { useAuth } from '../context/AuthContext';
@@ -107,8 +107,8 @@ const INDUSTRY_PLANS: Record<IndustryCode, PlanTier[]> = {
     {
       id: 'hotel_starter',
       name: 'Hotel Starter',
-      monthlyPrice: '₹1,499',
-      annualPrice: '₹1,199',
+      monthlyPrice: '\u20B91,499',
+      annualPrice: '\u20B91,199',
       description: 'Ideal for small lodges, guesthouses, and homestays with up to 15 rooms.',
       features: [
         'Up to 15 Rooms Management',
@@ -121,8 +121,8 @@ const INDUSTRY_PLANS: Record<IndustryCode, PlanTier[]> = {
     {
       id: 'hotel_pro',
       name: 'Hotel Professional',
-      monthlyPrice: '₹2,999',
-      annualPrice: '₹2,399',
+      monthlyPrice: '\u20B92,999',
+      annualPrice: '\u20B92,399',
       description: 'Best for standard hotels & multi-floor dining restaurants.',
       isPopular: true,
       features: [
@@ -136,8 +136,8 @@ const INDUSTRY_PLANS: Record<IndustryCode, PlanTier[]> = {
     {
       id: 'hotel_enterprise',
       name: 'Hotel Enterprise',
-      monthlyPrice: '₹5,999',
-      annualPrice: '₹4,799',
+      monthlyPrice: '\u20B95,999',
+      annualPrice: '\u20B94,799',
       description: 'Full capabilities for luxury resorts, hotel chains, and multi-property groups.',
       features: [
         'Unlimited Rooms & Banquet Halls',
@@ -152,8 +152,8 @@ const INDUSTRY_PLANS: Record<IndustryCode, PlanTier[]> = {
     {
       id: 'mess_starter',
       name: 'Mess Basic',
-      monthlyPrice: '₹999',
-      annualPrice: '₹799',
+      monthlyPrice: '\u20B9999',
+      annualPrice: '\u20B9799',
       description: 'Perfect for local dining messes with up to 50 active subscribers.',
       features: [
         'Up to 50 Active Members',
@@ -166,8 +166,8 @@ const INDUSTRY_PLANS: Record<IndustryCode, PlanTier[]> = {
     {
       id: 'mess_pro',
       name: 'Mess Pro & Tiffin',
-      monthlyPrice: '₹1,999',
-      annualPrice: '₹1,599',
+      monthlyPrice: '\u20B91,999',
+      annualPrice: '\u20B91,599',
       description: 'Ideal for growing messes with delivery tiffin operations.',
       isPopular: true,
       features: [
@@ -181,8 +181,8 @@ const INDUSTRY_PLANS: Record<IndustryCode, PlanTier[]> = {
     {
       id: 'mess_enterprise',
       name: 'Catering Commercial',
-      monthlyPrice: '₹3,499',
-      annualPrice: '₹2,799',
+      monthlyPrice: '\u20B93,499',
+      annualPrice: '\u20B92,799',
       description: 'Full-scale solution for commercial cloud kitchens & university catering.',
       features: [
         'Unlimited Subscribers & Routes',
@@ -197,8 +197,8 @@ const INDUSTRY_PLANS: Record<IndustryCode, PlanTier[]> = {
     {
       id: 'cafe_starter',
       name: 'Counter Express',
-      monthlyPrice: '₹799',
-      annualPrice: '₹649',
+      monthlyPrice: '\u20B9799',
+      annualPrice: '\u20B9649',
       description: 'Fast single-counter checkout for coffee shops, juice bars, and bakeries.',
       features: [
         'Single Terminal Fast POS',
@@ -211,8 +211,8 @@ const INDUSTRY_PLANS: Record<IndustryCode, PlanTier[]> = {
     {
       id: 'cafe_pro',
       name: 'Bistro & Dine-In',
-      monthlyPrice: '₹1,499',
-      annualPrice: '₹1,199',
+      monthlyPrice: '\u20B91,499',
+      annualPrice: '\u20B91,199',
       description: 'Full-service dine-in cafes with table layouts and kitchen printing.',
       isPopular: true,
       features: [
@@ -226,8 +226,8 @@ const INDUSTRY_PLANS: Record<IndustryCode, PlanTier[]> = {
     {
       id: 'cafe_enterprise',
       name: 'QSR & Multi-Outlet',
-      monthlyPrice: '₹2,799',
-      annualPrice: '₹2,249',
+      monthlyPrice: '\u20B92,799',
+      annualPrice: '\u20B92,249',
       description: 'High-volume franchises and multi-counter quick service restaurants.',
       features: [
         'Multi-Counter POS Terminals',
@@ -511,7 +511,7 @@ export const GetStartedPage: React.FC = () => {
       localStorage.setItem('ajalkar_industry', selectedIndustryType);
       setIndustryCode(selectedIndustryType);
 
-      showToast('success', `🎉 Business "${result.business.name}" registered and activated successfully!`);
+      showToast('success', `ðŸŽ‰ Business "${result.business.name}" registered and activated successfully!`);
       const targetRoute = `/${selectedIndustryType.toLowerCase()}/dashboard`;
       navigate(targetRoute, { replace: true });
     } catch (err: any) {
@@ -520,7 +520,7 @@ export const GetStartedPage: React.FC = () => {
       }
       localStorage.setItem('ajalkar_industry', selectedIndustryType);
       setIndustryCode(selectedIndustryType);
-      showToast('success', `🎉 Business "${payload.businessName}" activated successfully!`);
+      showToast('success', `ðŸŽ‰ Business "${payload.businessName}" activated successfully!`);
       navigate(`/${selectedIndustryType.toLowerCase()}/dashboard`, { replace: true });
     } finally {
       setSubmitting(false);
@@ -535,16 +535,20 @@ export const GetStartedPage: React.FC = () => {
     <div
       style={{
         minHeight: '100vh',
+        width: '100%',
         backgroundColor: '#F8FAFC',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        padding: '36px 20px 60px 20px',
+        padding: '32px 20px 100px 20px',
         color: '#090040',
         fontFamily: 'var(--font-sans)',
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        boxSizing: 'border-box',
       }}
     >
-      <div style={{ width: '100%', maxWidth: '980px', margin: '0 auto' }}>
+      <div style={{ width: '100%', maxWidth: '1020px', margin: '0 auto' }}>
         {/* Top Action Bar with Full Executive Glassmorphism Styling */}
         <header
           style={{
@@ -976,7 +980,14 @@ export const GetStartedPage: React.FC = () => {
                         transition: 'all 0.15s ease',
                       }}
                     >
-                      {isSelected ? '✓ Selected Industry' : 'Click to Select'}
+                      {isSelected ? (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                          <Check size={15} strokeWidth={3} />
+                          <span>Selected Industry</span>
+                        </span>
+                      ) : (
+                        <span>Click to Select</span>
+                      )}
                     </div>
                   </div>
                 );
@@ -1650,14 +1661,21 @@ export const GetStartedPage: React.FC = () => {
                         border: isSelected ? 'none' : '1px solid #E2E8F0',
                       }}
                     >
-                      {isSelected ? '✓ Plan Selected' : 'Choose Plan'}
+                      {isSelected ? (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                          <Check size={15} strokeWidth={3} />
+                          <span>Plan Selected</span>
+                        </span>
+                      ) : (
+                        <span>Choose Plan</span>
+                      )}
                     </div>
                   </div>
                 );
               })}
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '24px', paddingTop: '20px', borderTop: '1px solid #E2E8F0', flexWrap: 'wrap', gap: '16px', paddingBottom: '32px' }}>
               <button
                 type="button"
                 onClick={() => setCurrentStep(2)}
@@ -1889,6 +1907,8 @@ export const GetStartedPage: React.FC = () => {
                 boxShadow: '0 25px 50px -12px rgba(9, 0, 64, 0.25)',
                 border: '1px solid #E2E8F0',
                 padding: '32px',
+                maxHeight: '90vh',
+                overflowY: 'auto',
                 position: 'relative',
                 animation: 'modalSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
               }}
@@ -2249,3 +2269,4 @@ export const GetStartedPage: React.FC = () => {
     </div>
   );
 };
+
