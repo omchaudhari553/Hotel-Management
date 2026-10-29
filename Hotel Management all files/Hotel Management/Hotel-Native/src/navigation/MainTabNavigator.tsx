@@ -23,6 +23,7 @@ import { StaffScreen } from '../screens/hotel/StaffScreen';
 import { BranchesScreen } from '../screens/hotel/BranchesScreen';
 import { SettingsScreen } from '../screens/settings/SettingsScreen';
 import { AppSidebar } from '../components/AppSidebar';
+import { ReceiptRupee } from '../components/ReceiptRupeeIcon';
 import { useLanguage } from '../context/LanguageContext';
 import {
   LayoutDashboard,
@@ -211,7 +212,7 @@ export const MainTabNavigator: React.FC<{ navigation?: any }> = ({ navigation })
             options={{
               tabBarLabel: t('billingGst', 'Billing'),
               tabBarIcon: ({ color, size }) => (
-                <Receipt size={size} color={color} />
+                <ReceiptRupee size={size} color={color} strokeWidth={2} />
               ),
             }}
           />

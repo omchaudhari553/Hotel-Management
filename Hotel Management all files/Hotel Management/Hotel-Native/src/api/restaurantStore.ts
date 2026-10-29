@@ -133,7 +133,7 @@ export const BRANCH_TABLES_INITIAL: { [branchId: number]: TableItem[] } = {
   1: [
     { id: '1', tableNumber: 'Table 01', section: 'Main Dining', capacity: 4, status: 'AVAILABLE', branchId: 1 },
     { id: '2', tableNumber: 'Table 02', section: 'Main Dining', capacity: 4, status: 'AVAILABLE', branchId: 1 },
-    { id: '3', tableNumber: 'Table 03', section: 'Main Dining', capacity: 4, status: 'BILLING', guestName: 'Guest', guestCount: 2, currentOrderId: '92', activeBillAmount: 1470, activeItemsCount: 3, branchId: 1 },
+    { id: '3', tableNumber: 'Table 03', section: 'Main Dining', capacity: 4, status: 'AVAILABLE', branchId: 1 },
     { id: '4', tableNumber: 'Table 04', section: 'Main Dining', capacity: 4, status: 'AVAILABLE', branchId: 1 },
     { id: '5', tableNumber: 'Table 05', section: 'Main Dining', capacity: 4, status: 'AVAILABLE', branchId: 1 },
     { id: '6', tableNumber: 'Table 06', section: 'Main Dining', capacity: 4, status: 'AVAILABLE', branchId: 1 },
@@ -178,200 +178,29 @@ export const BRANCH_TABLES_INITIAL: { [branchId: number]: TableItem[] } = {
   ],
 };
 
-// Seeded KOTs for Branch 1
+// Empty seed containers - all data strictly fetched from shared SQL Server database
 export const BRANCH_KOTS_INITIAL: { [branchId: number]: KOTTicket[] } = {
-  1: [
-    {
-      id: '#KOT-1792390568474',
-      orderId: '88',
-      tableNumber: 'Table 08',
-      guestName: 'Guest',
-      time: '11:46 AM',
-      date: '19 Oct 2026',
-      items: [
-        { name: 'Veg Spring Rolls', quantity: 4, price: 180 },
-        { name: 'Gulab Jamun', quantity: 2, price: 70 },
-        { name: 'Masala Papad', quantity: 5, price: 60 },
-      ],
-      totalQty: 11,
-      kitchenStatus: 'Served',
-      billingStatus: 'Not Billed',
-      note: 'Note: Table No: Table 08 - Guest',
-      branchId: 1,
-    },
-    {
-      id: '#KOT-1792390505830',
-      orderId: '87',
-      tableNumber: 'Table 07',
-      guestName: 'Guest',
-      time: '11:45 AM',
-      date: '19 Oct 2026',
-      items: [
-        { name: 'Paneer Tikka', quantity: 2, price: 260 },
-        { name: 'Dal Tadka', quantity: 3, price: 190 },
-      ],
-      totalQty: 5,
-      kitchenStatus: 'Preparing',
-      billingStatus: 'Not Billed',
-      note: 'Note: Table No: Table 07 - Guest',
-      branchId: 1,
-    },
-    {
-      id: '#KOT-1792390500111',
-      orderId: '92',
-      tableNumber: 'Table 03',
-      guestName: 'Guest',
-      time: '02:51 PM',
-      date: '22 Oct 2026',
-      items: [
-        { name: 'Butter Chicken', quantity: 2, price: 380 },
-        { name: 'Butter Naan', quantity: 6, price: 45 },
-      ],
-      totalQty: 8,
-      kitchenStatus: 'Ready',
-      billingStatus: 'Not Billed',
-      note: 'Note: Table 03 - Bill Requested',
-      branchId: 1,
-    },
-  ],
-  2: [
-    {
-      id: '#KOT-NSK-201',
-      orderId: '201',
-      tableNumber: 'NSK-TBL-01',
-      guestName: 'Rooftop Guest',
-      time: '12:30 PM',
-      date: 'Today',
-      items: [{ name: 'Paneer Tikka', quantity: 2, price: 260 }],
-      totalQty: 2,
-      kitchenStatus: 'Preparing',
-      billingStatus: 'Not Billed',
-      branchId: 2,
-    },
-  ],
+  1: [],
+  2: [],
   3: [],
   4: [],
-  5: [
-    {
-      id: '#KOT-MUM-501',
-      orderId: '501',
-      tableNumber: 'Table 01',
-      guestName: 'Mumbai Guest',
-      time: '01:15 PM',
-      date: 'Today',
-      items: [{ name: 'Chicken Biryani Special', quantity: 2, price: 340 }],
-      totalQty: 2,
-      kitchenStatus: 'Ready',
-      billingStatus: 'Not Billed',
-      branchId: 5,
-    },
-  ],
+  5: [],
 };
 
-// Seeded Orders for Branch 1
 export const BRANCH_ORDERS_INITIAL: { [branchId: number]: ActiveOrder[] } = {
-  1: [
-    {
-      id: '92',
-      orderNumber: '#ORD-1792587692162',
-      date: '22 Oct 2026, 02:51 pm',
-      customer: 'Guest',
-      tableNumber: 'Table 03',
-      items: [
-        { name: 'Butter Chicken', quantity: 2, price: 380 },
-        { name: 'Butter Naan', quantity: 6, price: 45 },
-        { name: 'Jeera Rice', quantity: 2, price: 160 },
-      ],
-      itemsCount: 3,
-      subtotal: 1380,
-      cgst: 34.5,
-      sgst: 34.5,
-      taxAmount: 69,
-      discountAmount: 0,
-      total: 1470,
-      status: 'BILL GENERATED',
-      branchId: 1,
-    },
-    {
-      id: '88',
-      orderNumber: '#ORD-1792390568446',
-      date: '19 Oct 2026, 11:46 am',
-      customer: 'Guest',
-      tableNumber: 'Table 08',
-      items: [
-        { name: 'Veg Spring Rolls', quantity: 4, price: 180 },
-        { name: 'Gulab Jamun', quantity: 2, price: 70 },
-        { name: 'Masala Papad', quantity: 5, price: 60 },
-      ],
-      itemsCount: 3,
-      subtotal: 1160,
-      cgst: 29,
-      sgst: 29,
-      taxAmount: 58,
-      discountAmount: 0,
-      total: 1218,
-      status: 'Active Orders',
-      branchId: 1,
-    },
-  ],
-  2: [
-    {
-      id: '201',
-      orderNumber: '#ORD-NSK-201',
-      date: 'Today, 12:30 pm',
-      customer: 'Rooftop Guest',
-      tableNumber: 'NSK-TBL-01',
-      items: [{ name: 'Paneer Tikka', quantity: 2, price: 260 }],
-      itemsCount: 1,
-      subtotal: 520,
-      cgst: 13,
-      sgst: 13,
-      taxAmount: 26,
-      discountAmount: 0,
-      total: 546,
-      status: 'Active Orders',
-      branchId: 2,
-    },
-  ],
+  1: [],
+  2: [],
   3: [],
   4: [],
-  5: [
-    {
-      id: '501',
-      orderNumber: '#ORD-MUM-501',
-      date: 'Today, 01:15 pm',
-      customer: 'Mumbai Guest',
-      tableNumber: 'Table 01',
-      items: [{ name: 'Chicken Biryani Special', quantity: 2, price: 340 }],
-      itemsCount: 1,
-      subtotal: 680,
-      cgst: 17,
-      sgst: 17,
-      taxAmount: 34,
-      discountAmount: 0,
-      total: 714,
-      status: 'Active Orders',
-      branchId: 5,
-    },
-  ],
+  5: [],
 };
 
-// Seeded Payments
 export const BRANCH_PAYMENTS_INITIAL: { [branchId: number]: PaymentRecord[] } = {
-  1: [
-    { id: 'p1', billId: 'INV-1092', tableName: 'Table 06', customerName: 'Guest', amount: 2499, mode: 'UPI', time: '19 Oct 2026, 11:52 AM', date: '19 Oct 2026', status: 'SETTLED', referenceNo: 'UPI/629104819', branchId: 1 },
-    { id: 'p2', billId: 'INV-1091', tableName: 'Table 02', customerName: 'Guest', amount: 1450, mode: 'CASH', time: '19 Oct 2026, 11:20 AM', date: '19 Oct 2026', status: 'SETTLED', referenceNo: 'CASH/REC-1091', branchId: 1 },
-    { id: 'p3', billId: 'INV-1090', tableName: 'Table 08', customerName: 'Guest', amount: 3820, mode: 'UPI', time: '19 Oct 2026, 10:45 AM', date: '19 Oct 2026', status: 'SETTLED', referenceNo: 'UPI/629103991', branchId: 1 },
-    { id: 'p4', billId: 'INV-1089', tableName: 'Table 01', customerName: 'Walk-in', amount: 620, mode: 'CARD', time: '18 Oct 2026, 02:10 PM', date: '18 Oct 2026', status: 'SETTLED', referenceNo: 'CARD/9041', branchId: 1 },
-  ],
-  2: [
-    { id: 'p-nsk-1', billId: 'INV-NSK-101', tableName: 'NSK-TBL-01', customerName: 'Nashik Guest', amount: 1200, mode: 'UPI', time: 'Today, 11:00 AM', date: 'Today', status: 'SETTLED', referenceNo: 'UPI/77281928', branchId: 2 },
-  ],
+  1: [],
+  2: [],
   3: [],
   4: [],
-  5: [
-    { id: 'p-mum-1', billId: 'INV-MUM-501', tableName: 'Table 01', customerName: 'Mumbai Guest', amount: 2150, mode: 'UPI', time: 'Today, 12:15 PM', date: 'Today', status: 'SETTLED', referenceNo: 'UPI/88219481', branchId: 5 },
-  ],
+  5: [],
 };
 
 // Active state in memory, partitioned by branchId
@@ -497,16 +326,16 @@ export const restaurantStore = {
 
   },
 
-  // 2. GET KOTs STRICTLY FOR THE ACTIVE BRANCH
-  async getKOTs(branchId?: number): Promise<KOTTicket[]> {
+  // 2. GET KOTs STRICTLY FOR THE ACTIVE BRANCH (Real-time DB Sync)
+  async getKOTs(branchId?: number, forceRefresh: boolean = false): Promise<KOTTicket[]> {
     const bId = branchId !== undefined && !isNaN(Number(branchId)) ? Number(branchId) : currentBranchId;
 
     try {
       const res = await apiClient.get('/hotel/kot', {
-        params: { branchId: bId },
+        params: { branchId: bId, _t: Date.now() },
+        timeout: 5000,
       });
       const rawList = res.data?.data || res.data || [];
-
 
       if (Array.isArray(rawList)) {
         const backendKots: KOTTicket[] = rawList
@@ -561,31 +390,17 @@ export const restaurantStore = {
             };
           });
 
-        const currentLocal = branchKotsMap[bId] || BRANCH_KOTS_INITIAL[bId] || [];
-
-
-        const localActive = currentLocal.filter(
-          (lk) => !backendKots.some((bk) => bk.id === lk.id || bk.orderId === lk.orderId)
-        );
-        branchKotsMap[bId] = [...localActive, ...backendKots];
-
-
-        return [...branchKotsMap[bId]];
-
-
+        branchKotsMap[bId] = backendKots;
+        return [...backendKots];
       }
     } catch (err) {
       console.log(`[Store] Backend KOTs fetch offline for Branch ${bId}, using local branch cache`);
     }
 
     if (!branchKotsMap[bId]) {
-      branchKotsMap[bId] = BRANCH_KOTS_INITIAL[bId] || [];
-
-
+      branchKotsMap[bId] = [];
     }
     return [...(branchKotsMap[bId] || [])];
-
-
   },
 
   // 3. GET ACTIVE ORDERS STRICTLY FOR THE ACTIVE BRANCH

@@ -29,6 +29,7 @@ import {
 import { useLanguage } from '../context/LanguageContext';
 import { useBranch } from '../context/BranchContext';
 import { toDevanagari } from '../locales/translations';
+import { ReceiptRupee } from './ReceiptRupeeIcon';
 
 export interface AppSidebarProps {
   activeRouteName: string;
@@ -62,7 +63,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
     {
       name: 'Billing',
       label: t('billingAndInvoices', 'Billing / Invoices'),
-      icon: Receipt,
+      icon: ReceiptRupee,
     },
     {
       name: 'Tables',

@@ -30,9 +30,11 @@ import {
   Zap,
   Trash2,
   Menu,
+  LogOut,
 } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors } from '../theme/colors';
+import { useAuth } from '../context/AuthContext';
 import { useLanguage, AppLanguage } from '../context/LanguageContext';
 import { useBranch } from '../context/BranchContext';
 import { BranchConfig } from '../branches';
@@ -55,6 +57,36 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onOpenPlanModal, navigatio
   const insets = useSafeAreaInsets();
   const { language, setLanguage, t, formatDate, formatTime } = useLanguage();
   const { branches, activeBranchId, activeBranch, switchBranch, getBranchName } = useBranch();
+  const { logout } = useAuth();
+
+  const handleLogout = () => {
+    Alert.alert(
+      language === 'mr' ? 'लॉगआउट' : language === 'hi' ? 'लॉगआउट' : 'Log Out',
+      language === 'mr'
+        ? 'तुम्हाला नक्की लॉगआउट करायचे आहे का?'
+        : language === 'hi'
+        ? 'क्या आप वाकई लॉगआउट करना चाहते हैं?'
+        : 'Are you sure you want to log out?',
+      [
+        {
+          text: language === 'mr' ? 'रद्द करा' : language === 'hi' ? 'रद्द करें' : 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: language === 'mr' ? 'लॉगआउट करा' : language === 'hi' ? 'लॉगआउट करें' : 'Log Out',
+          style: 'destructive',
+          onPress: async () => {
+            setShowProfileModal(false);
+            try {
+              await logout();
+            } catch (err) {
+              console.error('Logout failed:', err);
+            }
+          },
+        },
+      ]
+    );
+  };
 
   // Modals state
   const [showBranchModal, setShowBranchModal] = useState(false);
@@ -697,6 +729,17 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onOpenPlanModal, navigatio
                   <Text style={styles.profileActionText}>{t('settings', 'System Settings')}</Text>
                 </TouchableOpacity>
               )}
+
+              <TouchableOpacity
+                style={styles.profileLogoutBtn}
+                onPress={handleLogout}
+                activeOpacity={0.8}
+              >
+                <LogOut size={16} color="#DC2626" />
+                <Text style={styles.profileLogoutText}>
+                  {language === 'mr' ? 'लॉगआउट करा' : language === 'hi' ? 'लॉगआउट करें' : 'Log Out'}
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
         </TouchableOpacity>
@@ -1368,6 +1411,22 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700',
     color: '#1E293B',
+  },
+  profileLogoutBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: '#FEF2F2',
+    padding: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#FECACA',
+    marginTop: 4,
+  },
+  profileLogoutText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#DC2626',
   },
   hamburgerBtn: {
     width: 32,

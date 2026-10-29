@@ -309,8 +309,8 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         zIndex: 99999,
         display: 'flex',
         justifyContent: 'center',
-        alignItems: 'center',
-        padding: '24px 16px',
+        alignItems: 'flex-start',
+        padding: '32px 16px',
         boxSizing: 'border-box',
         overflowY: 'auto',
         WebkitOverflowScrolling: 'touch',
@@ -338,8 +338,8 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
           backgroundColor: '#FFFFFF',
           borderRadius: '20px',
           width: '100%',
-          maxWidth: step === 'SELECT' ? '1040px' : '560px',
-          maxHeight: 'calc(100vh - 48px)',
+          maxWidth: step === 'SELECT' ? '1060px' : '580px',
+          maxHeight: 'calc(100vh - 64px)',
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
@@ -509,9 +509,10 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
                   gap: '20px',
                   marginBottom: '26px',
+                  alignItems: 'stretch',
                 }}
               >
                 {plans.map((plan) => {
@@ -537,6 +538,9 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                         transition: 'all 0.18s ease',
                         display: 'flex',
                         flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        height: '100%',
+                        boxSizing: 'border-box',
                       }}
                     >
                       {plan.isPopular && (
@@ -544,7 +548,8 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                           style={{
                             position: 'absolute',
                             top: '-11px',
-                            right: '18px',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
                             background: '#059669',
                             color: '#FFFFFF',
                             fontSize: '0.7rem',
@@ -583,7 +588,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                         ✓ {t('trialIncludes28', 'Includes 28-day free trial')}
                       </div>
 
-                      <p style={{ margin: '0 0 14px', fontSize: '0.8rem', color: '#64748B', minHeight: '36px', lineHeight: 1.4 }}>
+                      <p style={{ margin: '0 0 14px', fontSize: '0.8rem', color: '#64748B', minHeight: '44px', lineHeight: 1.4 }}>
                         {planDisplayDesc}
                       </p>
 
@@ -611,7 +616,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                         </div>
                       )}
 
-                      <div style={{ borderTop: '1px solid #E2E8F0', paddingTop: '14px', flex: 1 }}>
+                      <div style={{ borderTop: '1px solid #E2E8F0', paddingTop: '14px', flex: '1 1 auto', minHeight: '190px' }}>
                         <div
                           style={{
                             fontSize: '0.72rem',
@@ -634,7 +639,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                         </ul>
                       </div>
 
-                      <div style={{ marginTop: '18px' }}>
+                      <div style={{ marginTop: 'auto', paddingTop: '16px' }}>
                         <div
                           style={{
                             width: '100%',

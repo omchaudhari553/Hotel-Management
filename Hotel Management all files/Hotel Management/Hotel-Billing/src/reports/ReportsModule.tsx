@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { reportService } from '../services/reportService';
 import { useIndustry } from '../context/IndustryContext';
 import { useAuth } from '../context/AuthContext';
@@ -57,6 +57,167 @@ export const ReportsModule: React.FC = () => {
   const mess = reportData?.messReport;
   const hotel = reportData?.hotelReport;
   const cafe = reportData?.cafeReport;
+
+  // Pagination states
+  const [messPage, setMessPage] = useState<number>(1);
+  const [messPageSize, setMessPageSize] = useState<number>(10);
+
+  const [hotelPage, setHotelPage] = useState<number>(1);
+  const [hotelPageSize, setHotelPageSize] = useState<number>(10);
+
+  const [cafePage, setCafePage] = useState<number>(1);
+  const [cafePageSize, setCafePageSize] = useState<number>(10);
+
+  const messPlansList = useMemo(() => {
+    return mess?.planRevenueBreakdown || [
+      { planId: 1, planName: 'Monthly Executive (Lunch + Dinner)', planType: 'MONTHLY', subscriberCount: 24, monthlyPrice: 3600, totalRevenue: 86400, percentageOfTotal: 60.8 },
+      { planId: 2, planName: 'Student Economy (Lunch Only)', planType: 'MONTHLY', subscriberCount: 16, monthlyPrice: 2200, totalRevenue: 35200, percentageOfTotal: 24.8 },
+      { planId: 3, planName: 'Daily Tiffin Doorstep Plan', planType: 'TIFFIN_ONLY', subscriberCount: 8, monthlyPrice: 2550, totalRevenue: 20400, percentageOfTotal: 14.4 },
+    ];
+  }, [mess?.planRevenueBreakdown]);
+
+  const paginatedMessPlans = useMemo(() => {
+    const start = (messPage - 1) * messPageSize;
+    return messPlansList.slice(start, start + messPageSize);
+  }, [messPlansList, messPage, messPageSize]);
+
+  const hotelRoomsList = useMemo(() => {
+    return hotel?.roomTypeBreakdown || [
+      { roomType: 'Executive Suite', totalRooms: 6, occupiedRooms: 5, occupancyRate: 83.3, basePrice: 4500, revenueGenerated: 112500 },
+      { roomType: 'Deluxe King AC', totalRooms: 10, occupiedRooms: 8, occupancyRate: 80.0, basePrice: 2800, revenueGenerated: 112000 },
+      { roomType: 'Standard Double', totalRooms: 8, occupiedRooms: 5, occupancyRate: 62.5, basePrice: 1800, revenueGenerated: 60500 },
+    ];
+  }, [hotel?.roomTypeBreakdown]);
+
+  const paginatedHotelRooms = useMemo(() => {
+    const start = (hotelPage - 1) * hotelPageSize;
+    return hotelRoomsList.slice(start, start + hotelPageSize);
+  }, [hotelRoomsList, hotelPage, hotelPageSize]);
+
+  const cafeItemsList = useMemo(() => {
+    return cafe?.topSellingItems || [
+      { itemId: 1, itemName: 'Hazelnut Cold Coffee', category: 'Beverages', unitsSold: 182, unitPrice: 180, totalRevenue: 32760, marginPercentage: 68.5 },
+      { itemId: 2, itemName: 'Paneer Tikka Grilled Sandwich', category: 'Snacks', unitsSold: 145, unitPrice: 160, totalRevenue: 23200, marginPercentage: 62.0 },
+      { itemId: 3, itemName: 'Artisan Cappuccino', category: 'Hot Coffee', unitsSold: 120, unitPrice: 140, totalRevenue: 16800, marginPercentage: 74.0 },
+      { itemId: 4, itemName: 'Butter Croissant', category: 'Bakery', unitsSold: 95, unitPrice: 120, totalRevenue: 11400, marginPercentage: 55.0 },
+      { itemId: 5, itemName: 'Peri Peri French Fries', category: 'Sides', unitsSold: 88, unitPrice: 110, totalRevenue: 9680, marginPercentage: 70.0 },
+    ];
+  }, [cafe?.topSellingItems]);
+
+  const paginatedCafeItems = useMemo(() => {
+    const start = (cafePage - 1) * cafePageSize;
+    return cafeItemsList.slice(start, start + cafePageSize);
+  }, [cafeItemsList, cafePage, cafePageSize]);
+
+  const renderPagination = (
+    currentPage: number,
+    totalItems: number,
+    pageSize: number,
+    onPageChange: (p: number) => void,
+    onPageSizeChange?: (s: number) => void,
+    itemLabel: string = 'records'
+  ) => {
+    const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+    if (totalItems <= pageSize && currentPage === 1) return null;
+
+    const startItem = (currentPage - 1) * pageSize + 1;
+    const endItem = Math.min(currentPage * pageSize, totalItems);
+
+    return (
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '12px 18px',
+          backgroundColor: '#FFFFFF',
+          borderTop: '1px solid #E7E5E4',
+          borderRadius: '0 0 10px 10px',
+          flexWrap: 'wrap',
+          gap: '12px',
+          fontSize: '0.84rem',
+          color: '#57534E',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+          <span>
+            Showing <strong style={{ color: '#1C1917' }}>{startItem}</strong> -{' '}
+            <strong style={{ color: '#1C1917' }}>{endItem}</strong> of{' '}
+            <strong style={{ color: '#1C1917' }}>{totalItems}</strong> {itemLabel}
+          </span>
+
+          {onPageSizeChange && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '0.8rem', color: '#78716C' }}>Rows:</span>
+              <select
+                value={pageSize}
+                onChange={(e) => {
+                  onPageSizeChange(Number(e.target.value));
+                  onPageChange(1);
+                }}
+                style={{
+                  padding: '4px 8px',
+                  borderRadius: '6px',
+                  border: '1px solid #D6D3D1',
+                  backgroundColor: '#FAFAF9',
+                  color: '#1C1917',
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                {[5, 10, 25, 50].map((size) => (
+                  <option key={size} value={size}>
+                    {size}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <button
+            type="button"
+            disabled={currentPage === 1}
+            onClick={() => onPageChange(currentPage - 1)}
+            style={{
+              padding: '5px 12px',
+              borderRadius: '6px',
+              border: '1px solid #D6D3D1',
+              backgroundColor: currentPage === 1 ? '#FAFAF9' : '#FFFFFF',
+              color: currentPage === 1 ? '#A8A29E' : '#1C1917',
+              cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+              fontWeight: 600,
+              fontSize: '0.82rem',
+            }}
+          >
+            « Prev
+          </button>
+          <span style={{ padding: '0 8px', fontWeight: 700, color: '#1C1917' }}>
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            type="button"
+            disabled={currentPage === totalPages}
+            onClick={() => onPageChange(currentPage + 1)}
+            style={{
+              padding: '5px 12px',
+              borderRadius: '6px',
+              border: '1px solid #D6D3D1',
+              backgroundColor: currentPage === totalPages ? '#FAFAF9' : '#FFFFFF',
+              color: currentPage === totalPages ? '#A8A29E' : '#1C1917',
+              cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+              fontWeight: 600,
+              fontSize: '0.82rem',
+            }}
+          >
+            Next »
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   // Industry-specific header details
   const getHeaderInfo = () => {
@@ -210,11 +371,7 @@ export const ReportsModule: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {(mess?.planRevenueBreakdown || [
-                    { planId: 1, planName: 'Monthly Executive (Lunch + Dinner)', planType: 'MONTHLY', subscriberCount: 24, monthlyPrice: 3600, totalRevenue: 86400, percentageOfTotal: 60.8 },
-                    { planId: 2, planName: 'Student Economy (Lunch Only)', planType: 'MONTHLY', subscriberCount: 16, monthlyPrice: 2200, totalRevenue: 35200, percentageOfTotal: 24.8 },
-                    { planId: 3, planName: 'Daily Tiffin Doorstep Plan', planType: 'TIFFIN_ONLY', subscriberCount: 8, monthlyPrice: 2550, totalRevenue: 20400, percentageOfTotal: 14.4 },
-                  ]).map((item, idx) => (
+                  {paginatedMessPlans.map((item, idx) => (
                     <tr key={idx} style={{ borderBottom: '1px solid #F5F5F4' }}>
                       <td style={{ padding: '14px 16px', fontWeight: 700, color: '#1C1917' }}>{item.planName}</td>
                       <td style={{ padding: '14px 16px' }}>
@@ -240,6 +397,7 @@ export const ReportsModule: React.FC = () => {
                 </tbody>
               </table>
             </div>
+            {renderPagination(messPage, messPlansList.length, messPageSize, setMessPage, setMessPageSize, 'Meal Plans')}
           </div>
 
           {/* Weekly Attendance & Tiffin Flow */}
@@ -330,11 +488,7 @@ export const ReportsModule: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {(hotel?.roomTypeBreakdown || [
-                    { roomType: 'Executive Suite', totalRooms: 6, occupiedRooms: 5, occupancyRate: 83.3, basePrice: 4500, revenueGenerated: 112500 },
-                    { roomType: 'Deluxe King AC', totalRooms: 10, occupiedRooms: 8, occupancyRate: 80.0, basePrice: 2800, revenueGenerated: 112000 },
-                    { roomType: 'Standard Double', totalRooms: 8, occupiedRooms: 5, occupancyRate: 62.5, basePrice: 1800, revenueGenerated: 60500 },
-                  ]).map((r, idx) => (
+                  {paginatedHotelRooms.map((r, idx) => (
                     <tr key={idx} style={{ borderBottom: '1px solid #F5F5F4' }}>
                       <td style={{ padding: '14px 16px', fontWeight: 700, color: '#1C1917' }}>{r.roomType}</td>
                       <td style={{ padding: '14px 16px' }}>{r.totalRooms} rooms</td>
@@ -351,6 +505,7 @@ export const ReportsModule: React.FC = () => {
                 </tbody>
               </table>
             </div>
+            {renderPagination(hotelPage, hotelRoomsList.length, hotelPageSize, setHotelPage, setHotelPageSize, 'Room Categories')}
           </div>
         </>
       )}
@@ -412,13 +567,7 @@ export const ReportsModule: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {(cafe?.topSellingItems || [
-                    { itemId: 1, itemName: 'Hazelnut Cold Coffee', category: 'Beverages', unitsSold: 182, unitPrice: 180, totalRevenue: 32760, marginPercentage: 68.5 },
-                    { itemId: 2, itemName: 'Paneer Tikka Grilled Sandwich', category: 'Snacks', unitsSold: 145, unitPrice: 160, totalRevenue: 23200, marginPercentage: 62.0 },
-                    { itemId: 3, itemName: 'Artisan Cappuccino', category: 'Hot Coffee', unitsSold: 120, unitPrice: 140, totalRevenue: 16800, marginPercentage: 74.0 },
-                    { itemId: 4, itemName: 'Butter Croissant', category: 'Bakery', unitsSold: 95, unitPrice: 120, totalRevenue: 11400, marginPercentage: 55.0 },
-                    { itemId: 5, itemName: 'Peri Peri French Fries', category: 'Sides', unitsSold: 88, unitPrice: 110, totalRevenue: 9680, marginPercentage: 70.0 },
-                  ]).map((item, idx) => (
+                  {paginatedCafeItems.map((item, idx) => (
                     <tr key={idx} style={{ borderBottom: '1px solid #F5F5F4' }}>
                       <td style={{ padding: '14px 16px', fontWeight: 700, color: '#1C1917' }}>{item.itemName}</td>
                       <td style={{ padding: '14px 16px' }}>
@@ -435,6 +584,7 @@ export const ReportsModule: React.FC = () => {
                 </tbody>
               </table>
             </div>
+            {renderPagination(cafePage, cafeItemsList.length, cafePageSize, setCafePage, setCafePageSize, 'Menu Items')}
           </div>
         </>
       )}

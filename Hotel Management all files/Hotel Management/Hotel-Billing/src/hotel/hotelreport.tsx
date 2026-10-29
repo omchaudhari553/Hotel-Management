@@ -388,6 +388,55 @@ export default function ExpensesReports() {
     } catch {}
   };
 
+  // Report Performance & Pagination States
+  const [loadingData, setLoadingData] = useState<boolean>(false);
+  const fetchedBranchRef = useRef<string | null>(null);
+
+  const [expensePage, setExpensePage] = useState<number>(1);
+  const [expensePageSize, setExpensePageSize] = useState<number>(10);
+
+  const [salesPage, setSalesPage] = useState<number>(1);
+  const [salesPageSize, setSalesPageSize] = useState<number>(10);
+
+  const [orderPage, setOrderPage] = useState<number>(1);
+  const [orderPageSize, setOrderPageSize] = useState<number>(10);
+
+  const [menuPage, setMenuPage] = useState<number>(1);
+  const [menuPageSize, setMenuPageSize] = useState<number>(10);
+
+  const [branchPage, setBranchPage] = useState<number>(1);
+  const [branchPageSize, setBranchPageSize] = useState<number>(10);
+
+  const [gstRatePage, setGstRatePage] = useState<number>(1);
+  const [gstRatePageSize, setGstRatePageSize] = useState<number>(10);
+
+  const [gstInvoicePage, setGstInvoicePage] = useState<number>(1);
+  const [gstInvoicePageSize, setGstInvoicePageSize] = useState<number>(10);
+
+  const [gstPurchasePage, setGstPurchasePage] = useState<number>(1);
+  const [gstPurchasePageSize, setGstPurchasePageSize] = useState<number>(10);
+
+  const [purchasePage, setPurchasePage] = useState<number>(1);
+  const [purchasePageSize, setPurchasePageSize] = useState<number>(10);
+
+  // Auto-reset pages when filters change
+  useEffect(() => {
+    setExpensePage(1);
+  }, [search]);
+
+  useEffect(() => {
+    setSalesPage(1);
+    setOrderPage(1);
+    setMenuPage(1);
+    setPurchasePage(1);
+  }, [reportPeriod]);
+
+  useEffect(() => {
+    setGstRatePage(1);
+    setGstInvoicePage(1);
+    setGstPurchasePage(1);
+  }, [gstPeriod, gstBranchId]);
+
   useEffect(() => {
     Promise.allSettled([
       expenseService.getExpenses(selectedBranchId),
@@ -422,8 +471,9 @@ export default function ExpensesReports() {
       if (prRes.status === 'fulfilled' && prRes.value) setPurchaseReturns(prRes.value);
       if (payRes.status === 'fulfilled' && payRes.value) setBackendPayments(payRes.value);
       else setBackendPayments([]);
-    }).catch(err => console.warn('Failed to fetch report data', err));
-  }, [selectedBranchId, selectedBranch]);
+    }).catch(err => console.warn('Failed to fetch report data', err))
+      .finally(() => setLoadingData(false));
+  }, [selectedBranchId]);
   const [expenseCategories, setExpenseCategories] = useState<string[]>(defaultExpenseCategories);
   const [search, setSearch] = useState("");
   const [searchError, setSearchError] = useState("");
@@ -3508,6 +3558,245 @@ export default function ExpensesReports() {
     setShowReportDetails(true);
   };
 
+
+  // Memoized Paginated Data Slices for Instant Loading & High Performance
+  const paginatedExpenses = useMemo(() => {
+    const start = (expensePage - 1) * expensePageSize;
+    return filteredExpenses.slice(start, start + expensePageSize);
+  }, [filteredExpenses, expensePage, expensePageSize]);
+
+  const paginatedSalesData = useMemo(() => {
+    const start = (salesPage - 1) * salesPageSize;
+    return filteredSalesData.slice(start, start + salesPageSize);
+  }, [filteredSalesData, salesPage, salesPageSize]);
+
+  const paginatedOrderData = useMemo(() => {
+    const start = (orderPage - 1) * orderPageSize;
+    return filteredOrderData.slice(start, start + orderPageSize);
+  }, [filteredOrderData, orderPage, orderPageSize]);
+
+  const paginatedMenuData = useMemo(() => {
+    const start = (menuPage - 1) * menuPageSize;
+    return filteredMenuData.slice(start, start + menuPageSize);
+  }, [filteredMenuData, menuPage, menuPageSize]);
+
+  const paginatedBranchData = useMemo(() => {
+    const start = (branchPage - 1) * branchPageSize;
+    return filteredBranchData.slice(start, start + branchPageSize);
+  }, [filteredBranchData, branchPage, branchPageSize]);
+
+  const paginatedGstRateWise = useMemo(() => {
+    const start = (gstRatePage - 1) * gstRatePageSize;
+    return gstRateWiseReport.slice(start, start + gstRatePageSize);
+  }, [gstRateWiseReport, gstRatePage, gstRatePageSize]);
+
+  const paginatedGstInvoiceWise = useMemo(() => {
+    const start = (gstInvoicePage - 1) * gstInvoicePageSize;
+    return gstInvoiceWiseReport.slice(start, start + gstInvoicePageSize);
+  }, [gstInvoiceWiseReport, gstInvoicePage, gstInvoicePageSize]);
+
+  const paginatedGstPurchaseList = useMemo(() => {
+    const start = (gstPurchasePage - 1) * gstPurchasePageSize;
+    return gstPurchaseReport.purchaseList.slice(start, start + gstPurchasePageSize);
+  }, [gstPurchaseReport.purchaseList, gstPurchasePage, gstPurchasePageSize]);
+
+  const paginatedPurchaseData = useMemo(() => {
+    const start = (purchasePage - 1) * purchasePageSize;
+    return filteredPurchaseData.slice(start, start + purchasePageSize);
+  }, [filteredPurchaseData, purchasePage, purchasePageSize]);
+
+  const renderPagination = (
+    currentPage: number,
+    totalItems: number,
+    pageSize: number,
+    onPageChange: (p: number) => void,
+    onPageSizeChange?: (s: number) => void,
+    itemLabel: string = "records"
+  ) => {
+    const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+    if (totalItems === 0) return null;
+
+    const startItem = (currentPage - 1) * pageSize + 1;
+    const endItem = Math.min(currentPage * pageSize, totalItems);
+
+    const getPageNumbers = () => {
+      const pages: (number | string)[] = [];
+      if (totalPages <= 7) {
+        for (let i = 1; i <= totalPages; i++) pages.push(i);
+      } else {
+        pages.push(1);
+        if (currentPage > 3) pages.push('...');
+        const start = Math.max(2, currentPage - 1);
+        const end = Math.min(totalPages - 1, currentPage + 1);
+        for (let i = start; i <= end; i++) pages.push(i);
+        if (currentPage < totalPages - 2) pages.push('...');
+        pages.push(totalPages);
+      }
+      return pages;
+    };
+
+    return (
+      <div
+        className="er-pagination-bar"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '12px 18px',
+          backgroundColor: '#FFFFFF',
+          borderTop: '1px solid #E5DCD5',
+          borderRadius: '0 0 10px 10px',
+          flexWrap: 'wrap',
+          gap: '12px',
+          fontSize: '0.84rem',
+          color: '#5C544E',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+          <span>
+            {t('showing', 'Showing')}{' '}
+            <strong style={{ color: '#211B17' }}>{toDevanagari(startItem)}</strong> -{' '}
+            <strong style={{ color: '#211B17' }}>{toDevanagari(endItem)}</strong> {t('of', 'of')}{' '}
+            <strong style={{ color: '#211B17' }}>{toDevanagari(totalItems)}</strong> {itemLabel}
+          </span>
+
+          {onPageSizeChange && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '0.8rem', color: '#8C827A' }}>{t('rowsPerPage', 'Rows:')}</span>
+              <select
+                value={pageSize}
+                onChange={(e) => {
+                  onPageSizeChange(Number(e.target.value));
+                  onPageChange(1);
+                }}
+                style={{
+                  padding: '4px 8px',
+                  borderRadius: '6px',
+                  border: '1px solid #DCD3CB',
+                  backgroundColor: '#FFF9F3',
+                  color: '#211B17',
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                {[10, 25, 50, 100].map((size) => (
+                  <option key={size} value={size}>
+                    {toDevanagari(size)}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <button
+            type="button"
+            disabled={currentPage === 1}
+            onClick={() => onPageChange(1)}
+            title={t('firstPage', 'First Page')}
+            style={{
+              padding: '5px 9px',
+              borderRadius: '6px',
+              border: '1px solid #DCD3CB',
+              backgroundColor: currentPage === 1 ? '#FAF7F5' : '#FFFFFF',
+              color: currentPage === 1 ? '#BDB7B2' : '#5C544E',
+              cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+              fontWeight: 700,
+              fontSize: '0.8rem',
+            }}
+          >
+            ««
+          </button>
+          <button
+            type="button"
+            disabled={currentPage === 1}
+            onClick={() => onPageChange(currentPage - 1)}
+            title={t('previousPage', 'Previous Page')}
+            style={{
+              padding: '5px 10px',
+              borderRadius: '6px',
+              border: '1px solid #DCD3CB',
+              backgroundColor: currentPage === 1 ? '#FAF7F5' : '#FFFFFF',
+              color: currentPage === 1 ? '#BDB7B2' : '#5C544E',
+              cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+              fontWeight: 700,
+              fontSize: '0.82rem',
+            }}
+          >
+            « {t('prev', 'Prev')}
+          </button>
+
+          {getPageNumbers().map((p, idx) =>
+            p === '...' ? (
+              <span key={'ellipsis-' + idx} style={{ padding: '0 6px', color: '#8C827A' }}>
+                ...
+              </span>
+            ) : (
+              <button
+                key={p}
+                type="button"
+                onClick={() => onPageChange(Number(p))}
+                style={{
+                  minWidth: '32px',
+                  height: '32px',
+                  borderRadius: '6px',
+                  border: currentPage === p ? '1.5px solid #7C2D12' : '1px solid #DCD3CB',
+                  backgroundColor: currentPage === p ? '#7C2D12' : '#FFFFFF',
+                  color: currentPage === p ? '#FFFFFF' : '#211B17',
+                  fontWeight: currentPage === p ? 800 : 600,
+                  fontSize: '0.82rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                {toDevanagari(p)}
+              </button>
+            )
+          )}
+
+          <button
+            type="button"
+            disabled={currentPage === totalPages}
+            onClick={() => onPageChange(currentPage + 1)}
+            title={t('nextPage', 'Next Page')}
+            style={{
+              padding: '5px 10px',
+              borderRadius: '6px',
+              border: '1px solid #DCD3CB',
+              backgroundColor: currentPage === totalPages ? '#FAF7F5' : '#FFFFFF',
+              color: currentPage === totalPages ? '#BDB7B2' : '#5C544E',
+              cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+              fontWeight: 700,
+              fontSize: '0.82rem',
+            }}
+          >
+            {t('next', 'Next')} »
+          </button>
+          <button
+            type="button"
+            disabled={currentPage === totalPages}
+            onClick={() => onPageChange(totalPages)}
+            title={t('lastPage', 'Last Page')}
+            style={{
+              padding: '5px 9px',
+              borderRadius: '6px',
+              border: '1px solid #DCD3CB',
+              backgroundColor: currentPage === totalPages ? '#FAF7F5' : '#FFFFFF',
+              color: currentPage === totalPages ? '#BDB7B2' : '#5C544E',
+              cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+              fontWeight: 700,
+              fontSize: '0.8rem',
+            }}
+          >
+            »»
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   const renderReport = () => {
     if (activeReport === "sales") {
       return (
@@ -3534,7 +3823,7 @@ export default function ExpensesReports() {
                   </td>
                 </tr>
               ) : (
-                filteredSalesData.map((item) => (
+                paginatedSalesData.map((item) => (
                   <tr key={item.date}>
                     <td>{formatDate(item.date)}</td>
                     <td>{toDevanagari(item.bills)}</td>
@@ -3552,6 +3841,7 @@ export default function ExpensesReports() {
               </tr>
             </tfoot>
           </table>
+          {renderPagination(salesPage, filteredSalesData.length, salesPageSize, setSalesPage, setSalesPageSize, t('salesRecords', 'Sales Records'))}
         </div>
       );
     }
@@ -3761,7 +4051,7 @@ export default function ExpensesReports() {
                   </td>
                 </tr>
               ) : (
-                filteredOrderData.map((item) => (
+                paginatedOrderData.map((item) => (
                   <tr key={item.date}>
                     <td>{formatDate(item.date)}</td>
                     <td>{toDevanagari(item.total)}</td>
@@ -3778,6 +4068,7 @@ export default function ExpensesReports() {
               </tr>
             </tfoot>
           </table>
+          {renderPagination(orderPage, filteredOrderData.length, orderPageSize, setOrderPage, setOrderPageSize, t('orders', 'Orders'))}
         </div>
       );
     }
@@ -3809,7 +4100,7 @@ export default function ExpensesReports() {
               </tr>
             </thead>
             <tbody>
-              {filteredMenuData.map((item) => (
+              {paginatedMenuData.map((item) => (
                 <tr key={item.item}>
                   <td>{t(item.item, item.item)}</td>
                   <td>{t(item.category, item.category)}</td>
@@ -3821,6 +4112,7 @@ export default function ExpensesReports() {
               ))}
             </tbody>
           </table>
+          {renderPagination(menuPage, filteredMenuData.length, menuPageSize, setMenuPage, setMenuPageSize, t('menuItems', 'Menu Items'))}
         </div>
       );
     }
@@ -3854,7 +4146,7 @@ export default function ExpensesReports() {
             </tr>
           </thead>
           <tbody>
-            {filteredBranchData.map((item) => (
+            {paginatedBranchData.map((item) => (
               <tr key={item.branch}>
                 <td>{t(item.branch, item.branch)}</td>
                 <td className="er-amount" style={{ textAlign: "left" }}>
@@ -8700,7 +8992,7 @@ export default function ExpensesReports() {
                       </td>
                     </tr>
                   ) : (
-                    filteredExpenses.map((expense) => (
+                    paginatedExpenses.map((expense) => (
                       <tr key={expense.id}>
                         <td>
                           <div className="er-name-cell">
@@ -9463,7 +9755,7 @@ export default function ExpensesReports() {
                       </tr>
                     </thead>
                     <tbody>
-                      {gstRateWiseReport.map((row, idx) => (
+                      {paginatedGstRateWise.map((row, idx) => (
                         <tr key={idx} style={{ borderBottom: '1px solid #F0ECE7', color: '#211B17' }}>
                           <td style={{ padding: '12px', fontWeight: 600, color: '#211B17' }}>{t(row.name, row.name)}</td>
                           <td style={{ padding: '12px', color: '#0284C7', fontWeight: 700 }}>{toDevanagari(row.rate)}%</td>
@@ -9520,7 +9812,7 @@ export default function ExpensesReports() {
                         </tr>
                       </thead>
                       <tbody>
-                        {gstInvoiceWiseReport.map((inv) => (
+                        {paginatedGstInvoiceWise.map((inv) => (
                           <tr key={inv.id} style={{ borderBottom: '1px solid #F0ECE7', color: '#211B17' }}>
                             <td style={{ padding: '12px', fontFamily: 'monospace', fontWeight: 700, color: '#8B3E16' }}>
                               {inv.invoiceNumber}
@@ -9576,6 +9868,7 @@ export default function ExpensesReports() {
                       </tbody>
                     </table>
                   )}
+                  {renderPagination(gstInvoicePage, gstInvoiceWiseReport.length, gstInvoicePageSize, setGstInvoicePage, setGstInvoicePageSize, t('invoices', 'Invoices'))}
                 </div>
               )}
 
@@ -9617,7 +9910,7 @@ export default function ExpensesReports() {
                           </tr>
                         </thead>
                         <tbody>
-                          {gstPurchaseReport.purchaseList.map((p) => (
+                          {paginatedGstPurchaseList.map((p) => (
                             <tr key={p.id} style={{ borderBottom: '1px solid #F0ECE7', color: '#211B17' }}>
                               <td style={{ padding: '12px', fontWeight: 600, color: '#211B17' }}>{t(p.supplierName, p.supplierName)}</td>
                               <td style={{ padding: '12px', fontFamily: 'monospace', fontWeight: 700, color: '#8B3E16' }}>{p.invoiceNumber}</td>
@@ -9660,6 +9953,7 @@ export default function ExpensesReports() {
                         </tbody>
                       </table>
                     )}
+                    {renderPagination(gstPurchasePage, gstPurchaseReport.purchaseList.length, gstPurchasePageSize, setGstPurchasePage, setGstPurchasePageSize, t('purchaseInvoices', 'Purchase Invoices'))}
                   </div>
                 </>
               )}
@@ -9757,7 +10051,7 @@ export default function ExpensesReports() {
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredPurchaseData.map((item) => (
+                      {paginatedPurchaseData.map((item) => (
                         <tr key={item.id}>
                           <td>{formatDate(item.date)}</td>
                           <td>{t(item.supplier, item.supplier)}</td>
@@ -9768,6 +10062,7 @@ export default function ExpensesReports() {
                       ))}
                     </tbody>
                   </table>
+                  {renderPagination(purchasePage, filteredPurchaseData.length, purchasePageSize, setPurchasePage, setPurchasePageSize, t('purchases', 'Purchases'))}
                 </div>
               )}
             </div>

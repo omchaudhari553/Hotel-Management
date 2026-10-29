@@ -83,6 +83,7 @@ const BILL_REQUESTS_DATA: BillRequest[] = [
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppNavbar } from '../../components/AppNavbar';
 import { useLanguage } from '../../context/LanguageContext';
+import { ReceiptRupee } from '../../components/ReceiptRupeeIcon';
 import { useBranch } from '../../context/BranchContext';
 import {
   OfferItem,
@@ -398,26 +399,46 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
 
   // Delete Offer
   const handleDeleteOffer = (id: string) => {
-    Alert.alert('हटवा (Delete Offer)', 'तुम्हाला ही ऑफर हटवायची आहे का? (Remove this promotion?)', [
-      { text: 'रद्द करा (Cancel)', style: 'cancel' },
-      {
-        text: 'हटवा (Delete)',
-        style: 'destructive',
-        onPress: async () => {
-          const updated = offers.filter((o) => o.id !== id);
-          setOffers(updated);
-          await saveOffersToStorage(updated);
-          setOfferSuccessToast('ऑफर हटवली (Offer removed)!');
-          setTimeout(() => setOfferSuccessToast(''), 3000);
+    Alert.alert(
+      language === 'mr' ? 'ऑफर हटवा' : language === 'hi' ? 'ऑफ़र हटाएं' : 'Delete Offer',
+      language === 'mr'
+        ? 'तुम्हाला ही ऑफर हटवायची आहे का?'
+        : language === 'hi'
+        ? 'क्या आप वाकई इस ऑफ़र को हटाना चाहते हैं?'
+        : 'Are you sure you want to remove this promotion?',
+      [
+        {
+          text: language === 'mr' ? 'रद्द करा' : language === 'hi' ? 'रद्द करें' : 'Cancel',
+          style: 'cancel',
         },
-      },
-    ]);
+        {
+          text: language === 'mr' ? 'हटवा' : language === 'hi' ? 'हटाएं' : 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            const updated = offers.filter((o) => o.id !== id);
+            setOffers(updated);
+            await saveOffersToStorage(updated);
+            setOfferSuccessToast(
+              language === 'mr' ? 'ऑफर हटवली!' : language === 'hi' ? 'ऑफ़र हटा दी गई!' : 'Offer removed!'
+            );
+            setTimeout(() => setOfferSuccessToast(''), 3000);
+          },
+        },
+      ]
+    );
   };
 
   // Create New Offer
   const handleCreateNewOffer = async () => {
     if (!newOfferName.trim() || !newOfferCode.trim() || !newOfferVal.trim()) {
-      Alert.alert('माहिती अपूर्ण (Missing Details)', 'कृपया Offer Name, Code आणि Discount Value भरा.');
+      Alert.alert(
+        language === 'mr' ? 'माहिती अपूर्ण' : language === 'hi' ? 'विवरण अधूरा है' : 'Missing Details',
+        language === 'mr'
+          ? 'कृपया ऑफरचे नाव, कोड आणि सवलत मूल्य भरा.'
+          : language === 'hi'
+          ? 'कृपया ऑफ़र का नाम, कोड और छूट मूल्य भरें।'
+          : 'Please fill in Offer Name, Code and Discount Value.'
+      );
       return;
     }
     const val = parseFloat(newOfferVal) || 0;
@@ -448,13 +469,23 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
     setNewOfferCode('SAVE' + Math.floor(10 + Math.random() * 90));
     setNewOfferDesc('');
 
-    setOfferSuccessToast(`"${created.name}" ऑफर तयार झाली!`);
+    setOfferSuccessToast(
+      language === 'mr'
+        ? `"${created.name}" ऑफर तयार झाली!`
+        : language === 'hi'
+        ? `"${created.name}" ऑफ़र बनाई गई!`
+        : `"${created.name}" offer created!`
+    );
     setTimeout(() => setOfferSuccessToast(''), 3500);
 
     Alert.alert(
-      'यशस्वी! (Offer Added)',
-      `नवीन ऑफर "${created.name}" (Code: ${created.code}) तयार झाली असून ग्राहकांसाठी Active झाली आहे!`,
-      [{ text: 'पहा (View Offers)' }]
+      language === 'mr' ? 'यशस्वी!' : language === 'hi' ? 'सफल!' : 'Success!',
+      language === 'mr'
+        ? `नवीन ऑफर "${created.name}" (कोड: ${created.code}) तयार झाली असून ग्राहकांसाठी सक्रिय झाली आहे!`
+        : language === 'hi'
+        ? `नया ऑफ़र "${created.name}" (कोड: ${created.code}) सफलतापूर्वक बनाया गया और अब सक्रिय है!`
+        : `New offer "${created.name}" (Code: ${created.code}) created successfully and is now active!`,
+      [{ text: language === 'mr' ? 'ऑफर पहा' : language === 'hi' ? 'ऑफ़र देखें' : 'View Offers' }]
     );
   };
 
@@ -501,6 +532,66 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
   ];
 
   const activeOffersCount = offers.filter((o) => o.status === 'ACTIVE').length;
+
+  // Localized strings for Festive Offers Card reacting to selected language (en, mr, hi):
+  const festiveCardTitle = useMemo(() => {
+    if (language === 'mr') return 'नवरात्री विशेष सवलत';
+    if (language === 'hi') return 'नवरात्रि विशेष छूट';
+    return 'Navratri Festive Special';
+  }, [language]);
+
+  const festiveCardDesc = useMemo(() => {
+    const countStr = toDevanagari(activeOffersCount);
+    if (language === 'mr') return `ग्राहकांसाठी ${countStr} सक्रिय ऑफर्स आणि सवलती उपलब्ध`;
+    if (language === 'hi') return `ग्राहकों के लिए ${countStr} सक्रिय ऑफर्स और छूट उपलब्ध`;
+    return `${activeOffersCount} active promotions available for customers`;
+  }, [language, activeOffersCount, toDevanagari]);
+
+  const viewOffersBtnText = useMemo(() => {
+    if (language === 'mr') return 'ऑफर्स पहा →';
+    if (language === 'hi') return 'ऑफर्स देखें →';
+    return 'View Offers →';
+  }, [language]);
+
+  const getLocalizedOfferTitle = useCallback((name: string) => {
+    const lower = (name || '').toLowerCase();
+    if (lower.includes('navratri')) {
+      if (language === 'mr') return 'नवरात्री विशेष सवलत';
+      if (language === 'hi') return 'नवरात्रि विशेष छूट';
+      return 'Navratri Festive Special';
+    }
+    if (lower.includes('weekend') || lower.includes('family')) {
+      if (language === 'mr') return 'वीकेंड फॅमिली फीस्ट';
+      if (language === 'hi') return 'वीकेंड फैमिली दावत';
+      return 'Weekend Family Feast';
+    }
+    if (lower.includes('first order') || lower.includes('welcome')) {
+      if (language === 'mr') return 'पहिल्या ऑर्डरवर विशेष सवलत';
+      if (language === 'hi') return 'पहले ऑर्डर पर विशेष छूट';
+      return 'First Order Special';
+    }
+    return name;
+  }, [language]);
+
+  const getLocalizedOfferDesc = useCallback((desc: string) => {
+    const lower = (desc || '').toLowerCase();
+    if (lower.includes('navratri') || lower.includes('20%')) {
+      if (language === 'mr') return 'सर्व डायन-इन आणि पार्सल ऑर्डर्सवर २०% विशेष सवलत.';
+      if (language === 'hi') return 'सभी डाइन-इन और पार्सल ऑर्डर पर २०% विशेष छूट.';
+      return '20% discount offer on all dine-in and parcel orders.';
+    }
+    if (lower.includes('family') || lower.includes('10%')) {
+      if (language === 'mr') return '₹९९९ वरील सर्व फॅमिली टेबल बिलावर १०% थेट सवलत.';
+      if (language === 'hi') return '₹९९९ से अधिक के सभी फैमिली टेबल बिल पर १०% छूट.';
+      return 'Flat 10% discount on all family table bills above ₹999.';
+    }
+    if (lower.includes('first') || lower.includes('100')) {
+      if (language === 'mr') return '₹४९९ वरील पहिल्या डिलिव्हरी ऑर्डरवर ₹१०० थेट सवलत.';
+      if (language === 'hi') return '₹४९९ से अधिक के पहले डिलीवरी ऑर्डर पर ₹१०० सीधी छूट.';
+      return 'Get ₹100 flat discount on first online delivery order above ₹499.';
+    }
+    return desc;
+  }, [language]);
 
   return (
     <View style={styles.container}>
@@ -806,7 +897,7 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
                   activeOpacity={0.85}
                 >
                   <View style={styles.billReceiptIconWrap}>
-                    <Receipt size={16} color="#E3342F" />
+                    <ReceiptRupee size={16} color="#E3342F" strokeWidth={2.2} />
                   </View>
 
                   <View style={{ flex: 1, marginLeft: 10 }}>
@@ -936,7 +1027,7 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
         )}
 
         {/* ===================================================
-            FESTIVE PROMOTIONAL BANNER
+            FESTIVE PROMOTIONAL BANNER (Multi-Language)
         =================================================== */}
         <View style={styles.festiveBannerCard}>
           <View style={styles.festiveBannerLeft}>
@@ -944,8 +1035,8 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
               <Sparkles size={18} color="#EA580C" />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.festiveTitle}>Navratri Festive Special</Text>
-              <Text style={styles.festiveDesc}>{activeOffersCount} active promotions available for customers</Text>
+              <Text style={styles.festiveTitle}>{festiveCardTitle}</Text>
+              <Text style={styles.festiveDesc}>{festiveCardDesc}</Text>
             </View>
           </View>
 
@@ -958,7 +1049,7 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
               }}
               activeOpacity={0.85}
             >
-              <Text style={styles.viewOffersText}>View Offers →</Text>
+              <Text style={styles.viewOffersText}>{viewOffersBtnText}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -1114,8 +1205,16 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
                   <Tag size={20} color="#EA580C" />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.offersModalTitle} numberOfLines={1}>Active Offers & Promotions</Text>
-                  <Text style={styles.offersModalSubtitle} numberOfLines={1}>सक्रिय ऑफर्स आणि सवलती • {activeOffersCount} Active</Text>
+                  <Text style={styles.offersModalTitle} numberOfLines={1}>
+                    {language === 'mr' ? 'सक्रिय ऑफर्स आणि सवलती' : language === 'hi' ? 'सक्रिय ऑफर्स और छूट' : 'Active Offers & Promotions'}
+                  </Text>
+                  <Text style={styles.offersModalSubtitle} numberOfLines={1}>
+                    {language === 'mr'
+                      ? `विशेष सवलती आणि कूपन्स • ${toDevanagari(activeOffersCount)} सक्रिय`
+                      : language === 'hi'
+                      ? `विशेष छूट और कूपन • ${toDevanagari(activeOffersCount)} सक्रिय`
+                      : `Special Discounts & Coupons • ${toDevanagari(activeOffersCount)} Active`}
+                  </Text>
                 </View>
               </View>
 
@@ -1136,7 +1235,11 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
               >
                 <Tag size={14} color={offersViewMode === 'LIST' ? '#EA580C' : '#64748B'} />
                 <Text style={[styles.modalSegmentedTabText, offersViewMode === 'LIST' && styles.modalSegmentedTabTextActive]}>
-                  View Offers ({offers.length})
+                  {language === 'mr'
+                    ? `ऑफर्स पहा (${toDevanagari(offers.length)})`
+                    : language === 'hi'
+                    ? `ऑफर्स देखें (${toDevanagari(offers.length)})`
+                    : `View Offers (${toDevanagari(offers.length)})`}
                 </Text>
               </TouchableOpacity>
 
@@ -1147,7 +1250,7 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
               >
                 <Plus size={14} color={offersViewMode === 'ADD' ? '#EA580C' : '#64748B'} />
                 <Text style={[styles.modalSegmentedTabText, offersViewMode === 'ADD' && styles.modalSegmentedTabTextActive]}>
-                  + Add Offer
+                  {language === 'mr' ? 'ऑफर जोडा' : language === 'hi' ? 'ऑफर जोड़ें' : 'Add Offer'}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -1172,8 +1275,20 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
                     <Plus size={16} color="#FFFFFF" />
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.heroAddOfferTitle}>+ नवीन ऑफर / सवलत जोडा (Add Offer)</Text>
-                    <Text style={styles.heroAddOfferSub}>ग्राहकांसाठी प्रोमो कूपन कोड आणि डिस्काउंट तयार करा</Text>
+                    <Text style={styles.heroAddOfferTitle}>
+                      {language === 'mr'
+                        ? '+ नवीन ऑफर किंवा सवलत जोडा'
+                        : language === 'hi'
+                        ? '+ नया ऑफर या छूट जोड़ें'
+                        : '+ Create New Offer / Discount'}
+                    </Text>
+                    <Text style={styles.heroAddOfferSub}>
+                      {language === 'mr'
+                        ? 'ग्राहकांसाठी प्रोमो कूपन कोड आणि डिस्काउंट तयार करा'
+                        : language === 'hi'
+                        ? 'ग्राहकों के लिए प्रोमो कूपन कोड और डिस्काउंट बनाएं'
+                        : 'Create promo coupon codes and discounts for customers'}
+                    </Text>
                   </View>
                   <ChevronRight size={16} color="#EA580C" />
                 </TouchableOpacity>
@@ -1217,7 +1332,9 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
                                 activeOpacity={0.7}
                               >
                                 <Text style={[styles.deactivateBtnText, !isActive && { color: '#15803D' }]}>
-                                  {isActive ? 'Deactivate' : 'Activate'}
+                                  {isActive
+                                    ? (language === 'mr' ? 'निष्क्रिय करा' : language === 'hi' ? 'निष्क्रिय करें' : 'Deactivate')
+                                    : (language === 'mr' ? 'सक्रिय करा' : language === 'hi' ? 'सक्रिय करें' : 'Activate')}
                                 </Text>
                               </TouchableOpacity>
 
@@ -1232,27 +1349,31 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
                             </View>
                           </View>
 
-                          {/* Offer Title & Description */}
+                          {/* Offer Title & Description (Multi-Language) */}
                           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                            <Text style={styles.offerCardTitle}>{off.name}</Text>
+                            <Text style={styles.offerCardTitle}>{getLocalizedOfferTitle(off.name)}</Text>
                             {off.isCustom && (
                               <View style={styles.newCustomBadge}>
-                                <Text style={styles.newCustomBadgeText}>नवीन</Text>
+                                <Text style={styles.newCustomBadgeText}>
+                                  {language === 'mr' ? 'नवीन' : language === 'hi' ? 'नया' : 'NEW'}
+                                </Text>
                               </View>
                             )}
                           </View>
-                          <Text style={styles.offerCardDesc}>{off.desc}</Text>
+                          <Text style={styles.offerCardDesc}>{getLocalizedOfferDesc(off.desc)}</Text>
 
                           {/* Bottom Row: Code Pill & Validity Dates */}
                           <View style={styles.offerCardBottomRow}>
                             <View style={styles.codePill}>
                               <Text style={styles.codePillText}>
-                                Code: <Text style={{ fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace', fontWeight: '800' }}>{off.code}</Text>
+                                {language === 'mr' ? 'कोड: ' : language === 'hi' ? 'कोड: ' : 'Code: '}
+                                <Text style={{ fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace', fontWeight: '800' }}>{off.code}</Text>
                               </Text>
                             </View>
 
                             <Text style={styles.validDatesText}>
-                              Valid: {off.validFrom} to {off.validTo}
+                              {language === 'mr' ? 'वैध: ' : language === 'hi' ? 'वैध: ' : 'Valid: '}
+                              {toDevanagari(off.validFrom)} {language === 'mr' ? 'ते' : language === 'hi' ? 'से' : 'to'} {toDevanagari(off.validTo)}
                             </Text>
                           </View>
                         </View>
@@ -1267,7 +1388,9 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
                     style={styles.subModalCloseBtn}
                     onPress={() => setShowOfferModal(false)}
                   >
-                    <Text style={styles.subModalCloseBtnText}>Close</Text>
+                    <Text style={styles.subModalCloseBtnText}>
+                      {language === 'mr' ? 'बंद करा' : language === 'hi' ? 'बंद करें' : 'Close'}
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </>
@@ -1279,16 +1402,22 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
                 keyboardShouldPersistTaps="handled"
               >
                 <View style={{ marginBottom: 12 }}>
-                  <Text style={{ fontSize: 15, fontWeight: '800', color: '#1C1917' }}>नवीन ऑफर तयार करा (Add New Offer)</Text>
-                  <Text style={{ fontSize: 11, color: '#78716C' }}>ऑफरची माहिती भरा आणि सेव्ह करा</Text>
+                  <Text style={{ fontSize: 15, fontWeight: '800', color: '#1C1917' }}>
+                    {language === 'mr' ? 'नवीन ऑफर तयार करा' : language === 'hi' ? 'नया ऑफर बनाएं' : 'Create New Offer'}
+                  </Text>
+                  <Text style={{ fontSize: 11, color: '#78716C' }}>
+                    {language === 'mr' ? 'ऑफरची माहिती भरा आणि सेव्ह करा' : language === 'hi' ? 'ऑफर का विवरण भरें और सहेजें' : 'Fill in offer details and save'}
+                  </Text>
                 </View>
 
                 {/* Offer Name */}
                 <View style={styles.formGroup}>
-                  <Text style={styles.formLabel}>ऑफरचे नाव (Offer Name) *</Text>
+                  <Text style={styles.formLabel}>
+                    {language === 'mr' ? 'ऑफरचे नाव *' : language === 'hi' ? 'ऑफर का नाम *' : 'Offer Name *'}
+                  </Text>
                   <TextInput
                     style={styles.formInput}
-                    placeholder="उदा. Diwali Special 20% Off"
+                    placeholder={language === 'mr' ? 'उदा. Diwali Special 20% Off' : language === 'hi' ? 'उदा. Diwali Special 20% Off' : 'e.g. Diwali Special 20% Off'}
                     placeholderTextColor="#94A3B8"
                     value={newOfferName}
                     onChangeText={setNewOfferName}
@@ -1297,10 +1426,12 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
 
                 {/* Promo Code */}
                 <View style={styles.formGroup}>
-                  <Text style={styles.formLabel}>प्रोमो कूपन कोड (Promo Code) *</Text>
+                  <Text style={styles.formLabel}>
+                    {language === 'mr' ? 'प्रोमो कूपन कोड *' : language === 'hi' ? 'प्रोमो कूपन कोड *' : 'Promo Coupon Code *'}
+                  </Text>
                   <TextInput
                     style={[styles.formInput, { textTransform: 'uppercase', fontWeight: '700' }]}
-                    placeholder="उदा. FEST2026"
+                    placeholder={language === 'mr' ? 'उदा. FEST2026' : language === 'hi' ? 'उदा. FEST2026' : 'e.g. FEST2026'}
                     placeholderTextColor="#94A3B8"
                     value={newOfferCode}
                     onChangeText={setNewOfferCode}
@@ -1311,7 +1442,9 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
                 {/* Discount Type & Value Row */}
                 <View style={{ flexDirection: 'row', gap: 10, marginBottom: 12 }}>
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.formLabel}>प्रकार (Type)</Text>
+                    <Text style={styles.formLabel}>
+                      {language === 'mr' ? 'सवलत प्रकार *' : language === 'hi' ? 'छूट प्रकार *' : 'Discount Type *'}
+                    </Text>
                     <View style={styles.typeSelectorRow}>
                       <TouchableOpacity
                         style={[styles.typeBtn, newOfferType === 'PERCENTAGE' && styles.typeBtnActive]}
@@ -1333,7 +1466,13 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
                   </View>
 
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.formLabel}>सवलत (Value) * ({newOfferType === 'PERCENTAGE' ? '%' : '₹'})</Text>
+                    <Text style={styles.formLabel}>
+                      {language === 'mr'
+                        ? `सवलत मूल्य * (${newOfferType === 'PERCENTAGE' ? '%' : '₹'})`
+                        : language === 'hi'
+                        ? `छूट मूल्य * (${newOfferType === 'PERCENTAGE' ? '%' : '₹'})`
+                        : `Discount Value * (${newOfferType === 'PERCENTAGE' ? '%' : '₹'})`}
+                    </Text>
                     <TextInput
                       style={styles.formInput}
                       placeholder={newOfferType === 'PERCENTAGE' ? '20' : '150'}
@@ -1347,16 +1486,23 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
 
                 {/* Applicable Category */}
                 <View style={styles.formGroup}>
-                  <Text style={styles.formLabel}>लागू होणारा विभाग (Category)</Text>
+                  <Text style={styles.formLabel}>
+                    {language === 'mr' ? 'लागू विभाग' : language === 'hi' ? 'लागू श्रेणी' : 'Applicable Category'}
+                  </Text>
                   <View style={styles.categorySelectorRow}>
-                    {['All Menu Items', 'Dine-In', 'Online Delivery', 'Beverages'].map((cat) => (
+                    {[
+                      { id: 'All Menu Items', en: 'All Menu Items', mr: 'सर्व मेनू आयटम्स', hi: 'सभी मेनू' },
+                      { id: 'Dine-In', en: 'Dine-In', mr: 'डाइन-इन', hi: 'डाइन-इन' },
+                      { id: 'Online Delivery', en: 'Online Delivery', mr: 'ऑनलाइन डिलिव्हरी', hi: 'ऑनलाइन डिलीवरी' },
+                      { id: 'Beverages', en: 'Beverages', mr: 'पेये', hi: 'पेय पदार्थ' },
+                    ].map((cat) => (
                       <TouchableOpacity
-                        key={cat}
-                        style={[styles.categoryPillBtn, newOfferCategory === cat && styles.categoryPillBtnActive]}
-                        onPress={() => setNewOfferCategory(cat)}
+                        key={cat.id}
+                        style={[styles.categoryPillBtn, newOfferCategory === cat.id && styles.categoryPillBtnActive]}
+                        onPress={() => setNewOfferCategory(cat.id)}
                       >
-                        <Text style={[styles.categoryPillText, newOfferCategory === cat && styles.categoryPillTextActive]}>
-                          {cat}
+                        <Text style={[styles.categoryPillText, newOfferCategory === cat.id && styles.categoryPillTextActive]}>
+                          {language === 'mr' ? cat.mr : language === 'hi' ? cat.hi : cat.en}
                         </Text>
                       </TouchableOpacity>
                     ))}
@@ -1365,10 +1511,18 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
 
                 {/* Description */}
                 <View style={styles.formGroup}>
-                  <Text style={styles.formLabel}>वर्णन (Description)</Text>
+                  <Text style={styles.formLabel}>
+                    {language === 'mr' ? 'वर्णन' : language === 'hi' ? 'विवरण' : 'Description'}
+                  </Text>
                   <TextInput
                     style={[styles.formInput, { height: 50 }]}
-                    placeholder="उदा. सर्व जेवणाच्या बिलावर 20% सवलत."
+                    placeholder={
+                      language === 'mr'
+                        ? 'उदा. सर्व जेवणाच्या बिलावर 20% विशेष सवलत.'
+                        : language === 'hi'
+                        ? 'उदा. सभी भोजन बिलों पर 20% विशेष छूट।'
+                        : 'e.g. 20% special discount on all food orders.'
+                    }
                     placeholderTextColor="#94A3B8"
                     value={newOfferDesc}
                     onChangeText={setNewOfferDesc}
@@ -1379,7 +1533,9 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
                 {/* Validity Dates */}
                 <View style={{ flexDirection: 'row', gap: 10, marginBottom: 16 }}>
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.formLabel}>सुरुवात (From)</Text>
+                    <Text style={styles.formLabel}>
+                      {language === 'mr' ? 'सुरुवात तारीख' : language === 'hi' ? 'प्रारंभ तिथि' : 'Start Date'}
+                    </Text>
                     <TextInput
                       style={styles.formInput}
                       value={newOfferFrom}
@@ -1388,7 +1544,9 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
                     />
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.formLabel}>समाप्ती (To)</Text>
+                    <Text style={styles.formLabel}>
+                      {language === 'mr' ? 'समाप्ती तारीख' : language === 'hi' ? 'समाप्ति तिथि' : 'End Date'}
+                    </Text>
                     <TextInput
                       style={styles.formInput}
                       value={newOfferTo}
@@ -1404,7 +1562,9 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
                     style={[styles.subModalCloseBtn, { flex: 1, alignItems: 'center' }]}
                     onPress={() => setOffersViewMode('LIST')}
                   >
-                    <Text style={styles.subModalCloseBtnText}>रद्द करा (Back)</Text>
+                    <Text style={styles.subModalCloseBtnText}>
+                      {language === 'mr' ? 'मागे जा' : language === 'hi' ? 'वापस जाएं' : 'Back'}
+                    </Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -1412,7 +1572,9 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
                     onPress={handleCreateNewOffer}
                     activeOpacity={0.85}
                   >
-                    <Text style={styles.saveOfferSubmitBtnText}>💾 सेव्ह करा (Save & Publish)</Text>
+                    <Text style={styles.saveOfferSubmitBtnText}>
+                      {language === 'mr' ? '💾 सेव्ह करा' : language === 'hi' ? '💾 सहेजें' : '💾 Save & Publish'}
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </ScrollView>
@@ -1430,7 +1592,9 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
             <View style={styles.subModalHeader}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <Plus size={20} color="#EA580C" />
-                <Text style={styles.subModalTitle}>Create New Offer</Text>
+                <Text style={styles.subModalTitle}>
+                  {language === 'mr' ? 'नवीन ऑफर तयार करा' : language === 'hi' ? 'नया ऑफ़र बनाएं' : 'Create New Offer'}
+                </Text>
               </View>
               <TouchableOpacity
                 style={styles.modalCloseCircle}
@@ -1446,10 +1610,12 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
 
             <ScrollView style={{ maxHeight: 400 }} showsVerticalScrollIndicator={false}>
               <View style={styles.formGroup}>
-                <Text style={styles.formLabel}>Offer Name *</Text>
+                <Text style={styles.formLabel}>
+                  {language === 'mr' ? 'ऑफरचे नाव *' : language === 'hi' ? 'ऑफ़र का नाम *' : 'Offer Name *'}
+                </Text>
                 <TextInput
                   style={styles.formInput}
-                  placeholder="e.g. Navratri Festive Special"
+                  placeholder={language === 'mr' ? 'उदा. Navratri Festive Special' : language === 'hi' ? 'उदा. Navratri Festive Special' : 'e.g. Navratri Festive Special'}
                   placeholderTextColor="#94A3B8"
                   value={newOfferName}
                   onChangeText={setNewOfferName}
@@ -1457,10 +1623,12 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
               </View>
 
               <View style={styles.formGroup}>
-                <Text style={styles.formLabel}>Promo Code *</Text>
+                <Text style={styles.formLabel}>
+                  {language === 'mr' ? 'प्रोमो कूपन कोड *' : language === 'hi' ? 'प्रोमो कूपन कोड *' : 'Promo Coupon Code *'}
+                </Text>
                 <TextInput
                   style={[styles.formInput, { textTransform: 'uppercase' }]}
-                  placeholder="e.g. NAV2026"
+                  placeholder={language === 'mr' ? 'उदा. NAV2026' : language === 'hi' ? 'उदा. NAV2026' : 'e.g. NAV2026'}
                   placeholderTextColor="#94A3B8"
                   value={newOfferCode}
                   onChangeText={setNewOfferCode}
@@ -1470,7 +1638,9 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
 
               <View style={{ flexDirection: 'row', gap: 10, marginBottom: 12 }}>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.formLabel}>Type</Text>
+                  <Text style={styles.formLabel}>
+                    {language === 'mr' ? 'सवलत प्रकार *' : language === 'hi' ? 'छूट प्रकार *' : 'Discount Type *'}
+                  </Text>
                   <View style={styles.typeSelectorRow}>
                     <TouchableOpacity
                       style={[styles.typeBtn, newOfferType === 'PERCENTAGE' && styles.typeBtnActive]}
@@ -1492,7 +1662,13 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
                 </View>
 
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.formLabel}>Value *</Text>
+                  <Text style={styles.formLabel}>
+                    {language === 'mr'
+                      ? `सवलत मूल्य * (${newOfferType === 'PERCENTAGE' ? '%' : '₹'})`
+                      : language === 'hi'
+                      ? `छूट मूल्य * (${newOfferType === 'PERCENTAGE' ? '%' : '₹'})`
+                      : `Discount Value * (${newOfferType === 'PERCENTAGE' ? '%' : '₹'})`}
+                  </Text>
                   <TextInput
                     style={styles.formInput}
                     placeholder="20"
@@ -1509,7 +1685,9 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
                 onPress={handleCreateNewOffer}
                 activeOpacity={0.85}
               >
-                <Text style={styles.saveOfferSubmitBtnText}>Save & Publish Offer</Text>
+                <Text style={styles.saveOfferSubmitBtnText}>
+                  {language === 'mr' ? '💾 सेव्ह करा' : language === 'hi' ? '💾 सहेजें' : '💾 Save & Publish Offer'}
+                </Text>
               </TouchableOpacity>
             </ScrollView>
           </View>

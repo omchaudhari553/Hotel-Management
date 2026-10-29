@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,10 @@ import {
   Dimensions,
   Modal,
   Platform,
+  ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
+import { ReceiptRupee } from '../../components/ReceiptRupeeIcon';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppNavbar } from '../../components/AppNavbar';
 import { useLanguage } from '../../context/LanguageContext';
@@ -61,10 +64,29 @@ export const KOTScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [activeTab, setActiveTab] = useState<'ALL' | 'ACTIVE' | 'BILLED'>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [previewKot, setPreviewKot] = useState<KOTTicket | null>(null);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const todayDateStr = useMemo(() => {
     return formatDate(new Date(), { showDayOfWeek: false });
   }, [language]);
+
+  const loadData = useCallback(async (isManualRefresh: boolean = false) => {
+    if (isManualRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
+    try {
+      const list = await restaurantStore.getKOTs(activeBranchNumId, true);
+      setKots(list);
+    } catch (e) {
+      console.warn('Error fetching live KOTs:', e);
+    } finally {
+      setRefreshing(false);
+      setLoading(false);
+    }
+  }, [activeBranchNumId]);
 
   useEffect(() => {
     loadData();
@@ -78,12 +100,7 @@ export const KOTScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       unsubscribeStore();
       unsubscribeFocus?.();
     };
-  }, [navigation, activeBranchNumId]);
-
-  const loadData = async () => {
-    const list = await restaurantStore.getKOTs(activeBranchNumId);
-    setKots(list);
-  };
+  }, [navigation, activeBranchNumId, loadData]);
 
   const activeCount = kots.filter((k) => k.billingStatus === 'Not Billed').length;
 
@@ -149,6 +166,14 @@ export const KOTScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       <ScrollView
         contentContainerStyle={styles.scrollList}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => loadData(true)}
+            colors={['#EA580C']}
+            tintColor="#EA580C"
+          />
+        }
       >
         {/* ===================================================
             SCREEN HEADER (Screenshot 1 Exact Style)
@@ -156,7 +181,7 @@ export const KOTScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         <View style={styles.headerBar}>
           <View style={styles.headerLeftRow}>
             <View style={styles.headerIconBox}>
-              <Receipt size={18} color="#FFFFFF" />
+              <ReceiptRupee size={18} color="#FFFFFF" strokeWidth={2.2} />
             </View>
             <View style={{ flex: 1, marginLeft: 10 }}>
               <View style={styles.titleWithBadge}>
@@ -176,12 +201,19 @@ export const KOTScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             </View>
 
             <TouchableOpacity
-              style={styles.refreshBtn}
-              onPress={loadData}
-              activeOpacity={0.8}
+              style={[styles.refreshBtn, refreshing && { opacity: 0.7, borderColor: '#EA580C' }]}
+              onPress={() => loadData(true)}
+              disabled={refreshing}
+              activeOpacity={0.7}
             >
-              <RotateCcw size={13} color="#57534E" />
-              <Text style={styles.refreshText}>{t('refresh', 'Refresh')}</Text>
+              {refreshing ? (
+                <ActivityIndicator size={12} color="#EA580C" style={{ marginRight: 2 }} />
+              ) : (
+                <RotateCcw size={13} color="#57534E" />
+              )}
+              <Text style={[styles.refreshText, refreshing && { color: '#EA580C', fontWeight: '700' }]}>
+                {refreshing ? t('refreshing', 'Refreshing...') : t('refresh', 'Refresh')}
+              </Text>
             </TouchableOpacity>
 
             <View style={styles.datePill}>
