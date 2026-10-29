@@ -66,7 +66,7 @@ const getHostIp = (): string => {
     }
   } catch {}
   // Default to actual host machine IP on local Wi-Fi (192.168.1.34)
-  return '192.168.1.34';
+  return '192.168.1.44';
 };
 
 const hostIp = getHostIp();
@@ -88,7 +88,7 @@ export const STORAGE_KEYS = {
 
 export const apiClient: AxiosInstance = axios.create({
   baseURL: DEFAULT_URL,
-  timeout: 12000,
+  timeout: 5000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -97,7 +97,7 @@ export const apiClient: AxiosInstance = axios.create({
 export const getApiBaseUrl = async (): Promise<string> => {
   try {
     const saved = await AsyncStorage.getItem(STORAGE_KEYS.API_BASE_URL);
-    if (saved && (saved.includes('192.168.1.83') || saved.includes('192.168.1.80') || saved.includes('undefined'))) {
+    if (saved && (saved.includes('192.168.1.83') || saved.includes('192.168.1.80') || saved.includes('192.168.1.34') || saved.includes('undefined'))) {
       await AsyncStorage.removeItem(STORAGE_KEYS.API_BASE_URL);
       return DEFAULT_URL;
     }
@@ -135,7 +135,7 @@ export const ensureBackendToken = async (forceRefresh = false): Promise<string |
     authPromise = (async () => {
       const detectedIp = getHostIp();
       const preferred = [
-        'http://192.168.1.34:8080/api/v1',
+        'http://192.168.1.44:8080/api/v1',
         DEFAULT_URL,
         apiClient.defaults.baseURL,
         `http://${detectedIp}:8080/api/v1`,
@@ -145,7 +145,7 @@ export const ensureBackendToken = async (forceRefresh = false): Promise<string |
       ].filter(Boolean) as string[];
 
       const uniqueCandidates = Array.from(new Set(preferred)).filter(
-        (url) => !url.includes('192.168.1.83') && !url.includes('192.168.1.80')
+        (url) => !url.includes('192.168.1.83') && !url.includes('192.168.1.80') && !url.includes('192.168.1.34')
       );
 
       for (const base of uniqueCandidates) {
@@ -157,7 +157,7 @@ export const ensureBackendToken = async (forceRefresh = false): Promise<string |
               password: 'Admin@12345',
             },
             {
-              timeout: 8000,
+              timeout: 2500,
               headers: { 'Content-Type': 'application/json' },
             }
           );
@@ -205,7 +205,7 @@ apiClient.interceptors.request.use(async (config: InternalAxiosRequestConfig) =>
     let savedBaseUrl = await AsyncStorage.getItem(STORAGE_KEYS.API_BASE_URL);
     if (savedBaseUrl && (
       savedBaseUrl.includes('192.168.1.83') ||
-      savedBaseUrl.includes('192.168.1.80') ||
+      savedBaseUrl.includes('192.168.1.80') || savedBaseUrl.includes('192.168.1.34') ||
       savedBaseUrl.includes('.80:') ||
       savedBaseUrl.includes('undefined') ||
       (Platform.OS !== 'web' && (savedBaseUrl.includes('localhost') || savedBaseUrl.includes('127.0.0.1')))

@@ -202,7 +202,14 @@ export const TablesKOTScreen: React.FC<{ navigation: any }> = ({ navigation }) =
     });
 
     if (itemsList.length === 0) {
-      Alert.alert('निवड करा (Select Items)', 'कृपया Kitchen Order Ticket (KOT) साठी किमान 1 पदार्थ निवडा.');
+      Alert.alert(
+        language === 'mr' ? 'निवड करा' : language === 'hi' ? 'चयन करें' : 'Select Items',
+        language === 'mr'
+          ? 'कृपया Kitchen Order Ticket (KOT) साठी किमान १ पदार्थ निवडा.'
+          : language === 'hi'
+          ? 'कृपया Kitchen Order Ticket (KOT) के लिए कम से कम १ वस्तु चुनें।'
+          : 'Please select at least 1 item for Kitchen Order Ticket (KOT).'
+      );
       return;
     }
 
@@ -217,24 +224,45 @@ export const TablesKOTScreen: React.FC<{ navigation: any }> = ({ navigation }) =
 
       setOrderModalVisible(false);
       Alert.alert(
-        'KOT पाठवली! (KOT Dispatched)',
-        `${activeTable.tableNumber} साठी KOT (${kot.id}) किचनमध्ये पाठवली व ऑर्डर (${order.id}) तयार झाली!`,
+        language === 'mr'
+          ? 'KOT पाठवली!'
+          : language === 'hi'
+          ? 'KOT भेजी गई!'
+          : 'KOT Dispatched!',
+        language === 'mr'
+          ? `${formatTableName(activeTable.tableNumber, 'mr')} साठी KOT (${kot.id}) किचनमध्ये पाठवली व ऑर्डर (${order.id}) तयार झाली!`
+          : language === 'hi'
+          ? `${formatTableName(activeTable.tableNumber, 'hi')} के लिए KOT (${kot.id}) किचन में भेजी गई और ऑर्डर (${order.id}) तैयार हुआ!`
+          : `KOT (${kot.id}) sent to kitchen for ${formatTableName(activeTable.tableNumber, 'en')} and Order (${order.id}) created!`,
         [
-          { text: 'टेबल्स पहा', style: 'cancel' },
           {
-            text: 'KOT Kitchen पहा',
+            text: language === 'mr' ? 'टेबल्स पहा' : language === 'hi' ? 'टेबल्स देखें' : 'View Tables',
+            style: 'cancel',
+          },
+          {
+            text: language === 'mr' ? 'KOT Kitchen पहा' : language === 'hi' ? 'KOT Kitchen देखें' : 'View KOT Kitchen',
             onPress: () => navigation.navigate('KOT'),
           },
         ]
       );
     } catch (err) {
-      Alert.alert('Error', 'ऑर्डर सुरू करताना त्रुटी आली.');
+      Alert.alert(
+        language === 'mr' ? 'त्रुटी' : language === 'hi' ? 'त्रुटि' : 'Error',
+        language === 'mr' ? 'ऑर्डर सुरू करताना त्रुटी आली.' : language === 'hi' ? 'ऑर्डर शुरू करने में त्रुटि हुई।' : 'Error starting order.'
+      );
     }
   };
 
   const handleAddTable = async () => {
     if (!newTableName.trim()) {
-      Alert.alert('माहिती आवश्यक (Missing Info)', 'कृपया टेबल क्रमांक किंवा नाव टाका (उदा. Table 05 किंवा T-01).');
+      Alert.alert(
+        language === 'mr' ? 'माहिती आवश्यक' : language === 'hi' ? 'जानकारी आवश्यक' : 'Missing Info',
+        language === 'mr'
+          ? 'कृपया टेबल क्रमांक किंवा नाव टाका (उदा. Table 05 किंवा T-01).'
+          : language === 'hi'
+          ? 'कृपया टेबल संख्या या नाम दर्ज करें (उदा. Table 05 या T-01)।'
+          : 'Please enter table number or name (e.g. Table 05 or T-01).'
+      );
       return;
     }
     setIsAddingTable(true);

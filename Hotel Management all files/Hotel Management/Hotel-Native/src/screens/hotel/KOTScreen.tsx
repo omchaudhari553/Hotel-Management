@@ -123,8 +123,12 @@ export const KOTScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const updated = await restaurantStore.advanceKOTStatus(kot.id);
     if (updated) {
       Alert.alert(
-        'किचन स्टेटस बदलले (Status Updated)',
-        `${kot.tableNumber} साठी KOT स्टेटस "${updated.kitchenStatus}" झाले आहे.`
+        language === 'mr' ? 'किचन स्टेटस बदलले' : language === 'hi' ? 'किचन स्थिति अपडेट' : 'Status Updated',
+        language === 'mr'
+          ? `${formatTableName(kot.tableNumber, 'mr')} साठी KOT स्टेटस "${updated.kitchenStatus}" झाले आहे.`
+          : language === 'hi'
+          ? `${formatTableName(kot.tableNumber, 'hi')} के लिए KOT स्थिति "${updated.kitchenStatus}" हो गई है।`
+          : `KOT status for ${formatTableName(kot.tableNumber, 'en')} updated to "${updated.kitchenStatus}".`
       );
     }
   };

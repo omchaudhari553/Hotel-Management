@@ -799,7 +799,7 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
                 {t('salesOverview', 'SALES OVERVIEW (TODAY)')} - {getBranchName(language)}
               </Text>
               <Text style={styles.sectionCardSubtitle}>{t('totalSales', 'Total Sales')}</Text>
-              <Text style={styles.salesHighlightAmount}>{totalSalesDisplay}</Text>
+              <Text style={styles.salesHighlightAmount} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{totalSalesDisplay}</Text>
             </View>
 
             {/* Native SVG Area & Curved Line Chart */}
@@ -2137,27 +2137,35 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 1,
   },
+  kpiTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
   kpiHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   kpiIconCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
+    width: 30,
+    height: 30,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
   kpiLabel: {
     fontSize: 11,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#57534E',
+    flex: 1,
+    marginRight: 4,
   },
   kpiValueMain: {
     fontSize: 17,
     fontWeight: '900',
     color: '#1C1917',
-    marginTop: 2,
+    marginVertical: 4,
   },
   kpiFooterRow: {
     flexDirection: 'row',

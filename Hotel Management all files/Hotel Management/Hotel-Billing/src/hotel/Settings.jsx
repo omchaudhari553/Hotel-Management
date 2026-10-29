@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { settingsService } from "../services/settingsService";
 import { licenceService } from "../services/licenceService";
@@ -669,6 +669,147 @@ export default function Settings() {
   const [editingHsnSac, setEditingHsnSac] = useState(null);
   const [editingBranchGst, setEditingBranchGst] = useState(null);
   const [hsnSearchQuery, setHsnSearchQuery] = useState("");
+
+  // GST Configuration Pagination States
+  const [gstBranchPage, setGstBranchPage] = useState(1);
+  const [gstBranchPageSize, setGstBranchPageSize] = useState(10);
+
+  const [gstTaxGroupPage, setGstTaxGroupPage] = useState(1);
+  const [gstTaxGroupPageSize, setGstTaxGroupPageSize] = useState(10);
+
+  const [gstHsnPage, setGstHsnPage] = useState(1);
+  const [gstHsnPageSize, setGstHsnPageSize] = useState(10);
+
+  useEffect(() => {
+    setGstHsnPage(1);
+  }, [hsnSearchQuery]);
+
+  const filteredHsnSacList = useMemo(() => {
+    return hsnSacList.filter(h =>
+      !hsnSearchQuery ||
+      h.code.toLowerCase().includes(hsnSearchQuery.toLowerCase()) ||
+      h.description.toLowerCase().includes(hsnSearchQuery.toLowerCase())
+    );
+  }, [hsnSacList, hsnSearchQuery]);
+
+  const paginatedBranchGst = useMemo(() => {
+    const start = (gstBranchPage - 1) * gstBranchPageSize;
+    return branchGst.slice(start, start + gstBranchPageSize);
+  }, [branchGst, gstBranchPage, gstBranchPageSize]);
+
+  const paginatedTaxGroups = useMemo(() => {
+    const start = (gstTaxGroupPage - 1) * gstTaxGroupPageSize;
+    return taxGroups.slice(start, start + gstTaxGroupPageSize);
+  }, [taxGroups, gstTaxGroupPage, gstTaxGroupPageSize]);
+
+  const paginatedHsnSacList = useMemo(() => {
+    const start = (gstHsnPage - 1) * gstHsnPageSize;
+    return filteredHsnSacList.slice(start, start + gstHsnPageSize);
+  }, [filteredHsnSacList, gstHsnPage, gstHsnPageSize]);
+
+  const renderGstPagination = (currentPage, totalItems, pageSize, onPageChange, onPageSizeChange, itemLabel = "records") => {
+    const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+    if (totalItems <= pageSize && currentPage === 1) return null;
+
+    const startItem = (currentPage - 1) * pageSize + 1;
+    const endItem = Math.min(currentPage * pageSize, totalItems);
+
+    return (
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '10px 16px',
+          backgroundColor: '#FFFFFF',
+          borderTop: '1px solid #E5E7EB',
+          borderRadius: '0 0 8px 8px',
+          flexWrap: 'wrap',
+          gap: '12px',
+          fontSize: '12px',
+          color: '#4B5563',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          <span>
+            {t('showing', 'Showing')}{' '}
+            <strong style={{ color: '#1F2937' }}>{toDevanagari ? toDevanagari(startItem) : startItem}</strong> -{' '}
+            <strong style={{ color: '#1F2937' }}>{toDevanagari ? toDevanagari(endItem) : endItem}</strong> {t('of', 'of')}{' '}
+            <strong style={{ color: '#1F2937' }}>{toDevanagari ? toDevanagari(totalItems) : totalItems}</strong> {itemLabel}
+          </span>
+
+          {onPageSizeChange && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '11px', color: '#6B7280' }}>{t('rowsPerPage', 'Rows:')}</span>
+              <select
+                value={pageSize}
+                onChange={(e) => {
+                  onPageSizeChange(Number(e.target.value));
+                  onPageChange(1);
+                }}
+                style={{
+                  padding: '3px 6px',
+                  borderRadius: '4px',
+                  border: '1px solid #D1D5DB',
+                  backgroundColor: '#F9FAFB',
+                  color: '#1F2937',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                {[5, 10, 25, 50].map((size) => (
+                  <option key={size} value={size}>
+                    {toDevanagari ? toDevanagari(size) : size}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <button
+            type="button"
+            disabled={currentPage === 1}
+            onClick={() => onPageChange(currentPage - 1)}
+            style={{
+              padding: '4px 8px',
+              borderRadius: '4px',
+              border: '1px solid #D1D5DB',
+              backgroundColor: currentPage === 1 ? '#F9FAFB' : '#FFFFFF',
+              color: currentPage === 1 ? '#9CA3AF' : '#374151',
+              cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+              fontWeight: 600,
+              fontSize: '11px',
+            }}
+          >
+            « {t('prev', 'Prev')}
+          </button>
+          <span style={{ padding: '0 6px', fontWeight: 700, color: '#1F2937' }}>
+            {toDevanagari ? toDevanagari(currentPage) : currentPage} / {toDevanagari ? toDevanagari(totalPages) : totalPages}
+          </span>
+          <button
+            type="button"
+            disabled={currentPage === totalPages}
+            onClick={() => onPageChange(currentPage + 1)}
+            style={{
+              padding: '4px 8px',
+              borderRadius: '4px',
+              border: '1px solid #D1D5DB',
+              backgroundColor: currentPage === totalPages ? '#F9FAFB' : '#FFFFFF',
+              color: currentPage === totalPages ? '#9CA3AF' : '#374151',
+              cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+              fontWeight: 600,
+              fontSize: '11px',
+            }}
+          >
+            {t('next', 'Next')} »
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   const navigate = useNavigate();
   const [licenceInfo, setLicenceInfo] = useState({
@@ -2009,7 +2150,7 @@ export default function Settings() {
                     </tr>
                   </thead>
                   <tbody>
-                    {branchGst.map((br) => (
+                    {paginatedBranchGst.map((br) => (
                       <tr key={br.branchId} style={{ borderBottom: '1px solid #F3F4F6', color: '#1F2937' }}>
                         <td style={{ padding: '12px' }}>
                           <div style={{ fontWeight: 600 }}>{br.branchName}</div>
@@ -2054,6 +2195,7 @@ export default function Settings() {
                     ))}
                   </tbody>
                 </table>
+                {renderGstPagination(gstBranchPage, branchGst.length, gstBranchPageSize, setGstBranchPage, setGstBranchPageSize, 'Branches')}
               </div>
             </div>
           )}
@@ -2110,7 +2252,7 @@ export default function Settings() {
                     </tr>
                   </thead>
                   <tbody>
-                    {taxGroups.map((tg) => (
+                    {paginatedTaxGroups.map((tg) => (
                       <tr key={tg.id} style={{ borderBottom: '1px solid #F3F4F6', color: '#1F2937' }}>
                         <td style={{ padding: '12px' }}>
                           <div style={{ fontWeight: 600 }}>{tg.name}</div>
@@ -2189,6 +2331,7 @@ export default function Settings() {
                     ))}
                   </tbody>
                 </table>
+                {renderGstPagination(gstTaxGroupPage, taxGroups.length, gstTaxGroupPageSize, setGstTaxGroupPage, setGstTaxGroupPageSize, 'Tax Groups')}
               </div>
             </div>
           )}
@@ -2287,13 +2430,7 @@ export default function Settings() {
                     </tr>
                   </thead>
                   <tbody>
-                    {hsnSacList
-                      .filter(h =>
-                        !hsnSearchQuery ||
-                        h.code.toLowerCase().includes(hsnSearchQuery.toLowerCase()) ||
-                        h.description.toLowerCase().includes(hsnSearchQuery.toLowerCase())
-                      )
-                      .map((it) => (
+                    {paginatedHsnSacList.map((it) => (
                         <tr key={it.id} style={{ borderBottom: '1px solid #F3F4F6', color: '#1F2937' }}>
                           <td style={{ padding: '12px' }}>
                             <span
@@ -2370,6 +2507,7 @@ export default function Settings() {
                       ))}
                   </tbody>
                 </table>
+                {renderGstPagination(gstHsnPage, filteredHsnSacList.length, gstHsnPageSize, setGstHsnPage, setGstHsnPageSize, 'HSN / SAC Codes')}
               </div>
             </div>
           )}

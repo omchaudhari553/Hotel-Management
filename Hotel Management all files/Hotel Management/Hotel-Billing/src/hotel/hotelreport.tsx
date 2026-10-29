@@ -419,23 +419,6 @@ export default function ExpensesReports() {
   const [purchasePage, setPurchasePage] = useState<number>(1);
   const [purchasePageSize, setPurchasePageSize] = useState<number>(10);
 
-  // Auto-reset pages when filters change
-  useEffect(() => {
-    setExpensePage(1);
-  }, [search]);
-
-  useEffect(() => {
-    setSalesPage(1);
-    setOrderPage(1);
-    setMenuPage(1);
-    setPurchasePage(1);
-  }, [reportPeriod]);
-
-  useEffect(() => {
-    setGstRatePage(1);
-    setGstInvoicePage(1);
-    setGstPurchasePage(1);
-  }, [gstPeriod, gstBranchId]);
 
   useEffect(() => {
     Promise.allSettled([
@@ -529,6 +512,24 @@ export default function ExpensesReports() {
   const reportDateInputRef = useRef<HTMLInputElement | null>(null);
 
   const todayString = new Date().toISOString().split("T")[0];
+
+  // Auto-reset pages when filters change
+  useEffect(() => {
+    setExpensePage(1);
+  }, [search]);
+
+  useEffect(() => {
+    setSalesPage(1);
+    setOrderPage(1);
+    setMenuPage(1);
+    setPurchasePage(1);
+  }, [reportPeriod]);
+
+  useEffect(() => {
+    setGstRatePage(1);
+    setGstInvoicePage(1);
+    setGstPurchasePage(1);
+  }, [gstPeriod, gstBranchId]);
 
   const totalSales = useMemo(
     () => invoices.reduce((sum, item) => sum + (Number(item.total ?? item.grandTotal) || 0), 0),

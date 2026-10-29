@@ -607,6 +607,249 @@ export const GstReportComponent: React.FC<GstReportComponentProps> = ({ initialT
     return { taxable, cgst, sgst, igst, totalGst, total };
   }, [hsnSummaryData]);
 
+  // Pagination States for all GST Reports
+  const [salesPage, setSalesPage] = useState<number>(1);
+  const [salesPageSize, setSalesPageSize] = useState<number>(10);
+
+  const [purchasePage, setPurchasePage] = useState<number>(1);
+  const [purchasePageSize, setPurchasePageSize] = useState<number>(10);
+
+  const [gstr1Page, setGstr1Page] = useState<number>(1);
+  const [gstr1PageSize, setGstr1PageSize] = useState<number>(10);
+
+  const [gstr2Page, setGstr2Page] = useState<number>(1);
+  const [gstr2PageSize, setGstr2PageSize] = useState<number>(10);
+
+  const [hsnPage, setHsnPage] = useState<number>(1);
+  const [hsnPageSize, setHsnPageSize] = useState<number>(10);
+
+  // Auto-reset page numbers on date filter changes
+  useEffect(() => {
+    setSalesPage(1);
+    setPurchasePage(1);
+    setGstr1Page(1);
+    setGstr2Page(1);
+    setHsnPage(1);
+  }, [fromDate, toDate]);
+
+  // Memoized Paginated Slices
+  const paginatedSalesInvoices = useMemo(() => {
+    const start = (salesPage - 1) * salesPageSize;
+    return filteredInvoices.slice(start, start + salesPageSize);
+  }, [filteredInvoices, salesPage, salesPageSize]);
+
+  const paginatedPurchases = useMemo(() => {
+    const start = (purchasePage - 1) * purchasePageSize;
+    return filteredPurchases.slice(start, start + purchasePageSize);
+  }, [filteredPurchases, purchasePage, purchasePageSize]);
+
+  const paginatedGstr1Invoices = useMemo(() => {
+    const start = (gstr1Page - 1) * gstr1PageSize;
+    return filteredInvoices.slice(start, start + gstr1PageSize);
+  }, [filteredInvoices, gstr1Page, gstr1PageSize]);
+
+  const paginatedGstr2Purchases = useMemo(() => {
+    const start = (gstr2Page - 1) * gstr2PageSize;
+    return filteredPurchases.slice(start, start + gstr2PageSize);
+  }, [filteredPurchases, gstr2Page, gstr2PageSize]);
+
+  const paginatedHsnData = useMemo(() => {
+    const start = (hsnPage - 1) * hsnPageSize;
+    return hsnSummaryData.slice(start, start + hsnPageSize);
+  }, [hsnSummaryData, hsnPage, hsnPageSize]);
+
+  const renderPagination = (
+    currentPage: number,
+    totalItems: number,
+    pageSize: number,
+    onPageChange: (p: number) => void,
+    onPageSizeChange?: (s: number) => void,
+    itemLabel: string = "records"
+  ) => {
+    const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+    if (totalItems === 0) return null;
+
+    const startItem = (currentPage - 1) * pageSize + 1;
+    const endItem = Math.min(currentPage * pageSize, totalItems);
+
+    const getPageNumbers = () => {
+      const pages: (number | string)[] = [];
+      if (totalPages <= 7) {
+        for (let i = 1; i <= totalPages; i++) pages.push(i);
+      } else {
+        pages.push(1);
+        if (currentPage > 3) pages.push('...');
+        const start = Math.max(2, currentPage - 1);
+        const end = Math.min(totalPages - 1, currentPage + 1);
+        for (let i = start; i <= end; i++) pages.push(i);
+        if (currentPage < totalPages - 2) pages.push('...');
+        pages.push(totalPages);
+      }
+      return pages;
+    };
+
+    return (
+      <div
+        className="gst-pagination-bar"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '12px 18px',
+          backgroundColor: '#FFFFFF',
+          borderTop: '1px solid #E2E8F0',
+          borderRadius: '0 0 10px 10px',
+          flexWrap: 'wrap',
+          gap: '12px',
+          fontSize: '0.84rem',
+          color: '#475569',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+          <span>
+            {t('showing', 'Showing')}{' '}
+            <strong style={{ color: '#0F172A' }}>{toDevanagari(startItem)}</strong> -{' '}
+            <strong style={{ color: '#0F172A' }}>{toDevanagari(endItem)}</strong> {t('of', 'of')}{' '}
+            <strong style={{ color: '#0F172A' }}>{toDevanagari(totalItems)}</strong> {itemLabel}
+          </span>
+
+          {onPageSizeChange && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '0.8rem', color: '#64748B' }}>{t('rowsPerPage', 'Rows:')}</span>
+              <select
+                value={pageSize}
+                onChange={(e) => {
+                  onPageSizeChange(Number(e.target.value));
+                  onPageChange(1);
+                }}
+                style={{
+                  padding: '4px 8px',
+                  borderRadius: '6px',
+                  border: '1px solid #CBD5E1',
+                  backgroundColor: '#F8FAFC',
+                  color: '#0F172A',
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                {[10, 25, 50, 100].map((size) => (
+                  <option key={size} value={size}>
+                    {toDevanagari(size)}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <button
+            type="button"
+            disabled={currentPage === 1}
+            onClick={() => onPageChange(1)}
+            title={t('firstPage', 'First Page')}
+            style={{
+              padding: '5px 9px',
+              borderRadius: '6px',
+              border: '1px solid #CBD5E1',
+              backgroundColor: currentPage === 1 ? '#F1F5F9' : '#FFFFFF',
+              color: currentPage === 1 ? '#94A3B8' : '#334155',
+              cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+              fontWeight: 700,
+              fontSize: '0.8rem',
+            }}
+          >
+            ««
+          </button>
+          <button
+            type="button"
+            disabled={currentPage === 1}
+            onClick={() => onPageChange(currentPage - 1)}
+            title={t('previousPage', 'Previous Page')}
+            style={{
+              padding: '5px 10px',
+              borderRadius: '6px',
+              border: '1px solid #CBD5E1',
+              backgroundColor: currentPage === 1 ? '#F1F5F9' : '#FFFFFF',
+              color: currentPage === 1 ? '#94A3B8' : '#334155',
+              cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+              fontWeight: 700,
+              fontSize: '0.82rem',
+            }}
+          >
+            « {t('prev', 'Prev')}
+          </button>
+
+          {getPageNumbers().map((p, idx) =>
+            p === '...' ? (
+              <span key={'ellipsis-' + idx} style={{ padding: '0 6px', color: '#94A3B8' }}>
+                ...
+              </span>
+            ) : (
+              <button
+                key={p}
+                type="button"
+                onClick={() => onPageChange(Number(p))}
+                style={{
+                  minWidth: '32px',
+                  height: '32px',
+                  borderRadius: '6px',
+                  border: currentPage === p ? '1.5px solid #0F766E' : '1px solid #CBD5E1',
+                  backgroundColor: currentPage === p ? '#0F766E' : '#FFFFFF',
+                  color: currentPage === p ? '#FFFFFF' : '#0F172A',
+                  fontWeight: currentPage === p ? 800 : 600,
+                  fontSize: '0.82rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                {toDevanagari(p)}
+              </button>
+            )
+          )}
+
+          <button
+            type="button"
+            disabled={currentPage === totalPages}
+            onClick={() => onPageChange(currentPage + 1)}
+            title={t('nextPage', 'Next Page')}
+            style={{
+              padding: '5px 10px',
+              borderRadius: '6px',
+              border: '1px solid #CBD5E1',
+              backgroundColor: currentPage === totalPages ? '#F1F5F9' : '#FFFFFF',
+              color: currentPage === totalPages ? '#94A3B8' : '#334155',
+              cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+              fontWeight: 700,
+              fontSize: '0.82rem',
+            }}
+          >
+            {t('next', 'Next')} »
+          </button>
+          <button
+            type="button"
+            disabled={currentPage === totalPages}
+            onClick={() => onPageChange(totalPages)}
+            title={t('lastPage', 'Last Page')}
+            style={{
+              padding: '5px 9px',
+              borderRadius: '6px',
+              border: '1px solid #CBD5E1',
+              backgroundColor: currentPage === totalPages ? '#F1F5F9' : '#FFFFFF',
+              color: currentPage === totalPages ? '#94A3B8' : '#334155',
+              cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+              fontWeight: 700,
+              fontSize: '0.8rem',
+            }}
+          >
+            »»
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   // Tab Definitions matching the user's requirements
   const TABS = [
     { id: 'settings', label: t('gstSettingsTab', 'GST Settings'), icon: <Settings size={15} /> },
@@ -2169,8 +2412,9 @@ export const GstReportComponent: React.FC<GstReportComponentProps> = ({ initialT
             </div>
 
             {/* Data Table with CGST, SGST, IGST columns */}
-            <div style={{ overflowX: 'auto', border: '1px solid #E2E8F0', borderRadius: '10px' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
+            <div style={{ border: '1px solid #E2E8F0', borderRadius: '10px', overflow: 'hidden', backgroundColor: '#FFFFFF' }}>
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
                 <thead>
                   <tr style={{ backgroundColor: '#F1F5F9', borderBottom: '1px solid #CBD5E1', color: '#475569' }}>
                     <th style={{ padding: '11px 14px', fontWeight: 700 }}>{t('invoiceNo', 'Invoice #')}</th>
@@ -2194,7 +2438,7 @@ export const GstReportComponent: React.FC<GstReportComponentProps> = ({ initialT
                       </td>
                     </tr>
                   ) : (
-                    filteredInvoices.map((inv) => {
+                    paginatedSalesInvoices.map((inv) => {
                       const total = Number((inv as any).totalAmount || (inv as any).grandTotal || 0);
                       const b = getInvoiceTaxBreakdown(inv, gstConfig.businessState, gstConfig.gstin);
                       const discount = Number((inv as any).discountAmount || 0);
@@ -2281,7 +2525,9 @@ export const GstReportComponent: React.FC<GstReportComponentProps> = ({ initialT
                     <td style={{ padding: '12px 14px', textAlign: 'center' }}>-</td>
                   </tr>
                 </tfoot>
-              </table>
+                </table>
+              </div>
+              {renderPagination(salesPage, filteredInvoices.length, salesPageSize, setSalesPage, setSalesPageSize, t('invoices', 'Invoices'))}
             </div>
           </div>
         )}
@@ -2406,8 +2652,9 @@ export const GstReportComponent: React.FC<GstReportComponentProps> = ({ initialT
             </div>
 
             {/* Data Table */}
-            <div style={{ overflowX: 'auto', border: '1px solid #E2E8F0', borderRadius: '10px' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
+            <div style={{ border: '1px solid #E2E8F0', borderRadius: '10px', overflow: 'hidden', backgroundColor: '#FFFFFF' }}>
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
                 <thead>
                   <tr style={{ backgroundColor: '#F1F5F9', borderBottom: '1px solid #CBD5E1', color: '#475569' }}>
                     <th style={{ padding: '11px 14px', fontWeight: 700 }}>{t('invoiceNo', 'Invoice #')}</th>
@@ -2430,7 +2677,7 @@ export const GstReportComponent: React.FC<GstReportComponentProps> = ({ initialT
                       </td>
                     </tr>
                   ) : (
-                    filteredPurchases.map((pur) => {
+                    paginatedPurchases.map((pur) => {
                       const total = Number(pur.total || 0);
                       const b = getPurchaseTaxBreakdown(pur, gstConfig.businessState, gstConfig.gstin);
                       const subtotal = Number(pur.subtotal || total - b.totalTax);
@@ -2510,7 +2757,9 @@ export const GstReportComponent: React.FC<GstReportComponentProps> = ({ initialT
                     <td style={{ padding: '12px 14px', textAlign: 'center' }}>-</td>
                   </tr>
                 </tfoot>
-              </table>
+                </table>
+              </div>
+              {renderPagination(purchasePage, filteredPurchases.length, purchasePageSize, setPurchasePage, setPurchasePageSize, t('purchases', 'Purchases'))}
             </div>
           </div>
         )}
@@ -2642,8 +2891,9 @@ export const GstReportComponent: React.FC<GstReportComponentProps> = ({ initialT
             </div>
 
             {/* GSTR-1 Data Table */}
-            <div style={{ overflowX: 'auto', border: '1px solid #E2E8F0', borderRadius: '10px' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
+            <div style={{ border: '1px solid #E2E8F0', borderRadius: '10px', overflow: 'hidden', backgroundColor: '#FFFFFF' }}>
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
                 <thead>
                   <tr style={{ backgroundColor: '#F1F5F9', borderBottom: '1px solid #CBD5E1', color: '#475569' }}>
                     <th style={{ padding: '11px 14px', fontWeight: 700 }}>{t('invoiceNo', 'Invoice #')}</th>
@@ -2668,7 +2918,7 @@ export const GstReportComponent: React.FC<GstReportComponentProps> = ({ initialT
                       </td>
                     </tr>
                   ) : (
-                    filteredInvoices.map((inv) => {
+                    paginatedGstr1Invoices.map((inv) => {
                       const total = Number((inv as any).totalAmount || (inv as any).grandTotal || 0);
                       const b = getInvoiceTaxBreakdown(inv, gstConfig.businessState, gstConfig.gstin);
                       const subtotal = Number(inv.subtotal || total - b.totalTax);
@@ -2770,7 +3020,9 @@ export const GstReportComponent: React.FC<GstReportComponentProps> = ({ initialT
                     <td style={{ padding: '12px 14px', textAlign: 'center' }}>-</td>
                   </tr>
                 </tfoot>
-              </table>
+                </table>
+              </div>
+              {renderPagination(gstr1Page, filteredInvoices.length, gstr1PageSize, setGstr1Page, setGstr1PageSize, t('gstr1Invoices', 'GSTR-1 Records'))}
             </div>
           </div>
         )}
@@ -2895,8 +3147,9 @@ export const GstReportComponent: React.FC<GstReportComponentProps> = ({ initialT
             </div>
 
             {/* GSTR-2 Data Table */}
-            <div style={{ overflowX: 'auto', border: '1px solid #E2E8F0', borderRadius: '10px' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
+            <div style={{ border: '1px solid #E2E8F0', borderRadius: '10px', overflow: 'hidden', backgroundColor: '#FFFFFF' }}>
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
                 <thead>
                   <tr style={{ backgroundColor: '#F1F5F9', borderBottom: '1px solid #CBD5E1', color: '#475569' }}>
                     <th style={{ padding: '11px 14px', fontWeight: 700 }}>{t('invoiceNo', 'Bill / Inv #')}</th>
@@ -2922,7 +3175,7 @@ export const GstReportComponent: React.FC<GstReportComponentProps> = ({ initialT
                       </td>
                     </tr>
                   ) : (
-                    filteredPurchases.map((pur) => {
+                    paginatedGstr2Purchases.map((pur) => {
                       const total = Number(pur.total || 0);
                       const b = getPurchaseTaxBreakdown(pur, gstConfig.businessState, gstConfig.gstin);
                       const subtotal = Number(pur.subtotal || total - b.totalTax);
@@ -3027,7 +3280,9 @@ export const GstReportComponent: React.FC<GstReportComponentProps> = ({ initialT
                     <td style={{ padding: '12px 14px', textAlign: 'center' }}>-</td>
                   </tr>
                 </tfoot>
-              </table>
+                </table>
+              </div>
+              {renderPagination(gstr2Page, filteredPurchases.length, gstr2PageSize, setGstr2Page, setGstr2PageSize, t('gstr2Purchases', 'GSTR-2 Records'))}
             </div>
           </div>
         )}
@@ -3370,8 +3625,9 @@ export const GstReportComponent: React.FC<GstReportComponentProps> = ({ initialT
             </div>
 
             {/* Table */}
-            <div style={{ overflowX: 'auto', border: '1px solid #E2E8F0', borderRadius: '10px' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
+            <div style={{ border: '1px solid #E2E8F0', borderRadius: '10px', overflow: 'hidden', backgroundColor: '#FFFFFF' }}>
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
                 <thead>
                   <tr style={{ backgroundColor: '#F1F5F9', borderBottom: '1px solid #CBD5E1', color: '#475569' }}>
                     <th style={{ padding: '11px 14px', fontWeight: 700 }}>{t('hsnSac', 'HSN / SAC')}</th>
@@ -3393,7 +3649,7 @@ export const GstReportComponent: React.FC<GstReportComponentProps> = ({ initialT
                       </td>
                     </tr>
                   ) : (
-                    hsnSummaryData.map((row) => (
+                    paginatedHsnData.map((row) => (
                       <tr key={row.code} style={{ borderBottom: '1px solid #F1F5F9' }}>
                         <td style={{ padding: '11px 14px', fontWeight: 700, color: '#1E293B' }}>{row.code}</td>
                         <td style={{ padding: '11px 14px', color: '#475569' }}>{row.desc}</td>
@@ -3447,7 +3703,9 @@ export const GstReportComponent: React.FC<GstReportComponentProps> = ({ initialT
                     </td>
                   </tr>
                 </tfoot>
-              </table>
+                </table>
+              </div>
+              {renderPagination(hsnPage, hsnSummaryData.length, hsnPageSize, setHsnPage, setHsnPageSize, t('hsnEntries', 'HSN Entries'))}
             </div>
           </div>
         )}

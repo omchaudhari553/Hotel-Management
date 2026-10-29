@@ -45,7 +45,7 @@ import {
   ChevronRight,
   Calendar,
 } from 'lucide-react-native';
-import { printCustomerBill80mm } from '../../utils/thermalPrinter';
+import { printCustomerBill, PrintFormat } from '../../utils/thermalPrinter';
 
 export const PaymentsScreen: React.FC<{ navigation?: any }> = ({ navigation }) => {
   const {
@@ -66,6 +66,7 @@ export const PaymentsScreen: React.FC<{ navigation?: any }> = ({ navigation }) =
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
   const [selectedPaymentDetail, setSelectedPaymentDetail] = useState<PaymentRecord | null>(null);
+  const [paymentPrintFormat, setPaymentPrintFormat] = useState<PrintFormat>('80mm');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [dateFilter, setDateFilter] = useState<'ALL' | 'TODAY' | 'WEEK'>('ALL');
   const itemsPerPage = 8;
@@ -462,10 +463,75 @@ export const PaymentsScreen: React.FC<{ navigation?: any }> = ({ navigation }) =
                   </View>
                 ) : null}
 
+                {/* Print Format Selector (80mm, 58mm, A4) */}
+                <View style={{ marginHorizontal: 16, marginTop: 12, marginBottom: 8 }}>
+                  <Text style={{ fontSize: 11.5, fontWeight: '700', color: '#64748B', marginBottom: 6 }}>
+                    {language === 'mr' ? 'प्रिंट आकार निवडा (Format):' : language === 'hi' ? 'प्रिंट साइज़ चुनें (Format):' : 'Select Print Size:'}
+                  </Text>
+                  <View style={{ flexDirection: 'row', gap: 6 }}>
+                    <TouchableOpacity
+                      style={{
+                        flex: 1,
+                        paddingVertical: 7,
+                        borderRadius: 8,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: paymentPrintFormat === '80mm' ? '#FFF7ED' : '#F8FAFC',
+                        borderWidth: 1.5,
+                        borderColor: paymentPrintFormat === '80mm' ? '#EA580C' : '#CBD5E1',
+                      }}
+                      onPress={() => setPaymentPrintFormat('80mm')}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={{ fontSize: 11, fontWeight: '800', color: paymentPrintFormat === '80mm' ? '#EA580C' : '#64748B' }}>
+                        🧾 80mm POS
+                      </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={{
+                        flex: 1,
+                        paddingVertical: 7,
+                        borderRadius: 8,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: paymentPrintFormat === '58mm' ? '#FFF7ED' : '#F8FAFC',
+                        borderWidth: 1.5,
+                        borderColor: paymentPrintFormat === '58mm' ? '#EA580C' : '#CBD5E1',
+                      }}
+                      onPress={() => setPaymentPrintFormat('58mm')}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={{ fontSize: 11, fontWeight: '800', color: paymentPrintFormat === '58mm' ? '#EA580C' : '#64748B' }}>
+                        🧾 58mm Mini
+                      </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={{
+                        flex: 1,
+                        paddingVertical: 7,
+                        borderRadius: 8,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: paymentPrintFormat === 'a4' ? '#FFF7ED' : '#F8FAFC',
+                        borderWidth: 1.5,
+                        borderColor: paymentPrintFormat === 'a4' ? '#EA580C' : '#CBD5E1',
+                      }}
+                      onPress={() => setPaymentPrintFormat('a4')}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={{ fontSize: 11, fontWeight: '800', color: paymentPrintFormat === 'a4' ? '#EA580C' : '#64748B' }}>
+                        📄 A4 Invoice
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
                 {/* Action buttons */}
                 <View style={styles.receiptActionsRow}>
                   <TouchableOpacity
-                    style={[styles.receiptPrintBtn, { backgroundColor: '#1E40AF' }]}
+                    style={[styles.receiptPrintBtn, { backgroundColor: '#EA580C' }]}
                     onPress={() => {
                       if (!selectedPaymentDetail) return;
                       const tot = selectedPaymentDetail.amount || 0;
@@ -475,7 +541,8 @@ export const PaymentsScreen: React.FC<{ navigation?: any }> = ({ navigation }) =
                       const parts = rawSummary.split(',').filter(Boolean);
                       const eachPrice = Math.round(sub / Math.max(1, parts.length));
 
-                      printCustomerBill80mm({
+                      printCustomerBill({
+                        language,
                         invoiceNumber: selectedPaymentDetail.billId,
                         hotelName: activeBranch?.name || 'Royal Palace Hotel',
                         hotelAddress: activeBranch?.address || 'Shop No. 12, Shree Complex, Pune - 411028',
@@ -490,19 +557,22 @@ export const PaymentsScreen: React.FC<{ navigation?: any }> = ({ navigation }) =
                           name: name.trim(),
                           quantity: 1,
                           price: eachPrice,
+                          amount: eachPrice,
                         })),
                         subtotal: sub,
                         cgst: taxHalf,
                         sgst: taxHalf,
                         discount: 0,
                         total: tot,
-                        footerNote: 'Thank you for dining at Royal Palace Hotel!',
-                      });
+                        footerNote: 'Thank you for dining at Royal Palace Hotel! Visit Again.',
+                      }, paymentPrintFormat);
                     }}
                     activeOpacity={0.8}
                   >
                     <Printer size={16} color="#FFFFFF" />
-                    <Text style={[styles.receiptPrintText, { color: '#FFFFFF' }]}>{t('print', 'Print Bill')}</Text>
+                    <Text style={[styles.receiptPrintText, { color: '#FFFFFF' }]}>
+                      {`${t('print', 'Print Bill')} (${paymentPrintFormat.toUpperCase()})`}
+                    </Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity

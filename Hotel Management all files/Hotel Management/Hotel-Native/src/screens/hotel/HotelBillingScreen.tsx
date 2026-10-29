@@ -21,7 +21,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppNavbar } from '../../components/AppNavbar';
 import { useLanguage } from '../../context/LanguageContext';
 import { useBranch } from '../../context/BranchContext';
-import { printCustomerBill80mm } from '../../utils/thermalPrinter';
+import {
+  printCustomerBill,
+  printCustomerBill80mm,
+  printCustomerBill58mm,
+  printCustomerBillA4,
+  PrintFormat,
+  BillPrintData,
+} from '../../utils/thermalPrinter';
 import { shareTextToWhatsApp } from '../../utils/reportExporter';
 import { notificationManager } from '../../utils/notificationManager';
 import {
@@ -133,6 +140,11 @@ export const HotelBillingScreen: React.FC<{ route?: any; navigation?: any }> = (
   const [quickTableName, setQuickTableName] = useState<string>('Table 01');
   const [quickGuestName, setQuickGuestName] = useState<string>('Walk-in Guest');
 
+  // Print Format & Modal State (80mm, 58mm, A4)
+  const [printFormatModalVisible, setPrintFormatModalVisible] = useState<boolean>(false);
+  const [selectedPrintFormat, setSelectedPrintFormat] = useState<PrintFormat>('80mm');
+  const [isPrinting, setIsPrinting] = useState<boolean>(false);
+
   // Track if we already handled incoming route params so they don't overwrite manual clicks
   const handledParamKeyRef = useRef<string>('');
 
@@ -238,7 +250,10 @@ export const HotelBillingScreen: React.FC<{ route?: any; navigation?: any }> = (
 
     if (nextQty <= 0) {
       if (updated.length === 1) {
-        Alert.alert('किमान १ पदार्थ', 'बिलामध्ये किमान १ पदार्थ असणे आवश्यक आहे.');
+        Alert.alert(
+          language === 'mr' ? 'किमान १ पदार्थ' : language === 'hi' ? 'कम से कम १ वस्तु' : 'Minimum 1 Item',
+          language === 'mr' ? 'बिलामध्ये किमान १ पदार्थ असणे आवश्यक आहे.' : language === 'hi' ? 'बिल में कम से कम १ वस्तु होनी चाहिए।' : 'At least 1 item is required in the bill.'
+        );
         return;
       }
       updated.splice(index, 1);
@@ -315,7 +330,10 @@ export const HotelBillingScreen: React.FC<{ route?: any; navigation?: any }> = (
       // Pop up immediately!
       setShowSuccessModal(true);
     } catch (err) {
-      Alert.alert('त्रुटी', 'पेमेंट पूर्ण करताना त्रुटी आली.');
+      Alert.alert(
+        language === 'mr' ? 'त्रुटी' : language === 'hi' ? 'त्रुटि' : 'Error',
+        language === 'mr' ? 'पेमेंट पूर्ण करताना त्रुटी आली.' : language === 'hi' ? 'भुगतान पूरा करते समय त्रुटि आई।' : 'Failed to finalize payment.'
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -333,6 +351,68 @@ export const HotelBillingScreen: React.FC<{ route?: any; navigation?: any }> = (
       } catch (e2) {
         console.warn('Navigation to Payments error:', e2);
       }
+    }
+  };
+
+  // Construct Bill Print Data payload
+  const getBillPrintPayload = (overrideInv?: string): BillPrintData => {
+    const invNumber = overrideInv || generatedInvoiceNumber || finalPaidOrder?.invoiceNumber || '#INV-101';
+    const table = finalPaidOrder?.tableNumber || selectedOrder?.tableNumber || 'Table';
+    const items = (finalPaidOrder?.items || orderItemsList || []).map((dish) => ({
+      name: dish.name,
+      quantity: dish.quantity,
+      price: dish.price,
+      amount: dish.quantity * dish.price,
+    }));
+    const subtotal = Number(finalPaidOrder?.subtotal || calculatedSubtotal || 0);
+    const cgst = finalPaidOrder?.cgst || calculatedCGST || '0.00';
+    const sgst = finalPaidOrder?.sgst || calculatedSGST || '0.00';
+    const discount = Number(finalPaidOrder?.discountAmount || rawDiscount || 0);
+    const total = Number(finalPaidOrder?.total || calculatedGrandTotal || 0);
+
+    return {
+      language,
+      invoiceNumber: invNumber,
+      hotelName: activeBranch?.name || 'Hotel Management',
+      hotelAddress: activeBranch?.address || 'Shop No. 12, Shree Complex, Pune - 411028',
+      phone: activeBranch?.phone || '+91 98765 43210',
+      gstin: '27AAKCA1234F1Z5',
+      fssai: '11521034000123',
+      tableName: table,
+      customerName: finalPaidOrder?.customer || selectedOrder?.customer || 'Walk-in Guest',
+      date: finalPaidOrder?.date || new Date().toLocaleDateString('en-IN'),
+      time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+      paymentMode: finalPaidOrder?.paymentMode || paymentMode,
+      items,
+      subtotal,
+      cgst,
+      sgst,
+      discount,
+      total,
+      footerNote:
+        language === 'mr'
+          ? 'भेट दिल्याबद्दल धन्यवाद! पुन्हा या.'
+          : language === 'hi'
+          ? 'पधारने के लिए धन्यवाद! फिर आएं।'
+          : 'Thank you for dining with us! Visit again.',
+    };
+  };
+
+  const handlePrintWithFormat = async (format: PrintFormat = selectedPrintFormat) => {
+    try {
+      setIsPrinting(true);
+      setSelectedPrintFormat(format);
+      const data = getBillPrintPayload();
+      await printCustomerBill(data, format);
+      setPrintFormatModalVisible(false);
+    } catch (err: any) {
+      console.error('Failed to print bill:', err);
+      Alert.alert(
+        language === 'mr' ? 'प्रिंट त्रुटी' : language === 'hi' ? 'प्रिंट त्रुटि' : 'Print Error',
+        language === 'mr' ? 'बिल प्रिंट करताना त्रुटी आली. कृपया पुन्हा प्रयत्न करा.' : 'Failed to trigger print.'
+      );
+    } finally {
+      setIsPrinting(false);
     }
   };
 
@@ -996,48 +1076,74 @@ export const HotelBillingScreen: React.FC<{ route?: any; navigation?: any }> = (
             </Text>
           </View>
 
-          {/* Step 3 Action Buttons (Compact side-by-side row per user request) */}
+          {/* Format Selector Bar: 80mm, 58mm, A4 */}
+          <View style={styles.formatSelectorBox}>
+            <View style={styles.formatSelectorHeaderRow}>
+              <Text style={styles.formatSelectorHeading}>
+                🖨️ {language === 'mr' ? 'प्रिंट आकार निवडा:' : language === 'hi' ? 'प्रिंट साइज़ चुनें:' : 'Select Print Size:'}
+              </Text>
+              <View style={styles.activeFormatBadge}>
+                <Text style={styles.activeFormatBadgeText}>
+                  {selectedPrintFormat === '80mm' ? '80mm (3")' : selectedPrintFormat === '58mm' ? '58mm (2")' : 'A4 GST'}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.formatSelectorRow}>
+              <TouchableOpacity
+                style={[styles.formatChip, selectedPrintFormat === '80mm' && styles.formatChipActive]}
+                onPress={() => setSelectedPrintFormat('80mm')}
+                activeOpacity={0.8}
+              >
+                <Text style={[styles.formatChipText, selectedPrintFormat === '80mm' && styles.formatChipTextActive]}>
+                  🧾 80mm POS
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.formatChip, selectedPrintFormat === '58mm' && styles.formatChipActive]}
+                onPress={() => setSelectedPrintFormat('58mm')}
+                activeOpacity={0.8}
+              >
+                <Text style={[styles.formatChipText, selectedPrintFormat === '58mm' && styles.formatChipTextActive]}>
+                  🧾 58mm Mini
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.formatChip, selectedPrintFormat === 'a4' && styles.formatChipActive]}
+                onPress={() => setSelectedPrintFormat('a4')}
+                activeOpacity={0.8}
+              >
+                <Text style={[styles.formatChipText, selectedPrintFormat === 'a4' && styles.formatChipTextActive]}>
+                  📄 A4 Invoice
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Step 3 Action Buttons */}
           <View style={styles.step3Actions}>
             <TouchableOpacity
-              style={styles.printReceiptBtn}
-              onPress={() => {
-                const invNumber = generatedInvoiceNumber || finalPaidOrder?.invoiceNumber || '#INV-101';
-                const table = finalPaidOrder?.tableNumber || selectedOrder?.tableNumber || 'Table';
-                const items = (finalPaidOrder?.items || orderItemsList || []).map((dish) => ({
-                  name: dish.name,
-                  quantity: dish.quantity,
-                  price: dish.price,
-                }));
-                const subtotal = Number(finalPaidOrder?.subtotal || calculatedSubtotal || 0);
-                const cgst = finalPaidOrder?.cgst || calculatedCGST || '0.00';
-                const sgst = finalPaidOrder?.sgst || calculatedSGST || '0.00';
-                const discount = Number(finalPaidOrder?.discountAmount || rawDiscount || 0);
-                const total = Number(finalPaidOrder?.total || calculatedGrandTotal || 0);
-
-                printCustomerBill80mm({
-                  invoiceNumber: invNumber,
-                  hotelName: activeBranch?.name || 'Royal Palace Hotel',
-                  hotelAddress: activeBranch?.address || 'Shop No. 12, Shree Complex, Pune - 411028',
-                  gstin: '27AAKCA1234F1Z5',
-                  fssai: '11521034000123',
-                  tableName: table,
-                  customerName: finalPaidOrder?.customer || selectedOrder?.customer || 'Walk-in Guest',
-                  date: finalPaidOrder?.date || new Date().toLocaleDateString('en-IN'),
-                  time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
-                  paymentMode: finalPaidOrder?.paymentMode || paymentMode,
-                  items,
-                  subtotal,
-                  cgst,
-                  sgst,
-                  discount,
-                  total,
-                  footerNote: 'Thank you for dining with Royal Palace Hotel!',
-                });
-              }}
+              style={[styles.printReceiptBtn, isPrinting && { opacity: 0.7 }]}
+              onPress={() => handlePrintWithFormat(selectedPrintFormat)}
+              disabled={isPrinting}
               activeOpacity={0.85}
             >
-              <Printer size={15} color="#FFFFFF" />
-              <Text style={styles.printReceiptText}>{t('print80mmBill', 'Print')}</Text>
+              <Printer size={16} color="#FFFFFF" />
+              <Text style={styles.printReceiptText}>
+                {isPrinting
+                  ? (language === 'mr' ? 'प्रिंट...' : language === 'hi' ? 'प्रिंट...' : 'Printing...')
+                  : `${t('print', 'Print')} (${selectedPrintFormat.toUpperCase()})`}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.pickFormatBtn}
+              onPress={() => setPrintFormatModalVisible(true)}
+              activeOpacity={0.85}
+            >
+              <FileText size={14} color="#9A3412" />
+              <Text style={styles.pickFormatText}>
+                {language === 'mr' ? 'आकार' : language === 'hi' ? 'साइज़' : 'Sizes'}
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -1217,48 +1323,76 @@ export const HotelBillingScreen: React.FC<{ route?: any; navigation?: any }> = (
               </View>
             </View>
 
-            <Text style={styles.successTitle}>{t('billPaymentSuccessful', 'बिल व पेमेंट यशस्वी!')}</Text>
+            <Text style={styles.successTitle}>
+              {language === 'mr' ? 'बिल व पेमेंट यशस्वी!' : language === 'hi' ? 'बिल व भुगतान सफल!' : 'Bill & Payment Successful!'}
+            </Text>
             <Text style={styles.successSub}>
-              {t('billCompletedRecordedInPayments', 'Bill Completed & Recorded in Payments')}
+              {language === 'mr'
+                ? 'बिल पूर्ण झाले असून पेमेंट नोंदवले गेले आहे'
+                : language === 'hi'
+                ? 'बिल पूरा हुआ और भुगतान दर्ज किया गया'
+                : 'Bill Completed & Recorded in Payments'}
             </Text>
 
             {/* Bill Summary Card inside Modal */}
             {successPaymentData && (
               <View style={styles.successDetailsBox}>
                 <View style={styles.successDetailRow}>
-                  <Text style={styles.successDetailKey}>{t('invoiceNumber', 'पावती क्र. (Invoice)')}</Text>
-                  <Text style={styles.successInvoiceVal}>{toDevanagari(successPaymentData.invoiceNumber)}</Text>
+                  <Text style={styles.successDetailKey}>
+                    {language === 'mr' ? 'पावती क्र.' : language === 'hi' ? 'चालान सं.' : 'Invoice No.'}
+                  </Text>
+                  <Text style={styles.successInvoiceVal}>
+                    {language === 'mr' || language === 'hi' ? toDevanagari(successPaymentData.invoiceNumber) : String(successPaymentData.invoiceNumber)}
+                  </Text>
                 </View>
 
                 <View style={styles.successDetailRow}>
-                  <Text style={styles.successDetailKey}>{t('tableCustomer', 'टेबल / ग्राहक')}</Text>
+                  <Text style={styles.successDetailKey}>
+                    {language === 'mr' ? 'टेबल / ग्राहक' : language === 'hi' ? 'टेबल / अतिथि' : 'Table / Guest'}
+                  </Text>
                   <Text style={styles.successDetailVal}>
-                    {formatTableName(successPaymentData.tableName)} • {localizeGuestName(successPaymentData.customer)}
+                    {formatTableName(successPaymentData.tableName, language)} • {localizeGuestName(successPaymentData.customer)}
                   </Text>
                 </View>
 
                 <View style={styles.successDivider} />
 
                 <View style={styles.successDetailRow}>
-                  <Text style={styles.successDetailKey}>{t('totalAmountPaid', 'भरलेली एकूण रक्कम')}</Text>
-                  <Text style={styles.successAmountVal}>₹ {toDevanagari(successPaymentData.amount.toFixed(2))}</Text>
+                  <Text style={styles.successDetailKey}>
+                    {language === 'mr' ? 'भरलेली एकूण रक्कम' : language === 'hi' ? 'कुल भुगतान राशि' : 'Total Amount Paid'}
+                  </Text>
+                  <Text style={styles.successAmountVal}>
+                    ₹ {language === 'mr' || language === 'hi' ? toDevanagari(successPaymentData.amount.toFixed(2)) : successPaymentData.amount.toFixed(2)}
+                  </Text>
                 </View>
 
                 <View style={styles.successDetailRow}>
-                  <Text style={styles.successDetailKey}>{t('paymentMethod', 'पेमेंट पद्धत')}</Text>
+                  <Text style={styles.successDetailKey}>
+                    {language === 'mr' ? 'पेमेंट पद्धत' : language === 'hi' ? 'भुगतान विधि' : 'Payment Method'}
+                  </Text>
                   <View style={styles.successModeBadge}>
                     {successPaymentData.paymentMode === 'UPI' && <QrCode size={14} color="#2563EB" />}
                     {successPaymentData.paymentMode === 'CASH' && <Banknote size={14} color="#16A34A" />}
                     {successPaymentData.paymentMode === 'CARD' && <CreditCard size={14} color="#7C3AED" />}
-                    <Text style={styles.successModeText}>{t(successPaymentData.paymentMode.toLowerCase(), successPaymentData.paymentMode)}</Text>
+                    <Text style={styles.successModeText}>
+                      {successPaymentData.paymentMode === 'UPI'
+                        ? 'UPI'
+                        : successPaymentData.paymentMode === 'CASH'
+                        ? (language === 'mr' ? 'रोख' : language === 'hi' ? 'नकद' : 'Cash')
+                        : (language === 'mr' ? 'कार्ड' : language === 'hi' ? 'कार्ड' : 'Card')}
+                    </Text>
                   </View>
                 </View>
 
                 <View style={styles.successDetailRow}>
-                  <Text style={styles.successDetailKey}>{t('timeAndStatus', 'वेळ व स्थिती')}</Text>
+                  <Text style={styles.successDetailKey}>
+                    {language === 'mr' ? 'वेळ व स्थिती' : language === 'hi' ? 'समय व स्थिति' : 'Time & Status'}
+                  </Text>
                   <View style={styles.settledGreenPill}>
                     <CheckCircle2 size={11} color="#15803D" />
-                    <Text style={styles.settledGreenText}>SETTLED ({t('completed', 'पूर्ण')})</Text>
+                    <Text style={styles.settledGreenText}>
+                      {language === 'mr' ? 'पूर्ण (SETTLED)' : language === 'hi' ? 'पूर्ण (SETTLED)' : 'SETTLED (Completed)'}
+                    </Text>
                   </View>
                 </View>
               </View>
@@ -1268,7 +1402,11 @@ export const HotelBillingScreen: React.FC<{ route?: any; navigation?: any }> = (
             <View style={styles.syncNoticeRow}>
               <View style={styles.syncNoticeDot} />
               <Text style={styles.syncNoticeText}>
-                {t('paymentAutoSyncedNotice', 'हे पेमेंट आपोआप Payments मॉड्यूलमध्ये जोडले गेले आहे!')}
+                {language === 'mr'
+                  ? 'हे पेमेंट आपोआप Payments मॉड्यूलमध्ये जोडले गेले आहे!'
+                  : language === 'hi'
+                  ? 'यह भुगतान स्वचालित रूप से Payments मॉड्यूल में जोड़ दिया गया है!'
+                  : 'This payment is automatically synced to the Payments module!'}
               </Text>
             </View>
 
@@ -1281,8 +1419,26 @@ export const HotelBillingScreen: React.FC<{ route?: any; navigation?: any }> = (
                 activeOpacity={0.85}
               >
                 <CreditCard size={18} color="#FFFFFF" />
-                <Text style={styles.goToPaymentsText}>{t('viewInPayments', 'View in Payments')}</Text>
+                <Text style={styles.goToPaymentsText}>
+                  {language === 'mr' ? 'पेमेंट्समध्ये पहा' : language === 'hi' ? 'भुगतान में देखें' : 'View in Payments'}
+                </Text>
                 <ArrowRight size={16} color="#FFFFFF" />
+              </TouchableOpacity>
+
+              {/* Direct Print Button with 80mm / 58mm / A4 Format Selection */}
+              <TouchableOpacity
+                style={styles.modalDirectPrintBtn}
+                onPress={() => setPrintFormatModalVisible(true)}
+                activeOpacity={0.85}
+              >
+                <Printer size={18} color="#FFFFFF" />
+                <Text style={styles.modalDirectPrintText}>
+                  {language === 'mr'
+                    ? '🖨️ बिल प्रिंट करा (80mm / 58mm / A4)'
+                    : language === 'hi'
+                    ? '🖨️ बिल प्रिंट करें (80mm / 58mm / A4)'
+                    : '🖨️ Print Bill (80mm / 58mm / A4)'}
+                </Text>
               </TouchableOpacity>
 
               {/* View Tax Invoice / Receipt */}
@@ -1292,7 +1448,9 @@ export const HotelBillingScreen: React.FC<{ route?: any; navigation?: any }> = (
                 activeOpacity={0.8}
               >
                 <Receipt size={16} color="#EA580C" />
-                <Text style={styles.modalViewInvoiceText}>{t('viewGstInvoicePrint', 'View GST Invoice / Print')}</Text>
+                <Text style={styles.modalViewInvoiceText}>
+                  {language === 'mr' ? 'जीएसटी बिल पहा / प्रिंट' : language === 'hi' ? 'जीएसटी बिल देखें / प्रिंट' : 'View GST Invoice / Print'}
+                </Text>
               </TouchableOpacity>
 
               {/* Back to Tables */}
@@ -1302,7 +1460,9 @@ export const HotelBillingScreen: React.FC<{ route?: any; navigation?: any }> = (
                 activeOpacity={0.7}
               >
                 <UtensilsCrossed size={14} color="#78716C" />
-                <Text style={styles.modalBackToTablesText}>{t('goToTables', 'Go to Tables')}</Text>
+                <Text style={styles.modalBackToTablesText}>
+                  {language === 'mr' ? 'टेबल्सकडे जा' : language === 'hi' ? 'टेबल्स पर जाएं' : 'Go to Tables'}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -1377,6 +1537,141 @@ export const HotelBillingScreen: React.FC<{ route?: any; navigation?: any }> = (
                 <Text style={styles.saveDishSubmitText}>{t('saveDishToMenu', 'Save Dish to Menu')}</Text>
               </TouchableOpacity>
             </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* ===================================================
+          MODAL: SELECT PRINT SIZE & FORMAT (80mm, 58mm, A4)
+      =================================================== */}
+      <Modal visible={printFormatModalVisible} animationType="fade" transparent={true}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.printSizeModalCard}>
+            <View style={styles.modalHeader}>
+              <View>
+                <Text style={styles.modalTitle}>
+                  🖨️ {language === 'mr' ? 'प्रिंट आकार निवडा' : language === 'hi' ? 'प्रिंट साइज़ चुनें' : 'Select Print Size'}
+                </Text>
+                <Text style={styles.modalSub}>
+                  {language === 'mr'
+                    ? 'आपल्या प्रिंटरनुसार योग्य आकार निवडा'
+                    : language === 'hi'
+                    ? 'अपने प्रिंटर अनुसार उपयुक्त साइज़ चुनें'
+                    : 'Choose appropriate size for your printer'}
+                </Text>
+              </View>
+              <TouchableOpacity onPress={() => setPrintFormatModalVisible(false)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <X size={20} color="#78716C" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.printOptionsContainer}>
+              {/* Option 1: 80mm Standard POS */}
+              <TouchableOpacity
+                style={[
+                  styles.printOptionItem,
+                  selectedPrintFormat === '80mm' && styles.printOptionItemActive,
+                ]}
+                onPress={() => handlePrintWithFormat('80mm')}
+                activeOpacity={0.85}
+              >
+                <View style={styles.printOptionIconWrap}>
+                  <Printer size={22} color="#EA580C" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Text style={styles.printOptionTitle}>80mm (3-Inch) Thermal POS</Text>
+                    <View style={styles.recommendedBadge}>
+                      <Text style={styles.recommendedBadgeText}>
+                        {language === 'mr' ? 'लोकप्रिय' : language === 'hi' ? 'लोकप्रिय' : 'Popular'}
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.printOptionDesc}>
+                    {language === 'mr'
+                      ? 'हॉटेल काउंटर थर्मल प्रिंटरसाठी (TVS, Epson, NGX, Posiflex)'
+                      : language === 'hi'
+                      ? 'होटल काउंटर थर्मल प्रिंटर के लिए (TVS, Epson, NGX, Posiflex)'
+                      : 'Standard hotel POS counter thermal receipt'}
+                  </Text>
+                </View>
+                <ArrowRight size={18} color="#EA580C" />
+              </TouchableOpacity>
+
+              {/* Option 2: 58mm Mini POS */}
+              <TouchableOpacity
+                style={[
+                  styles.printOptionItem,
+                  selectedPrintFormat === '58mm' && styles.printOptionItemActive,
+                ]}
+                onPress={() => handlePrintWithFormat('58mm')}
+                activeOpacity={0.85}
+              >
+                <View style={[styles.printOptionIconWrap, { backgroundColor: '#F0FDF4' }]}>
+                  <Receipt size={22} color="#16A34A" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Text style={styles.printOptionTitle}>58mm (2-Inch) Mini Bluetooth</Text>
+                    <View style={[styles.recommendedBadge, { backgroundColor: '#DCFCE7' }]}>
+                      <Text style={[styles.recommendedBadgeText, { color: '#15803D' }]}>
+                        {language === 'mr' ? 'पोर्टेबल' : language === 'hi' ? 'पोर्टेबल' : 'Portable'}
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.printOptionDesc}>
+                    {language === 'mr'
+                      ? 'हॅन्डहेल्ड वायरलेस ब्लूटूथ मिनी प्रिंटरसाठी'
+                      : language === 'hi'
+                      ? 'हैंडहेल्ड वायरलेस ब्लूटूथ मिनी प्रिंटर के लिए'
+                      : 'Compact slip for 2-inch handheld Bluetooth POS'}
+                  </Text>
+                </View>
+                <ArrowRight size={18} color="#16A34A" />
+              </TouchableOpacity>
+
+              {/* Option 3: A4 GST Tax Invoice */}
+              <TouchableOpacity
+                style={[
+                  styles.printOptionItem,
+                  selectedPrintFormat === 'a4' && styles.printOptionItemActive,
+                ]}
+                onPress={() => handlePrintWithFormat('a4')}
+                activeOpacity={0.85}
+              >
+                <View style={[styles.printOptionIconWrap, { backgroundColor: '#EFF6FF' }]}>
+                  <FileText size={22} color="#2563EB" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Text style={styles.printOptionTitle}>A4 Size (Full GST Tax Invoice)</Text>
+                    <View style={[styles.recommendedBadge, { backgroundColor: '#DBEAFE' }]}>
+                      <Text style={[styles.recommendedBadgeText, { color: '#1E40AF' }]}>
+                        {language === 'mr' ? 'अधिकृत' : language === 'hi' ? 'आधिकारिक' : 'Official'}
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.printOptionDesc}>
+                    {language === 'mr'
+                      ? 'पूर्ण पान जीएसटी टॅक्स इनव्हॉइस (HSN, CGST, SGST, बँक तपशील)'
+                      : language === 'hi'
+                      ? 'फुल पेज जीएसटी टैक्स इनवॉइस (HSN, CGST, SGST, बैंक विवरण)'
+                      : 'Full-page GST Tax Invoice with HSN breakdown & bank details'}
+                  </Text>
+                </View>
+                <ArrowRight size={18} color="#2563EB" />
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity
+              style={styles.printCloseModalBtn}
+              onPress={() => setPrintFormatModalVisible(false)}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.printCloseModalText}>
+                {language === 'mr' ? 'बंद करा (Cancel)' : language === 'hi' ? 'रद्द करें (Cancel)' : 'Cancel'}
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -2648,5 +2943,178 @@ const styles = StyleSheet.create({
     fontSize: 11.5,
     fontWeight: '700',
     color: '#64748B',
+  },
+  // Print Format & Size Styles
+  formatSelectorBox: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    padding: 10,
+    marginTop: 10,
+    marginBottom: 6,
+  },
+  formatSelectorHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  formatSelectorHeading: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#475569',
+  },
+  activeFormatBadge: {
+    backgroundColor: '#FFF7ED',
+    borderWidth: 1,
+    borderColor: '#FDBA74',
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  activeFormatBadgeText: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#EA580C',
+  },
+  formatSelectorRow: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  formatChip: {
+    flex: 1,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    borderRadius: 8,
+    paddingVertical: 7,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  formatChipActive: {
+    backgroundColor: '#FFF7ED',
+    borderColor: '#EA580C',
+    borderWidth: 1.5,
+  },
+  formatChipText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  formatChipTextActive: {
+    color: '#EA580C',
+    fontWeight: '800',
+  },
+  pickFormatBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFF7ED',
+    borderWidth: 1,
+    borderColor: '#FDBA74',
+    paddingVertical: 9,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    gap: 3,
+  },
+  pickFormatText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#9A3412',
+  },
+  modalDirectPrintBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#EA580C',
+    borderRadius: 12,
+    paddingVertical: 13,
+    shadowColor: '#EA580C',
+    shadowOpacity: 0.35,
+    shadowOffset: { width: 0, height: 3 },
+    shadowRadius: 6,
+    elevation: 4,
+    marginTop: 6,
+  },
+  modalDirectPrintText: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  printSizeModalCard: {
+    width: '94%',
+    maxWidth: 440,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowOffset: { width: 0, height: 8 },
+    shadowRadius: 16,
+    elevation: 10,
+  },
+  printOptionsContainer: {
+    gap: 10,
+    marginVertical: 14,
+  },
+  printOptionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 12,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    gap: 12,
+  },
+  printOptionItemActive: {
+    borderColor: '#EA580C',
+    backgroundColor: '#FFF7ED',
+  },
+  printOptionIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    backgroundColor: '#FFF7ED',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  printOptionTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#1E293B',
+  },
+  printOptionDesc: {
+    fontSize: 11,
+    fontWeight: '500',
+    color: '#64748B',
+    marginTop: 2,
+    lineHeight: 15,
+  },
+  recommendedBadge: {
+    backgroundColor: '#FFEDD5',
+    paddingHorizontal: 6,
+    paddingVertical: 1.5,
+    borderRadius: 4,
+  },
+  recommendedBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#EA580C',
+  },
+  printCloseModalBtn: {
+    paddingVertical: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F1F5F9',
+    borderRadius: 10,
+    marginTop: 4,
+  },
+  printCloseModalText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#475569',
   },
 });

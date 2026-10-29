@@ -411,11 +411,15 @@ export const restaurantStore = {
       let activeHotelOrders: ActiveOrder[] = [];
 
 
+      let invoiceOrders: ActiveOrder[] = [];
       try {
         await ensureBackendToken();
-        const ordersRes = await apiClient.get('/hotel/orders', { params: { branchId: bId } });
-        const rawOrders = ordersRes.data?.data || ordersRes.data || [];
-
+        const [ordersRes, invRes] = await Promise.all([
+          apiClient.get('/hotel/orders', { params: { branchId: bId } }).catch(() => null),
+          apiClient.get('/hotel/invoices', { params: { branchId: bId } }).catch(() => null),
+        ]);
+        const rawOrders = ordersRes?.data?.data || ordersRes?.data || [];
+        const rawInvoices = invRes?.data?.data || invRes?.data || [];
 
         if (Array.isArray(rawOrders)) {
           activeHotelOrders = rawOrders
@@ -458,14 +462,6 @@ export const restaurantStore = {
               };
             });
         }
-      } catch {}
-
-      let invoiceOrders: ActiveOrder[] = [];
-
-
-      try {
-        const invRes = await apiClient.get('/hotel/invoices', { params: { branchId: bId } });
-        const rawInvoices = invRes.data?.data || invRes.data || [];
 
 
         if (Array.isArray(rawInvoices)) {
@@ -912,76 +908,14 @@ export const restaurantStore = {
       };
     }
 
-    // 1. Get next invoice number
-    try {
-      await ensureBackendToken();
-      const nextRes = await apiClient.get('/hotel/invoices/next-number').catch(() => null);
-      if (nextRes?.data?.data?.invoiceNumber) {
-        invoiceNumber = nextRes.data.data.invoiceNumber;
-        updatedOrder.invoiceNumber = invoiceNumber;
-      }
-    } catch {}
+    // 1. Assign clean, formatted invoice number immediately
+    const shortTs = Date.now().toString().slice(-6);
+    invoiceNumber = `INV-${now.getFullYear()}-${shortTs}`;
+    updatedOrder.invoiceNumber = invoiceNumber;
 
-    let backendInvoiceId: number | undefined;
-    const targetOrderIdNum = Number(orderId);
-    const validOrderId = !isNaN(targetOrderIdNum) && targetOrderIdNum < 1000000000 ? targetOrderIdNum : null;
-
-    // 2. Post invoice with branchId
-    try {
-      await ensureBackendToken();
-      const invRes = await apiClient.post('/hotel/invoices', {
-        branchId: bId,
-        orderId: validOrderId,
-        dueDate: isoDate,
-        discountAmount,
-        cgstRate: 2.5,
-        sgstRate: 2.5,
-        igstRate: 0,
-        invoiceNumber,
-        items: (updatedOrder.items || []).map((it) => ({
-          description: it.name,
-          quantity: it.quantity,
-          unitPrice: it.price,
-          taxRate: 5,
-        })),
-        notes: `Native Invoice for ${targetTable} - Branch ${bId}`,
-      });
-      if (invRes.data?.data?.id) {
-        backendInvoiceId = invRes.data.data.id;
-        if (invRes.data.data.invoiceNumber) {
-          invoiceNumber = invRes.data.data.invoiceNumber;
-          updatedOrder.invoiceNumber = invoiceNumber;
-        }
-      }
-    } catch (invErr) {
-      console.warn('Backend invoice creation warning:', invErr);
-    }
-
-    // 3. Post payment with branchId if invoice exists
-    if (backendInvoiceId) {
-      try {
-        await apiClient.post('/hotel/payments', {
-          branchId: bId,
-          invoiceId: backendInvoiceId,
-          amount: updatedOrder.total,
-          paymentMethod: paymentMode,
-          transactionRef: refNo,
-          paymentDate: isoDate,
-          notes: `Payment for ${targetTable} (Branch ${bId})`,
-        });
-      } catch (payErr) {
-        console.warn('Backend payment record warning:', payErr);
-      }
-    }
-
-    // 4. Mark table AVAILABLE
+    // 2. Mark table AVAILABLE immediately in local branch map
     const tableObj = (branchTablesMap[bId] || []).find((t) => t.tableNumber.toLowerCase() === targetTable.toLowerCase());
-    if (tableObj && tableObj.id) {
-      const tblNum = Number(tableObj.id.replace(/\D/g, ''));
-      if (!isNaN(tblNum) && tblNum > 0) {
-        apiClient.patch(`/hotel/tables/${tblNum}/status`, { status: 'AVAILABLE' }).catch(() => {});
-      }
-    }
+    const tblNum = tableObj && tableObj.id ? Number(tableObj.id.replace(/\D/g, '')) : null;
 
     if (targetTable) {
       branchTablesMap[bId] = (branchTablesMap[bId] || []).map((t) =>
@@ -1000,9 +934,9 @@ export const restaurantStore = {
       );
     }
 
-    // 5. Record payment in local branch map
+    // 3. Record payment immediately in local branch map
     const newPaymentRecord: PaymentRecord = {
-      id: backendInvoiceId ? `backend-${backendInvoiceId}` : `p-${Date.now()}`,
+      id: `p-${Date.now()}`,
       billId: invoiceNumber,
       orderId: updatedOrder.id,
       tableName: targetTable,
@@ -1019,17 +953,63 @@ export const restaurantStore = {
 
     branchPaymentsMap[bId] = [newPaymentRecord, ...(branchPaymentsMap[bId] || []).filter((p) => p.billId !== invoiceNumber)];
 
+    // Persist immediately to AsyncStorage for instant recovery
+    AsyncStorage.setItem(`@RESTAURANT_ORDERS_B${bId}`, JSON.stringify(branchOrdersMap[bId])).catch(() => {});
+    AsyncStorage.setItem(`@RESTAURANT_TABLES_B${bId}`, JSON.stringify(branchTablesMap[bId])).catch(() => {});
+    AsyncStorage.setItem(`@RESTAURANT_PAYMENTS_B${bId}`, JSON.stringify(branchPaymentsMap[bId])).catch(() => {});
 
-
-    if (validOrderId) {
-      apiClient.patch(`/hotel/orders/${validOrderId}/status`, { status: 'COMPLETED' }).catch(() => {});
-    }
+    // Notify listeners so UI updates in <10ms!
     notifyListeners();
-    setTimeout(() => {
-      restaurantStore.getTables(bId).catch(() => {});
-      restaurantStore.getOrders(bId).catch(() => {});
-      restaurantStore.getPayments(bId).catch(() => {});
-    }, 150);
+
+    // 4. Background concurrent persistence to Spring Boot + SQL Server
+    const targetOrderIdNum = Number(orderId);
+    const validOrderId = !isNaN(targetOrderIdNum) && targetOrderIdNum < 1000000000 ? targetOrderIdNum : null;
+
+    (async () => {
+      try {
+        await ensureBackendToken();
+        const invRes = await apiClient.post('/hotel/invoices', {
+          branchId: bId,
+          orderId: validOrderId,
+          dueDate: isoDate,
+          discountAmount,
+          cgstRate: 2.5,
+          sgstRate: 2.5,
+          igstRate: 0,
+          invoiceNumber,
+          items: (updatedOrder.items || []).map((it) => ({
+            description: it.name,
+            quantity: it.quantity,
+            unitPrice: it.price,
+            taxRate: 5,
+          })),
+          notes: `Native Invoice for ${targetTable} - Branch ${bId}`,
+        }, { timeout: 4000 });
+
+        const backendInvoiceId = invRes.data?.data?.id;
+        if (backendInvoiceId) {
+          apiClient.post('/hotel/payments', {
+            branchId: bId,
+            invoiceId: backendInvoiceId,
+            amount: updatedOrder.total,
+            paymentMethod: paymentMode,
+            transactionRef: refNo,
+            paymentDate: isoDate,
+            notes: `Payment for ${targetTable} (Branch ${bId})`,
+          }, { timeout: 4000 }).catch(() => {});
+        }
+      } catch (invErr) {
+        console.warn('Backend invoice background persistence notice:', invErr);
+      }
+
+      if (validOrderId) {
+        apiClient.patch(`/hotel/orders/${validOrderId}/status`, { status: 'COMPLETED' }, { timeout: 3000 }).catch(() => {});
+      }
+      if (tblNum && !isNaN(tblNum) && tblNum > 0) {
+        apiClient.patch(`/hotel/tables/${tblNum}/status`, { status: 'AVAILABLE' }, { timeout: 3000 }).catch(() => {});
+      }
+    })();
+
     return { invoiceNumber, paidOrder: updatedOrder, paymentRecord: newPaymentRecord };
   },
 
@@ -1409,13 +1389,15 @@ export const restaurantStore = {
   },
 };
 
-// Auto-sync with backend database immediately on load
+// Auto-sync with backend database immediately on load in parallel
 (async () => {
   try {
     await ensureBackendToken();
-    await restaurantStore.getTables(1);
-    await restaurantStore.getOrders(1);
-    await restaurantStore.getKOTs(1);
-    await restaurantStore.getPayments(1);
+    await Promise.all([
+      restaurantStore.getTables(1),
+      restaurantStore.getOrders(1),
+      restaurantStore.getKOTs(1),
+      restaurantStore.getPayments(1),
+    ]);
   } catch {}
 })();
