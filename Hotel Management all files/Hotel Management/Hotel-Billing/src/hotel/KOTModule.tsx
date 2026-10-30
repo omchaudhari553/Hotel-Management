@@ -1,7 +1,9 @@
+import { PrintInvoiceModal } from "../components/PrintInvoiceModal";
+import { UniversalInvoicePrintData } from "../types/printing";
 import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Receipt,
+  ReceiptIndianRupee,
   CalendarDays,
   ChevronDown,
   ChevronLeft,
@@ -36,6 +38,8 @@ import { useLanguage } from "../context/LanguageContext";
 import { formatTableNumber } from "./Tables";
 
 export const KOTModule = () => {
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+  const [printModalData, setPrintModalData] = useState<UniversalInvoicePrintData | null>(null);
   const navigate = useNavigate();
   const { t, translateStatus, formatDate } = useLanguage();
   const { selectedBranch, selectedBranchId } = useBranch();
@@ -544,7 +548,7 @@ export const KOTModule = () => {
     return {
       label: t("proceedToBilling", "Proceed to Billing"),
       nextStatus: "BILLING",
-      icon: Receipt,
+      icon: ReceiptIndianRupee,
       bg: "#8B3E16",
       isLink: true,
     };
@@ -756,11 +760,69 @@ export const KOTModule = () => {
   };
 
   // =================================================
+
+  const mapKotToUniversalPrintData = (kot: KotItem, isCustomerBill: boolean = false, existingInvoice?: any): UniversalInvoicePrintData => {
+    const billingInfo = getKotBillingInfo(kot);
+    const inv = existingInvoice || billingInfo.invoice;
+    const totals = calculateKotTotals(kot);
+
+    const hotelName = selectedBranch?.name || localStorage.getItem("billing_hotel_name") || "AJALKAR HOTEL & RESTAURANT";
+    const hotelAddress = selectedBranch?.address || localStorage.getItem("billing_address") || "Hotel Premises, Pune, Maharashtra - 411004";
+    const hotelPhone = (selectedBranch as any)?.phone || localStorage.getItem("billing_phone") || "+91 98765 43210";
+    const gstin = (selectedBranch as any)?.gstin || localStorage.getItem("billing_gstin") || "27AAKCA1234F1Z5";
+
+    const invNumber = inv?.invoiceNumber || (inv?.id ? `INV-${inv.id}` : `KOT-${kot.kotNumber || kot.id}`);
+    const orderNum = kot.orderNumber || (kot.orderId ? `ORD-${kot.orderId}` : "-");
+    const tableDisplay = kot.tableName || kot.tableNumber || inv?.tableNumber || "Table";
+    const guestDisplay = kot.guestName || kot.customerName || inv?.guestName || "Walk-in Guest";
+
+    const items = (inv?.items && inv.items.length > 0) ? inv.items : (kot.items || []);
+    const subtotal = (totals as any).subtotal ?? (totals as any).itemTotal ?? inv?.itemTotal ?? 0;
+    const totalTax = (totals as any).gst ?? (totals as any).taxAmount ?? inv?.taxAmount ?? 0;
+    const grandTotal = totals.grandTotal || inv?.grandTotal || subtotal;
+
+    return {
+      invoiceNumber: invNumber,
+      invoiceDate: new Date().toISOString().split('T')[0],
+      hotelName,
+      hotelAddress,
+      hotelPhone,
+      gstin,
+      customerName: guestDisplay,
+      tableName: tableDisplay,
+      orderNumber: orderNum,
+      items: items.map((it: any, idx: number) => ({
+        id: it.id || idx,
+        name: it.itemName || it.name || it.item_name || `Item ${idx + 1}`,
+        quantity: Number(it.quantity || it.qty || 1),
+        unitPrice: Number(it.price || it.unitPrice || 0),
+        totalPrice: Number((it.quantity || 1) * (it.price || 0)),
+        notes: it.specialInstructions || it.notes,
+      })),
+      subtotal,
+      taxableAmount: subtotal,
+      cgstRate: 2.5,
+      cgstAmount: totalTax / 2,
+      sgstRate: 2.5,
+      sgstAmount: totalTax / 2,
+      totalTax,
+      grandTotal,
+      paymentMethod: inv?.paymentMethod || "CASH",
+      paymentStatus: inv?.status || (billingInfo.isPaid ? "PAID" : "UNPAID"),
+      footerMessage: isCustomerBill
+        ? "Thank you for dining with us! Please visit again."
+        : "KOT Order Ticket - Kitchen Copy",
+    };
+  };
+
   // 80MM THERMAL KOT TICKET PRINTER (0 BLANK PAGES)
   // =================================================
   const printKotTicket80mm = useCallback((kot: KotItem) => {
     if (!kot) return;
-
+    const printData = mapKotToUniversalPrintData(kot, false);
+    setPrintModalData(printData);
+    setIsPrintModalOpen(true);
+    return;
     const printWindow = window.open("", "_blank", "width=420,height=650");
     if (!printWindow) {
       dialogService.alert({
@@ -1160,7 +1222,10 @@ export const KOTModule = () => {
   // =================================================
   const printKotBill80mm = useCallback((kot: KotItem, existingInvoice?: any) => {
     if (!kot) return;
-
+    const printData = mapKotToUniversalPrintData(kot, true, existingInvoice);
+    setPrintModalData(printData);
+    setIsPrintModalOpen(true);
+    return;
     const printWindow = window.open("", "_blank", "width=450,height=700");
     if (!printWindow) {
       dialogService.alert({
@@ -1625,7 +1690,7 @@ export const KOTModule = () => {
               boxShadow: "0 2px 8px rgba(139, 62, 22, 0.25)",
             }}
           >
-            <Receipt size={25} />
+            <ReceiptIndianRupee size={25} />
           </div>
 
           <div>
@@ -2600,7 +2665,7 @@ export const KOTModule = () => {
                       }}
                       title={t("printBillThermal", "Print Bill Receipt (80mm)")}
                     >
-                      <Receipt size={15} strokeWidth={2.4} color="#059669" />
+                      <ReceiptIndianRupee size={15} strokeWidth={2.4} color="#059669" />
                     </button>
                   )}
 
@@ -2731,7 +2796,7 @@ export const KOTModule = () => {
                     justifyContent: "center",
                   }}
                 >
-                  <Receipt size={22} />
+                  <ReceiptIndianRupee size={22} />
                 </div>
                 <div>
                   <h2
@@ -3222,7 +3287,7 @@ export const KOTModule = () => {
                           }}
                         >
                           <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                            <Receipt size={18} color="#D97706" />
+                            <ReceiptIndianRupee size={18} color="#D97706" />
                             <span
                               style={{
                                 fontSize: "14px",
@@ -3633,7 +3698,7 @@ export const KOTModule = () => {
                   cursor: "pointer",
                 }}
               >
-                <Receipt size={15} strokeWidth={2.4} color="#059669" />
+                <ReceiptIndianRupee size={15} strokeWidth={2.4} color="#059669" />
                 <span>{t("printBill80mm", "Print Bill (80mm)")}</span>
               </button>
 
@@ -3712,6 +3777,11 @@ export const KOTModule = () => {
           }
         }
       `}</style>
+      <PrintInvoiceModal
+        isOpen={isPrintModalOpen}
+        onClose={() => setIsPrintModalOpen(false)}
+        invoiceData={printModalData}
+      />
     </div>
   );
 };

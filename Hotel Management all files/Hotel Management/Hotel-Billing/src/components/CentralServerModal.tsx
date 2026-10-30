@@ -83,14 +83,15 @@ export const CentralServerModal: React.FC<CentralServerModalProps> = ({
   };
 
   const handleReset = () => {
-    setCentralServerHost(DEFAULT_CENTRAL_HOST);
-    setCurrentHost(DEFAULT_CENTRAL_HOST);
-    setInputHost(DEFAULT_CENTRAL_HOST);
-    setSavedSuccessMessage(`Reset to central server IP: ${DEFAULT_CENTRAL_HOST}`);
+    const defaultHost = window.location?.hostname || DEFAULT_CENTRAL_HOST;
+    setCentralServerHost('');
+    setCurrentHost(defaultHost);
+    setInputHost(defaultHost);
+    setSavedSuccessMessage(`Reset to default host: ${defaultHost}`);
     if (onHostChanged) {
-      onHostChanged(DEFAULT_CENTRAL_HOST);
+      onHostChanged(defaultHost);
     }
-    runPingTest(DEFAULT_CENTRAL_HOST);
+    runPingTest(defaultHost);
     setTimeout(() => {
       setSavedSuccessMessage(null);
     }, 4000);
@@ -308,7 +309,7 @@ export const CentralServerModal: React.FC<CentralServerModalProps> = ({
                 type="text"
                 value={inputHost}
                 onChange={(e) => setInputHost(e.target.value)}
-                placeholder="e.g. 192.168.1.51"
+                placeholder="e.g. localhost or 10.173.104.1"
                 style={{
                   flex: 1,
                   padding: '10px 14px',
@@ -341,7 +342,7 @@ export const CentralServerModal: React.FC<CentralServerModalProps> = ({
               </button>
               <button
                 onClick={handleReset}
-                title="Reset to 192.168.1.51"
+                title="Reset to default host"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -383,7 +384,7 @@ export const CentralServerModal: React.FC<CentralServerModalProps> = ({
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
                 <span style={{ fontWeight: 700, color: '#7C3AED' }}>1.</span>
                 <span>
-                  <strong>Laptop A (Host):</strong> Houses the authoritative SQL Server database (<code>hotel_management</code>) at IP <code>192.168.1.51</code>.
+                  <strong>Laptop A (Host):</strong> Houses the authoritative SQL Server database (<code>hotel_management</code>) at IP/host <code>{window.location?.hostname || 'localhost'}</code>.
                 </span>
               </div>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
@@ -400,7 +401,7 @@ export const CentralServerModal: React.FC<CentralServerModalProps> = ({
                         fontWeight: 700,
                       }}
                     >
-                      http://192.168.1.51:5173
+                      {`http://${window.location?.hostname || 'localhost'}:5173`}
                     </code>
                   </div>
                 </span>

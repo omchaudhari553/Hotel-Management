@@ -5,6 +5,9 @@ import { authService } from "../services/authService";
 import { settingsService } from "../services/settingsService";
 import { licenceService, LicenceInfo } from "../services/licenceService";
 import { sanitizeMobileInput } from "../common/phoneUtils";
+import { webBluetoothPrinter } from "../services/webBluetoothPrinter";
+import { printService } from "../services/printService";
+import { BluetoothPrinterDevice, BluetoothState, PaperSize, PrintMethod } from "../types/printing";
 import { ReportsModule } from "../reports/ReportsModule";
 import { GstReportComponent } from "../hotel/GstReportComponent";
 import { useLanguage } from "../context/LanguageContext";
@@ -16,10 +19,12 @@ import {
 } from "../common/gstUtils";
 import {
   Activity,
+  AlertCircle,
   AlertTriangle,
   ArchiveRestore,
   ArrowLeft,
   BarChart3,
+  Bluetooth,
   Bell,
   Building2,
   CalendarDays,
@@ -40,6 +45,7 @@ import {
   Globe2,
   KeyRound,
   LayoutDashboard,
+  Loader2,
   Lock,
   Mail,
   Menu,
@@ -466,7 +472,67 @@ export default function HotelSettingsModule() {
     invoicePrefix: "INV", nextNumber: "10045", logo: true, taxDisplay: true, discountDisplay: true,
     footer: "Thank you for staying with Hotel Sunshine.", terms: "All disputes are subject to Mumbai jurisdiction.",
     signature: true,
+    printerType: (localStorage.getItem("ajalkar_default_print_method") === "bluetooth" ? "thermal_bt" : "system") as "thermal_bt" | "system",
+    paperSize: (localStorage.getItem("ajalkar_default_paper_size") as "80mm" | "58mm" | "A4") || "80mm",
+    autoThermalPrint: localStorage.getItem("ajalkar_auto_thermal_print") !== "false",
   });
+
+  const [btDevice, setBtDevice] = useState<BluetoothPrinterDevice | null>(() => webBluetoothPrinter.getConnectedPrinter());
+  const [btState, setBtState] = useState<BluetoothState>(() => webBluetoothPrinter.getState());
+  const [isConnectingBt, setIsConnectingBt] = useState(false);
+  const [isTestingBt, setIsTestingBt] = useState(false);
+  const isBtSupported = webBluetoothPrinter.isSupported();
+
+  useEffect(() => {
+    const unsub = webBluetoothPrinter.subscribe((st, dev) => {
+      setBtState(st);
+      setBtDevice(dev);
+    });
+    return () => unsub();
+  }, []);
+
+  const handleConnectBtPrinter = async () => {
+    try {
+      setIsConnectingBt(true);
+      const dev = await webBluetoothPrinter.connect();
+      setBtDevice(dev);
+      setBillingSettings(s => ({ ...s, printerType: "thermal_bt" }));
+      printService.setDefaultPrintMethod("bluetooth");
+      localStorage.setItem("ajalkar_default_print_method", "bluetooth");
+      localStorage.setItem("ajalkar_printer_type", "thermal_bt");
+      showToast(`✓ Connected to ${dev.name || "Bluetooth Printer"} successfully!`);
+    } catch (err: any) {
+      showToast(err.message || "Failed to connect to Bluetooth printer.");
+    } finally {
+      setIsConnectingBt(false);
+    }
+  };
+
+  const handleDisconnectBtPrinter = async () => {
+    try {
+      await webBluetoothPrinter.disconnect();
+      setBtDevice(null);
+      showToast("Bluetooth printer disconnected.");
+    } catch (err: any) {
+      showToast(err.message || "Failed to disconnect Bluetooth printer.");
+    }
+  };
+
+  const handleTestBtPrint = async () => {
+    try {
+      setIsTestingBt(true);
+      if (btState !== "connected" || !btDevice) {
+        showToast("Please connect a Bluetooth thermal printer first.");
+        return;
+      }
+      await webBluetoothPrinter.testPrint(billingSettings.paperSize === "58mm" ? "58mm" : "80mm");
+      showToast(`✓ Test print sent to ${btDevice.name || "Thermal Printer"}!`);
+    } catch (err: any) {
+      showToast(err.message || "Failed to send test print.");
+    } finally {
+      setIsTestingBt(false);
+    }
+  };
 
   const [reservationSettings, setReservationSettings] = useState({
     autoConfirmation: true, overbooking: false, depositRequired: true, noShowCharge: true, noShowPercent: "50",
@@ -1822,8 +1888,155 @@ export default function HotelSettingsModule() {
             <div style={{ display: "flex", justifyContent: "space-between" }}><b>Total</b><b>₹10,030</b></div>
             <div style={{ marginTop: 22, fontSize: 10, color: COLORS.muted }}>{billingSettings.footer}</div>
           </div>
-          <div style={{ marginTop: 14, display: "flex", gap: 8 }}><Button variant="secondary" size="sm" icon={<Eye size={14} />} onClick={() => showToast("Full invoice preview opened.")}>Preview Full</Button><Button variant="secondary" size="sm" icon={<Printer size={14} />} onClick={() => showToast("Invoice print job sent.")}>Print</Button></div>
+            <Button variant="secondary" size="sm" icon={<Printer size={14} />} onClick={async () => {
+              if (billingSettings.printerType === 'thermal_bt') {
+                if (btState === 'connected' && btDevice) {
+                  await handleTestBtPrint();
+                } else {
+                  showToast("Please connect your Bluetooth thermal printer first.");
+                }
+              } else {
+                showToast("Invoice print job sent to system printer.");
+              }
+            }}>Print</Button>
         </div>
+      </div>
+
+      {/* Bluetooth Thermal Printer Configuration (थर्मल प्रिंटर व ब्लूटूथ कनेक्टिव्हिटी) */}
+      <div style={{ ...css.card, padding: 22, marginTop: 20 }}>
+        <SectionHeader
+          title="Bluetooth Thermal Printer (ब्लूटूथ थर्मल प्रिंटर)"
+          action={
+            btState === "connected" ? (
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "4px 12px", background: COLORS.successSoft, color: COLORS.success, borderRadius: 20, fontSize: 12, fontWeight: 700 }}>
+                <CheckCircle2 size={15} /> Connected: {btDevice?.name || "Thermal Printer"}
+              </span>
+            ) : (
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "4px 12px", background: COLORS.warningSoft, color: COLORS.warning, borderRadius: 20, fontSize: 12, fontWeight: 700 }}>
+                <AlertCircle size={15} /> Disconnected
+              </span>
+            )
+          }
+        />
+
+        {/* Setting Toggle: Enable Bluetooth Thermal Printer matching Image 3 */}
+        <SettingRow
+          title="Bluetooth Thermal Printer (ब्लूटूथ थर्मल प्रिंटर सक्षम करा)"
+          description="Directly print all bills, KOT tickets, and payment receipts to your wireless Bluetooth thermal printer."
+          checked={billingSettings.printerType === "thermal_bt"}
+          onChange={(enabled) => {
+            const newType = enabled ? "thermal_bt" : "system";
+            const newMethod = enabled ? "bluetooth" : "browser";
+            setBillingSettings(s => ({ ...s, printerType: newType }));
+            printService.setDefaultPrintMethod(newMethod);
+            localStorage.setItem("ajalkar_default_print_method", newMethod);
+            localStorage.setItem("ajalkar_printer_type", newType);
+            showToast(enabled ? "Bluetooth Thermal Printer enabled." : "System printer selected.");
+          }}
+        />
+
+        {/* When Enabled: Show Bluetooth Connection Manager matching Image 2 */}
+        {billingSettings.printerType === "thermal_bt" && (
+          <div style={{ marginTop: 16, display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: 16 }}>
+            {/* Card: Direct Bluetooth Thermal */}
+            <div
+              style={{
+                border: `2px solid ${COLORS.purple}`,
+                background: COLORS.purpleSoft,
+                borderRadius: 12,
+                padding: 16,
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ width: 34, height: 34, borderRadius: 8, background: COLORS.purple, color: "#fff", display: "grid", placeItems: "center" }}>
+                    <Bluetooth size={18} />
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: 13, color: COLORS.text }}>Direct Bluetooth Thermal (ESC/POS)</div>
+                    <div style={{ fontSize: 11, color: COLORS.muted }}>Pair with 58mm/80mm BLE thermal printers</div>
+                  </div>
+                </div>
+                <div style={{ width: 22, height: 22, borderRadius: "50%", background: COLORS.purple, color: "#fff", display: "grid", placeItems: "center" }}>
+                  <Check size={14} strokeWidth={3} />
+                </div>
+              </div>
+
+              {/* Sub-card matching Image 2 */}
+              <div style={{ marginTop: 14, padding: 12, borderRadius: 10, background: "#fff", border: `1px solid ${COLORS.border}` }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                  <b style={{ fontSize: 12, color: COLORS.text }}>Bluetooth Status</b>
+                  <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 12, background: btState === "connected" ? COLORS.successSoft : "#f1f5f9", color: btState === "connected" ? COLORS.success : COLORS.muted }}>
+                    {btState === "connected" ? `Connected: ${btDevice?.name}` : "Disconnected"}
+                  </span>
+                </div>
+
+                <div style={{ display: "flex", gap: 8 }}>
+                  {btState === "connected" ? (
+                    <Button variant="danger" size="sm" icon={<X size={13} />} onClick={handleDisconnectBtPrinter}>
+                      Disconnect
+                    </Button>
+                  ) : (
+                    <Button variant="primary" size="sm" icon={isConnectingBt ? <Loader2 size={13} className="animate-spin" /> : <Bluetooth size={13} />} onClick={handleConnectBtPrinter} disabled={isConnectingBt || !isBtSupported}>
+                      {isConnectingBt ? "Connecting..." : "Discover & Connect"}
+                    </Button>
+                  )}
+                  <Button variant="secondary" size="sm" icon={<Printer size={13} />} onClick={handleTestBtPrint} disabled={isTestingBt}>
+                    {isTestingBt ? "Printing..." : "Test Print"}
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Paper Size & Direct Print Setting */}
+            <div style={{ border: `1px solid ${COLORS.border}`, borderRadius: 12, padding: 16, background: "#fff" }}>
+              <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 10, color: COLORS.text }}>
+                Default Thermal Paper Size:
+              </div>
+              <div style={{ display: "flex", gap: 10 }}>
+                {[
+                  { id: "80mm", label: '80mm (3" Standard)' },
+                  { id: "58mm", label: '58mm (2" Pocket)' },
+                ].map(opt => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => {
+                      setBillingSettings(s => ({ ...s, paperSize: opt.id as any }));
+                      printService.setDefaultPaperSize(opt.id as any);
+                      localStorage.setItem("ajalkar_default_paper_size", opt.id);
+                    }}
+                    style={{
+                      flex: 1,
+                      padding: "10px 12px",
+                      borderRadius: 8,
+                      border: billingSettings.paperSize === opt.id ? `2px solid ${COLORS.purple}` : `1px solid ${COLORS.border}`,
+                      background: billingSettings.paperSize === opt.id ? COLORS.purpleSoft : "#fff",
+                      fontWeight: 700,
+                      fontSize: 12,
+                      cursor: "pointer",
+                      textAlign: "center",
+                    }}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+
+              <div style={{ marginTop: 14 }}>
+                <SettingRow
+                  title="Direct 1-Click Print"
+                  description="Immediately send print commands to thermal printer without opening preview dialog."
+                  checked={billingSettings.autoThermalPrint}
+                  onChange={(v) => {
+                    setBillingSettings(s => ({ ...s, autoThermalPrint: v }));
+                    localStorage.setItem("ajalkar_auto_thermal_print", String(v));
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

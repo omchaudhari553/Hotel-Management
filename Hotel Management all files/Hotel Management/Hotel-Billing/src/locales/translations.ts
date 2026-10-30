@@ -25,6 +25,9 @@ export const COMMON_TRANSLATIONS: TranslationsMap = {
   purchase: { en: "Purchase", mr: "खरेदी", hi: "खरीद" },
   branches: { en: "Branches", mr: "शाखा", hi: "शाखाएं" },
   settings: { en: "Settings", mr: "सेटिंग्ज", hi: "सेटिंग्स" },
+  hotel: { en: "Hotel", mr: "हॉटेल", hi: "होटल" },
+  mess: { en: "Mess", mr: "मेस", hi: "मेस" },
+  cafe: { en: "Cafe", mr: "कॅफे", hi: "कैफे" },
 
   // Standard Buttons
   save: { en: "Save", mr: "जतन करा", hi: "सहेजें" },

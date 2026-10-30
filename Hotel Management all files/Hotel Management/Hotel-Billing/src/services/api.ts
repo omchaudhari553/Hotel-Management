@@ -3,24 +3,39 @@ import { ApiResponse } from '../types/api';
 
 export * from '../types/api';
 
-export const DEFAULT_CENTRAL_HOST = '192.168.1.51';
+export const DEFAULT_CENTRAL_HOST = 'localhost';
 
 export const getCentralServerHost = (): string => {
   if (typeof window !== 'undefined') {
     // 1. Check custom saved host in localStorage
     const saved = localStorage.getItem('ajalkar_server_host');
-    if (saved && saved.trim()) {
+    if (saved && (saved.trim() === '192.168.1.51' || saved.trim() === 'http://192.168.1.51:8080/api/v1')) {
+      // Clear obsolete hardcoded stale IP
+      localStorage.removeItem('ajalkar_server_host');
+    } else if (saved && saved.trim()) {
       return saved.trim();
     }
 
-    // 2. If loaded over network IP/hostname in browser (e.g. http://192.168.1.51:5173)
+    // 2. Use current browser hostname (e.g. localhost, 10.173.104.1, etc.)
     const hn = window.location?.hostname;
-    if (hn && hn !== 'localhost' && hn !== '127.0.0.1' && hn !== '::1') {
+    if (hn) {
       return hn;
     }
   }
 
-  // 3. Fallback to authoritative central host IP
+  // 3. Fallback to env or default
+  const envUrl = import.meta.env.VITE_API_BASE_URL;
+  if (envUrl) {
+    try {
+      const parsed = new URL(envUrl);
+      if (parsed.hostname && parsed.hostname !== '192.168.1.51') {
+        return parsed.hostname;
+      }
+    } catch {
+      // ignore
+    }
+  }
+
   return DEFAULT_CENTRAL_HOST;
 };
 
@@ -38,25 +53,27 @@ export const resolveBaseUrl = (): string => {
   if (typeof window !== 'undefined') {
     // 1. Check custom saved host
     const saved = localStorage.getItem('ajalkar_server_host');
-    if (saved && saved.trim()) {
+    if (saved && (saved.trim() === '192.168.1.51' || saved.trim() === 'http://192.168.1.51:8080/api/v1')) {
+      localStorage.removeItem('ajalkar_server_host');
+    } else if (saved && saved.trim()) {
       const trimmed = saved.trim();
       return trimmed.startsWith('http') ? trimmed : `http://${trimmed}:8080/api/v1`;
     }
 
-    // 2. If loaded over network IP/hostname
+    // 2. If loaded over network IP/hostname or localhost
     const hn = window.location?.hostname;
-    if (hn && hn !== 'localhost' && hn !== '127.0.0.1' && hn !== '::1') {
+    if (hn) {
       return `http://${hn}:8080/api/v1`;
     }
   }
 
-  // 3. Check environment variable if valid non-localhost
+  // 3. Check environment variable
   const envUrl = import.meta.env.VITE_API_BASE_URL;
-  if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
+  if (envUrl && !envUrl.includes('192.168.1.51')) {
     return envUrl;
   }
 
-  // 4. Default to authoritative central host IP
+  // 4. Default to localhost
   return `http://${DEFAULT_CENTRAL_HOST}:8080/api/v1`;
 };
 

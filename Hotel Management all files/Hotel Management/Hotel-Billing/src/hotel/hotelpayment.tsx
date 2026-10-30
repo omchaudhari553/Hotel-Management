@@ -1,3 +1,5 @@
+import { PrintInvoiceModal } from "../components/PrintInvoiceModal";
+import { UniversalInvoicePrintData } from "../types/printing";
 import React, { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import html2pdf from "html2pdf.js";
@@ -135,6 +137,8 @@ const COLORS = {
 
 export const HotelPayment: React.FC = () => {
   const navigate = useNavigate();
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+  const [printModalData, setPrintModalData] = useState<UniversalInvoicePrintData | null>(null);
   const [searchParams] = useSearchParams();
   const { selectedBranchId, selectedBranch } = useBranch();
   const { language, t, translateStatus, formatDate, toDevanagari, formatNumber } = useLanguage();
@@ -709,9 +713,59 @@ export const HotelPayment: React.FC = () => {
     }
   };
 
+
+  const mapLiveInvoiceToUniversalPrintData = (inv: LiveInvoice): UniversalInvoicePrintData => {
+    const hotelName = localStorage.getItem("billing_hotel_name") || "AJALKAR HOTEL & RESTAURANT";
+    const hotelAddress = localStorage.getItem("billing_address") || "Hotel Premises, Pune, Maharashtra - 411004";
+    const hotelPhone = localStorage.getItem("billing_phone") || "+91 98765 43210";
+    const gstin = localStorage.getItem("billing_gstin") || "27AAKCA1234F1Z5";
+
+    const totalTax = Number(inv.taxAmount || 0);
+    const subtotal = Number(inv.subtotal || inv.taxableAmount || (inv.grandTotal - totalTax));
+
+    return {
+      invoiceNumber: inv.invoiceNumber || String(inv.id),
+      invoiceDate: inv.invoiceDate || new Date().toISOString().split('T')[0],
+      hotelName,
+      hotelAddress,
+      hotelPhone,
+      gstin,
+      customerName: inv.customerName || inv.guestName || "Walk-in Guest",
+      customerPhone: inv.customerMobile || inv.phone || inv.customerPhone || "",
+      tableName: inv.tableName || inv.tableNumber || "Table",
+      orderNumber: inv.orderNumber || (inv.orderId ? `ORD-${inv.orderId}` : inv.kotNumber || ""),
+      items: (inv.items || []).map((it, idx) => ({
+        id: it.id || idx,
+        name: it.itemName || it.description || it.name || `Item ${idx + 1}`,
+        quantity: Number(it.quantity || it.qty || 1),
+        unitPrice: Number(it.price || it.unitPrice || 0),
+        totalPrice: Number(it.totalPrice || ((it.quantity || 1) * (it.price || 0))),
+      })),
+      subtotal,
+      discountAmount: Number(inv.discountAmount || 0),
+      taxableAmount: Number(inv.taxableAmount || subtotal),
+      cgstRate: Number(inv.cgstRate || 2.5),
+      cgstAmount: Number(inv.cgst || totalTax / 2),
+      sgstRate: Number(inv.sgstRate || 2.5),
+      sgstAmount: Number(inv.sgst || totalTax / 2),
+      igstRate: Number(inv.igstRate || 0),
+      igstAmount: Number(inv.igst || 0),
+      totalTax,
+      grandTotal: Number(inv.grandTotal || 0),
+      paymentMethod: inv.paymentMethod || "CASH",
+      paymentStatus: inv.status || "PAID",
+      paidAmount: Number(inv.paidAmount ?? inv.grandTotal),
+      outstandingAmount: Number(inv.dueAmount || 0),
+      footerMessage: "Thank you for dining with us! Please visit again.",
+    };
+  };
+
   const handlePrintInvoice = useCallback((inv: LiveInvoice) => {
     if (!inv) return;
-
+    const printData = mapLiveInvoiceToUniversalPrintData(inv);
+    setPrintModalData(printData);
+    setIsPrintModalOpen(true);
+    return;
     const printWindow = window.open("", "_blank", "width=450,height=700");
     if (!printWindow) {
       window.alert("Please allow pop-ups for this site, then click Print Receipt again.");
@@ -3344,6 +3398,11 @@ export const HotelPayment: React.FC = () => {
           </div>
         </div>
       )}
+      <PrintInvoiceModal
+        isOpen={isPrintModalOpen}
+        onClose={() => setIsPrintModalOpen(false)}
+        invoiceData={printModalData}
+      />
     </div>
   );
 };
