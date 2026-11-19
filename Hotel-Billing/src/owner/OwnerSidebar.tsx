@@ -16,6 +16,7 @@ import {
   X,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 interface OwnerSidebarProps {
   mobileOpen?: boolean;
@@ -24,42 +25,43 @@ interface OwnerSidebarProps {
 
 export const OwnerSidebar: React.FC<OwnerSidebarProps> = ({ mobileOpen = false, onCloseMobile }) => {
   const { business, user } = useAuth();
+  const { language } = useLanguage();
   const navigate = useNavigate();
 
   const CENTRAL_ITEMS = [
     {
       to: '/owner/dashboard',
-      label: 'Dashboard',
+      label: language === 'mr' ? 'डॅशबोर्ड' : 'Dashboard',
       icon: LayoutDashboard,
     },
     {
       to: '/owner/branches',
-      label: 'Branch Management',
+      label: language === 'mr' ? 'शाखा व्यवस्थापन' : 'Branch Management',
       icon: GitBranch,
     },
     {
       to: '/owner/sales',
-      label: 'Branch-wise Sales',
+      label: language === 'mr' ? 'शाखानिहाय विक्री' : 'Branch-wise Sales',
       icon: TrendingUp,
     },
     {
       to: '/owner/profit-analysis',
-      label: 'Profit Analysis',
+      label: language === 'mr' ? 'नफा विश्लेषण' : 'Profit Analysis',
       icon: PieChart,
     },
     {
       to: '/owner/staff',
-      label: 'Staff Management',
+      label: language === 'mr' ? 'कर्मचारी व्यवस्थापन' : 'Staff Management',
       icon: Users,
     },
     {
       to: '/owner/reports',
-      label: 'Reports',
+      label: language === 'mr' ? 'अहवाल' : 'Reports',
       icon: FileSpreadsheet,
     },
     {
       to: '/owner/billing-performance',
-      label: 'Billing Performance',
+      label: language === 'mr' ? 'बिलिंग कार्यक्षमता' : 'Billing Performance',
       icon: Gauge,
     },
   ];
@@ -67,7 +69,7 @@ export const OwnerSidebar: React.FC<OwnerSidebarProps> = ({ mobileOpen = false, 
   const PREFERENCE_ITEMS = [
     {
       to: '/owner/settings',
-      label: 'Settings & Themes',
+      label: language === 'mr' ? 'सेटिंग्ज आणि थीम' : 'Settings & Themes',
       icon: Settings,
     },
   ];
@@ -153,7 +155,7 @@ export const OwnerSidebar: React.FC<OwnerSidebarProps> = ({ mobileOpen = false, 
                     borderRadius: '4px',
                   }}
                 >
-                  Owner Admin
+                  {language === 'mr' ? 'मालक ॲडमिन' : 'Owner Admin'}
                 </span>
               </div>
             </div>
@@ -185,7 +187,7 @@ export const OwnerSidebar: React.FC<OwnerSidebarProps> = ({ mobileOpen = false, 
               padding: '4px 12px 6px',
             }}
           >
-            Central Management
+            {language === 'mr' ? 'केंद्रीय व्यवस्थापन' : 'Central Management'}
           </div>
 
           <nav style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
@@ -232,7 +234,7 @@ export const OwnerSidebar: React.FC<OwnerSidebarProps> = ({ mobileOpen = false, 
               padding: '6px 12px 6px',
             }}
           >
-            Preferences
+            {language === 'mr' ? 'प्राधान्ये' : 'Preferences'}
           </div>
 
           <nav style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
@@ -298,7 +300,7 @@ export const OwnerSidebar: React.FC<OwnerSidebarProps> = ({ mobileOpen = false, 
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Building2 size={16} color="#F59E0B" />
-            <span>Open Hotel Billing</span>
+            <span>{language === 'mr' ? 'हॉटेल बिलिंग उघडा' : 'Open Hotel Billing'}</span>
           </div>
           <ExternalLink size={14} color="#9CA3AF" />
         </button>

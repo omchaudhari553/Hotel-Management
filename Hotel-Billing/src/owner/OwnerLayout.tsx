@@ -3,25 +3,27 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { OwnerSidebar } from './OwnerSidebar';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 import SubscriptionModal from '../components/SubscriptionModal';
 import {
   LogOut,
-  PlusCircle,
   ShieldCheck,
   Menu,
   Sun,
   Moon,
   RefreshCw,
+  Globe,
 } from 'lucide-react';
 
 export const OwnerLayout: React.FC = () => {
   const { user, logout } = useAuth();
   const { theme, resolvedTheme, setTheme } = useTheme();
+  const { language, setLanguage } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Close drawer when route changes
+  // Close the mobile drawer whenever the route changes.
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [location.pathname]);
@@ -29,10 +31,24 @@ export const OwnerLayout: React.FC = () => {
   const handleLogout = async () => {
     try {
       await logout();
-      navigate('/login');
     } catch {
+      // Always return to the login screen if logout fails.
+    } finally {
       navigate('/login');
     }
+  };
+
+  const controlButtonStyle: React.CSSProperties = {
+    height: '34px',
+    borderRadius: '6px',
+    border: '1px solid var(--border-slate, #CBD5E1)',
+    backgroundColor: 'var(--card-white, #FFFFFF)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    transition: 'all 0.15s ease',
+    flexShrink: 0,
   };
 
   return (
@@ -56,9 +72,12 @@ export const OwnerLayout: React.FC = () => {
       )}
 
       {/* Dedicated Owner Sidebar */}
-      <OwnerSidebar mobileOpen={mobileMenuOpen} onCloseMobile={() => setMobileMenuOpen(false)} />
+      <OwnerSidebar
+        mobileOpen={mobileMenuOpen}
+        onCloseMobile={() => setMobileMenuOpen(false)}
+      />
 
-      {/* Main Content Area (Margin handled responsively via CSS) */}
+      {/* Main Content Area (margin handled responsively via CSS) */}
       <div
         className="owner-main-content"
         style={{
@@ -89,7 +108,6 @@ export const OwnerLayout: React.FC = () => {
         >
           {/* Left Title / Badge with Mobile Toggle */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
-            {/* Mobile Hamburger Button */}
             <button
               type="button"
               className="owner-mobile-toggle-btn"
@@ -100,7 +118,15 @@ export const OwnerLayout: React.FC = () => {
               <Menu size={20} />
             </button>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flexWrap: 'wrap' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                minWidth: 0,
+                flexWrap: 'wrap',
+              }}
+            >
               <span
                 className="owner-header-title"
                 style={{
@@ -110,8 +136,9 @@ export const OwnerLayout: React.FC = () => {
                   letterSpacing: '0.02em',
                 }}
               >
-                Owner Administration Panel
+                {language === 'mr' ? 'मालक प्रशासन पॅनेल' : 'Owner Administration Panel'}
               </span>
+
               <span
                 className="owner-badge-pill"
                 style={{
@@ -126,60 +153,68 @@ export const OwnerLayout: React.FC = () => {
               >
                 <ShieldCheck size={14} color="currentColor" />
                 <span className="owner-badge-text" style={{ fontWeight: 700 }}>
-                  Multi-Branch Central
+                  {language === 'mr' ? 'मल्टी-ब्राँच सेंट्रल' : 'Multi-Branch Central'}
                 </span>
               </span>
             </div>
           </div>
 
-          {/* Right Controls */}
-          <div className="owner-header-right" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            {/* Quick Refresh Button */}
+          {/* Right Controls: refresh, language, theme, and account */}
+          <div
+            className="owner-header-right"
+            style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
+          >
+            {/* Quick Refresh Button (preserved from HEAD) */}
             <button
               type="button"
-              onClick={() => {
-                window.location.reload();
-              }}
+              onClick={() => window.location.reload()}
               className="owner-theme-toggle-btn"
               title="Refresh Admin Panel"
               aria-label="Refresh Admin Panel"
               style={{
+                ...controlButtonStyle,
                 width: '34px',
-                height: '34px',
-                borderRadius: '6px',
-                border: '1px solid var(--border-slate, #CBD5E1)',
-                backgroundColor: 'var(--card-white, #FFFFFF)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
                 color: 'var(--text-body, #64748B)',
-                transition: 'all 0.15s ease',
-                flexShrink: 0,
               }}
             >
               <RefreshCw size={15} />
             </button>
 
-            {/* Quick Small Theme Button */}
+            {/* Quick Language Toggle Button (preserved from origin/poonam) */}
+            <button
+              type="button"
+              onClick={() => setLanguage(language === 'mr' ? 'en' : 'mr')}
+              className="owner-lang-toggle-btn"
+              title={
+                language === 'mr'
+                  ? 'इंग्रजीत बदला (Switch to English)'
+                  : 'मराठीत बदला (Switch to Marathi)'
+              }
+              aria-label="Switch language"
+              style={{
+                ...controlButtonStyle,
+                padding: '0 10px',
+                gap: '6px',
+                color: 'var(--text-heading, #0F172A)',
+                fontSize: '0.80rem',
+                fontWeight: 700,
+              }}
+            >
+              <Globe size={15} color="#D97706" />
+              <span>{language === 'mr' ? 'मराठी' : 'English'}</span>
+            </button>
+
+            {/* Quick Theme Button */}
             <button
               type="button"
               onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
               className="owner-theme-toggle-btn"
               title={`Switch to ${resolvedTheme === 'dark' ? 'Light' : 'Dark'} Theme`}
+              aria-label={`Switch to ${resolvedTheme === 'dark' ? 'Light' : 'Dark'} Theme`}
               style={{
+                ...controlButtonStyle,
                 width: '34px',
-                height: '34px',
-                borderRadius: '6px',
-                border: '1px solid var(--border-slate, #CBD5E1)',
-                backgroundColor: 'var(--card-white, #FFFFFF)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
                 color: resolvedTheme === 'dark' ? '#F59E0B' : '#64748B',
-                transition: 'all 0.15s ease',
-                flexShrink: 0,
               }}
             >
               {resolvedTheme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
@@ -195,15 +230,28 @@ export const OwnerLayout: React.FC = () => {
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div className="owner-profile-meta" style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-heading, #1E293B)', lineHeight: 1.2 }}>
+                <div
+                  className="owner-profile-meta"
+                  style={{ display: 'flex', flexDirection: 'column' }}
+                >
+                  <span
+                    style={{
+                      fontSize: '0.84rem',
+                      fontWeight: 700,
+                      color: 'var(--text-heading, #1E293B)',
+                      lineHeight: 1.2,
+                    }}
+                  >
                     {user?.fullName || user?.username || 'Hotel Owner'}
                   </span>
-                  <span style={{ fontSize: '0.70rem', color: 'var(--text-muted, #64748B)' }}>Business Owner</span>
+                  <span style={{ fontSize: '0.70rem', color: 'var(--text-muted, #64748B)' }}>
+                    {language === 'mr' ? 'व्यवसाय मालक' : 'Business Owner'}
+                  </span>
                 </div>
               </div>
 
               <button
+                type="button"
                 onClick={handleLogout}
                 className="owner-logout-btn"
                 style={{
@@ -221,20 +269,22 @@ export const OwnerLayout: React.FC = () => {
                   transition: 'all 0.15s ease',
                   flexShrink: 0,
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#EF4444';
-                  e.currentTarget.style.color = '#EF4444';
-                  e.currentTarget.style.backgroundColor = '#FEF2F2';
+                onMouseEnter={(event) => {
+                  event.currentTarget.style.borderColor = '#EF4444';
+                  event.currentTarget.style.color = '#EF4444';
+                  event.currentTarget.style.backgroundColor = '#FEF2F2';
                 }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--border-slate, #CBD5E1)';
-                  e.currentTarget.style.color = 'var(--text-heading, #475569)';
-                  e.currentTarget.style.backgroundColor = 'var(--card-white, #FFFFFF)';
+                onMouseLeave={(event) => {
+                  event.currentTarget.style.borderColor = 'var(--border-slate, #CBD5E1)';
+                  event.currentTarget.style.color = 'var(--text-heading, #475569)';
+                  event.currentTarget.style.backgroundColor = 'var(--card-white, #FFFFFF)';
                 }}
                 title="Logout from session"
               >
                 <LogOut size={15} />
-                <span className="owner-logout-text">Logout</span>
+                <span className="owner-logout-text">
+                  {language === 'mr' ? 'लॉगआउट' : 'Logout'}
+                </span>
               </button>
             </div>
           </div>
@@ -243,7 +293,12 @@ export const OwnerLayout: React.FC = () => {
         {/* Content View */}
         <main
           className="owner-page-content"
-          style={{ flex: 1, padding: '24px 28px', minWidth: 0, backgroundColor: 'var(--bg-page, #F8FAFC)' }}
+          style={{
+            flex: 1,
+            padding: '24px 28px',
+            minWidth: 0,
+            backgroundColor: 'var(--bg-page, #F8FAFC)',
+          }}
         >
           <Outlet />
         </main>

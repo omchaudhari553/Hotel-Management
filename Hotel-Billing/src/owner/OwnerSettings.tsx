@@ -20,12 +20,14 @@ import {
   EyeOff,
   FileText,
   Key,
+  Globe,
 } from 'lucide-react';
 import { ownerService } from './ownerService';
 import apiClient from '../services/api';
 import { licenceService, LicenceInfo } from '../services/licenceService';
 import { useToast } from '../context/ToastContext';
 import { useTheme, ThemeType } from '../context/ThemeContext';
+import { useLanguage, LanguageCode } from '../context/LanguageContext';
 import SubscriptionModal from '../components/SubscriptionModal';
 
 export const OwnerSettings: React.FC = () => {
@@ -55,6 +57,7 @@ export const OwnerSettings: React.FC = () => {
 
   const { showToast } = useToast();
   const { theme, setTheme } = useTheme();
+  const { language, setLanguage } = useLanguage();
 
   const loadData = async () => {
     try {
@@ -277,18 +280,26 @@ export const OwnerSettings: React.FC = () => {
     icon: any;
   }> = [
     {
+      id: 'system',
+      name: language === 'mr' ? 'सिस्टीम डिफॉल्ट' : 'System Default',
+      badge: language === 'mr' ? 'स्वयंचलित' : 'Automatic',
+      desc: language === 'mr' ? 'तुमच्या डिव्हाइसच्या ऑपरेटिंग सिस्टीम थीमशी जुळते' : 'Automatically matches your device operating system theme (Light or Dark)',
+      colors: ['#FFFFFF', '#0B0F19', '#F59E0B', '#38BDF8'],
+      icon: Laptop,
+    },
+    {
       id: 'light',
-      name: 'Daylight / Classic Light',
-      badge: 'Standard',
-      desc: 'Clean daylight theme with crisp white cards & amber accents',
+      name: language === 'mr' ? 'क्लासिक लाईट' : 'Daylight / Classic Light',
+      badge: language === 'mr' ? 'स्टँडर्ड' : 'Standard',
+      desc: language === 'mr' ? 'स्वच्छ डेलाईट थीम' : 'Clean daylight theme with crisp white cards & amber accents',
       colors: ['#FFFFFF', '#F8FAFC', '#F59E0B', '#1E293B'],
       icon: Sun,
     },
     {
       id: 'dark',
-      name: 'Midnight / Modern Dark',
-      badge: 'Night Mode',
-      desc: 'Deep obsidian night theme with high contrast slate cards',
+      name: language === 'mr' ? 'मॉडर्न डार्क' : 'Midnight / Modern Dark',
+      badge: language === 'mr' ? 'नाईट मोड' : 'Night Mode',
+      desc: language === 'mr' ? 'गडद ऑब्सिडियन नाईट थीम' : 'Deep obsidian night theme with high contrast slate cards',
       colors: ['#161F36', '#0B0F19', '#38BDF8', '#F8FAFC'],
       icon: Moon,
     },
@@ -307,7 +318,7 @@ export const OwnerSettings: React.FC = () => {
       {/* Header */}
       <div>
         <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-heading, #0F172A)', margin: 0 }}>
-          Owner Settings & Enterprise Preferences
+          {language === 'mr' ? 'मालक सेटिंग्ज आणि एंटरप्राइझ प्राधान्ये' : 'Owner Settings & Enterprise Preferences'}
         </h1>
       </div>
 
@@ -357,13 +368,17 @@ export const OwnerSettings: React.FC = () => {
                   fontWeight: 600,
                 }}
               >
-                Status:{' '}
+                {language === 'mr' ? 'स्थिती: ' : 'Status: '}
                 <strong className="owner-trial-status-badge">
-                  {licenceInfo?.trialStatus || 'Active'}
+                  {licenceInfo?.trialStatus === 'Active'
+                    ? (language === 'mr' ? 'सक्रिय' : 'Active')
+                    : (licenceInfo?.trialStatus || (language === 'mr' ? 'सक्रिय' : 'Active'))}
                 </strong>{' '}
                 •{' '}
                 <span className="owner-trial-days">
-                  {licenceInfo?.daysRemaining != null ? `${licenceInfo.daysRemaining} Days Remaining` : 'Full Access'}
+                  {licenceInfo?.daysRemaining != null
+                    ? (language === 'mr' ? `${licenceInfo.daysRemaining} दिवस शिल्लक` : `${licenceInfo.daysRemaining} Days Remaining`)
+                    : (language === 'mr' ? 'पूर्ण प्रवेश' : 'Full Access')}
                 </span>
               </p>
             </div>
@@ -396,15 +411,14 @@ export const OwnerSettings: React.FC = () => {
               e.currentTarget.style.transform = 'none';
             }}
           >
-            Upgrade / Renew Plan
+            {language === 'mr' ? 'प्लॅन अपग्रेड / नूतनीकरण करा' : 'Upgrade / Renew Plan'}
           </button>
         </div>
       </div>
 
       {/* ========================================================
-          THEME SWITCHER SECTION (Applies Across Whole Application)
+          THEME & LANGUAGE SWITCHER SECTION (Preferences)
       ======================================================== */}
-      {/* Compact Theme Buttons - All verbose garbage removed per user request */}
       <div
         className="owner-card"
         style={{
@@ -420,42 +434,87 @@ export const OwnerSettings: React.FC = () => {
           gap: '12px',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Palette size={18} color="#D97706" />
-          <span style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-heading, #0F172A)' }}>
-            Theme
-          </span>
+        {/* Theme Section */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Palette size={18} color="#D97706" />
+            <span style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-heading, #0F172A)' }}>
+              {language === 'mr' ? 'थीम' : 'Theme'}
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            {THEMES.map((t) => {
+              const isSelected = theme === t.id;
+              const Icon = t.icon;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => handleSelectTheme(t.id)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '6px 12px',
+                    borderRadius: '6px',
+                    border: isSelected ? '1px solid #D97706' : '1px solid var(--border-slate, #CBD5E1)',
+                    backgroundColor: isSelected ? 'rgba(245, 158, 11, 0.12)' : 'var(--card-white, #FFFFFF)',
+                    color: isSelected ? '#B45309' : 'var(--text-body, #475569)',
+                    fontSize: '0.82rem',
+                    fontWeight: isSelected ? 700 : 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  <Icon size={14} color={isSelected ? '#D97706' : '#64748B'} />
+                  <span>{t.name}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {THEMES.map((t) => {
-            const isSelected = theme === t.id;
-            const Icon = t.icon;
-            return (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => handleSelectTheme(t.id)}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '6px 12px',
-                  borderRadius: '6px',
-                  border: isSelected ? '1px solid #D97706' : '1px solid var(--border-slate, #CBD5E1)',
-                  backgroundColor: isSelected ? 'rgba(245, 158, 11, 0.12)' : 'var(--card-white, #FFFFFF)',
-                  color: isSelected ? '#B45309' : 'var(--text-body, #475569)',
-                  fontSize: '0.82rem',
-                  fontWeight: isSelected ? 700 : 500,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                }}
-              >
-                <Icon size={14} color={isSelected ? '#D97706' : '#64748B'} />
-                <span>{t.name}</span>
-              </button>
-            );
-          })}
+        {/* Language Selection Section */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Globe size={18} color="#D97706" />
+            <span style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-heading, #0F172A)' }}>
+              {language === 'mr' ? 'भाषा' : 'Language'}
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            {[
+              { code: 'en' as LanguageCode, label: 'English' },
+              { code: 'mr' as LanguageCode, label: 'मराठी' },
+            ].map((langOpt) => {
+              const isSelected = language === langOpt.code;
+              return (
+                <button
+                  key={langOpt.code}
+                  type="button"
+                  onClick={() => setLanguage(langOpt.code)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    padding: '6px 14px',
+                    borderRadius: '6px',
+                    border: isSelected ? '1px solid #D97706' : '1px solid var(--border-slate, #CBD5E1)',
+                    backgroundColor: isSelected ? 'rgba(245, 158, 11, 0.12)' : 'var(--card-white, #FFFFFF)',
+                    color: isSelected ? '#B45309' : 'var(--text-body, #475569)',
+                    fontSize: '0.82rem',
+                    fontWeight: isSelected ? 700 : 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  <span>{langOpt.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -472,17 +531,17 @@ export const OwnerSettings: React.FC = () => {
       >
         <div style={{ borderBottom: '1px solid var(--border-slate, #F1F5F9)', paddingBottom: '14px', marginBottom: '20px' }}>
           <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-heading, #0F172A)', margin: 0 }}>
-            Central Hotel Business Profile
+            {language === 'mr' ? 'केंद्रीय हॉटेल व्यवसाय प्रोफाइल' : 'Central Hotel Business Profile'}
           </h2>
           <span style={{ fontSize: '0.8rem', color: 'var(--text-muted, #64748B)' }}>
-            Multi-branch identifier: <strong>{settings?.code || 'HOTEL_GRANDHERITAGE12'}</strong>
+            {language === 'mr' ? 'मल्टी-ब्राँच आयडेंटिफायर: ' : 'Multi-branch identifier: '}<strong>{settings?.code || 'HOTEL_GRANDHERITAGE12'}</strong>
           </span>
         </div>
 
         <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div className="owner-form-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
             <div>
-              <label style={labelStyle}>Business Legal / Brand Name</label>
+              <label style={labelStyle}>{language === 'mr' ? 'व्यवसाय कायदेशीर / ब्रँड नाव' : 'Business Legal / Brand Name'}</label>
               <input
                 type="text"
                 name="businessName"
@@ -495,7 +554,7 @@ export const OwnerSettings: React.FC = () => {
             </div>
 
             <div>
-              <label style={labelStyle}>Owner Full Name</label>
+              <label style={labelStyle}>{language === 'mr' ? 'मालकाचे पूर्ण नाव' : 'Owner Full Name'}</label>
               <input
                 type="text"
                 name="ownerName"
@@ -509,7 +568,7 @@ export const OwnerSettings: React.FC = () => {
 
             {/* Contact Email field with proper thickness, padding and Lucide Mail icon */}
             <div>
-              <label style={labelStyle}>Contact Email</label>
+              <label style={labelStyle}>{language === 'mr' ? 'संपर्क ईमेल' : 'Contact Email'}</label>
               <div style={{ position: 'relative', width: '100%' }}>
                 <input
                   type="email"
@@ -541,7 +600,7 @@ export const OwnerSettings: React.FC = () => {
             </div>
 
             <div>
-              <label style={labelStyle}>Phone Number</label>
+              <label style={labelStyle}>{language === 'mr' ? 'फोन नंबर' : 'Phone Number'}</label>
               <input
                 type="tel"
                 name="phone"
@@ -576,7 +635,7 @@ export const OwnerSettings: React.FC = () => {
             </div>
 
             <div>
-              <label style={labelStyle}>City</label>
+              <label style={labelStyle}>{language === 'mr' ? 'शहर' : 'City'}</label>
               <input
                 type="text"
                 name="city"
@@ -588,7 +647,7 @@ export const OwnerSettings: React.FC = () => {
             </div>
 
             <div>
-              <label style={labelStyle}>State</label>
+              <label style={labelStyle}>{language === 'mr' ? 'राज्य' : 'State'}</label>
               <input
                 type="text"
                 name="state"
@@ -600,7 +659,7 @@ export const OwnerSettings: React.FC = () => {
             </div>
 
             <div>
-              <label style={labelStyle}>Currency Code</label>
+              <label style={labelStyle}>{language === 'mr' ? 'चलन कोड' : 'Currency Code'}</label>
               <input
                 type="text"
                 name="currency"
@@ -612,7 +671,7 @@ export const OwnerSettings: React.FC = () => {
             </div>
 
             <div>
-              <label style={labelStyle}>GSTIN / Tax Registration Number</label>
+              <label style={labelStyle}>{language === 'mr' ? 'जीएसटीआयएन / कर नोंदणी क्रमांक' : 'GSTIN / Tax Registration Number'}</label>
               <input
                 type="text"
                 name="taxNumber"
@@ -625,7 +684,7 @@ export const OwnerSettings: React.FC = () => {
             </div>
 
             <div style={{ gridColumn: '1 / -1' }}>
-              <label style={labelStyle}>Headquarters / Registered Address</label>
+              <label style={labelStyle}>{language === 'mr' ? 'मुख्यालय / नोंदणीकृत पत्ता' : 'Headquarters / Registered Address'}</label>
               <input
                 type="text"
                 name="address"
@@ -781,7 +840,11 @@ export const OwnerSettings: React.FC = () => {
               }}
             >
               <Save size={16} />
-              <span>{saving ? 'Saving Settings...' : 'Save Settings'}</span>
+              <span>
+                {saving
+                  ? (language === 'mr' ? 'सेटिंग्ज सेव्ह होत आहेत...' : 'Saving Settings...')
+                  : (language === 'mr' ? 'सेटिंग्ज सेव्ह करा' : 'Save Settings')}
+              </span>
             </button>
           </div>
         </form>
@@ -789,36 +852,58 @@ export const OwnerSettings: React.FC = () => {
 
       {/* Daily Automated Backup (11:00 PM) Card */}
       <div
+        className="owner-card"
         style={{
-          backgroundColor: 'var(--bg-card, #FFFFFF)',
-          borderRadius: '16px',
+          backgroundColor: 'var(--card-white, #FFFFFF)',
+          borderRadius: '12px',
           border: '1px solid var(--border-slate, #E2E8F0)',
-          padding: '24px',
-          boxShadow: 'var(--card-shadow, 0 1px 3px rgba(0,0,0,0.05))',
+          padding: '24px 28px',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
           marginBottom: '28px',
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#3B82F6', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFFFFF' }}>
+            <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#3B82F6', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFFFFF', flexShrink: 0 }}>
               <Mail size={20} />
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-heading, #1E293B)' }}>
-                Daily Automated Hotel Backup (11:00 PM)
+              <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-heading, #0F172A)' }}>
+                {language === 'mr' ? 'दैनिक स्वयंचलित हॉटेल बॅकअप (रात्री ११:००)' : 'Daily Automated Hotel Backup (11:00 PM)'}
               </h3>
               <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: 'var(--text-muted, #64748B)' }}>
-                दैनिक हॉटेल डेटा बॅकअप • रोज रात्री ११:०० वाजता ऑटोमॅटिक मेल
+                {language === 'mr'
+                  ? 'दैनिक हॉटेल डेटा बॅकअप • रोज रात्री ११:०० वाजता ऑटोमॅटिक ईमेल'
+                  : 'Daily hotel data backup • Automatic email every night at 11:00 PM'}
               </p>
             </div>
           </div>
-          <span style={{ backgroundColor: '#10B98118', color: '#10B981', border: '1px solid #10B98140', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 800 }}>
-            SCHEDULED EVERY NIGHT (23:00)
+          <span
+            style={{
+              backgroundColor: 'rgba(16, 185, 129, 0.15)',
+              color: '#10B981',
+              border: '1px solid rgba(16, 185, 129, 0.35)',
+              padding: '4px 10px',
+              borderRadius: '6px',
+              fontSize: '0.75rem',
+              fontWeight: 800,
+              letterSpacing: '0.02em',
+            }}
+          >
+            {language === 'mr' ? 'दररोज रात्री नियोजित (२३:००)' : 'SCHEDULED EVERY NIGHT (23:00)'}
           </span>
         </div>
 
-        <p style={{ fontSize: '0.86rem', color: 'var(--text-muted, #475569)', lineHeight: 1.6, margin: '0 0 16px 0' }}>
-          Every night at <strong>11:00 PM</strong>, all daily sales, orders, invoices, payments, tables, and expenses are compiled and automatically sent to your Hotel Profile email (<strong>{settings.contactEmail || 'admin@royalpalace.com'}</strong>) with JSON data and PDF summary attachments.
+        <p style={{ fontSize: '0.86rem', color: 'var(--text-body, #475569)', lineHeight: 1.6, margin: '0 0 16px 0' }}>
+          {language === 'mr' ? (
+            <>
+              दररोज रात्री <strong>११:०० वाजता</strong>, सर्व दैनंदिन विक्री, ऑर्डर्स, इनव्हॉइसेस, पेमेंट्स, टेबल्स आणि खर्च संकलित केले जातात आणि JSON डेटा व PDF अहवाल स्वरूपात तुमच्या हॉटेल प्रोफाइल ईमेलवर (<strong>{settings.contactEmail || 'admin@royalpalace.com'}</strong>) आपोआप पाठवले जातात.
+            </>
+          ) : (
+            <>
+              Every night at <strong>11:00 PM</strong>, all daily sales, orders, invoices, payments, tables, and expenses are compiled and automatically sent to your Hotel Profile email (<strong>{settings.contactEmail || 'admin@royalpalace.com'}</strong>) with JSON data and PDF summary attachments.
+            </>
+          )}
         </p>
 
         {/* SMTP Status Notice */}
@@ -829,18 +914,18 @@ export const OwnerSettings: React.FC = () => {
             gap: '10px',
             marginBottom: '18px',
             padding: '11px 16px',
-            backgroundColor: '#F0FDF4',
+            backgroundColor: 'rgba(16, 185, 129, 0.10)',
             borderRadius: '10px',
-            border: '1px solid #BBF7D0',
+            border: '1px solid rgba(16, 185, 129, 0.28)',
           }}
         >
-          <CheckCircle2 size={18} color="#16A34A" style={{ flexShrink: 0 }} />
+          <CheckCircle2 size={18} color="#10B981" style={{ flexShrink: 0 }} />
           <div>
-            <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#166534' }}>
-              Gmail SMTP Connected via application.yml
+            <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#10B981' }}>
+              {language === 'mr' ? 'Gmail SMTP कनेक्टेड (application.yml द्वारे)' : 'Gmail SMTP Connected via application.yml'}
             </span>
-            <span style={{ fontSize: '0.78rem', color: '#15803D', marginLeft: '6px' }}>
-              ({smtpSenderEmail || 'omchaudhari553@gmail.com'}) — Credentials already configured in application.yml.
+            <span style={{ fontSize: '0.78rem', color: 'var(--text-muted, #64748B)', marginLeft: '6px' }}>
+              ({smtpSenderEmail || 'omchaudhari553@gmail.com'}) — {language === 'mr' ? 'क्रेडेन्शियल्स आधीच application.yml मध्ये कॉन्फिगर केलेले आहेत.' : 'Credentials already configured in application.yml.'}
             </span>
           </div>
         </div>
@@ -857,23 +942,23 @@ export const OwnerSettings: React.FC = () => {
               fontSize: '0.84rem',
               backgroundColor:
                 lastBackupStatus.status === 'success'
-                  ? '#ECFDF5'
+                  ? 'rgba(16, 185, 129, 0.12)'
                   : lastBackupStatus.status === 'warning'
-                  ? '#FFFBEB'
-                  : '#FEF2F2',
+                  ? 'rgba(245, 158, 11, 0.12)'
+                  : 'rgba(239, 68, 68, 0.12)',
               border: `1px solid ${
                 lastBackupStatus.status === 'success'
-                  ? '#10B98150'
+                  ? 'rgba(16, 185, 129, 0.35)'
                   : lastBackupStatus.status === 'warning'
-                  ? '#F59E0B60'
-                  : '#EF444450'
+                  ? 'rgba(245, 158, 11, 0.35)'
+                  : 'rgba(239, 68, 68, 0.35)'
               }`,
               color:
                 lastBackupStatus.status === 'success'
-                  ? '#065F46'
+                  ? '#10B981'
                   : lastBackupStatus.status === 'warning'
-                  ? '#92400E'
-                  : '#991B1B',
+                  ? '#F59E0B'
+                  : '#EF4444',
             }}
           >
             {lastBackupStatus.status === 'success' ? (
@@ -884,8 +969,8 @@ export const OwnerSettings: React.FC = () => {
             <div>
               <div style={{ fontWeight: 700 }}>
                 {lastBackupStatus.status === 'success'
-                  ? 'Backup Email Dispatched Successfully!'
-                  : 'Backup File Saved Locally on Server!'}
+                  ? (language === 'mr' ? 'बॅकअप ईमेल यशस्वीरीत्या पाठवला!' : 'Backup Email Dispatched Successfully!')
+                  : (language === 'mr' ? 'बॅकअप फाइल सर्व्हरवर सेव्ह केली!' : 'Backup File Saved Locally on Server!')}
               </div>
               <div style={{ marginTop: '2px', lineHeight: 1.4 }}>
                 {lastBackupStatus.message}
@@ -899,7 +984,7 @@ export const OwnerSettings: React.FC = () => {
             type="button"
             disabled={backupSending}
             onClick={handleSendDailyBackupNow}
-            title={backupSending ? 'Sending Backup Email...' : 'Send Daily Backup to Email Now'}
+            title={language === 'mr' ? 'बॅकअप ईमेल आता पाठवा' : (backupSending ? 'Sending Backup Email...' : 'Send Daily Backup to Email Now')}
             aria-label="Send Daily Backup to Email Now"
             style={{
               display: 'inline-flex',
@@ -916,13 +1001,13 @@ export const OwnerSettings: React.FC = () => {
               transition: 'background-color 0.2s ease',
             }}
           >
-            <RefreshCw size={18} style={backupSending ? { animation: 'spin 1s linear infinite' } : undefined} />
+            <RefreshCw size={18} color="#FFFFFF" style={backupSending ? { animation: 'spin 1s linear infinite' } : undefined} />
           </button>
 
           <button
             type="button"
             onClick={handleDownloadDailyBackup}
-            title="Download Backup (.json)"
+            title={language === 'mr' ? 'बॅकअप डाउनलोड करा (.json)' : 'Download Backup (.json)'}
             aria-label="Download Backup (.json)"
             style={{
               display: 'inline-flex',
@@ -930,21 +1015,29 @@ export const OwnerSettings: React.FC = () => {
               justifyContent: 'center',
               width: '40px',
               height: '40px',
-              backgroundColor: 'var(--bg-secondary, #F1F5F9)',
-              color: 'var(--text-heading, #1E293B)',
+              backgroundColor: 'var(--card-white, #FFFFFF)',
+              color: 'var(--text-heading, #0F172A)',
               border: '1px solid var(--border-slate, #CBD5E1)',
               borderRadius: '8px',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
             }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#D97706';
+              e.currentTarget.style.color = '#D97706';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = 'var(--border-slate, #CBD5E1)';
+              e.currentTarget.style.color = 'var(--text-heading, #0F172A)';
+            }}
           >
-            <Download size={18} />
+            <Download size={18} color="currentColor" />
           </button>
 
           <button
             type="button"
             onClick={handleDownloadDailyBackupPdf}
-            title="Download PDF Report (.pdf)"
+            title={language === 'mr' ? 'PDF अहवाल डाउनलोड करा (.pdf)' : 'Download PDF Report (.pdf)'}
             aria-label="Download PDF Report (.pdf)"
             style={{
               display: 'inline-flex',
@@ -952,15 +1045,23 @@ export const OwnerSettings: React.FC = () => {
               justifyContent: 'center',
               width: '40px',
               height: '40px',
-              backgroundColor: 'var(--bg-secondary, #F1F5F9)',
-              color: 'var(--text-heading, #1E293B)',
+              backgroundColor: 'var(--card-white, #FFFFFF)',
+              color: 'var(--text-heading, #0F172A)',
               border: '1px solid var(--border-slate, #CBD5E1)',
               borderRadius: '8px',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
             }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#D97706';
+              e.currentTarget.style.color = '#D97706';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = 'var(--border-slate, #CBD5E1)';
+              e.currentTarget.style.color = 'var(--text-heading, #0F172A)';
+            }}
           >
-            <FileText size={18} />
+            <FileText size={18} color="currentColor" />
           </button>
         </div>
       </div>
