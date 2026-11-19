@@ -6521,7 +6521,6 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                 </View>
 
                 {/* Bank Details (Optional) */}
-<<<<<<< HEAD
                 {!isBranchUser && (
                   <>
                     <View style={{ width: '100%', marginTop: 14, paddingTop: 14, borderTopWidth: 1, borderTopColor: isDark ? '#334155' : '#E5E7EB', marginBottom: 10 }}>
@@ -6531,7 +6530,6 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                         </Text>
                       </View>
                     </View>
-=======
                 <View style={{ width: '100%', marginTop: 14, paddingTop: 14, borderTopWidth: 1, borderTopColor: isDark ? '#334155' : '#E5E7EB', marginBottom: 10 }}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Text style={{ fontSize: 13, fontWeight: '800', color: isDark ? '#F9FAFB' : '#111827' }}>
@@ -6539,8 +6537,6 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                     </Text>
                   </View>
                 </View>
->>>>>>> origin/main
-
                     {/* Row 5: Bank Name & Account Holder Name */}
                     <View style={styles.formRow}>
                       <View style={styles.formCol}>
