@@ -69,6 +69,7 @@ import {
   Zap,
   Search,
   Eye,
+  EyeOff,
   Edit2,
   Download,
   Share2,
@@ -615,6 +616,8 @@ export const SettingsScreen: React.FC<{ navigation?: any; route?: any }> = ({ na
   const [backupStatusMsg, setBackupStatusMsg] = useState('');
   const [smtpSenderEmail, setSmtpSenderEmail] = useState('omchaudhari553@gmail.com');
   const [smtpAppPassword, setSmtpAppPassword] = useState('');
+  const [showSmtpPassword, setShowSmtpPassword] = useState(false);
+  const [savingSmtp, setSavingSmtp] = useState(false);
 
   // 2. Billing Settings State (Screenshot 2: 3 toggles + Bluetooth)
   const [enableTax, setEnableTax] = useState<boolean>(true);
@@ -1231,6 +1234,11 @@ export const SettingsScreen: React.FC<{ navigation?: any; route?: any }> = ({ na
             setExpenses(parsed);
           }
         }
+
+        apiClient.get('/hotel/backup/status').then((res) => {
+          const d = res.data?.data;
+          if (d?.sender) setSmtpSenderEmail(d.sender);
+        }).catch(() => {});
       } catch (e) {
         console.warn('Failed to load settings', e);
       }
@@ -1609,6 +1617,29 @@ export const SettingsScreen: React.FC<{ navigation?: any; route?: any }> = ({ na
       }
     } catch (e: any) {
       Alert.alert('Download Error', e.message || 'Failed to download PDF summary');
+    }
+  };
+
+  const handleSaveSmtpSettings = async () => {
+    setSavingSmtp(true);
+    try {
+      await ensureBackendToken();
+      await apiClient.post('/hotel/backup/settings', null, {
+        params: {
+          senderEmail: smtpSenderEmail ? smtpSenderEmail.trim() : undefined,
+          appPassword: smtpAppPassword ? smtpAppPassword.trim() : undefined,
+        }
+      });
+      setBackupStatusMsg('Google SMTP credentials saved successfully!');
+      Alert.alert(
+        'Credentials Saved',
+        'Google SMTP credentials saved successfully for daily 11:00 PM backups!'
+      );
+    } catch (e: any) {
+      const errMsg = e?.response?.data?.message || e.message || 'Failed to save SMTP settings';
+      Alert.alert('Error', errMsg);
+    } finally {
+      setSavingSmtp(false);
     }
   };
 
@@ -6121,17 +6152,243 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                     />
                   </View>
 
-                  <View style={styles.backupPanel}>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.backupTitle}>{t('dataManagement', 'Data Management')}</Text>
-                      <Text style={styles.backupDesc}>{t('automaticBackupDesc', 'Create a secure backup of your system data.')}</Text>
+                  {/* Daily Automated Hotel Backup (11:00 PM) Card */}
+                  <View style={{
+                    width: '100%',
+                    marginTop: 18,
+                    marginBottom: 16,
+                    padding: 16,
+                    borderRadius: 14,
+                    backgroundColor: isDark ? '#1E293B' : '#FFFFFF',
+                    borderWidth: 1,
+                    borderColor: isDark ? '#334155' : '#E2E8F0',
+                    gap: 12,
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.05,
+                    shadowRadius: 3,
+                    elevation: 1,
+                  }}>
+                    {/* Header: Icon, Titles & Scheduled badge */}
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                        <View style={{ width: 38, height: 38, borderRadius: 10, backgroundColor: '#3B82F6', alignItems: 'center', justifyContent: 'center' }}>
+                          <Mail size={20} color="#FFFFFF" />
+                        </View>
+                        <View>
+                          <Text style={{ fontSize: 14, fontWeight: '800', color: isDark ? '#F9FAFB' : '#0F172A' }}>
+                            Daily Automated Hotel Backup (11:00 PM)
+                          </Text>
+                          <Text style={{ fontSize: 11, color: isDark ? '#94A3B8' : '#64748B', marginTop: 2 }}>
+                            दैनिक हॉटेल डेटा बॅकअप • रोज रात्री ११:०० वाजता ऑटोमॅटिक मेल
+                          </Text>
+                        </View>
+                      </View>
+                      <View style={{ backgroundColor: '#10B98120', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6, borderWidth: 1, borderColor: '#10B98140' }}>
+                        <Text style={{ fontSize: 10, fontWeight: '800', color: '#10B981' }}>SCHEDULED EVERY NIGHT (23:00)</Text>
+                      </View>
                     </View>
-                    <TouchableOpacity
-                      style={styles.createBackupBtn}
-                      onPress={() => Alert.alert(t('backupCreated', 'Backup Created'), t('backupCreatedDesc', 'System data backup created successfully.'))}
-                    >
-                      <Text style={styles.createBackupBtnText}>{t('createBackup', 'Create Backup')}</Text>
-                    </TouchableOpacity>
+
+                    {/* Explanatory description */}
+                    <Text style={{ fontSize: 12, color: isDark ? '#CBD5E1' : '#475569', lineHeight: 18 }}>
+                      Every night at <Text style={{ fontWeight: '700' }}>11:00 PM</Text>, all daily sales, orders, invoices, payments, tables, and expenses are compiled and automatically sent to your Hotel Profile email (<Text style={{ fontWeight: '700', color: '#3B82F6' }}>{email || 'admin@royalpalace.com'}</Text>) with JSON data and PDF summary attachments.
+                    </Text>
+
+                    {/* Form Grid: Sender Gmail & App Password */}
+                    <View style={{ flexDirection: 'row', gap: 12, flexWrap: 'wrap' }}>
+                      <View style={{ flex: 1, minWidth: 260 }}>
+                        <Text style={{ fontSize: 12, fontWeight: '700', color: isDark ? '#E2E8F0' : '#334155', marginBottom: 6 }}>
+                          Sender Gmail Address (प्रेषक ईमेल)
+                        </Text>
+                        <TextInput
+                          style={[styles.textInput, { fontSize: 12.5, height: 42, fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace' }]}
+                          value={smtpSenderEmail}
+                          onChangeText={setSmtpSenderEmail}
+                          placeholder="e.g. yourhotel@gmail.com"
+                          placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
+                          autoCapitalize="none"
+                          keyboardType="email-address"
+                        />
+                        <Text style={{ fontSize: 10.5, color: isDark ? '#94A3B8' : '#64748B', marginTop: 4 }}>
+                          ज्या Gmail खात्यावरून बॅकअप पाठवायचा आहे तो ईमेल.
+                        </Text>
+                      </View>
+
+                      <View style={{ flex: 1, minWidth: 260 }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                            <Key size={13} color="#D97706" />
+                            <Text style={{ fontSize: 12, fontWeight: '700', color: isDark ? '#E2E8F0' : '#334155' }}>
+                              Google App Password (16-digit)
+                            </Text>
+                          </View>
+                          <TouchableOpacity
+                            onPress={() => Linking.openURL('https://myaccount.google.com/apppasswords')}
+                            activeOpacity={0.7}
+                          >
+                            <Text style={{ fontSize: 11, color: '#2563EB', fontWeight: '600', textDecorationLine: 'underline' }}>
+                              गुगल ॲप पासवर्ड तयार करा ↗
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
+                        <View style={{ position: 'relative', width: '100%', justifyContent: 'center' }}>
+                          <TextInput
+                            style={[
+                              styles.textInput,
+                              {
+                                fontSize: 12.5,
+                                height: 42,
+                                fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+                                letterSpacing: 1,
+                                paddingRight: 40,
+                              }
+                            ]}
+                            value={smtpAppPassword}
+                            onChangeText={setSmtpAppPassword}
+                            placeholder="abcd efgh ijkl mnop"
+                            placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
+                            secureTextEntry={!showSmtpPassword}
+                            autoCapitalize="none"
+                          />
+                          <TouchableOpacity
+                            onPress={() => setShowSmtpPassword(!showSmtpPassword)}
+                            style={{ position: 'absolute', right: 12, top: 12 }}
+                            activeOpacity={0.7}
+                          >
+                            {showSmtpPassword ? (
+                              <EyeOff size={16} color={isDark ? '#94A3B8' : '#64748B'} />
+                            ) : (
+                              <Eye size={16} color={isDark ? '#94A3B8' : '#64748B'} />
+                            )}
+                          </TouchableOpacity>
+                        </View>
+                        <Text style={{ fontSize: 10.5, color: isDark ? '#94A3B8' : '#64748B', marginTop: 4 }}>
+                          Gmail वरून दररोज रात्री ११:०० वाजता बॅकअप मेल जाण्यासाठी गुगलचा 16-अंकी App Password येथे टाका.
+                        </Text>
+                      </View>
+                    </View>
+
+                    {/* 1-Minute Guide Alert Box */}
+                    <View style={{
+                      backgroundColor: isDark ? '#0F172A' : '#F8FAFC',
+                      borderWidth: 1,
+                      borderColor: isDark ? '#334155' : '#E2E8F0',
+                      borderRadius: 10,
+                      padding: 12,
+                      gap: 6,
+                    }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <Shield size={14} color="#3B82F6" />
+                        <Text style={{ fontSize: 11.5, fontWeight: '700', color: isDark ? '#F1F5F9' : '#0F172A' }}>
+                          1 मिनिटात Google 16-Digit App Password कसा मिळवायचा:
+                        </Text>
+                      </View>
+                      <Text style={{ fontSize: 11, color: isDark ? '#CBD5E1' : '#334155', lineHeight: 16 }}>
+                        1. तुमच्या Google खात्यात (उदा. {smtpSenderEmail || 'Gmail'}) 2-Step Verification चालू असल्याची खात्री करा.{'\n'}
+                        2. <Text style={{ color: '#2563EB', fontWeight: '600' }} onPress={() => Linking.openURL('https://myaccount.google.com/apppasswords')}>https://myaccount.google.com/apppasswords</Text> वर जा आणि App Name मध्ये <Text style={{ fontWeight: '700' }}>Hotel POS</Text> टाकून "Create" वर क्लिक करा.{'\n'}
+                        3. मिळालेला 16-अंकी पासवर्ड (उदा. abcd efgh ijkl mnop) वरील रकान्यात टाकून खालील <Text style={{ fontWeight: '700' }}>"Save SMTP Credentials"</Text> किंवा <Text style={{ fontWeight: '700' }}>"Send Daily Backup to Email Now"</Text> दाबा.
+                      </Text>
+                    </View>
+
+                    {/* Status Alert Box */}
+                    {backupStatusMsg ? (
+                      <View style={{
+                        padding: 10,
+                        borderRadius: 8,
+                        backgroundColor: backupStatusMsg.startsWith('Error') ? '#FEF2F2' : '#ECFDF5',
+                        borderWidth: 1,
+                        borderColor: backupStatusMsg.startsWith('Error') ? '#EF444450' : '#10B98150',
+                      }}>
+                        <Text style={{
+                          fontSize: 11.5,
+                          fontWeight: '600',
+                          color: backupStatusMsg.startsWith('Error') ? '#991B1B' : '#065F46',
+                        }}>
+                          {backupStatusMsg}
+                        </Text>
+                      </View>
+                    ) : null}
+
+                    {/* Action Buttons Row */}
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginTop: 4 }}>
+                      <TouchableOpacity
+                        onPress={handleSendDailyBackupNow}
+                        disabled={backupSending}
+                        activeOpacity={0.8}
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: 6,
+                          backgroundColor: backupSending ? '#94A3B8' : '#3B82F6',
+                          paddingHorizontal: 16,
+                          paddingVertical: 10,
+                          borderRadius: 8,
+                        }}
+                      >
+                        <RefreshCw size={14} color="#FFFFFF" />
+                        <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: '700' }}>
+                          {backupSending ? 'Sending Backup...' : 'Send Daily Backup to Email Now'}
+                        </Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        onPress={handleSaveSmtpSettings}
+                        disabled={savingSmtp}
+                        activeOpacity={0.8}
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: 6,
+                          backgroundColor: '#10B981',
+                          paddingHorizontal: 16,
+                          paddingVertical: 10,
+                          borderRadius: 8,
+                        }}
+                      >
+                        <Check size={14} color="#FFFFFF" />
+                        <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: '700' }}>
+                          {savingSmtp ? 'Saving...' : 'Save SMTP Credentials'}
+                        </Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        onPress={handleDownloadDailyBackup}
+                        activeOpacity={0.8}
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: 6,
+                          backgroundColor: isDark ? '#334155' : '#E2E8F0',
+                          paddingHorizontal: 14,
+                          paddingVertical: 10,
+                          borderRadius: 8,
+                        }}
+                      >
+                        <Download size={14} color={isDark ? '#F8FAFC' : '#1E293B'} />
+                        <Text style={{ color: isDark ? '#F8FAFC' : '#1E293B', fontSize: 12, fontWeight: '700' }}>
+                          Download Backup (.json)
+                        </Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        onPress={handleDownloadDailyBackupPdf}
+                        activeOpacity={0.8}
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: 6,
+                          backgroundColor: isDark ? '#334155' : '#E2E8F0',
+                          paddingHorizontal: 14,
+                          paddingVertical: 10,
+                          borderRadius: 8,
+                        }}
+                      >
+                        <FileText size={14} color={isDark ? '#F8FAFC' : '#1E293B'} />
+                        <Text style={{ color: isDark ? '#F8FAFC' : '#1E293B', fontSize: 12, fontWeight: '700' }}>
+                          Download PDF Report (.pdf)
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
 
                   <View style={styles.systemStatusGrid}>
@@ -6445,140 +6702,6 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                       placeholder="e.g. royalpalace@upi"
                       placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
                     />
-                  </View>
-                </View>
-
-                {/* Nightly Auto Backup Section (11:00 PM) */}
-                <View style={{
-                  width: '100%',
-                  marginTop: 18,
-                  marginBottom: 16,
-                  padding: 16,
-                  borderRadius: 14,
-                  backgroundColor: isDark ? '#1E293B' : '#F8FAFC',
-                  borderWidth: 1,
-                  borderColor: isDark ? '#334155' : '#E2E8F0',
-                  gap: 10,
-                }}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                      <View style={{ width: 32, height: 32, borderRadius: 8, backgroundColor: '#3B82F6', alignItems: 'center', justifyContent: 'center' }}>
-                        <Mail size={18} color="#FFFFFF" />
-                      </View>
-                      <View>
-                        <Text style={{ fontSize: 13.5, fontWeight: '800', color: isDark ? '#F9FAFB' : '#0F172A' }}>
-                          Daily Automated Backup (11:00 PM)
-                        </Text>
-                        <Text style={{ fontSize: 11, color: isDark ? '#94A3B8' : '#64748B' }}>
-                          दैनिक डेटा बॅकअप • रोज रात्री ११:०० वाजता
-                        </Text>
-                      </View>
-                    </View>
-                    <View style={{ backgroundColor: '#10B98120', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, borderWidth: 1, borderColor: '#10B98140' }}>
-                      <Text style={{ fontSize: 10, fontWeight: '800', color: '#10B981' }}>SCHEDULED 23:00</Text>
-                    </View>
-                  </View>
-
-                  <Text style={{ fontSize: 12, color: isDark ? '#CBD5E1' : '#475569', lineHeight: 17 }}>
-                    Every night at 11:00 PM, all daily sales, orders, invoices, payments, tables, and expenses will be compiled and automatically sent to your Hotel Profile email (<Text style={{ fontWeight: '700', color: '#3B82F6' }}>{email || 'admin@royalpalace.com'}</Text>) with JSON data &amp; PDF backup attachments.
-                  </Text>
-
-                  {/* Google SMTP Setup Row */}
-                  <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap', marginTop: 4 }}>
-                    <View style={{ flex: 1, minWidth: 200 }}>
-                      <Text style={{ fontSize: 11.5, fontWeight: '700', color: isDark ? '#E2E8F0' : '#334155', marginBottom: 4 }}>
-                        Sender Gmail (प्रेषक ईमेल)
-                      </Text>
-                      <TextInput
-                        style={[styles.textInput, { fontSize: 12, height: 38 }]}
-                        value={smtpSenderEmail}
-                        onChangeText={setSmtpSenderEmail}
-                        placeholder="yourhotel@gmail.com"
-                        placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
-                        autoCapitalize="none"
-                        keyboardType="email-address"
-                      />
-                    </View>
-
-                    <View style={{ flex: 1, minWidth: 200 }}>
-                      <Text style={{ fontSize: 11.5, fontWeight: '700', color: isDark ? '#E2E8F0' : '#334155', marginBottom: 4 }}>
-                        Google App Password (16-Digit)
-                      </Text>
-                      <TextInput
-                        style={[styles.textInput, { fontSize: 12, height: 38, fontFamily: 'monospace' }]}
-                        value={smtpAppPassword}
-                        onChangeText={setSmtpAppPassword}
-                        placeholder="abcd efgh ijkl mnop"
-                        placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
-                        secureTextEntry
-                        autoCapitalize="none"
-                      />
-                    </View>
-                  </View>
-
-                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 4, flexWrap: 'wrap', gap: 8 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                      <TouchableOpacity
-                        onPress={handleSendDailyBackupNow}
-                        disabled={backupSending}
-                        style={{
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          gap: 6,
-                          backgroundColor: backupSending ? '#94A3B8' : '#3B82F6',
-                          paddingHorizontal: 14,
-                          paddingVertical: 9,
-                          borderRadius: 8,
-                        }}
-                      >
-                        <RefreshCw size={14} color="#FFFFFF" />
-                        <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: '700' }}>
-                          {backupSending ? 'Sending Backup...' : 'Send Backup to Email Now'}
-                        </Text>
-                      </TouchableOpacity>
-
-                      <TouchableOpacity
-                        onPress={handleDownloadDailyBackup}
-                        style={{
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          gap: 6,
-                          backgroundColor: isDark ? '#334155' : '#E2E8F0',
-                          paddingHorizontal: 12,
-                          paddingVertical: 9,
-                          borderRadius: 8,
-                        }}
-                      >
-                        <Download size={14} color={isDark ? '#F8FAFC' : '#1E293B'} />
-                        <Text style={{ color: isDark ? '#F8FAFC' : '#1E293B', fontSize: 12, fontWeight: '700' }}>
-                          Download JSON
-                        </Text>
-                      </TouchableOpacity>
-
-                      <TouchableOpacity
-                        onPress={handleDownloadDailyBackupPdf}
-                        style={{
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          gap: 6,
-                          backgroundColor: isDark ? '#334155' : '#E2E8F0',
-                          paddingHorizontal: 12,
-                          paddingVertical: 9,
-                          borderRadius: 8,
-                        }}
-                      >
-                        <FileText size={14} color={isDark ? '#F8FAFC' : '#1E293B'} />
-                        <Text style={{ color: isDark ? '#F8FAFC' : '#1E293B', fontSize: 12, fontWeight: '700' }}>
-                          Download PDF
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-
-                    {backupStatusMsg ? (
-                      <Text style={{ fontSize: 11.5, fontWeight: '600', color: backupStatusMsg.startsWith('Error') ? '#EF4444' : '#10B981' }}>
-                        {backupStatusMsg}
-                      </Text>
-                    ) : null}
                   </View>
                 </View>
 
