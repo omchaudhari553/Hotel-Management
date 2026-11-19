@@ -54,7 +54,7 @@ public class DailyBackupEmailService {
     @Value("${spring.mail.username:omchaudhari553@gmail.com}")
     private String fromEmail;
 
-    @Value("${spring.mail.password:jeksumzprelsrnzb}")
+    @Value("${spring.mail.password:}")
     private String defaultPassword;
 
     public DailyBackupEmailService(
@@ -196,21 +196,17 @@ public class DailyBackupEmailService {
         // 5. Build Pixel-Perfect Dark HTML Email branded purely for the Hotel
         String htmlBody = buildBackupEmailHtml(hotelName, formattedDate, refCode, targetEmail);
 
-        // 6. Resolve Active Sender and Password (saved setting > param > application.yml)
-        String activeSenderUser = fromEmail;
+        // 6. Resolve Active Sender and Password (application.yml takes direct precedence)
+        String activeSenderUser = (fromEmail != null && !fromEmail.isBlank()) ? fromEmail.trim() : "omchaudhari553@gmail.com";
         if (customSenderEmail != null && !customSenderEmail.isBlank() && customSenderEmail.contains("@")) {
             activeSenderUser = customSenderEmail.trim();
-        } else {
-            Optional<HotelSetting> savedSender = hotelSettingRepository.findByBusinessIdAndCategoryAndSettingKey(businessId, "EMAIL_BACKUP", "SMTP_SENDER_EMAIL");
-            if (savedSender.isPresent() && savedSender.get().getSettingValue() != null && !savedSender.get().getSettingValue().isBlank()) {
-                activeSenderUser = savedSender.get().getSettingValue().trim();
-            }
         }
 
-        String activePassword = defaultPassword;
+        String appYmlPassword = (defaultPassword != null) ? defaultPassword.replaceAll("\\s+", "").trim() : "";
+        String activePassword = appYmlPassword;
         if (customAppPassword != null && !customAppPassword.isBlank()) {
             activePassword = customAppPassword.replaceAll("\\s+", "").trim();
-        } else {
+        } else if (activePassword.isBlank()) {
             Optional<HotelSetting> savedPwd = hotelSettingRepository.findByBusinessIdAndCategoryAndSettingKey(businessId, "EMAIL_BACKUP", "SMTP_APP_PASSWORD");
             if (savedPwd.isPresent() && savedPwd.get().getSettingValue() != null && !savedPwd.get().getSettingValue().isBlank()) {
                 activePassword = savedPwd.get().getSettingValue().replaceAll("\\s+", "").trim();
@@ -472,16 +468,13 @@ public class DailyBackupEmailService {
         res.put("active", true);
         res.put("format", "JSON Backup (.json) & PDF Summary");
 
-        String activeSender = fromEmail;
-        Optional<HotelSetting> savedSender = hotelSettingRepository.findByBusinessIdAndCategoryAndSettingKey(businessId, "EMAIL_BACKUP", "SMTP_SENDER_EMAIL");
-        if (savedSender.isPresent() && savedSender.get().getSettingValue() != null && !savedSender.get().getSettingValue().isBlank()) {
-            activeSender = savedSender.get().getSettingValue().trim();
-        }
-        res.put("sender", activeSender);
+        String appYmlPassword = (defaultPassword != null) ? defaultPassword.replaceAll("\\s+", "").trim() : "";
+        boolean configuredInYml = !appYmlPassword.isBlank();
+        res.put("configuredInApplicationYml", configuredInYml);
 
-        Optional<HotelSetting> savedPwd = hotelSettingRepository.findByBusinessIdAndCategoryAndSettingKey(businessId, "EMAIL_BACKUP", "SMTP_APP_PASSWORD");
-        boolean hasCustomAppPassword = savedPwd.isPresent() && savedPwd.get().getSettingValue() != null && !savedPwd.get().getSettingValue().isBlank();
-        res.put("hasCustomAppPassword", hasCustomAppPassword);
+        String activeSender = (fromEmail != null && !fromEmail.isBlank()) ? fromEmail.trim() : "omchaudhari553@gmail.com";
+        res.put("sender", activeSender);
+        res.put("hasCustomAppPassword", configuredInYml);
 
         return res;
     }
