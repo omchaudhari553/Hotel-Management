@@ -1,0 +1,3828 @@
+:root {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-heading: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+  /* Official Common Brand Color System (#090040 / rgb(9, 0, 64)) */
+  --main-brand-navy: #090040;
+  --royal-blue: #090040;
+  --royal-blue-hover: #1A0B66;
+  --royal-blue-subtle: #F0EEF8;
+  --royal-blue-border: #D7D0F0;
+
+  --accent-gold: #F59E0B;
+  --accent-gold-hover: #D97706;
+  --accent-gold-subtle: #FFFBEB;
+  --accent-gold-border: #FDE68A;
+
+  --card-white: #FFFFFF;
+  --bg-page: #F8FAFC;
+  --bg-subtle: #F1F5F9;
+  --border-slate: #E2E8F0;
+  --border-focus: #090040;
+
+  --warm-gray-border: #E7E5E4;
+  --deep-charcoal: #1C1917;
+  --warm-slate: #57534E;
+
+  --text-heading: #090040;
+  --text-body: #475569;
+  --text-muted: #64748B;
+  --text-light: #94A3B8;
+
+  --success-green: #10B981;
+  --success-green-hover: #059669;
+  --success-bg: #ECFDF5;
+  --success-border: #A7F3D0;
+
+  /* HOTEL / RESTRO - AJALKAR HOTEL COLOR SYSTEM */
+  --hotel-primary: #7C2D12;
+  /* Terracotta Brown */
+  --hotel-secondary: #B45309;
+  /* Amber Brown */
+  --hotel-accent: #F59E0B;
+  /* Warm Gold */
+  --hotel-highlight: #F59E0B;
+  /* Warm Gold */
+  --hotel-light-accent: #FFF7ED;
+  /* Soft Peach */
+  --hotel-bg: #FFFBF5;
+  /* Warm Cream */
+  --hotel-card: #FFFFFF;
+  /* White */
+  --hotel-heading: #1C1917;
+  /* Deep Charcoal */
+  --hotel-body: #57534E;
+  /* Warm Slate */
+  --hotel-border: #E7E5E4;
+  /* Warm Gray */
+
+  /* MESS - AJALKAR MESS COLOR SYSTEM */
+  --mess-primary: #09331D;
+  /* Deep Forest Green */
+  --mess-secondary: #166534;
+  /* Forest Green */
+  --mess-light-accent: #EBF7EE;
+  /* Light Mint Accent */
+  --mess-highlight: #09331D;
+  /* Deep Forest Green */
+  --mess-bg: #EBF7EE;
+  /* Light Mint Tint */
+  --mess-card: #FFFFFF;
+  /* White */
+  --mess-heading: #1C1917;
+  /* Deep Charcoal */
+  --mess-body: #57534E;
+  /* Warm Slate */
+  --mess-border: #E7E5E4;
+  /* Warm Gray */
+
+  /* CAFE - AJALKAR CAFE COLOR SYSTEM */
+  --cafe-primary: #A56F63;
+  /* Main identity */
+  --cafe-secondary: #6F453C;
+  /* Depth / Navigation */
+  --cafe-highlight: #C68B5C;
+  /* Caramel highlights */
+  --cafe-accent: #F3E4E0;
+  /* Soft accents */
+  --cafe-bg: #FCF8F6;
+  /* Background */
+  --cafe-border: #F3E4E0;
+  /* Soft accent border */
+
+  /* Semantic UI Aliases */
+  --bg-main: var(--bg-page);
+  --bg-card: var(--card-white);
+  --bg-sidebar: var(--main-brand-navy);
+  --bg-sidebar-hover: rgba(255, 255, 255, 0.08);
+  --border-subtle: var(--border-slate);
+  --border-color: var(--border-slate);
+
+  --text-main: var(--text-heading);
+  --primary: var(--royal-blue);
+  --primary-hover: var(--royal-blue-hover);
+  --secondary: var(--accent-gold);
+  --secondary-hover: var(--accent-gold-hover);
+
+  /* Status Colors */
+  --success: #10B981;
+  --warning: #F59E0B;
+  --warning-bg: #FFFBEB;
+  --warning-border: #FDE68A;
+  --danger: #EF4444;
+  --danger-bg: #FEF2F2;
+  --danger-border: #FECACA;
+  --info: #090040;
+  --info-bg: #F0EEF8;
+  --info-border: #D7D0F0;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px 0 rgba(9, 0, 64, 0.04);
+  --shadow-sm: 0 1px 3px 0 rgba(9, 0, 64, 0.06), 0 1px 2px -1px rgba(9, 0, 64, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(9, 0, 64, 0.07), 0 2px 4px -2px rgba(9, 0, 64, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(9, 0, 64, 0.08), 0 4px 6px -4px rgba(9, 0, 64, 0.04);
+  --shadow-xl: 0 20px 25px -5px rgba(9, 0, 64, 0.1), 0 8px 10px -6px rgba(9, 0, 64, 0.05);
+
+  /* Border radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-full: 9999px;
+}
+
+
+
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+
+html {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  font-family: var(--font-sans);
+  background-color: var(--bg-page);
+  color: var(--text-body);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* High-Visibility Modern Universal Scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #94A3B8 #F1F5F9;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #94A3B8;
+  border-radius: 6px;
+  border: 2px solid #F1F5F9;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #64748B;
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: #475569;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-heading);
+}
+
+/* Enforced Consistent Modern Typography Across All Pages */
+button,
+input,
+select,
+textarea,
+p,
+span,
+div,
+table,
+th,
+td,
+a,
+label,
+li,
+ul,
+ol {
+  font-family: var(--font-sans);
+}
+
+code,
+pre,
+kbd,
+samp,
+.font-mono,
+[style*="monospace"] {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+}
+
+@keyframes dialogTimerShrink {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+/* App Layout */
+.app-container {
+  display: flex;
+  height: 100vh;
+  max-height: 100vh;
+  width: 100vw;
+  max-width: 100vw;
+  overflow: hidden;
+  position: relative;
+}
+
+.main-content {
+  flex: 1 1 0%;
+  min-width: 0;
+  width: calc(100% - 240px);
+  max-width: calc(100% - 240px);
+  box-sizing: border-box;
+  height: 100vh;
+  max-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  background-color: var(--bg-page);
+  scrollbar-width: thin;
+}
+
+.page-content {
+  flex: 1 0 auto;
+  padding: 8px 12px 20px;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.sidebar {
+  box-sizing: border-box;
+  width: 240px;
+  min-width: 240px;
+  max-width: 240px;
+  height: 100vh;
+  max-height: 100vh;
+  background-color: var(--main-brand-navy);
+  color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  transition: width 0.2s ease;
+  z-index: 100;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  position: relative;
+}
+
+.sidebar-header {
+  flex-shrink: 0;
+  padding: 18px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sidebar-logo {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--royal-blue) 0%, var(--accent-gold) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.2rem;
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.sidebar-title {
+  font-size: 1.08rem;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  color: #FFFFFF;
+}
+
+.sidebar-subtitle {
+  font-size: 0.72rem;
+  color: var(--accent-gold);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.sidebar-content {
+  flex: 1 1 0%;
+  padding: 10px 8px 16px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.sidebar-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.sidebar-section-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 6px;
+  padding-left: 10px;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 12px;
+  border-radius: var(--radius-md);
+  color: rgba(255, 255, 255, 0.75);
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.nav-item:hover {
+  background-color: var(--bg-sidebar-hover);
+  color: #FFFFFF;
+}
+
+.nav-item.active {
+  background-color: var(--royal-blue);
+  color: #FFFFFF;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+}
+
+/* Hotel Theme: Terracotta Brown & Amber Brown with Warm Cream Background */
+.app-container[data-industry="hotel"] {
+  background-color: #FFFBF5 !important;
+}
+
+.app-container[data-industry="hotel"] .sidebar {
+  background-color: #431407 !important;
+  /* Deep Rich Terracotta Brown (eliminates all navy blue) */
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.app-container[data-industry="hotel"] .sidebar .sidebar-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.app-container[data-industry="hotel"] .sidebar .nav-item {
+  color: rgba(255, 255, 255, 0.85) !important;
+  border-radius: 8px !important;
+  margin: 2px 4px !important;
+  padding: 9px 12px !important;
+  font-size: 0.88rem !important;
+}
+
+.app-container[data-industry="hotel"] .sidebar .nav-item:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  color: #FFFFFF !important;
+}
+
+.app-container[data-industry="hotel"] .sidebar .nav-item.active {
+  background: linear-gradient(135deg, #7C2D12 0%, #B45309 100%) !important;
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 14px rgba(124, 45, 18, 0.5) !important;
+}
+
+.app-container[data-industry="hotel"] .top-navbar {
+  background-color: #FFFFFF !important;
+  border-bottom: 1px solid #E7E5E4 !important;
+}
+
+/* Hotel Software Full-Screen Edge-to-Edge Cards */
+.app-container[data-industry="hotel"] .main-content {
+  background-color: #FFFBF5 !important;
+}
+
+@media (min-width: 1025px) {
+  .app-container[data-industry="hotel"] .main-content {
+    width: calc(100% - 240px) !important;
+    max-width: calc(100% - 240px) !important;
+  }
+}
+
+.app-container[data-industry="hotel"] .page-content {
+  padding: 6px 10px 16px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.app-container[data-industry="hotel"] .card,
+.app-container[data-industry="hotel"] section.card,
+.app-container[data-industry="hotel"] .billing-module .card,
+.app-container[data-industry="hotel"] .billing-module .stepper,
+.app-container[data-industry="hotel"] .tables-page,
+.app-container[data-industry="hotel"] .summary-grid,
+.app-container[data-industry="hotel"] .table-section,
+.app-container[data-industry="hotel"] .settings-page,
+.app-container[data-industry="hotel"] .settings-card,
+.app-container[data-industry="hotel"] .settings-layout {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.top-navbar {
+  height: 64px;
+  min-height: 64px;
+  background-color: #FFFFFF;
+  border-bottom: 1px solid #E7E5E4;
+  padding: 13px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 1000 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.02);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-sizing: border-box;
+  width: 100%;
+  overflow-x: clip;
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 0 0 auto;
+}
+
+.navbar-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 1 auto;
+  min-width: fit-content;
+  padding: 0 6px;
+  box-sizing: border-box;
+}
+
+.navbar-search-wrapper {
+  position: relative;
+  flex: 1 1 240px;
+  min-width: 140px;
+  max-width: 320px;
+}
+
+.navbar-search-input {
+  width: 100%;
+  height: 38px;
+  padding: 0 32px 0 36px;
+  border-radius: 10px;
+  font-size: 0.84rem;
+  font-weight: 500;
+  outline: none;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+.navbar-search-icon {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.navbar-search-clear {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  opacity: 0.6;
+  transition: opacity 0.15s ease;
+}
+
+.navbar-search-clear:hover {
+  opacity: 1;
+}
+
+.navbar-branch-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.navbar-branch-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  user-select: none;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+.navbar-branch-btn:hover {
+  filter: brightness(0.97);
+}
+
+.navbar-branch-name {
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex: 0 1 auto;
+  min-width: 0;
+  flex-wrap: nowrap;
+}
+
+/* Trial / Licence Badge */
+.navbar-trial-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 8px 0 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  user-select: none;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.navbar-trial-badge:hover {
+  filter: brightness(0.98);
+}
+
+.navbar-renew-btn {
+  border: none;
+  border-radius: 6px;
+  padding: 4px 9px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  line-height: 1;
+}
+
+.navbar-renew-btn:hover {
+  transform: translateY(-0.5px);
+  filter: brightness(1.08);
+}
+
+/* Language Chip */
+.navbar-lang-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 10px;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  user-select: none;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  box-sizing: border-box;
+  flex-shrink: 0;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.navbar-lang-chip:hover {
+  filter: brightness(0.98);
+}
+
+.central-db-label-full {
+  display: inline;
+}
+
+.central-db-label-short {
+  display: none;
+}
+
+.navbar-trial-text-mini {
+  display: none;
+}
+
+/* Date Chip */
+.navbar-date-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  user-select: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  box-sizing: border-box;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Notification Button */
+.navbar-icon-btn {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  border: 1.5px solid;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  background: transparent;
+}
+
+.navbar-icon-btn:hover {
+  filter: brightness(0.96);
+}
+
+.navbar-badge-count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9px;
+  background-color: #DC2626;
+  color: #FFFFFF;
+  font-size: 0.68rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.3);
+  line-height: 1;
+}
+
+/* User Profile */
+.navbar-profile-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.navbar-profile-chip {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 38px;
+  padding: 0 10px 0 4px;
+  border-radius: 10px;
+  cursor: pointer;
+  border: 1.5px solid;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  transition: all 0.15s ease;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.navbar-profile-chip:hover {
+  filter: brightness(0.98);
+}
+
+.navbar-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 0.95rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  flex-shrink: 0;
+}
+
+.navbar-profile-text {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.navbar-user-name {
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  max-width: 130px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.navbar-user-role {
+  font-size: 0.68rem;
+  font-weight: 700;
+  margin-top: 1px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  line-height: 1.1;
+}
+
+/* Sign out button */
+.navbar-logout-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  border: 1.5px solid;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  background: transparent;
+}
+
+.navbar-logout-btn:hover {
+  background-color: #FEE2E2 !important;
+  border-color: #FECACA !important;
+  color: #DC2626 !important;
+}
+
+/* Dropdown Card Base */
+.navbar-dropdown-card {
+  position: absolute;
+  top: calc(100% + 8px);
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  border: 1px solid #E7E5E4;
+  box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.05);
+  z-index: 1100;
+  animation: fadeIn 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Responsive Rules for 100% Zoom and Varied Laptop Displays */
+@media (max-width: 1400px) {
+  .central-db-label-full {
+    display: none !important;
+  }
+
+  .central-db-label-short {
+    display: inline !important;
+  }
+
+  .navbar-user-role {
+    display: none !important;
+  }
+
+  .navbar-branch-name {
+    max-width: 110px;
+  }
+
+  .navbar-user-name {
+    max-width: 105px;
+  }
+
+  .navbar-right {
+    gap: 6px;
+  }
+
+  .top-navbar {
+    padding: 13px 12px;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 1280px) {
+  .navbar-date-full {
+    display: none !important;
+  }
+
+  .navbar-date-short {
+    display: inline !important;
+  }
+
+  .navbar-trial-text-full {
+    display: none !important;
+  }
+
+  .navbar-trial-text-short {
+    display: inline !important;
+  }
+
+  .navbar-trial-text-mini {
+    display: none !important;
+  }
+
+  .navbar-branch-name {
+    max-width: 95px;
+  }
+
+  .navbar-user-name {
+    max-width: 90px;
+  }
+}
+
+@media (min-width: 1281px) {
+  .navbar-date-full {
+    display: inline !important;
+  }
+
+  .navbar-date-short {
+    display: none !important;
+  }
+
+  .navbar-trial-text-full {
+    display: inline !important;
+  }
+
+  .navbar-trial-text-short {
+    display: none !important;
+  }
+
+  .navbar-trial-text-mini {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1180px) {
+  .navbar-trial-text-short {
+    display: none !important;
+  }
+
+  .navbar-trial-text-mini {
+    display: inline !important;
+  }
+
+  .navbar-date-chip-wrapper {
+    display: none !important;
+  }
+
+  .navbar-branch-name {
+    max-width: 85px;
+  }
+
+  .navbar-user-name {
+    max-width: 80px;
+  }
+}
+
+@media (max-width: 960px) {
+  .top-navbar {
+    padding: 10px 10px;
+  }
+
+  .navbar-profile-text {
+    display: none !important;
+  }
+
+  .navbar-profile-chip {
+    padding: 0 6px 0 4px;
+    gap: 4px;
+  }
+
+  .navbar-search-wrapper {
+    max-width: 190px;
+    min-width: 120px;
+  }
+
+  .navbar-branch-name {
+    max-width: 75px;
+  }
+
+  .navbar-center {
+    display: none !important;
+  }
+
+  .navbar-right {
+    gap: 5px;
+  }
+
+  .navbar-renew-btn {
+    padding: 3px 6px;
+    font-size: 0.7rem;
+  }
+
+  .navbar-branch-btn {
+    padding: 0 8px;
+  }
+}
+
+.page-content {
+  flex: 1;
+  padding: 8px 12px 20px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+/* Cards & Surfaces - Full Width Edge-to-Edge */
+.card,
+.owner-card,
+.hotel-card,
+section.card {
+  background-color: #FFFFFF;
+  border-radius: 10px;
+  border: 1px solid var(--border-slate);
+  padding: 14px 16px;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card:hover {
+  border-color: #CBD5E1;
+}
+
+/* Compact Header Cards Across Whole Software */
+.billing-header,
+.payment-header,
+.page-header,
+.module-header {
+  padding: 12px 16px !important;
+  margin-bottom: 14px !important;
+}
+
+.billing-header h1,
+.payment-header h1,
+.page-header h1,
+.module-header h1 {
+  font-size: 22px !important;
+  line-height: 1.2 !important;
+}
+
+.header-icon,
+.billing-header .header-icon {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  border-radius: 10px !important;
+}
+
+/* Dashboard Grids */
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+  width: 100%;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  width: 100%;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  width: 100%;
+}
+
+.grid-1 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  width: 100%;
+}
+
+@media (max-width: 1100px) {
+  .grid-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+
+  .grid-4,
+  .grid-3,
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  transition: all 0.15s ease;
+  text-decoration: none;
+  line-height: 1.25;
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background-color: var(--royal-blue);
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(9, 0, 64, 0.35);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--royal-blue-hover);
+  box-shadow: 0 6px 18px rgba(9, 0, 64, 0.5);
+}
+
+.btn-hotel {
+  background-color: var(--hotel-primary);
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(124, 45, 18, 0.25);
+}
+
+.btn-hotel:hover:not(:disabled) {
+  background-color: var(--hotel-secondary);
+}
+
+.btn-mess {
+  background-color: var(--mess-primary);
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(9, 51, 29, 0.25);
+}
+
+.btn-mess:hover:not(:disabled) {
+  background-color: #062414;
+}
+
+.btn-cafe {
+  background-color: var(--cafe-primary);
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(120, 53, 15, 0.25);
+}
+
+.btn-cafe:hover:not(:disabled) {
+  background-color: var(--cafe-secondary);
+}
+
+.btn-secondary {
+  background-color: var(--royal-blue-subtle);
+  color: var(--royal-blue);
+  border-color: var(--royal-blue-border);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: #DBEAFE;
+  color: var(--royal-blue-hover);
+}
+
+.btn-outline {
+  background-color: #FFFFFF;
+  border-color: var(--border-slate);
+  color: var(--text-heading);
+}
+
+.btn-outline:hover:not(:disabled) {
+  background-color: var(--bg-subtle);
+  border-color: #CBD5E1;
+  color: var(--text-heading);
+}
+
+.btn-danger {
+  background-color: var(--danger);
+  color: #FFFFFF;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: #B91C1C;
+}
+
+.btn-sm {
+  padding: 6px 14px;
+  font-size: 0.82rem;
+  border-radius: var(--radius-sm);
+}
+
+/* ========================================================================= */
+/* Inputs & Form Controls                                                    */
+/* ========================================================================= */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.form-label {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.form-control,
+.input,
+.select,
+.textarea {
+  width: 100%;
+  height: 46px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border-slate);
+  font-size: 0.92rem;
+  font-family: inherit;
+  background-color: #FFFFFF;
+  color: var(--text-heading);
+  transition: all 0.15s ease;
+  outline: none;
+  box-shadow: var(--shadow-xs);
+}
+
+.textarea {
+  height: auto;
+  min-height: 80px;
+}
+
+.form-control:hover,
+.input:hover,
+.select:hover,
+.textarea:hover {
+  border-color: #CBD5E1;
+}
+
+.form-control:focus,
+.input:focus,
+.select:focus,
+.textarea:focus {
+  border-color: var(--royal-blue);
+  box-shadow: 0 0 0 3.5px rgba(37, 99, 235, 0.14);
+  background-color: #FFFFFF;
+}
+
+.form-control.is-invalid,
+.input.is-invalid {
+  border-color: var(--danger) !important;
+  background-color: #FEF2F2 !important;
+}
+
+.form-control.is-invalid:focus,
+.input.is-invalid:focus {
+  box-shadow: 0 0 0 3.5px rgba(220, 38, 38, 0.14) !important;
+}
+
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.input-with-icon .input-icon {
+  position: absolute;
+  left: 14px;
+  color: var(--text-body);
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.input-with-icon .form-control,
+.input-with-icon .input {
+  padding-left: 44px;
+}
+
+.input-with-prefix {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.input-with-prefix .prefix-badge {
+  position: absolute;
+  left: 8px;
+  background-color: var(--bg-subtle);
+  border: 1px solid var(--border-slate);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.input-with-prefix .form-control,
+.input-with-prefix .input {
+  padding-left: 58px;
+}
+
+.form-error-msg {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #DC2626;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.badge-success {
+  background: var(--success-bg);
+  color: var(--success);
+  border: 1px solid var(--success-border);
+}
+
+.badge-warning {
+  background: var(--warning-bg);
+  color: #B45309;
+  border: 1px solid var(--warning-border);
+}
+
+.badge-danger {
+  background: var(--danger-bg);
+  color: var(--danger);
+  border: 1px solid var(--danger-border);
+}
+
+.badge-info {
+  background: var(--info-bg);
+  color: var(--info);
+  border: 1px solid var(--info-border);
+}
+
+.badge-brand {
+  background: var(--royal-blue-subtle);
+  color: var(--royal-blue);
+  border: 1px solid var(--royal-blue-border);
+}
+
+.badge-gold {
+  background: var(--accent-gold-subtle);
+  color: #B45309;
+  border: 1px solid var(--accent-gold-border);
+}
+
+/* Industry Badges */
+.badge-hotel {
+  background: var(--hotel-bg);
+  color: var(--hotel-primary);
+  border: 1px solid var(--hotel-border);
+}
+
+.badge-mess {
+  background: var(--mess-light-accent);
+  color: var(--mess-secondary);
+  border: 1px solid var(--mess-border);
+}
+
+.badge-cafe {
+  background: var(--cafe-bg);
+  color: var(--cafe-primary);
+  border: 1px solid var(--cafe-border);
+}
+
+/* Data Tables */
+.table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+  border: 1px solid var(--warm-gray-border);
+  border-radius: var(--radius-lg);
+  background: #FFFFFF;
+  box-sizing: border-box;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.88rem;
+}
+
+.data-table th {
+  background-color: #FAFAF9;
+  padding: 13px 18px;
+  font-weight: 700;
+  color: var(--warm-slate);
+  border-bottom: 1px solid var(--warm-gray-border);
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+}
+
+.data-table td {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--warm-gray-border);
+  color: var(--deep-charcoal);
+  vertical-align: middle;
+}
+
+.data-table tr:last-child td {
+  border-bottom: none;
+}
+
+.data-table tr:hover td {
+  background-color: #FEFDF5;
+}
+
+/* Modals */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(28, 25, 23, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 20px;
+}
+
+.modal-content {
+  background: #FFFFFF;
+  border-radius: var(--radius-xl);
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--warm-gray-border);
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--warm-gray-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--warm-gray-border);
+  background-color: #FAFAF9;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  border-bottom-left-radius: var(--radius-xl);
+  border-bottom-right-radius: var(--radius-xl);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes scaleUp {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Auth Layout Responsive */
+@media (max-width: 960px) {
+  .auth-hero-pane {
+    display: none !important;
+  }
+}
+
+/* =========================================================
+   LAPTOP VIEWPORT DEFAULT 100% ZOOM & RESPONSIVE FIT
+   "laptop chya size nusar 100 zoom hoyla pahije mhnjech jsa laptop tsa view default size krun de ani vite la krun de"
+========================================================= */
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100vw;
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  zoom: 1;
+}
+
+.auth-layout-container {
+  min-height: 100vh;
+  width: 100%;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+/* Specific styling for Laptop resolutions (1024px to 1536px, e.g. 1366x768, 1440x900, 1536x864) */
+@media screen and (min-width: 1025px) and (max-width: 1536px) {
+
+  html,
+  body,
+  #root {
+    zoom: 1 !important;
+    -moz-transform: scale(1) !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    min-height: 100% !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+  }
+
+  .auth-layout-container {
+    min-height: 100vh !important;
+    width: 100% !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+  }
+
+  .app-container {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+  }
+
+  /* Compact sidebar on laptop so billing, tables and POS modules fit perfectly */
+  .sidebar {
+    width: 236px !important;
+    min-width: 236px !important;
+    max-width: 236px !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+  }
+
+  .sidebar-header {
+    padding: 16px 14px !important;
+  }
+
+  .sidebar-content {
+    padding: 8px 6px 14px !important;
+    gap: 12px !important;
+  }
+
+  .nav-item {
+    padding: 8px 12px !important;
+    font-size: 0.85rem !important;
+    margin: 2px 4px !important;
+  }
+
+  .main-content {
+    flex: 1 1 0% !important;
+    width: calc(100% - 236px) !important;
+    max-width: calc(100% - 236px) !important;
+    min-width: 0 !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+  }
+
+  .page-content {
+    padding: 8px 10px 18px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Billing 3-Step Grid Laptop Optimization */
+  .billing-grid,
+  .three-step-grid,
+  .steps-container {
+    gap: 14px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Table Cards & Floor Grid Laptop Optimization */
+  .tables-grid,
+  .floor-diagram-grid,
+  .kot-cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  /* Stat & KPI Cards */
+  .stat-card,
+  .kpi-card {
+    padding: 12px 14px !important;
+  }
+}
+
+/* Extra large screens / Monitors (1537px+) */
+@media screen and (min-width: 1537px) {
+
+  html,
+  body {
+    zoom: 1;
+    overflow-x: hidden;
+  }
+}
+
+/* =========================================================
+   SINGLE-PAGE RECEIPT & INVOICE PRINTING RULES
+========================================================= */
+@media print {
+  .owner-layout-main .owner-main-content {
+    margin-left: 0 !important;
+  }
+  @page {
+    size: 80mm auto;
+    margin: 2mm 3mm;
+  }
+
+  /* Hide app shell, sidebar, trial banners, navigation, buttons, modals backdrops */
+  .sidebar,
+  .sidebar-container,
+  .top-navbar,
+  nav,
+  aside,
+  header,
+  .topbar,
+  .trial-banner,
+  .popup-overlay,
+  .modal-overlay,
+  .popup-actions,
+  button,
+  .payment-filter-bar,
+  .dashboard-tabs,
+  .no-print,
+  .billing-header,
+  .stepper,
+  .actions,
+  .success-summary,
+  .success-bill-label,
+  .billing-grid,
+  .app-container>.sidebar,
+  .navbar-left,
+  .navbar-center,
+  .navbar-right {
+    display: none !important;
+  }
+
+  html,
+  body {
+    background: #FFFFFF !important;
+    color: #000000 !important;
+    font-size: 10pt !important;
+    width: 80mm !important;
+    min-width: 80mm !important;
+    max-width: 80mm !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* Single-page receipt container */
+  .printable-invoice-container,
+  .print-receipt-sheet,
+  #simple-bill-preview-success,
+  #hotel-print-receipt,
+  .simple-bill {
+    display: block !important;
+    position: static !important;
+    width: 72mm !important;
+    max-width: 72mm !important;
+    min-width: 72mm !important;
+    margin: 0 auto !important;
+    padding: 2mm 1mm !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: #FFFFFF !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
+
+  .print-avoid-break {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
+}
+
+
+/* ========================================================
+   GLOBAL APPLICATION THEME ENGINE & FORM INPUT FIXES
+======================================================== */
+.form-control,
+.owner-input-field,
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="number"],
+input[type="password"] {
+  width: 100%;
+  height: 44px;
+  min-height: 44px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1.5px solid #CBD5E1;
+  font-size: 0.90rem;
+  font-family: inherit;
+  color: var(--text-heading, #0F172A);
+  background-color: #FFFFFF;
+  outline: none;
+  box-sizing: border-box;
+  transition: all 0.15s ease-in-out;
+  display: block;
+}
+
+.form-control:focus,
+.owner-input-field:focus,
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="tel"]:focus,
+input[type="number"]:focus,
+input[type="password"]:focus {
+  border-color: #F59E0B !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.18) !important;
+}
+
+/* Exclude search and compact inline inputs from global 44px expansion */
+.purchase-search-input,
+div[data-search-box="true"] input {
+  height: 100% !important;
+  min-height: unset !important;
+  padding: 0 0 0 8px !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  background: transparent !important;
+  display: inline-block !important;
+  font-size: 13px !important;
+}
+
+.purchase-search-input:focus,
+div[data-search-box="true"] input:focus {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* =========================================================================
+   OWNER ADMIN PANEL THEMES (Completely Isolated from Hotel Application)
+   These rules apply SOLELY inside .owner-layout-main.
+   The Hotel Application (.app-container, /hotel/*) is 100% UNTOUCHED.
+   ========================================================================= */
+
+/* --- 1. CLASSIC LIGHT / DAYLIGHT (Default) --- */
+.owner-layout-main[data-theme="light"],
+.owner-layout-main:not([data-theme]) {
+  --bg-page: #F8FAFC;
+  --bg-subtle: #F1F5F9;
+  --card-white: #FFFFFF;
+  --border-slate: #E2E8F0;
+  --text-heading: #0F172A;
+  --text-body: #475569;
+  --text-muted: #64748B;
+  --text-light: #94A3B8;
+  --badge-bg: #FEF3C7;
+  --badge-text: #92400E;
+  --badge-border: #FDE68A;
+  --badge-icon: #B45309;
+  --trial-banner-bg: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+  --trial-border: #FDE68A;
+  --trial-heading: #78350F;
+  --trial-text: #92400E;
+  background-color: #F8FAFC !important;
+  color: #475569 !important;
+}
+
+.owner-layout-main[data-theme="light"] .owner-header-bar,
+.owner-layout-main:not([data-theme]) .owner-header-bar {
+  background-color: #FFFFFF !important;
+  border-bottom: 1px solid #E2E8F0 !important;
+  color: #0F172A !important;
+}
+
+.owner-layout-main[data-theme="light"] .owner-card,
+.owner-layout-main:not([data-theme]) .owner-card {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  color: #0F172A !important;
+}
+
+.owner-layout-main[data-theme="light"] .owner-sidebar,
+.owner-layout-main:not([data-theme]) .owner-sidebar {
+  background-color: #1E1B18 !important;
+}
+
+/* Light Trial Banner */
+.owner-layout-main[data-theme="light"] .owner-trial-banner,
+.owner-layout-main:not([data-theme]) .owner-trial-banner {
+  background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%) !important;
+  border: 1.5px solid #FDE68A !important;
+}
+
+.owner-layout-main[data-theme="light"] .owner-trial-banner h3,
+.owner-layout-main[data-theme="light"] .owner-trial-banner .owner-trial-heading,
+.owner-layout-main:not([data-theme]) .owner-trial-banner h3,
+.owner-layout-main:not([data-theme]) .owner-trial-banner .owner-trial-heading {
+  color: #78350F !important;
+  font-weight: 800 !important;
+}
+
+.owner-layout-main[data-theme="light"] .owner-trial-banner p,
+.owner-layout-main[data-theme="light"] .owner-trial-banner .owner-trial-subtext,
+.owner-layout-main[data-theme="light"] .owner-trial-banner span,
+.owner-layout-main:not([data-theme]) .owner-trial-banner p,
+.owner-layout-main:not([data-theme]) .owner-trial-banner .owner-trial-subtext,
+.owner-layout-main:not([data-theme]) .owner-trial-banner span {
+  color: #92400E !important;
+  font-weight: 600 !important;
+}
+
+.owner-layout-main[data-theme="light"] .owner-trial-banner strong,
+.owner-layout-main[data-theme="light"] .owner-trial-banner .owner-trial-status-badge,
+.owner-layout-main:not([data-theme]) .owner-trial-banner strong,
+.owner-layout-main:not([data-theme]) .owner-trial-banner .owner-trial-status-badge {
+  color: #78350F !important;
+  font-weight: 800 !important;
+}
+
+/* Light Badge & Pills */
+.owner-layout-main[data-theme="light"] .owner-badge-pill,
+.owner-layout-main:not([data-theme]) .owner-badge-pill {
+  background-color: #FEF3C7 !important;
+  color: #92400E !important;
+  border: 1.5px solid #FDE68A !important;
+}
+
+.owner-layout-main[data-theme="light"] .owner-badge-pill *,
+.owner-layout-main[data-theme="light"] .owner-badge-pill span,
+.owner-layout-main[data-theme="light"] .owner-badge-pill .owner-badge-text,
+.owner-layout-main:not([data-theme]) .owner-badge-pill *,
+.owner-layout-main:not([data-theme]) .owner-badge-pill span,
+.owner-layout-main:not([data-theme]) .owner-badge-pill .owner-badge-text {
+  color: #92400E !important;
+  font-weight: 700 !important;
+}
+
+.owner-layout-main[data-theme="light"] .owner-badge-pill svg,
+.owner-layout-main:not([data-theme]) .owner-badge-pill svg {
+  color: #B45309 !important;
+  stroke: #B45309 !important;
+}
+
+.owner-layout-main[data-theme="light"] .owner-avatar-icon,
+.owner-layout-main:not([data-theme]) .owner-avatar-icon {
+  background-color: #FEF3C7 !important;
+  border: 1px solid #FDE68A !important;
+}
+
+.owner-layout-main[data-theme="light"] .owner-username-pill,
+.owner-layout-main:not([data-theme]) .owner-username-pill {
+  background-color: #F1F5F9 !important;
+  border: 1px solid #CBD5E1 !important;
+}
+
+.owner-layout-main[data-theme="light"] .owner-username-pill code,
+.owner-layout-main:not([data-theme]) .owner-username-pill code {
+  color: #0F172A !important;
+}
+
+.owner-layout-main[data-theme="light"] .owner-designation-pill,
+.owner-layout-main:not([data-theme]) .owner-designation-pill {
+  background-color: #F1F5F9 !important;
+  border: 1px solid #E2E8F0 !important;
+  color: #334155 !important;
+}
+
+/* --- 2. MIDNIGHT DARK MODE --- */
+.owner-layout-main[data-theme="dark"] {
+  --bg-page: #0B0F19;
+  --bg-subtle: #151D2F;
+  --card-white: #161F36;
+  --border-slate: #2A364F;
+  --text-heading: #F8FAFC;
+  --text-body: #CBD5E1;
+  --text-muted: #94A3B8;
+  --text-light: #64748B;
+  --badge-bg: rgba(245, 158, 11, 0.18);
+  --badge-text: #F59E0B;
+  --badge-border: rgba(245, 158, 11, 0.35);
+  --badge-icon: #F59E0B;
+  --trial-banner-bg: linear-gradient(135deg, #1C1917 0%, #291D13 100%);
+  --trial-border: rgba(245, 158, 11, 0.45);
+  --trial-heading: #FBBF24;
+  --trial-text: #FDE68A;
+  background-color: #0B0F19 !important;
+  color: #CBD5E1 !important;
+}
+
+.owner-layout-main[data-theme="dark"] main {
+  background-color: #0B0F19 !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-header-bar {
+  background-color: #161F36 !important;
+  border-bottom: 1px solid #2A364F !important;
+  color: #F8FAFC !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-sidebar {
+  background-color: #0B1120 !important;
+  border-right: 1px solid #1E293B !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-card {
+  background-color: #161F36 !important;
+  border-color: #2A364F !important;
+  color: #F8FAFC !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* Dark Trial Banner */
+.owner-layout-main[data-theme="dark"] .owner-trial-banner {
+  background: linear-gradient(135deg, #1C1917 0%, #291D13 100%) !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.45) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45) !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-trial-banner h3,
+.owner-layout-main[data-theme="dark"] .owner-trial-banner .owner-trial-heading {
+  color: #FBBF24 !important;
+  font-weight: 800 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-trial-banner p,
+.owner-layout-main[data-theme="dark"] .owner-trial-banner .owner-trial-subtext,
+.owner-layout-main[data-theme="dark"] .owner-trial-banner span {
+  color: #FDE68A !important;
+  font-weight: 600 !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-trial-banner strong,
+.owner-layout-main[data-theme="dark"] .owner-trial-banner .owner-trial-status-badge {
+  color: #FBBF24 !important;
+  font-weight: 800 !important;
+}
+
+/* Dark Badge & Pills */
+.owner-layout-main[data-theme="dark"] .owner-badge-pill {
+  background-color: rgba(245, 158, 11, 0.22) !important;
+  color: #F59E0B !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.5) !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-badge-pill *,
+.owner-layout-main[data-theme="dark"] .owner-badge-pill span,
+.owner-layout-main[data-theme="dark"] .owner-badge-pill .owner-badge-text {
+  color: #F59E0B !important;
+  font-weight: 700 !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-badge-pill svg {
+  color: #F59E0B !important;
+  stroke: #F59E0B !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-avatar-icon {
+  background-color: rgba(245, 158, 11, 0.18) !important;
+  border: 1px solid rgba(245, 158, 11, 0.35) !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-username-pill {
+  background-color: #1E293B !important;
+  border: 1px solid #334155 !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-username-pill code {
+  color: #38BDF8 !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-username-pill svg {
+  color: #38BDF8 !important;
+  stroke: #38BDF8 !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-designation-pill {
+  background-color: #1E293B !important;
+  border: 1px solid #334155 !important;
+  color: #F8FAFC !important;
+}
+
+.owner-layout-main[data-theme="dark"] .form-control,
+.owner-layout-main[data-theme="dark"] .owner-input-field,
+.owner-layout-main[data-theme="dark"] input,
+.owner-layout-main[data-theme="dark"] select,
+.owner-layout-main[data-theme="dark"] textarea {
+  background-color: #1E293B !important;
+  border-color: #334155 !important;
+  color: #F8FAFC !important;
+}
+
+.owner-layout-main[data-theme="dark"] input::placeholder,
+.owner-layout-main[data-theme="dark"] textarea::placeholder {
+  color: #64748B !important;
+}
+
+.owner-layout-main[data-theme="dark"] label {
+  color: #CBD5E1 !important;
+}
+
+.owner-layout-main[data-theme="dark"] table {
+  background-color: #161F36 !important;
+  color: #E2E8F0 !important;
+}
+
+.owner-layout-main[data-theme="dark"] table thead,
+.owner-layout-main[data-theme="dark"] table thead tr,
+.owner-layout-main[data-theme="dark"] table thead th {
+  background-color: #1E293B !important;
+  color: #94A3B8 !important;
+  border-color: #2A364F !important;
+}
+
+.owner-layout-main[data-theme="dark"] table tbody tr {
+  border-bottom: 1px solid #2A364F !important;
+}
+
+.owner-layout-main[data-theme="dark"] table tbody td {
+  background-color: #161F36 !important;
+  color: #E2E8F0 !important;
+  border-color: #2A364F !important;
+}
+
+.owner-layout-main[data-theme="dark"] table tbody tr:hover td {
+  background-color: #1E293B !important;
+}
+
+/* --- 3. ROYAL HOTEL TERRACOTTA THEME --- */
+.owner-layout-main[data-theme="hotel"] {
+  --bg-page: #FFFBF5;
+  --bg-subtle: #FFF7ED;
+  --card-white: #FFFFFF;
+  --border-slate: #FED7AA;
+  --text-heading: #431407;
+  --text-body: #78350F;
+  --text-muted: #9A3412;
+  --text-light: #C2410C;
+  --badge-bg: #FFF7ED;
+  --badge-text: #9A3412;
+  --badge-border: #FED7AA;
+  --badge-icon: #B45309;
+  --trial-banner-bg: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%);
+  --trial-border: #FED7AA;
+  --trial-heading: #7C2D12;
+  --trial-text: #9A3412;
+  background-color: #FFFBF5 !important;
+  color: #78350F !important;
+}
+
+.owner-layout-main[data-theme="hotel"] main {
+  background-color: #FFFBF5 !important;
+}
+
+.owner-layout-main[data-theme="hotel"] .owner-header-bar {
+  background-color: #FFFFFF !important;
+  border-bottom: 1px solid #FED7AA !important;
+  color: #431407 !important;
+}
+
+.owner-layout-main[data-theme="hotel"] .owner-sidebar {
+  background-color: #431407 !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.owner-layout-main[data-theme="hotel"] .owner-card {
+  background-color: #FFFFFF !important;
+  border-color: #FED7AA !important;
+  color: #431407 !important;
+  box-shadow: 0 2px 8px rgba(180, 83, 9, 0.08) !important;
+}
+
+/* Hotel Trial Banner */
+.owner-layout-main[data-theme="hotel"] .owner-trial-banner {
+  background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%) !important;
+  border: 1px solid #FED7AA !important;
+}
+
+.owner-layout-main[data-theme="hotel"] .owner-trial-banner h3 {
+  color: #7C2D12 !important;
+}
+
+.owner-layout-main[data-theme="hotel"] .owner-trial-banner p,
+.owner-layout-main[data-theme="hotel"] .owner-trial-banner span {
+  color: #9A3412 !important;
+}
+
+.owner-layout-main[data-theme="hotel"] .owner-trial-banner strong {
+  color: #7C2D12 !important;
+}
+
+.owner-layout-main[data-theme="hotel"] .owner-badge-pill {
+  background-color: #FFF7ED !important;
+  color: #9A3412 !important;
+  border: 1px solid #FED7AA !important;
+}
+
+.owner-layout-main[data-theme="hotel"] .owner-badge-pill span {
+  color: #9A3412 !important;
+}
+
+.owner-layout-main[data-theme="hotel"] .form-control,
+.owner-layout-main[data-theme="hotel"] .owner-input-field,
+.owner-layout-main[data-theme="hotel"] input,
+.owner-layout-main[data-theme="hotel"] select,
+.owner-layout-main[data-theme="hotel"] textarea {
+  background-color: #FFFBF5 !important;
+  border-color: #FED7AA !important;
+  color: #431407 !important;
+}
+
+.owner-layout-main[data-theme="hotel"] table thead,
+.owner-layout-main[data-theme="hotel"] table thead tr,
+.owner-layout-main[data-theme="hotel"] table thead th {
+  background-color: #FFF7ED !important;
+  color: #9A3412 !important;
+  border-color: #FED7AA !important;
+}
+
+.owner-layout-main[data-theme="hotel"] table tbody td {
+  background-color: #FFFFFF !important;
+  color: #78350F !important;
+  border-color: #FED7AA !important;
+}
+
+/* --- 4. FOREST EMERALD THEME --- */
+.owner-layout-main[data-theme="emerald"] {
+  --bg-page: #F0FDF4;
+  --bg-subtle: #DCFCE7;
+  --card-white: #FFFFFF;
+  --border-slate: #BBF7D0;
+  --text-heading: #064E3B;
+  --text-body: #166534;
+  --text-muted: #15803D;
+  --text-light: #16A34A;
+  --badge-bg: #DCFCE7;
+  --badge-text: #166534;
+  --badge-border: #BBF7D0;
+  --badge-icon: #16A34A;
+  --trial-banner-bg: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
+  --trial-border: #BBF7D0;
+  --trial-heading: #064E3B;
+  --trial-text: #166534;
+  background-color: #F0FDF4 !important;
+  color: #166534 !important;
+}
+
+.owner-layout-main[data-theme="emerald"] main {
+  background-color: #F0FDF4 !important;
+}
+
+.owner-layout-main[data-theme="emerald"] .owner-header-bar {
+  background-color: #FFFFFF !important;
+  border-bottom: 1px solid #BBF7D0 !important;
+  color: #064E3B !important;
+}
+
+.owner-layout-main[data-theme="emerald"] .owner-sidebar {
+  background-color: #09331D !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.owner-layout-main[data-theme="emerald"] .owner-card {
+  background-color: #FFFFFF !important;
+  border-color: #BBF7D0 !important;
+  color: #064E3B !important;
+  box-shadow: 0 2px 8px rgba(22, 101, 52, 0.08) !important;
+}
+
+/* Emerald Trial Banner */
+.owner-layout-main[data-theme="emerald"] .owner-trial-banner {
+  background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%) !important;
+  border: 1px solid #BBF7D0 !important;
+}
+
+.owner-layout-main[data-theme="emerald"] .owner-trial-banner h3 {
+  color: #064E3B !important;
+}
+
+.owner-layout-main[data-theme="emerald"] .owner-trial-banner p,
+.owner-layout-main[data-theme="emerald"] .owner-trial-banner span {
+  color: #166534 !important;
+}
+
+.owner-layout-main[data-theme="emerald"] .owner-trial-banner strong {
+  color: #064E3B !important;
+}
+
+.owner-layout-main[data-theme="emerald"] .owner-badge-pill {
+  background-color: #DCFCE7 !important;
+  color: #166534 !important;
+  border: 1px solid #BBF7D0 !important;
+}
+
+.owner-layout-main[data-theme="emerald"] .owner-badge-pill span {
+  color: #166534 !important;
+}
+
+.owner-layout-main[data-theme="emerald"] .form-control,
+.owner-layout-main[data-theme="emerald"] .owner-input-field,
+.owner-layout-main[data-theme="emerald"] input,
+.owner-layout-main[data-theme="emerald"] select,
+.owner-layout-main[data-theme="emerald"] textarea {
+  background-color: #F0FDF4 !important;
+  border-color: #BBF7D0 !important;
+  color: #064E3B !important;
+}
+
+.owner-layout-main[data-theme="emerald"] table thead,
+.owner-layout-main[data-theme="emerald"] table thead tr,
+.owner-layout-main[data-theme="emerald"] table thead th {
+  background-color: #DCFCE7 !important;
+  color: #15803D !important;
+  border-color: #BBF7D0 !important;
+}
+
+.owner-layout-main[data-theme="emerald"] table tbody td {
+  background-color: #FFFFFF !important;
+  color: #166534 !important;
+  border-color: #BBF7D0 !important;
+}
+
+/* =========================================================================
+   UNIVERSAL THEMED COMPONENTS FOR OWNER ADMIN PANEL
+   ========================================================================= */
+
+/* 1. Trial / Subscription Status Banner */
+.owner-trial-banner {
+  background: var(--trial-banner-bg) !important;
+  border-color: var(--trial-border) !important;
+}
+
+.owner-trial-banner h3 {
+  color: var(--trial-heading) !important;
+}
+
+.owner-trial-banner p,
+.owner-trial-banner span {
+  color: var(--trial-text) !important;
+}
+
+.owner-trial-banner strong {
+  color: var(--trial-heading) !important;
+}
+
+/* 2. WebKit Native Date Picker Indicator in All Themes */
+.owner-layout-main input[type="date"],
+.owner-layout-main .owner-date-input {
+  outline: none;
+}
+
+.owner-layout-main[data-theme="dark"] input[type="date"],
+.owner-layout-main[data-theme="dark"] .owner-date-input {
+  color-scheme: dark !important;
+  background-color: #1E293B !important;
+  color: #F8FAFC !important;
+  border-color: #334155 !important;
+}
+
+.owner-layout-main[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator,
+.owner-layout-main[data-theme="dark"] .owner-date-input::-webkit-calendar-picker-indicator {
+  filter: invert(0.9) brightness(1.3) !important;
+  opacity: 0.85 !important;
+  cursor: pointer !important;
+}
+
+.owner-layout-main[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator:hover,
+.owner-layout-main[data-theme="dark"] .owner-date-input::-webkit-calendar-picker-indicator:hover {
+  opacity: 1 !important;
+  filter: invert(1) brightness(1.6) !important;
+}
+
+/* 3. Search Inputs (eliminate double-box outline in all themes) */
+.owner-layout-main .owner-search-input,
+.owner-layout-main input.owner-search-input,
+.owner-layout-main[data-theme="dark"] .owner-search-input,
+.owner-layout-main[data-theme="dark"] input.owner-search-input {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  height: auto !important;
+  min-height: unset !important;
+  padding: 0 !important;
+  color: var(--text-heading) !important;
+}
+
+.owner-layout-main .owner-search-input::placeholder,
+.owner-layout-main[data-theme="dark"] .owner-search-input::placeholder {
+  color: #94A3B8 !important;
+}
+
+/* 4. Secondary / Outline Buttons (Refresh, Print Report, Clear Filters) */
+.owner-layout-main .owner-btn-secondary,
+.owner-layout-main button.owner-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 16px;
+  height: 42px;
+  min-height: 42px;
+  background-color: var(--card-white, #FFFFFF);
+  border: 1.5px solid var(--border-slate, #CBD5E1);
+  border-radius: 8px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--text-heading, #1E293B);
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  box-sizing: border-box;
+}
+
+.owner-layout-main .owner-btn-secondary *,
+.owner-layout-main button.owner-btn-secondary * {
+  color: inherit !important;
+}
+
+.owner-layout-main .owner-btn-secondary svg,
+.owner-layout-main button.owner-btn-secondary svg {
+  color: inherit !important;
+  stroke: currentColor !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-btn-secondary,
+.owner-layout-main[data-theme="dark"] button.owner-btn-secondary {
+  background-color: #161F36 !important;
+  border: 1.5px solid #3B82F6 !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-btn-secondary *,
+.owner-layout-main[data-theme="dark"] button.owner-btn-secondary *,
+.owner-layout-main[data-theme="dark"] .owner-btn-secondary span,
+.owner-layout-main[data-theme="dark"] button.owner-btn-secondary span {
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-btn-secondary svg,
+.owner-layout-main[data-theme="dark"] button.owner-btn-secondary svg {
+  color: #38BDF8 !important;
+  stroke: #38BDF8 !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-btn-secondary:hover,
+.owner-layout-main[data-theme="dark"] button.owner-btn-secondary:hover {
+  background-color: #1E293B !important;
+  border-color: #60A5FA !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25) !important;
+}
+
+/* 5. Table Row Action Buttons (View, Edit, Power/Activate/Deactivate) */
+.owner-layout-main .owner-action-btn,
+.owner-layout-main button.owner-action-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--border-slate, #CBD5E1);
+  background-color: var(--card-white, #FFFFFF);
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.owner-layout-main .owner-action-btn:hover {
+  transform: translateY(-1px);
+}
+
+.owner-layout-main .owner-action-btn-view {
+  color: var(--text-muted, #64748B);
+}
+
+.owner-layout-main .owner-action-btn-view:hover {
+  background-color: var(--bg-subtle, #F1F5F9);
+  color: var(--text-heading, #0F172A);
+  border-color: #94A3B8;
+}
+
+.owner-layout-main .owner-action-btn-edit {
+  color: #0284C7;
+}
+
+.owner-layout-main .owner-action-btn-edit:hover {
+  background-color: rgba(2, 132, 199, 0.12);
+  border-color: #0284C7;
+}
+
+.owner-layout-main .owner-action-btn-power.active {
+  background-color: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #DC2626;
+}
+
+.owner-layout-main .owner-action-btn-power.inactive {
+  background-color: rgba(34, 197, 94, 0.12);
+  border-color: rgba(34, 197, 94, 0.4);
+  color: #16A34A;
+}
+
+/* Dark mode action button overrides */
+.owner-layout-main[data-theme="dark"] .owner-action-btn {
+  background-color: #161F36 !important;
+  border: 1.5px solid #2A364F !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-action-btn-view {
+  color: #93C5FD !important;
+  border-color: #2A364F !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-action-btn-view svg {
+  color: #93C5FD !important;
+  stroke: #93C5FD !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-action-btn-view:hover {
+  background-color: #1E293B !important;
+  border-color: #60A5FA !important;
+  color: #FFFFFF !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-action-btn-edit {
+  color: #38BDF8 !important;
+  border-color: #2A364F !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-action-btn-edit svg {
+  color: #38BDF8 !important;
+  stroke: #38BDF8 !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-action-btn-edit:hover {
+  background-color: rgba(56, 189, 248, 0.2) !important;
+  border-color: #38BDF8 !important;
+  color: #FFFFFF !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-action-btn-power.active {
+  background-color: rgba(239, 68, 68, 0.18) !important;
+  border-color: rgba(239, 68, 68, 0.5) !important;
+  color: #F87171 !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-action-btn-power.active svg {
+  color: #F87171 !important;
+  stroke: #F87171 !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-action-btn-power.active:hover {
+  background-color: rgba(239, 68, 68, 0.28) !important;
+  border-color: #EF4444 !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-action-btn-power.inactive {
+  background-color: rgba(34, 197, 94, 0.18) !important;
+  border-color: rgba(34, 197, 94, 0.5) !important;
+  color: #4ADE80 !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-action-btn-power.inactive svg {
+  color: #4ADE80 !important;
+  stroke: #4ADE80 !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-action-btn-power.inactive:hover {
+  background-color: rgba(34, 197, 94, 0.28) !important;
+  border-color: #22C55E !important;
+}
+
+/* Calendar Date Picker Indicator Visibility in Dark Mode */
+.owner-layout-main[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+  opacity: 0.85;
+}
+
+.owner-layout-main[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+/* 6. Contact Email Input with Lucide Mail Icon Padding */
+.owner-layout-main #contactEmailInput,
+.owner-layout-main input#contactEmailInput,
+.owner-layout-main input[name="contactEmail"] {
+  padding-left: 48px !important;
+}
+
+/* =========================================================================
+   THICK & POLISHED CONTROLS FOR OWNER ADMIN PANEL & SUBSCRIPTIONS MODULE
+   ========================================================================= */
+
+/* 1. Unified Search Boxes */
+.owner-layout-main .owner-search-box {
+  height: 42px !important;
+  min-height: 42px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 0 14px !important;
+  border-radius: 8px !important;
+  border: 1.5px solid var(--border-slate, #CBD5E1) !important;
+  background-color: var(--card-white, #FFFFFF) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+  box-sizing: border-box !important;
+}
+
+.owner-layout-main .owner-search-box:focus-within {
+  border-color: #B45309 !important;
+  box-shadow: 0 0 0 3px rgba(180, 83, 9, 0.15) !important;
+}
+
+.owner-layout-main .owner-search-box input,
+.owner-layout-main input.owner-search-input,
+.owner-layout-main .owner-search-input {
+  height: 100% !important;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  font-size: 0.88rem !important;
+  font-weight: 500 !important;
+  color: var(--text-heading, #0F172A) !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.owner-layout-main .owner-search-box input::placeholder,
+.owner-layout-main input.owner-search-input::placeholder {
+  color: var(--text-muted, #94A3B8) !important;
+  opacity: 1 !important;
+  font-weight: 400 !important;
+}
+
+/* 2. Unified Select Fields (e.g. Branch Filter in OwnerStaff) */
+.owner-layout-main select.owner-select-field,
+.owner-layout-main .owner-select-field {
+  height: 42px !important;
+  min-height: 42px !important;
+  padding: 0 14px !important;
+  border-radius: 8px !important;
+  border: 1.5px solid var(--border-slate, #CBD5E1) !important;
+  background-color: var(--card-white, #FFFFFF) !important;
+  color: var(--text-heading, #0F172A) !important;
+  font-size: 0.88rem !important;
+  font-weight: 600 !important;
+  outline: none !important;
+  cursor: pointer !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+  box-sizing: border-box !important;
+}
+
+.owner-layout-main select.owner-select-field:focus,
+.owner-layout-main .owner-select-field:focus {
+  border-color: #B45309 !important;
+  box-shadow: 0 0 0 3px rgba(180, 83, 9, 0.15) !important;
+}
+
+/* 3. Filter Buttons (All Hotels, Free Trial, Paid Active, Expired, etc.) */
+.owner-layout-main .owner-filter-btn {
+  height: 38px !important;
+  min-height: 38px !important;
+  padding: 0 16px !important;
+  border-radius: 8px !important;
+  font-size: 0.84rem !important;
+  font-weight: 700 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease-in-out !important;
+  box-sizing: border-box !important;
+}
+
+.owner-layout-main .owner-filter-btn.active {
+  background-color: #B45309 !important;
+  border: 1.5px solid #B45309 !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 2px 6px rgba(180, 83, 9, 0.28) !important;
+}
+
+.owner-layout-main .owner-filter-btn:not(.active) {
+  background-color: var(--card-white, #FFFFFF) !important;
+  border: 1.5px solid var(--border-slate, #CBD5E1) !important;
+  color: var(--text-heading, #475569) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+}
+
+.owner-layout-main .owner-filter-btn:not(.active):hover {
+  border-color: #B45309 !important;
+  color: #B45309 !important;
+  background-color: var(--bg-subtle, #F8FAFC) !important;
+}
+
+/* 4. Subscriptions Hub Main Navigation Tabs */
+.owner-layout-main .owner-hub-tab-btn {
+  height: 42px !important;
+  min-height: 42px !important;
+  padding: 0 18px !important;
+  border-radius: 8px !important;
+  font-size: 0.86rem !important;
+  font-weight: 700 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  cursor: pointer !important;
+  border: 1.5px solid transparent !important;
+  transition: all 0.15s ease-in-out !important;
+  box-sizing: border-box !important;
+}
+
+.owner-layout-main .owner-hub-tab-btn.active {
+  background-color: #B45309 !important;
+  color: #FFFFFF !important;
+  border-color: #B45309 !important;
+  box-shadow: 0 3px 8px rgba(180, 83, 9, 0.35) !important;
+}
+
+.owner-layout-main .owner-hub-tab-btn:not(.active) {
+  background-color: transparent !important;
+  color: var(--text-heading, #475569) !important;
+}
+
+.owner-layout-main .owner-hub-tab-btn:not(.active):hover {
+  background-color: var(--bg-subtle, #F1F5F9) !important;
+  color: #B45309 !important;
+}
+
+/* 5. Dark Theme Overrides for Thick Controls */
+.owner-layout-main[data-theme="dark"] .owner-search-box {
+  background-color: #161F36 !important;
+  border-color: #2A364F !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-search-box:focus-within {
+  border-color: #F59E0B !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25) !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-search-box input,
+.owner-layout-main[data-theme="dark"] input.owner-search-input,
+.owner-layout-main[data-theme="dark"] .owner-search-input {
+  color: #F8FAFC !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-search-box input::placeholder,
+.owner-layout-main[data-theme="dark"] input.owner-search-input::placeholder {
+  color: #64748B !important;
+}
+
+.owner-layout-main[data-theme="dark"] select.owner-select-field,
+.owner-layout-main[data-theme="dark"] .owner-select-field {
+  background-color: #161F36 !important;
+  border-color: #2A364F !important;
+  color: #F8FAFC !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+.owner-layout-main[data-theme="dark"] select.owner-select-field:focus,
+.owner-layout-main[data-theme="dark"] .owner-select-field:focus {
+  border-color: #F59E0B !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25) !important;
+}
+
+.owner-layout-main[data-theme="dark"] select.owner-select-field option,
+.owner-layout-main[data-theme="dark"] .owner-select-field option {
+  background-color: #161F36 !important;
+  color: #F8FAFC !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-filter-btn:not(.active) {
+  background-color: #161F36 !important;
+  border-color: #2A364F !important;
+  color: #CBD5E1 !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-filter-btn:not(.active):hover {
+  border-color: #F59E0B !important;
+  color: #F59E0B !important;
+  background-color: #1E293B !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-filter-btn.active {
+  background-color: #B45309 !important;
+  border-color: #F59E0B !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 2px 8px rgba(180, 83, 9, 0.5) !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-hub-tab-btn:not(.active) {
+  color: #CBD5E1 !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-hub-tab-btn:not(.active):hover {
+  background-color: #1E293B !important;
+  color: #F59E0B !important;
+}
+
+.owner-layout-main[data-theme="dark"] .owner-hub-tab-btn.active {
+  background-color: #B45309 !important;
+  border-color: #F59E0B !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 3px 10px rgba(180, 83, 9, 0.5) !important;
+}
+
+/* 11. High-Precision A4 Direct Browser Print Rules for Owner Management */
+@media print {
+
+  .owner-layout-main .owner-sidebar,
+  .owner-layout-main .owner-header-bar,
+  .owner-layout-main button,
+  .owner-layout-main .owner-btn-secondary,
+  .owner-layout-main .owner-hub-tab-btn,
+  .owner-layout-main .no-print {
+    display: none !important;
+  }
+
+  .owner-layout-main {
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+    padding: 0 !important;
+  }
+
+  .owner-layout-main .owner-card {
+    box-shadow: none !important;
+    border: 1.5px solid #94A3B8 !important;
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+  }
+
+  .owner-layout-main table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+  }
+
+  .owner-layout-main th,
+  .owner-layout-main td {
+    border: 1px solid #CBD5E1 !important;
+    color: #0F172A !important;
+  }
+}
+
+/* =========================================================================
+   COMPREHENSIVE RESPONSIVE SYSTEM: HOTEL POS & OWNER ADMIN PANEL
+   ========================================================================= */
+
+/* --- 1. DESKTOP MODE (min-width: 1025px) --- */
+@media (min-width: 1025px) {
+  .owner-layout-main .owner-sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    width: 260px !important;
+    height: 100vh !important;
+    min-height: 100vh !important;
+    z-index: 50 !important;
+    flex-shrink: 0 !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    transform: none !important;
+  }
+
+  .owner-layout-main .owner-main-content {
+    margin-left: 260px !important;
+    min-width: 0 !important;
+    flex: 1 !important;
+    min-height: 100vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    width: calc(100% - 260px) !important;
+  }
+
+  .navbar-mobile-toggle-btn,
+  .owner-mobile-toggle-btn,
+  .sidebar-mobile-close-btn,
+  .owner-sidebar-close-btn,
+  .mobile-sidebar-backdrop,
+  .owner-sidebar-backdrop {
+    display: none !important;
+  }
+}
+
+/* --- 2. DRAWER & TOGGLE BUTTON COMMON STYLES --- */
+.navbar-mobile-toggle-btn,
+.owner-mobile-toggle-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background-color: transparent;
+  border: 1.5px solid var(--border-slate, #E2E8F0);
+  color: var(--text-heading, #1E293B);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.navbar-mobile-toggle-btn:hover,
+.owner-mobile-toggle-btn:hover {
+  background-color: var(--bg-subtle, #F1F5F9);
+}
+
+.sidebar-mobile-close-btn,
+.owner-sidebar-close-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #FFFFFF;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.sidebar-mobile-close-btn:hover,
+.owner-sidebar-close-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.mobile-sidebar-backdrop,
+.owner-sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  z-index: 1150;
+  animation: fadeIn 0.2s ease;
+}
+
+/* Form 2-Column Responsive Grid */
+.owner-form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* --- 3. TABLETS & MOBILE SCREENS (max-width: 1024px) --- */
+@media (max-width: 1024px) {
+  html,
+  body,
+  #root {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+
+  .app-container {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    overflow: hidden !important;
+    position: relative !important;
+  }
+
+  /* Main App Sidebar Mobile Drawer (iOS Safari 100dvh & safe area safe) */
+  .sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    width: 280px !important;
+    max-width: 85vw !important;
+    z-index: 1200 !important;
+    transform: translateX(-100%) !important;
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-sizing: border-box !important;
+  }
+
+  .sidebar.mobile-open {
+    transform: translateX(0) !important;
+    box-shadow: 6px 0 28px rgba(0, 0, 0, 0.5) !important;
+  }
+
+  /* Dedicated Sidebar Footer (Never cut off in Safari) */
+  .sidebar-footer {
+    flex-shrink: 0 !important;
+    padding-bottom: max(32px, calc(16px + env(safe-area-inset-bottom, 24px))) !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Main Content Area Full Width */
+  .main-content,
+  .app-container[data-industry="hotel"] .main-content,
+  .app-container .main-content {
+    width: 100% !important;
+    max-width: 100vw !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    flex: 1 1 100% !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  /* Owner Panel Mobile Drawer */
+  .owner-layout-main .owner-sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    width: 280px !important;
+    max-width: 85vw !important;
+    z-index: 1200 !important;
+    transform: translateX(-100%) !important;
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-sizing: border-box !important;
+  }
+
+  .owner-layout-main .owner-sidebar.mobile-open {
+    transform: translateX(0) !important;
+    box-shadow: 6px 0 28px rgba(0, 0, 0, 0.6) !important;
+  }
+
+  .owner-sidebar-footer {
+    flex-shrink: 0 !important;
+    padding-bottom: max(32px, calc(16px + env(safe-area-inset-bottom, 24px))) !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Owner Panel Content Full Width */
+  .owner-layout-main .owner-main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    flex: 1 !important;
+    min-height: 100vh !important;
+    min-height: 100dvh !important;
+  }
+
+  /* Display Toggle & Close Buttons */
+  .navbar-mobile-toggle-btn,
+  .owner-mobile-toggle-btn,
+  .sidebar-mobile-close-btn,
+  .owner-sidebar-close-btn {
+    display: inline-flex !important;
+  }
+
+  /* Hotel Dashboard Grids */
+  .hotel-dashboard-main-grid {
+    grid-template-columns: 1fr !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 14px !important;
+    width: 100% !important;
+  }
+
+  /* Live POS Main Layout */
+  div[style*="1fr 380px"],
+  .pos-main-layout {
+    grid-template-columns: 1fr !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+    width: 100% !important;
+  }
+
+  /* Order History Split View */
+  div[style*="minmax(0, 1fr) 440px"],
+  div[style*="minmax(0,1fr) 440px"] {
+    grid-template-columns: 1fr !important;
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+
+  /* Purchase Dashboard 2-column sections */
+  div[style*="1.8fr 1.2fr"],
+  div[style*="1fr 300px"] {
+    grid-template-columns: 1fr !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+    width: 100% !important;
+  }
+
+  /* Multi-column KPI Card Rows (5 and 4 columns) */
+  div[style*="repeat(5, 1fr)"],
+  div[style*="repeat(4, 1fr)"] {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  /* 3-column Rows (Mess / Cafe / Purchase) */
+  div[style*="1.2fr 1.2fr 1fr"],
+  div[style*="2fr 1.2fr 1fr"] {
+    grid-template-columns: 1fr !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 14px !important;
+  }
+}
+
+/* --- 4. SMARTPHONES & SMALL SCREENS (max-width: 768px) --- */
+@media (max-width: 768px) {
+  /* Top Navbar */
+  .top-navbar {
+    padding: 8px 10px !important;
+    height: auto !important;
+    min-height: 52px !important;
+    gap: 6px !important;
+    box-sizing: border-box !important;
+  }
+
+  .navbar-left {
+    gap: 6px !important;
+    min-width: 36px !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  .navbar-right {
+    gap: 5px !important;
+    min-width: 0 !important;
+    flex-shrink: 1 !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+  }
+
+  .navbar-mobile-toggle-btn,
+  .owner-mobile-toggle-btn,
+  .navbar-icon-btn,
+  .navbar-logout-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 8px !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Branch Chip */
+  .navbar-branch-chip,
+  .navbar-branch-btn {
+    height: 32px !important;
+    padding: 0 8px !important;
+    font-size: 0.74rem !important;
+    gap: 4px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .navbar-branch-name {
+    max-width: 65px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    display: inline-block !important;
+  }
+
+  /* Language Chip */
+  .navbar-lang-chip {
+    height: 32px !important;
+    padding: 0 8px !important;
+    font-size: 0.74rem !important;
+    gap: 4px !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Profile Chip: Hide name on mobile, keep avatar */
+  .navbar-profile-chip {
+    height: 32px !important;
+    padding: 0 4px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .navbar-profile-text {
+    display: none !important;
+  }
+
+  /* Trial Badges */
+  .navbar-trial-badge {
+    height: 32px !important;
+    padding: 0 6px !important;
+    font-size: 0.70rem !important;
+  }
+
+  .navbar-trial-text-short {
+    display: none !important;
+  }
+
+  .navbar-trial-text-mini {
+    display: inline !important;
+  }
+
+  /* Fixed & Centered Dropdown Cards on Mobile (Prevents Notification Overflow) */
+  .navbar-dropdown-card {
+    position: fixed !important;
+    top: 58px !important;
+    left: 10px !important;
+    right: 10px !important;
+    margin: 0 auto !important;
+    width: auto !important;
+    max-width: min(440px, calc(100vw - 20px)) !important;
+    max-height: calc(85vh - 58px) !important;
+    max-height: calc(85dvh - 58px) !important;
+    z-index: 1500 !important;
+    box-shadow: 0 16px 42px rgba(0, 0, 0, 0.32) !important;
+    border-radius: 14px !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  /* Owner Header Bar */
+  .owner-header-bar {
+    padding: 8px 10px !important;
+    min-height: 52px !important;
+    gap: 8px !important;
+    box-sizing: border-box !important;
+  }
+
+  .owner-header-title {
+    font-size: 0.92rem !important;
+  }
+
+  .owner-badge-text,
+  .owner-add-branch-text,
+  .owner-logout-text,
+  .owner-profile-meta {
+    display: none !important;
+  }
+
+  .owner-header-right {
+    gap: 6px !important;
+  }
+
+  .owner-user-cluster {
+    padding-left: 4px !important;
+    gap: 6px !important;
+  }
+
+  /* Page Content Padding */
+  .page-content,
+  .owner-page-content {
+    padding: 8px 8px 16px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .card,
+  .owner-card,
+  section.card {
+    padding: 12px 12px !important;
+    border-radius: 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Hotel Dashboard Top KPI Cards 2x2 Grid */
+  .hotel-dashboard-top-cards {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  .hotel-dashboard-top-cards > div {
+    padding: 12px 10px !important;
+    min-height: auto !important;
+  }
+
+  /* Sales Breakdown 3 columns convert to auto-fit */
+  .hotel-dashboard-sales-breakdown {
+    grid-template-columns: repeat(auto-fit, minmax(105px, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  /* Responsive 2-column form grids collapse to single column */
+  .owner-form-grid-2,
+  .grid-2 {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .grid-4,
+  .grid-3 {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .owner-kpi-grid {
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  .owner-plans-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  .owner-search-box {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* Tables Universal Horizontal Scroll */
+  table {
+    min-width: 480px;
+  }
+
+  th, td {
+    padding: 8px 10px !important;
+    font-size: 0.8rem !important;
+  }
+
+  /* Billing Module Stepper & Header on Mobile */
+  .billing-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+
+  .billing-header h1 {
+    font-size: 20px !important;
+  }
+
+  .stepper {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 8px 10px !important;
+    gap: 6px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .step {
+    font-size: 11px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .billing-grid,
+  .three-step-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .section-head {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+
+  .section-head-right {
+    width: 100% !important;
+    justify-content: space-between !important;
+  }
+
+  /* Universal Popups & Modals */
+  div[style*="position: fixed"] > div[style*="maxWidth"],
+  div[style*="position: 'fixed'"] > div[style*="maxWidth"],
+  .modal-content {
+    width: 95% !important;
+    max-width: calc(100vw - 20px) !important;
+    max-height: calc(90vh - 20px) !important;
+    max-height: calc(90dvh - 20px) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 16px 14px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Form item row in BillingModule */
+  div[style*="2fr 1fr 1fr 1fr auto"] {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+
+  /* Touch targets & Mobile Form Input Font Size (prevents iOS auto-zoom) */
+  input[type="text"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="email"],
+  input[type="password"],
+  select,
+  textarea {
+    font-size: 16px !important;
+    min-height: 40px !important;
+  }
+
+  button,
+  .btn,
+  .nav-item {
+    touch-action: manipulation;
+  }
+}
+
+/* --- 5. EXTRA SMALL PHONES (max-width: 440px) --- */
+@media (max-width: 440px) {
+  .owner-kpi-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  .navbar-branch-chip,
+  .navbar-branch-btn {
+    padding: 0 4px !important;
+  }
+
+  .navbar-branch-name {
+    max-width: 50px !important;
+  }
+
+  .navbar-lang-chip {
+    padding: 0 4px !important;
+  }
+
+  .page-content,
+  .owner-page-content {
+    padding: 10px 8px 20px !important;
+  }
+
+  .card,
+  .owner-card {
+    padding: 12px 10px !important;
+  }
+
+  /* Multi-card grids on small phones */
+  div[style*="repeat(5, 1fr)"],
+  div[style*="repeat(4, 1fr)"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+}
+
+/* --- 6. TINY SCREENS (max-width: 360px) --- */
+@media (max-width: 360px) {
+  .hotel-dashboard-top-cards {
+    grid-template-columns: 1fr !important;
+  }
+
+  .owner-kpi-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+
+/* Owner Dashboard KPI Grid Responsive Layout */
+.owner-kpi-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+}
+
+@media (min-width: 1280px) {
+  .owner-kpi-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .owner-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+}
+
+
+/* Owner Reports KPI Grid (4 Columns) */
+.owner-reports-kpi-grid-4,
+.owner-kpi-grid-4 {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 900px) {
+  .owner-reports-kpi-grid-4,
+  .owner-kpi-grid-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .owner-reports-kpi-grid-4,
+  .owner-kpi-grid-4 {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+}
+
+/* Owner Reports KPI Grid (5 Columns) */
+.owner-reports-kpi-grid-5,
+.owner-kpi-grid-5 {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 1100px) {
+  .owner-reports-kpi-grid-5,
+  .owner-kpi-grid-5 {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+}
+
+@media (max-width: 680px) {
+  .owner-reports-kpi-grid-5,
+  .owner-kpi-grid-5 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+}
+
+@media (max-width: 440px) {
+  .owner-reports-kpi-grid-5,
+  .owner-kpi-grid-5 {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Universal GST Export CSV Button Styles - Green button with pure white text and icon */
+.er-gst-export-btn,
+button.er-gst-export-btn,
+.er-report-layout .er-report-content .er-gst-export-btn {
+  background-color: #15803D !important;
+  color: #FFFFFF !important;
+  border: none !important;
+}
+
+.er-gst-export-btn:hover,
+button.er-gst-export-btn:hover,
+.er-report-layout .er-report-content .er-gst-export-btn:hover {
+  background-color: #166534 !important;
+  color: #FFFFFF !important;
+}
+
+.er-gst-export-btn span,
+.er-gst-export-btn-text,
+.er-btn-text-white,
+button.er-gst-export-btn span,
+.er-report-layout .er-report-content .er-gst-export-btn span,
+.er-report-layout .er-report-content span.er-gst-export-btn-text,
+.er-report-layout .er-report-content span.er-btn-text-white {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  font-weight: 700 !important;
+}
+
+.er-gst-export-btn svg,
+button.er-gst-export-btn svg,
+.er-report-layout .er-report-content .er-gst-export-btn svg {
+  color: #FFFFFF !important;
+  stroke: #FFFFFF !important;
+  fill: none !important;
+}
+
+/* =========================================================================
+   COMPREHENSIVE UNIVERSAL RESPONSIVE ENGINE (ALL SCREENS & MODULES)
+   ========================================================================= */
+
+/* --- 1. Global Box-Sizing & Viewport Containment --- */
+html,
+body,
+#root {
+  width: 100% !important;
+  max-width: 100vw !important;
+  overflow-x: hidden !important;
+  box-sizing: border-box !important;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Ensure app containers prevent horizontal scroll on any viewport */
+.app-container,
+.main-content,
+.page-content,
+.owner-layout-main,
+.owner-main-content,
+.owner-page-content {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* --- 2. Tables & Data Grids Universal Responsive Scroll --- */
+.records-table-wrap,
+.table-responsive,
+.table-wrap,
+.overflow-x-auto,
+div[style*="overflowX"],
+div[style*="overflow-x"] {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  box-sizing: border-box !important;
+}
+
+/* Ensure data tables maintain legible column widths and scroll smoothly */
+table.records-table,
+.records-table-wrap > table,
+.overflow-x-auto > table,
+div[style*="overflowX"] > table {
+  min-width: 720px;
+}
+
+/* --- 3. Universal Module Headers & Toolbars on Mobile / Tablet --- */
+@media (max-width: 900px) {
+  .tables-header,
+  .billing-header,
+  .settings-header,
+  .kot-header,
+  .module-header,
+  div[style*="justifyContent: 'space-between'"],
+  div[style*="justify-content: space-between"] {
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+  }
+
+  /* Full width search bars on smaller screens */
+  .search,
+  .menu-search,
+  .settings-search,
+  input[placeholder*="Search"] {
+    max-width: 100% !important;
+  }
+}
+
+/* --- 4. Universal Table Module Responsiveness --- */
+@media (max-width: 1100px) {
+  .app-container[data-industry="hotel"] .summary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .table-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+}
+
+@media (max-width: 680px) {
+  .app-container[data-industry="hotel"] .summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+  }
+
+  .table-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  .tables-page .controls {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+  }
+
+  .tables-page .search {
+    width: 100% !important;
+    flex-basis: auto !important;
+  }
+
+  .tables-page .select {
+    width: 100% !important;
+  }
+
+  .tables-page .filters {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    flex-wrap: nowrap !important;
+    padding-bottom: 6px !important;
+    margin-bottom: 16px !important;
+  }
+
+  .tables-page .filter {
+    flex-shrink: 0 !important;
+  }
+}
+
+@media (max-width: 440px) {
+  .app-container[data-industry="hotel"] .summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+  }
+
+  .table-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+}
+
+/* --- 5. Universal Modals & Overlays Responsive Adaptation --- */
+@media (max-width: 768px) {
+  .overlay,
+  .popup-overlay {
+    padding: 10px !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .modal,
+  .modal.wide,
+  .add-item-popup,
+  .popup-box,
+  div[style*="position: fixed"] > div[style*="maxWidth"],
+  div[style*="position: 'fixed'"] > div[style*="maxWidth"],
+  div[style*="position:fixed"] > div[style*="max-width"] {
+    width: 95vw !important;
+    max-width: calc(100vw - 20px) !important;
+    max-height: calc(90vh - 20px) !important;
+    max-height: calc(90dvh - 20px) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 16px 14px !important;
+    margin: auto !important;
+    border-radius: 14px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Order modal split view collapse to single column */
+  .order-layout {
+    grid-template-columns: 1fr !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .order-layout .menu-tools {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .order-layout .menu-search {
+    width: 100% !important;
+  }
+
+  .modal-head,
+  .modal-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+
+  .modal-footer,
+  .popup-actions {
+    flex-direction: column !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .modal-footer button,
+  .popup-actions button {
+    width: 100% !important;
+  }
+
+  /* Responsive 2-column form grids in modals and settings */
+  .form-grid,
+  .settings-grid,
+  .owner-form-grid-2 {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+}
+
+/* --- 6. Settings Page Mobile Tabs & Navigation --- */
+@media (max-width: 768px) {
+  .settings-layout {
+    width: 100% !important;
+  }
+
+  .settings-sidebar {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    white-space: nowrap !important;
+    flex-wrap: nowrap !important;
+    padding: 6px !important;
+    scrollbar-width: thin;
+  }
+
+  .settings-nav {
+    flex-shrink: 0 !important;
+  }
+
+  .settings-actions {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .settings-actions button {
+    width: 100% !important;
+  }
+}
+
+/* --- 7. Touch Target & Input Font Zoom Fix on Mobile Devices --- */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  select,
+  textarea {
+    font-size: 16px !important; /* Prevents auto-zoom in iOS Safari */
+    min-height: 42px !important;
+    box-sizing: border-box !important;
+  }
+
+  button,
+  .btn,
+  .nav-item,
+  .settings-nav {
+    touch-action: manipulation;
+  }
+}
+

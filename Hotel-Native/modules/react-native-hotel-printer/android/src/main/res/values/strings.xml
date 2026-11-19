@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hotel_print_service_name">Ajalkar POS &amp; Hotel Print Service</string>
+    <string name="hotel_print_service_desc">Discovers paired Bluetooth thermal receipt printers, USB OTG printers, and Network POS printers for instant receipt &amp; KOT printing.</string>
+</resources>
+

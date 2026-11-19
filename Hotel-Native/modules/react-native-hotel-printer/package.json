@@ -1,0 +1,19 @@
+{
+  "name": "react-native-hotel-printer",
+  "version": "1.0.0",
+  "description": "Native Android ESC/POS Bluetooth, USB, Network, and System PrintService module for Hotel Management POS",
+  "main": "index.js",
+  "keywords": [
+    "react-native",
+    "printer",
+    "escpos",
+    "bluetooth",
+    "usb",
+    "android-print-service"
+  ],
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*"
+  }
+}
+

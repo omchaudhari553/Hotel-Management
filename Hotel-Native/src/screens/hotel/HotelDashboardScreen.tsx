@@ -1,0 +1,3812 @@
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  RefreshControl,
+  Modal,
+  Dimensions,
+  Platform,
+  TextInput,
+  Alert,
+  KeyboardAvoidingView,
+  PanResponder,
+} from 'react-native';
+import Svg, {
+  Path,
+  Line,
+  Circle,
+  Defs,
+  LinearGradient,
+  Stop,
+  Text as SvgText,
+  Rect,
+} from 'react-native-svg';
+import { Colors } from '../../theme/colors';
+import { useAppTheme } from '../../context/ThemeContext';
+import {
+  Receipt,
+  ReceiptIndianRupee,
+  Table2,
+  ShoppingBag,
+  Grid,
+  ShieldCheck,
+  Sparkles,
+  ChevronRight,
+  ChevronDown,
+  Eye,
+  EyeOff,
+  Bell,
+  Globe,
+  Calendar,
+  Wallet,
+  CreditCard,
+  Building2,
+  UtensilsCrossed,
+  ChefHat,
+  Users,
+  ShoppingCart,
+  Settings,
+  X,
+  CheckCircle2,
+  AlertCircle,
+  ArrowRight,
+  Plus,
+  Tag,
+  Trash2,
+  LayoutDashboard,
+  RotateCcw,
+  BarChart3,
+} from 'lucide-react-native';
+
+import {
+  restaurantStore,
+  TableItem,
+  ActiveOrder,
+  PaymentRecord,
+} from '../../api/restaurantStore';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+interface BillRequest {
+  id: string;
+  orderId?: string;
+  table: string;
+  guestName?: string;
+  amount: string;
+  time: string;
+  statusBadge: string;
+  statusType: 'UNPAID' | 'PARTIAL' | 'BILL_REQUESTED' | 'PENDING';
+}
+
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AppNavbar } from '../../components/AppNavbar';
+import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
+import { ReceiptRupee } from '../../components/ReceiptRupeeIcon';
+import { useBranch } from '../../context/BranchContext';
+import {
+  OfferItem,
+  INITIAL_OFFERS,
+  getSavedOffers,
+  saveOffersToStorage,
+} from '../../api/offersService';
+import {
+  translateNotifTitle,
+  translateNotifDesc,
+  translateNotifTime,
+} from '../../utils/notificationLocalization';
+import { notificationManager } from '../../utils/notificationManager';
+export type { OfferItem };
+
+export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
+  const { isDark } = useAppTheme();
+  const styles = useMemo(() => getStyles(isDark), [isDark]);
+  const insets = useSafeAreaInsets();
+  const { user } = useAuth();
+  const displayName = user?.fullName || user?.name || 'Rahul Patil';
+  const { language, t, formatDate, toDevanagari, formatNumber, localizeGuestName, formatTableName } = useLanguage();
+  const { activeBranch, getBranchName, activeBranchNumId } = useBranch();
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [isOverviewOn, setIsOverviewOn] = useState<boolean>(true);
+  const [salesChartMode, setSalesChartMode] = useState<'cumulative' | 'interval'>('cumulative');
+  const [selectedSalesPointIdx, setSelectedSalesPointIdx] = useState<number | null>(null);
+
+  // Live operational data for active branch initialized with 0ms cache
+  const [branchTables, setBranchTables] = useState<TableItem[]>(() =>
+    restaurantStore.getCachedTables(activeBranchNumId)
+  );
+  const [branchOrders, setBranchOrders] = useState<ActiveOrder[]>(() =>
+    restaurantStore.getCachedOrders(activeBranchNumId)
+  );
+  const [branchPayments, setBranchPayments] = useState<PaymentRecord[]>(() =>
+    restaurantStore.getCachedPayments(activeBranchNumId)
+  );
+  const [dateFilterActive, setDateFilterActive] = useState<boolean>(true);
+  const [dateRangeStr, setDateRangeStr] = useState<string>('2026-10-01 to 2026-10-23');
+
+  // Subscription / Plan State (Screenshot 2)
+  const [planType, setPlanType] = useState<'TRIAL' | 'PRO' | 'ENTERPRISE'>('TRIAL');
+  const [planTitle, setPlanTitle] = useState<string>('28 Days Free Trial');
+  const [daysLeft, setDaysLeft] = useState<number>(9);
+  const [validityDate, setValidityDate] = useState<string>('14 Nov 2030');
+
+  // Modals state
+  const [showPlanModal, setShowPlanModal] = useState<boolean>(false);
+  const [planModalTab, setPlanModalTab] = useState<'PLANS' | 'OFFERS'>('PLANS');
+  const [showOfferModal, setShowOfferModal] = useState<boolean>(false);
+  const [offersViewMode, setOffersViewMode] = useState<'LIST' | 'ADD'>('LIST');
+  const [showAddOfferModal, setShowAddOfferModal] = useState<boolean>(false);
+  const [showNotificationModal, setShowNotificationModal] = useState<boolean>(false);
+  const [showBranchModal, setShowBranchModal] = useState<boolean>(false);
+
+  const [selectedBranch, setSelectedBranch] = useState<string>('Main Branch');
+  const [currentLang, setCurrentLang] = useState<string>('English');
+
+
+  // Offers State (Screenshot 1 & Persistent Storage)
+  const [offers, setOffers] = useState<OfferItem[]>(INITIAL_OFFERS);
+  const [offerSuccessToast, setOfferSuccessToast] = useState<string>('');
+
+  // Add Offer Form State (Pre-filled smart defaults for instant creation)
+  const [newOfferName, setNewOfferName] = useState<string>('Festive Special Offer');
+  const [newOfferCode, setNewOfferCode] = useState<string>('FEST2026');
+  const [newOfferType, setNewOfferType] = useState<'PERCENTAGE' | 'FIXED'>('PERCENTAGE');
+  const [newOfferVal, setNewOfferVal] = useState<string>('20');
+  const [newOfferCategory, setNewOfferCategory] = useState<string>('All Menu Items');
+  const [newOfferDesc, setNewOfferDesc] = useState<string>('20% special discount on all food orders.');
+  const [newOfferFrom, setNewOfferFrom] = useState<string>('2026-10-19');
+  const [newOfferTo, setNewOfferTo] = useState<string>('2026-11-19');
+
+  // Load saved offers on mount
+  useEffect(() => {
+    const loadSavedOffers = async () => {
+      const data = await getSavedOffers();
+      if (data && data.length > 0) {
+        setOffers(data);
+      }
+    };
+    loadSavedOffers();
+  }, []);
+
+  // Equality comparison helpers to prevent periodic re-render freezes
+  const areTablesEqual = (a: TableItem[], b: TableItem[]) =>
+    a.length === b.length && a.every((t, i) => t.id === b[i]?.id && t.status === b[i]?.status && t.activeBillAmount === b[i]?.activeBillAmount);
+  const areOrdersEqual = (a: ActiveOrder[], b: ActiveOrder[]) =>
+    a.length === b.length && a.every((o, i) => o.id === b[i]?.id && o.status === b[i]?.status && o.total === b[i]?.total);
+  const arePaymentsEqual = (a: PaymentRecord[], b: PaymentRecord[]) =>
+    a.length === b.length && a.every((p, i) => p.id === b[i]?.id && p.amount === b[i]?.amount);
+
+  // 0ms synchronous cache reader so store updates reflect immediately without redundant HTTP calls
+  const syncOperationalFromCache = useCallback(() => {
+    const cachedT = restaurantStore.getCachedTables(activeBranchNumId);
+    const cachedO = restaurantStore.getCachedOrders(activeBranchNumId);
+    const cachedP = restaurantStore.getCachedPayments(activeBranchNumId);
+    setBranchTables((prev) => (areTablesEqual(prev, cachedT) ? prev : cachedT));
+    setBranchOrders((prev) => (areOrdersEqual(prev, cachedO) ? prev : cachedO));
+    setBranchPayments((prev) => (arePaymentsEqual(prev, cachedP) ? prev : cachedP));
+  }, [activeBranchNumId]);
+
+  // Operational branch data loader (isolates data strictly by activeBranchNumId)
+  const loadBranchOperationalData = useCallback(async () => {
+    syncOperationalFromCache();
+    try {
+      const [tList, oList, pList] = await Promise.all([
+        restaurantStore.getTables(activeBranchNumId),
+        restaurantStore.getOrders(activeBranchNumId),
+        restaurantStore.getPayments(activeBranchNumId),
+      ]);
+      setBranchTables((prev) => (areTablesEqual(prev, tList) ? prev : tList));
+      setBranchOrders((prev) => (areOrdersEqual(prev, oList) ? prev : oList));
+      setBranchPayments((prev) => (arePaymentsEqual(prev, pList) ? prev : pList));
+    } catch (e) {
+      console.warn('Error loading branch operational data:', e);
+    }
+  }, [activeBranchNumId, syncOperationalFromCache]);
+
+  useEffect(() => {
+    loadBranchOperationalData();
+    const unsubStore = restaurantStore.subscribe(syncOperationalFromCache);
+    const unsubFocus = navigation?.addListener?.('focus', () => {
+      loadBranchOperationalData();
+    });
+    return () => {
+      unsubStore();
+      unsubFocus?.();
+    };
+  }, [loadBranchOperationalData, syncOperationalFromCache, navigation]);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await Promise.all([
+      getSavedOffers().then((data) => {
+        if (data && data.length > 0) setOffers(data);
+      }),
+      loadBranchOperationalData(),
+    ]);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 600);
+  };
+
+  // Helper to determine if an order/payment/timestamp belongs strictly to TODAY
+  const isItemToday = useCallback((dateStr?: string, createdAtMs?: number): boolean => {
+    if (!dateStr && !createdAtMs) return false;
+
+    // Explicit 'Today' flag
+    if (dateStr) {
+      const s = String(dateStr).trim();
+      if (s === 'Today' || s.toLowerCase().startsWith('today')) return true;
+    }
+
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const todayYmd = `${yyyy}-${mm}-${dd}`;
+
+    if (dateStr) {
+      const s = String(dateStr).trim();
+      if (s.includes(todayYmd)) return true;
+      const d = new Date(s);
+      if (!isNaN(d.getTime())) {
+        const itemYmd = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        if (itemYmd === todayYmd) return true;
+      }
+    }
+
+    if (createdAtMs && createdAtMs > 0) {
+      const d = new Date(createdAtMs);
+      if (!isNaN(d.getTime())) {
+        const itemYmd = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        if (itemYmd === todayYmd) return true;
+      }
+    }
+
+    return false;
+  }, []);
+
+  // Filter orders and payments strictly for TODAY:
+  const branchOrdersToday = useMemo(() => {
+    return branchOrders.filter((o) => isItemToday(o.date, o.createdAtMs));
+  }, [branchOrders, isItemToday]);
+
+  const branchPaymentsToday = useMemo(() => {
+    return branchPayments.filter((p) => isItemToday(p.date || p.time));
+  }, [branchPayments, isItemToday]);
+
+  // Dynamic calculations for the currently active branch:
+  const liveTotalTables = useMemo(() => {
+    if (branchTables.length > 0) return branchTables.length;
+    return activeBranch?.stats?.totalTables || 0;
+  }, [branchTables, activeBranch?.stats?.totalTables]);
+
+  const liveOccupiedTables = useMemo(() => {
+    // Only tables that have an active order or billing TODAY are considered occupied
+    const occupiedToday = branchTables.filter((t) => {
+      if (t.status !== 'OCCUPIED' && t.status !== 'BILLING') return false;
+      const tKey = (t.tableNumber || '').toLowerCase().trim();
+      return branchOrdersToday.some((o) => {
+        if (o.status === 'PAID') return false;
+        const oKey = (o.tableNumber || '').toLowerCase().trim();
+        return oKey === tKey || o.id === t.currentOrderId;
+      });
+    }).length;
+    return occupiedToday;
+  }, [branchTables, branchOrdersToday]);
+
+  const liveAvailableTables = Math.max(0, liveTotalTables - liveOccupiedTables);
+
+  const isMainBranch = activeBranchNumId === 1;
+
+  // Dynamic calculations from live branch orders & payments FOR TODAY ONLY:
+  const liveSalesTotalNum = useMemo(() => {
+    const paidSum = branchPaymentsToday.reduce((acc: number, p: PaymentRecord) => acc + (Number(p.amount) || 0), 0);
+    if (paidSum > 0) return paidSum;
+    const orderSum = branchOrdersToday
+      .filter((o: ActiveOrder) => o.status === 'PAID' || o.status === 'BILL GENERATED')
+      .reduce((acc: number, o: ActiveOrder) => acc + (Number(o.total) || 0), 0);
+    if (orderSum > 0) return orderSum;
+    return 0; // Today's Sales strictly defaults to 0.00 until orders/payments occur today
+  }, [branchPaymentsToday, branchOrdersToday]);
+
+  const liveOrdersCount = useMemo(() => {
+    return branchOrdersToday.length;
+  }, [branchOrdersToday]);
+
+  // Dynamic Hourly Sales calculation for the Sales Overview Chart
+  const liveSalesChartData = useMemo(() => {
+    // 6 Operating Shift Intervals of a full restaurant day
+    const SLOTS = [
+      { id: '6am', label: '6 AM', window: '6 AM - 9 AM (Breakfast)', pct: 0.08, x: 35 },
+      { id: '9am', label: '9 AM', window: '9 AM - 12 PM (Morning Bites)', pct: 0.14, x: 89 },
+      { id: '12pm', label: '12 PM', window: '12 PM - 3 PM (Lunch Rush)', pct: 0.32, x: 143 },
+      { id: '3pm', label: '3 PM', window: '3 PM - 6 PM (Afternoon Tea)', pct: 0.14, x: 197 },
+      { id: '6pm', label: '6 PM', window: '6 PM - 9 PM (Dinner Rush)', pct: 0.22, x: 251 },
+      { id: '9pm', label: '9 PM', window: '9 PM - Midnight (Late Supper)', pct: 0.10, x: 305 },
+    ];
+
+    // Helper to extract a valid hour (6..23) only when a real specific time is present
+    const parseHour = (timeStr?: string, dateStr?: string): number | null => {
+      if (timeStr && timeStr !== 'Today' && !timeStr.toLowerCase().startsWith('today')) {
+        const m = timeStr.match(/(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)?/i);
+        if (m) {
+          let h = parseInt(m[1], 10);
+          const meridiem = (m[3] || '').toUpperCase();
+          if (meridiem === 'PM' && h < 12) h += 12;
+          if (meridiem === 'AM' && h === 12) h = 0;
+          return h;
+        }
+      }
+      if (dateStr && dateStr.includes('T')) {
+        const timePart = dateStr.split('T')[1];
+        if (timePart && !timePart.startsWith('00:00:00')) {
+          const d = new Date(dateStr);
+          if (!isNaN(d.getTime())) return d.getHours();
+        }
+      }
+      return null;
+    };
+
+    const slotBuckets = [0, 0, 0, 0, 0, 0];
+    let realParsedTotal = 0;
+
+    // 1. Tally payments that have an actual hour specified for today
+    branchPaymentsToday.forEach((p) => {
+      const h = parseHour(p.time, p.date);
+      const amt = Number(p.amount) || 0;
+      if (amt <= 0 || h === null) return;
+      let slotIdx = 0;
+      if (h < 9) slotIdx = 0;
+      else if (h < 12) slotIdx = 1;
+      else if (h < 15) slotIdx = 2;
+      else if (h < 18) slotIdx = 3;
+      else if (h < 21) slotIdx = 4;
+      else slotIdx = 5;
+      slotBuckets[slotIdx] += amt;
+      realParsedTotal += amt;
+    });
+
+    // 2. Also tally active orders with actual hour for today
+    if (realParsedTotal === 0 && branchOrdersToday.length > 0) {
+      branchOrdersToday.forEach((o) => {
+        const h = parseHour(undefined, o.date);
+        const amt = Number(o.total) || 0;
+        if (amt <= 0 || h === null) return;
+        let slotIdx = 0;
+        if (h < 9) slotIdx = 0;
+        else if (h < 12) slotIdx = 1;
+        else if (h < 15) slotIdx = 2;
+        else if (h < 18) slotIdx = 3;
+        else if (h < 21) slotIdx = 4;
+        else slotIdx = 5;
+        slotBuckets[slotIdx] += amt;
+        realParsedTotal += amt;
+      });
+    }
+
+    // 3. Realistic progression curve
+    let cumulativeAmounts: number[] = [];
+    if (liveSalesTotalNum > 0) {
+      const totalToDistribute = liveSalesTotalNum;
+      const unassignedAmount = Math.max(0, totalToDistribute - realParsedTotal);
+      let running = 0;
+      for (let i = 0; i < 6; i++) {
+        const slotAmt = slotBuckets[i] + (unassignedAmount * SLOTS[i].pct);
+        running += slotAmt;
+        cumulativeAmounts.push(running);
+      }
+    } else {
+      // 0 when no sales have occurred today
+      cumulativeAmounts = [0, 0, 0, 0, 0, 0];
+    }
+
+    const pointsData = SLOTS.map((s, idx) => ({
+      ...s,
+      cumAmount: cumulativeAmounts[idx],
+    }));
+
+    const maxVal = Math.max(...cumulativeAmounts, 100);
+    // Determine nice rounded max for clean Y-axis labels
+    const niceStep = maxVal > 100000 ? 50000 : maxVal > 10000 ? 5000 : 2000;
+    const niceMax = Math.max(6000, Math.ceil((maxVal * 1.05) / niceStep) * niceStep);
+
+    const baselineY = 125;
+    const peakY = 22;
+    const usableHeight = baselineY - peakY; // 103
+
+    const points = pointsData.map((p) => {
+      const ratio = niceMax > 0 ? Math.min(1, Math.max(0, p.cumAmount / niceMax)) : 0;
+      const y = baselineY - (ratio * usableHeight);
+      return {
+        ...p,
+        plotVal: p.cumAmount,
+        y,
+      };
+    });
+
+    // Smooth cubic bezier spline
+    let linePath = `M ${points[0].x} ${points[0].y.toFixed(1)}`;
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[i];
+      const p1 = points[i + 1];
+      const dx = p1.x - p0.x;
+      const cp1x = (p0.x + dx * 0.45).toFixed(1);
+      const cp1y = p0.y.toFixed(1);
+      const cp2x = (p1.x - dx * 0.45).toFixed(1);
+      const cp2y = p1.y.toFixed(1);
+      linePath += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p1.x} ${p1.y.toFixed(1)}`;
+    }
+
+    const areaPath = `${linePath} L ${points[points.length - 1].x} ${baselineY} L ${points[0].x} ${baselineY} Z`;
+
+    const formatY = (val: number): string => {
+      if (val >= 100000) return `₹${(val / 100000).toFixed(1)}L`;
+      if (val >= 1000) return `₹${Math.round(val / 1000)}k`;
+      return `₹${Math.round(val)}`;
+    };
+
+    const yAxisLabels = [
+      { y: 24, label: formatY(niceMax) },
+      { y: 58, label: formatY(niceMax * 0.666) },
+      { y: 92, label: formatY(niceMax * 0.333) },
+      { y: 126, label: '₹0' },
+    ];
+
+    const liveAvgBill = liveOrdersCount > 0 ? Math.round(liveSalesTotalNum / liveOrdersCount) : 0;
+    const liveTotalCust = branchOrdersToday.length > 0 ? branchOrdersToday.length : 0;
+    const orderDiscounts = branchOrdersToday.reduce((acc, o) => acc + (Number(o.discountAmount) || 0), 0);
+    const liveTotalDiscounts = orderDiscounts > 0 ? orderDiscounts : 0;
+
+    return {
+      points,
+      linePath,
+      areaPath,
+      yAxisLabels,
+      niceMax,
+      liveAvgBill,
+      liveTotalCust,
+      liveTotalDiscounts,
+    };
+  }, [branchPaymentsToday, branchOrdersToday, liveSalesTotalNum, liveOrdersCount]);
+
+  // Dynamic layout measurement & Moveable Chart Touch / PanResponder handler
+  const [chartWidthPx, setChartWidthPx] = useState<number>(Math.min(SCREEN_WIDTH - 64, 480));
+
+  const handleChartTouch = useCallback(
+    (touchX: number) => {
+      if (!chartWidthPx || chartWidthPx <= 0) return;
+      const svgX = (touchX / chartWidthPx) * 320;
+      let bestIdx = 0;
+      let bestDist = Infinity;
+      liveSalesChartData.points.forEach((pt, idx) => {
+        const dist = Math.abs(pt.x - svgX);
+        if (dist < bestDist) {
+          bestDist = dist;
+          bestIdx = idx;
+        }
+      });
+      setSelectedSalesPointIdx(bestIdx);
+    },
+    [chartWidthPx, liveSalesChartData.points]
+  );
+
+  const salesPanResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onStartShouldSetPanResponderCapture: () => false,
+        onMoveShouldSetPanResponder: (_, gestureState) => {
+          return Math.abs(gestureState.dx) > Math.abs(gestureState.dy) && Math.abs(gestureState.dx) > 3;
+        },
+        onMoveShouldSetPanResponderCapture: (_, gestureState) => {
+          return Math.abs(gestureState.dx) > Math.abs(gestureState.dy) && Math.abs(gestureState.dx) > 3;
+        },
+        onPanResponderGrant: (evt) => {
+          handleChartTouch(evt.nativeEvent.locationX);
+        },
+        onPanResponderMove: (evt) => {
+          handleChartTouch(evt.nativeEvent.locationX);
+        },
+      }),
+    [handleChartTouch]
+  );
+
+  const chartHandlers = useMemo(() => {
+    if (Platform.OS === 'web') {
+      return {
+        onPointerDown: (e: any) => {
+          const rect = e.currentTarget?.getBoundingClientRect?.();
+          const clientX = e.clientX ?? e.nativeEvent?.clientX;
+          if (rect && clientX != null) {
+            handleChartTouch(clientX - rect.left);
+          }
+        },
+        onPointerMove: (e: any) => {
+          if (e.buttons === 1) {
+            const rect = e.currentTarget?.getBoundingClientRect?.();
+            const clientX = e.clientX ?? e.nativeEvent?.clientX;
+            if (rect && clientX != null) {
+              handleChartTouch(clientX - rect.left);
+            }
+          }
+        },
+      };
+    }
+    return salesPanResponder.panHandlers;
+  }, [salesPanResponder, handleChartTouch]);
+
+  const rawTotalSales = `₹ ${liveSalesTotalNum.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const totalSalesDisplay = toDevanagari(rawTotalSales);
+
+  const rawTotalOrders = liveOrdersCount;
+  const totalOrdersDisplay = toDevanagari(rawTotalOrders);
+
+  const formattedDashboardDate = useMemo(() => {
+    try {
+      const now = new Date();
+      const day = now.toLocaleDateString('en-GB', { weekday: 'short' });
+      const dayNum = String(now.getDate()).padStart(2, '0');
+      const month = now.toLocaleDateString('en-GB', { month: 'short' });
+      const year = now.getFullYear();
+      return `${day}, ${dayNum} ${month}, ${year}`;
+    } catch {
+      return 'Wed, 04 Nov, 2026';
+    }
+  }, []);
+
+  const salesCardLabel = t('todaysSales', "Today's Sales");
+  const ordersCardLabel = t('todaysOrders', "Today's Orders");
+
+  const availableRatioText = toDevanagari(`${liveAvailableTables} / ${liveTotalTables}`);
+  const availablePercentText = toDevanagari(`${liveTotalTables > 0 ? Math.round((liveAvailableTables / liveTotalTables) * 100) : 0}%`);
+  const occupiedRatioText = toDevanagari(`${liveOccupiedTables} / ${liveTotalTables}`);
+  const occupiedPercentText = toDevanagari(`${liveTotalTables > 0 ? Math.round((liveOccupiedTables / liveTotalTables) * 100) : 0}%`);
+
+  // Current active / unbilled amount
+  const currentBillTotalNum = useMemo(() => {
+    return branchOrdersToday
+      .filter((o: ActiveOrder) => o.status !== 'PAID')
+      .reduce((acc: number, o: ActiveOrder) => acc + (Number(o.total) || 0), 0);
+  }, [branchOrdersToday]);
+  const currentBillDisplay = toDevanagari(`₹ ${(currentBillTotalNum || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
+
+  // Dynamic Payment Breakdown calculated from branchPayments:
+  const livePaymentBreakdown = useMemo(() => {
+    let cash = 0, upi = 0, card = 0, others = 0, total = 0;
+    branchPaymentsToday.forEach((p: PaymentRecord) => {
+      const amt = Number(p.amount) || 0;
+      total += amt;
+      const m = String(p.mode || '').toUpperCase();
+      if (m === 'CASH') cash += amt;
+      else if (m === 'CARD' || m === 'DEBIT_CARD' || m === 'CREDIT_CARD') card += amt;
+      else if (m === 'UPI') upi += amt;
+      else others += amt;
+    });
+
+    const formatCurr = (n: number) => {
+      return `₹ ${n.toLocaleString('en-IN', {
+        minimumFractionDigits: n % 1 === 0 ? 0 : 2,
+        maximumFractionDigits: 2,
+      })}`;
+    };
+
+    if (total === 0) {
+      return {
+        total: '₹ 0',
+        cash: '₹ 0 (0%)',
+        upi: '₹ 0 (0%)',
+        card: '₹ 0 (0%)',
+        others: '₹ 0 (0%)',
+        cashAmount: '₹ 0',
+        upiAmount: '₹ 0',
+        cardAmount: '₹ 0',
+        othersAmount: '₹ 0',
+        cashPct: 0,
+        upiPct: 0,
+        cardPct: 0,
+        othersPct: 0,
+        rawTotal: 0,
+        rawCash: 0,
+        rawUpi: 0,
+        rawCard: 0,
+        rawOthers: 0,
+      };
+    }
+
+    const cashPct = total > 0 ? Math.round((cash / total) * 100) : 0;
+    const upiPct = total > 0 ? Math.round((upi / total) * 100) : 0;
+    const cardPct = total > 0 ? Math.round((card / total) * 100) : 0;
+    const othersPct = total > 0 ? Math.round((others / total) * 100) : 0;
+
+    return {
+      total: formatCurr(total),
+      cash: `${formatCurr(cash)} (${cashPct}%)`,
+      upi: `${formatCurr(upi)} (${upiPct}%)`,
+      card: `${formatCurr(card)} (${cardPct}%)`,
+      others: `${formatCurr(others)} (${othersPct}%)`,
+      cashAmount: formatCurr(cash),
+      upiAmount: formatCurr(upi),
+      cardAmount: formatCurr(card),
+      othersAmount: formatCurr(others),
+      cashPct,
+      upiPct,
+      cardPct,
+      othersPct,
+      rawTotal: total,
+      rawCash: cash,
+      rawUpi: upi,
+      rawCard: card,
+      rawOthers: others,
+    };
+  }, [branchPaymentsToday, isMainBranch]);
+
+  const paymentTotalDisplay = toDevanagari(livePaymentBreakdown.total);
+  const paymentCashDisplay = toDevanagari(livePaymentBreakdown.cash);
+  const paymentUpiDisplay = toDevanagari(livePaymentBreakdown.upi);
+  const paymentCardDisplay = toDevanagari(livePaymentBreakdown.card);
+
+  const paymentCashAmount = toDevanagari(livePaymentBreakdown.cashAmount);
+  const paymentCashPct = toDevanagari(livePaymentBreakdown.cashPct.toString());
+  const paymentUpiAmount = toDevanagari(livePaymentBreakdown.upiAmount);
+  const paymentUpiPct = toDevanagari(livePaymentBreakdown.upiPct.toString());
+  const paymentCardAmount = toDevanagari(livePaymentBreakdown.cardAmount);
+  const paymentCardPct = toDevanagari(livePaymentBreakdown.cardPct.toString());
+  const paymentOthersAmount = toDevanagari(livePaymentBreakdown.othersAmount);
+  const paymentOthersPct = toDevanagari(livePaymentBreakdown.othersPct.toString());
+
+  // Dynamic proportional Donut Chart segments for Payment Summary:
+  const paymentDonutSegments = useMemo(() => {
+    const { rawTotal, rawCash, rawUpi, rawCard, rawOthers } = livePaymentBreakdown;
+    const r = 48;
+    const circumference = 2 * Math.PI * r; // ~301.59
+    if (rawTotal <= 0) return { segments: [], circumference, r };
+
+    const modes = [
+      { key: 'UPI', amount: rawUpi, color: '#2563EB' },
+      { key: 'Cash', amount: rawCash, color: '#16A34A' },
+      { key: 'Card', amount: rawCard, color: '#7C3AED' },
+      { key: 'Others', amount: rawOthers, color: '#94A3B8' },
+    ].filter((m) => m.amount > 0);
+
+    const activeCount = modes.length;
+    const gapLength = activeCount > 1 ? 3 : 0;
+
+    let accumulatedArc = 0;
+    const segments = modes.map((m) => {
+      const ratio = m.amount / rawTotal;
+      const totalArc = ratio * circumference;
+      const visibleArc = Math.max(1, totalArc - gapLength);
+      // Start from 12 o'clock (-90°), which corresponds to (0.25 * circumference):
+      const strokeDashoffset = (0.25 * circumference) - accumulatedArc;
+      accumulatedArc += totalArc;
+
+      return {
+        key: m.key,
+        color: m.color,
+        strokeDasharray: `${visibleArc.toFixed(1)} ${circumference.toFixed(1)}`,
+        strokeDashoffset,
+      };
+    });
+
+    return { segments, circumference, r };
+  }, [livePaymentBreakdown]);
+
+  // Live Bill Requests derived matching Vite dashboard:
+  const formatReqTableLabel = useCallback((rawTable?: string): string => {
+    const s = String(rawTable || '').trim();
+    if (!s) return 'Table';
+    if (/^(table|nsk-tbl|tbl|takeaway|parcel|walk-in|room)/i.test(s) || s.includes('-TBL-')) {
+      return s;
+    }
+    return /^\d+$/.test(s) || s.length <= 4 ? `Table ${s}` : s;
+  }, []);
+
+  const liveBillRequests = useMemo<BillRequest[]>(() => {
+    const list: BillRequest[] = [];
+    const seenOrderIds = new Set<string>();
+
+    // Strictly match Billing module: only active unbilled orders that exist in branchOrdersToday
+    branchOrdersToday
+      .filter((o: ActiveOrder) => {
+        if (!o) return false;
+        if (o.status === 'PAID') return false;
+        return (Number(o.total) > 0 || (o.items && o.items.length > 0) || o.status === 'BILL GENERATED');
+      })
+      .forEach((o: ActiveOrder) => {
+        const idStr = String(o.id || o.orderNumber);
+        if (seenOrderIds.has(idStr)) return;
+        seenOrderIds.add(idStr);
+
+        const tbl = formatReqTableLabel(o.tableNumber);
+        const isBillReq = o.status === 'BILL GENERATED';
+        list.push({
+          id: o.id,
+          orderId: o.id,
+          table: tbl,
+          guestName: o.customer || 'Guest',
+          amount: `₹ ${(o.total || 0).toLocaleString('en-IN')}`,
+          time: o.date ? o.date : 'Just now',
+          statusBadge: isBillReq ? 'Bill Requested' : 'Unpaid',
+          statusType: isBillReq ? 'BILL_REQUESTED' : 'UNPAID',
+        });
+      });
+
+    return list;
+  }, [branchOrdersToday, formatReqTableLabel]);
+
+  const handleOpenBillingStep1 = useCallback(() => {
+    navigation.navigate('Billing', {
+      resetStepTs: Date.now(),
+      orderId: undefined,
+      tableNumber: undefined,
+      step: 1,
+    });
+  }, [navigation]);
+
+  const handleOpenBillRequest = useCallback(
+    (item: BillRequest) => {
+      const numericAmt = Number(String(item.amount || '').replace(/[^0-9.]/g, '')) || 0;
+      const candidateOrderId =
+        item.orderId ||
+        (!String(item.id || '').startsWith('tbl-') && !String(item.id || '').startsWith('b-')
+          ? item.id
+          : undefined);
+      const ensuredOrder = restaurantStore.ensureBillingOrderForTableName(
+        item.table,
+        item.guestName,
+        numericAmt,
+        candidateOrderId,
+        activeBranchNumId
+      );
+      const resolvedOrderId = restaurantStore.resolveOrderId(ensuredOrder.id);
+      if (ensuredOrder.status !== 'PAID') {
+        restaurantStore.markOrderForBilling(resolvedOrderId, activeBranchNumId).catch(() => { });
+      }
+      navigation.navigate('Billing', {
+        orderId: resolvedOrderId,
+        tableNumber: item.table,
+        guestName: item.guestName,
+        billAmount: numericAmt || item.amount,
+        step: 2,
+        resetStepTs: undefined,
+        _navTs: Date.now(),
+      });
+    },
+    [activeBranchNumId, navigation]
+  );
+
+  // Toggle Offer Active / Inactive
+  const handleToggleOfferStatus = async (id: string) => {
+    const updated = offers.map((off) =>
+      off.id === id
+        ? { ...off, status: (off.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE') as ('ACTIVE' | 'INACTIVE') }
+        : off
+    );
+    setOffers(updated);
+    await saveOffersToStorage(updated);
+
+    const target = updated.find((o) => o.id === id);
+    if (target && target.status === 'ACTIVE') {
+      try {
+        await notificationManager.addNotification({
+          title: 'Offer Activated',
+          desc: `Offer "${target.name}" (${target.code}) activated with ${target.discountValue}${target.discountType === 'PERCENTAGE' ? '%' : '₹'} discount.`,
+          targetScreen: 'Overview',
+          type: 'GENERAL',
+        });
+      } catch (e) {
+        console.warn('Failed to dispatch offer active notification', e);
+      }
+    }
+  };
+
+  // Delete Offer
+  const handleDeleteOffer = (id: string) => {
+    Alert.alert(
+      language === 'mr' ? 'ऑफर हटवा' : language === 'hi' ? 'ऑफ़र हटाएं' : 'Delete Offer',
+      language === 'mr'
+        ? 'तुम्हाला ही ऑफर हटवायची आहे का?'
+        : language === 'hi'
+          ? 'क्या आप वाकई इस ऑफ़र को हटाना चाहते हैं?'
+          : 'Are you sure you want to remove this promotion?',
+      [
+        {
+          text: language === 'mr' ? 'रद्द करा' : language === 'hi' ? 'रद्द करें' : 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: language === 'mr' ? 'हटवा' : language === 'hi' ? 'हटाएं' : 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            const updated = offers.filter((o) => o.id !== id);
+            setOffers(updated);
+            await saveOffersToStorage(updated);
+            setOfferSuccessToast(
+              language === 'mr' ? 'ऑफर हटवली!' : language === 'hi' ? 'ऑफ़र हटा दी गई!' : 'Offer removed!'
+            );
+            setTimeout(() => setOfferSuccessToast(''), 3000);
+          },
+        },
+      ]
+    );
+  };
+
+  // Create New Offer
+  const handleCreateNewOffer = async () => {
+    if (!newOfferName.trim() || !newOfferCode.trim() || !newOfferVal.trim()) {
+      Alert.alert(
+        language === 'mr' ? 'माहिती अपूर्ण' : language === 'hi' ? 'विवरण अधूरा है' : 'Missing Details',
+        language === 'mr'
+          ? 'कृपया ऑफरचे नाव, कोड आणि सवलत मूल्य भरा.'
+          : language === 'hi'
+            ? 'कृपया ऑफ़र का नाम, कोड और छूट मूल्य भरें।'
+            : 'Please fill in Offer Name, Code and Discount Value.'
+      );
+      return;
+    }
+    const val = parseFloat(newOfferVal) || 0;
+    const created: OfferItem = {
+      id: 'off-' + Date.now(),
+      name: newOfferName.trim(),
+      code: newOfferCode.trim().toUpperCase(),
+      desc: newOfferDesc.trim() || `${val}${newOfferType === 'PERCENTAGE' ? '%' : '₹'} discount offer.`,
+      discountType: newOfferType,
+      discountValue: val,
+      validFrom: newOfferFrom.trim() || '2026-10-19',
+      validTo: newOfferTo.trim() || '2026-11-19',
+      status: 'ACTIVE',
+      isCustom: true,
+    };
+
+    const updated = [created, ...offers];
+    setOffers(updated);
+    await saveOffersToStorage(updated);
+
+    // Dispatch real-time offer notification
+    try {
+      await notificationManager.addNotification({
+        title: 'New Offer Added',
+        desc: `New offer "${created.name}" (${created.code}) activated with ${val}${created.discountType === 'PERCENTAGE' ? '%' : '₹'} discount.`,
+        targetScreen: 'Overview',
+        type: 'GENERAL',
+      });
+    } catch (e) {
+      console.warn('Failed to dispatch new offer notification', e);
+    }
+
+    // Switch back to LIST view to show the new offer immediately
+    setOffersViewMode('LIST');
+    setShowAddOfferModal(false);
+    setShowOfferModal(true);
+
+    // Set fresh defaults for next offer
+    setNewOfferName('Special Discount');
+    setNewOfferCode('SAVE' + Math.floor(10 + Math.random() * 90));
+    setNewOfferDesc('');
+
+    setOfferSuccessToast(
+      language === 'mr'
+        ? `"${created.name}" ऑफर तयार झाली!`
+        : language === 'hi'
+          ? `"${created.name}" ऑफ़र बनाई गई!`
+          : `"${created.name}" offer created!`
+    );
+    setTimeout(() => setOfferSuccessToast(''), 3500);
+
+    Alert.alert(
+      language === 'mr' ? 'यशस्वी!' : language === 'hi' ? 'सफल!' : 'Success!',
+      language === 'mr'
+        ? `नवीन ऑफर "${created.name}" (कोड: ${created.code}) तयार झाली असून ग्राहकांसाठी सक्रिय झाली आहे!`
+        : language === 'hi'
+          ? `नया ऑफ़र "${created.name}" (कोड: ${created.code}) सफलतापूर्वक बनाया गया और अब सक्रिय है!`
+          : `New offer "${created.name}" (Code: ${created.code}) created successfully and is now active!`,
+      [{ text: language === 'mr' ? 'ऑफर पहा' : language === 'hi' ? 'ऑफ़र देखें' : 'View Offers' }]
+    );
+  };
+
+  // Plan Activation Handlers
+  const handleActivateStarter = () => {
+    setPlanType('TRIAL');
+    setPlanTitle('28 Days Free Trial');
+    setDaysLeft(28);
+    setValidityDate('24 Nov 2026');
+    setShowPlanModal(false);
+    Alert.alert('Subscription Selected', 'Starter (28-Day Free Trial) selected!');
+  };
+
+  const handleActivatePro = () => {
+    setPlanType('PRO');
+    setPlanTitle('Pro Edition');
+    setDaysLeft(365);
+    setValidityDate('19 Oct 2027');
+    setShowPlanModal(false);
+    Alert.alert('Subscription Activated', 'Pro Edition (Annual) activated successfully for 1 Year!');
+  };
+
+  const handleActivateEnterprise = () => {
+    setPlanType('ENTERPRISE');
+    setPlanTitle('Enterprise Suite');
+    setDaysLeft(365);
+    setValidityDate('19 Oct 2027');
+    setShowPlanModal(false);
+    Alert.alert('Subscription Activated', 'Enterprise Suite (Annual) activated successfully for 1 Year!');
+  };
+
+  const branches = [
+    { name: 'Main Branch', location: 'Royal Palace Hotel - Pune', sales: '₹ 58,716.26', tables: '12/16' },
+    { name: 'City Center Outlet', location: 'Ajalkar Express - Camp', sales: '₹ 32,450.00', tables: '8/10' },
+    { name: 'Highway Dining', location: 'Ajalkar Dhaba - Expressway', sales: '₹ 64,120.00', tables: '18/24' },
+  ];
+
+  const notifications = [
+    { id: '1', title: 'New Bill Request', desc: 'Table 06 requested final bill (₹ 2,499)', time: '2m ago' },
+    { id: '2', title: 'KOT Sent', desc: 'Order #KOT-104 dispatched to kitchen for Table 02', time: '5m ago' },
+    { id: '3', title: 'Low Inventory Alert', desc: 'Paneer & Butter stock below reorder level (2 kg left)', time: '15m ago' },
+    { id: '4', title: 'Payment Received', desc: 'UPI payment of ₹ 1,450 received via PhonePe', time: '25m ago' },
+    { id: '5', title: 'Table Cleaned', desc: 'Table 05 sanitized and ready for seating', time: '35m ago' },
+  ];
+
+  const activeOffersCount = offers.filter((o) => o.status === 'ACTIVE').length;
+
+  // Localized strings for Festive Offers Card reacting to selected language (en, mr, hi):
+  const festiveCardTitle = useMemo(() => {
+    if (language === 'mr') return 'नवरात्री विशेष सवलत';
+    if (language === 'hi') return 'नवरात्रि विशेष छूट';
+    return 'Navratri Festive Special';
+  }, [language]);
+
+  const festiveCardDesc = useMemo(() => {
+    const countStr = toDevanagari(activeOffersCount);
+    if (language === 'mr') return `ग्राहकांसाठी ${countStr} सक्रिय ऑफर्स आणि सवलती उपलब्ध`;
+    if (language === 'hi') return `ग्राहकों के लिए ${countStr} सक्रिय ऑफर्स और छूट उपलब्ध`;
+    return `${activeOffersCount} active promotions available for customers`;
+  }, [language, activeOffersCount, toDevanagari]);
+
+  const viewOffersBtnText = useMemo(() => {
+    if (language === 'mr') return 'ऑफर्स पहा →';
+    if (language === 'hi') return 'ऑफर्स देखें →';
+    return 'View Offers →';
+  }, [language]);
+
+  const getLocalizedOfferTitle = useCallback((name: string) => {
+    const lower = (name || '').toLowerCase();
+    if (lower.includes('navratri')) {
+      if (language === 'mr') return 'नवरात्री विशेष सवलत';
+      if (language === 'hi') return 'नवरात्रि विशेष छूट';
+      return 'Navratri Festive Special';
+    }
+    if (lower.includes('weekend') || lower.includes('family')) {
+      if (language === 'mr') return 'वीकेंड फॅमिली फीस्ट';
+      if (language === 'hi') return 'वीकेंड फैमिली दावत';
+      return 'Weekend Family Feast';
+    }
+    if (lower.includes('first order') || lower.includes('welcome')) {
+      if (language === 'mr') return 'पहिल्या ऑर्डरवर विशेष सवलत';
+      if (language === 'hi') return 'पहले ऑर्डर पर विशेष छूट';
+      return 'First Order Special';
+    }
+    return name;
+  }, [language]);
+
+  const getLocalizedOfferDesc = useCallback((desc: string) => {
+    const lower = (desc || '').toLowerCase();
+    if (lower.includes('navratri') || lower.includes('20%')) {
+      if (language === 'mr') return 'सर्व डायन-इन आणि पार्सल ऑर्डर्सवर २०% विशेष सवलत.';
+      if (language === 'hi') return 'सभी डाइन-इन और पार्सल ऑर्डर पर २०% विशेष छूट.';
+      return '20% discount offer on all dine-in and parcel orders.';
+    }
+    if (lower.includes('family') || lower.includes('10%')) {
+      if (language === 'mr') return '₹९९९ वरील सर्व फॅमिली टेबल बिलावर १०% थेट सवलत.';
+      if (language === 'hi') return '₹९९९ से अधिक के सभी फैमिली टेबल बिल पर १०% छूट.';
+      return 'Flat 10% discount on all family table bills above ₹999.';
+    }
+    if (lower.includes('first') || lower.includes('100')) {
+      if (language === 'mr') return '₹४९९ वरील पहिल्या डिलिव्हरी ऑर्डरवर ₹१०० थेट सवलत.';
+      if (language === 'hi') return '₹४९९ से अधिक के पहले डिलीवरी ऑर्डर पर ₹१०० सीधी छूट.';
+      return 'Get ₹100 flat discount on first online delivery order above ₹499.';
+    }
+    return desc;
+  }, [language]);
+
+  return (
+    <View style={styles.container}>
+      {/* ===================================================
+          MASTER APP NAVBAR (Responsive Two-Line Layout)
+          ("jr thithe jaga purt nel tr eka khali ek asa don line madhe thev")
+      =================================================== */}
+      <AppNavbar
+        navigation={navigation}
+        activeRouteName="Dashboard"
+        onOpenPlanModal={() => setShowPlanModal(true)}
+      />
+
+      {/* ===================================================
+          MAIN SCROLLABLE CONTENT
+      =================================================== */}
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#EA580C']} />}
+      >
+        {/* Title Row with Eye Toggle */}
+        <View style={styles.dashboardHeaderRow}>
+          <Text style={styles.dashboardHeading}>{t('dashboard', 'Dashboard')}</Text>
+
+          <TouchableOpacity
+            style={[styles.eyeToggleBtn, isOverviewOn && styles.eyeToggleBtnActive]}
+            onPress={() => setIsOverviewOn(!isOverviewOn)}
+            activeOpacity={0.8}
+          >
+            {isOverviewOn ? <Eye size={18} color="#EA580C" /> : <EyeOff size={18} color="#94A3B8" />}
+          </TouchableOpacity>
+        </View>
+
+        {/* Success Toast for Offers */}
+        {offerSuccessToast ? (
+          <View style={styles.toastCard}>
+            <CheckCircle2 size={16} color="#15803D" />
+            <Text style={styles.toastText}>{offerSuccessToast}</Text>
+          </View>
+        ) : null}
+
+        {/* ===================================================
+            TOP 4 STATISTIC CARDS (Connected to Active Branch)
+        =================================================== */}
+        {isOverviewOn && (
+          <View style={styles.topCardsGrid}>
+            {/* Card 1: Today's Sales */}
+            <TouchableOpacity
+              style={styles.kpiCard}
+              onPress={() => navigation.navigate('Payments')}
+              activeOpacity={0.88}
+            >
+              <View style={styles.kpiCardInner}>
+                <View style={[styles.kpiIconCircle, { backgroundColor: '#F5F5F4' }]}>
+                  <ReceiptIndianRupee size={20} color="#1C1917" />
+                </View>
+                <View style={styles.kpiContentCol}>
+                  <Text style={styles.kpiLabel} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85}>
+                    {t('todaysSales', "Today's Sales")}
+                  </Text>
+                  <Text
+                    style={styles.kpiValueMain}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.7}
+                  >
+                    {totalSalesDisplay}
+                  </Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+
+            {/* Card 2: Today's Orders */}
+            <TouchableOpacity
+              style={styles.kpiCard}
+              onPress={handleOpenBillingStep1}
+              activeOpacity={0.88}
+            >
+              <View style={styles.kpiCardInner}>
+                <View style={[styles.kpiIconCircle, { backgroundColor: '#EFF6FF' }]}>
+                  <ShoppingBag size={20} color="#2563EB" />
+                </View>
+                <View style={styles.kpiContentCol}>
+                  <Text style={styles.kpiLabel} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85}>
+                    {t('todaysOrders', "Today's Orders")}
+                  </Text>
+                  <Text
+                    style={styles.kpiValueMain}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.7}
+                  >
+                    {totalOrdersDisplay}
+                  </Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+
+            {/* Card 3: Available Tables */}
+            <TouchableOpacity
+              style={styles.kpiCard}
+              onPress={() => navigation.navigate('Tables')}
+              activeOpacity={0.88}
+            >
+              <View style={styles.kpiCardInner}>
+                <View style={[styles.kpiIconCircle, { backgroundColor: '#EAF8EF' }]}>
+                  <Table2 size={20} color="#16A34A" />
+                </View>
+                <View style={styles.kpiContentCol}>
+                  <Text style={styles.kpiLabel} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85}>
+                    {t('availableTables', 'Available Tables')}
+                  </Text>
+                  <Text
+                    style={[styles.kpiValueMain, { color: '#16A34A' }]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.7}
+                  >
+                    {availableRatioText}
+                  </Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+
+            {/* Card 4: Occupied Tables */}
+            <TouchableOpacity
+              style={styles.kpiCard}
+              onPress={() => navigation.navigate('Tables')}
+              activeOpacity={0.88}
+            >
+              <View style={styles.kpiCardInner}>
+                <View style={[styles.kpiIconCircle, { backgroundColor: '#FEEFEF' }]}>
+                  <Table2 size={20} color="#E3342F" />
+                </View>
+                <View style={styles.kpiContentCol}>
+                  <Text style={styles.kpiLabel} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85}>
+                    {t('occupiedTables', 'Occupied Tables')}
+                  </Text>
+                  <Text
+                    style={[styles.kpiValueMain, { color: '#E3342F' }]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.7}
+                  >
+                    {occupiedRatioText}
+                  </Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* ===================================================
+            SECTION 1: SALES OVERVIEW (TODAY) (Exact Match to User Reference Screenshot)
+        =================================================== */}
+        {isOverviewOn && (
+          <View style={styles.sectionCard}>
+            {/* Header: Title, Subtitle, Sales Amount */}
+            <View style={{ marginBottom: 6 }}>
+              <Text style={styles.sectionCardTitle}>
+                {t('salesOverview', 'SALES OVERVIEW (TODAY)')}
+              </Text>
+              <Text style={styles.sectionCardSubtitle}>{t('totalSales', 'Total Sales')}</Text>
+              <Text style={styles.salesHighlightAmount} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+                {totalSalesDisplay}
+              </Text>
+            </View>
+
+            {/* Native SVG Moveable Spline Chart (Touch & Drag horizontally to move) */}
+            <View
+              style={styles.chartContainer}
+              onLayout={(e) => {
+                const w = e.nativeEvent.layout.width;
+                if (w > 0) setChartWidthPx(w);
+              }}
+              {...chartHandlers}
+            >
+              <Svg width={Math.min(SCREEN_WIDTH - 64, 480)} height={160} viewBox="0 0 320 160">
+                <Defs>
+                  <LinearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
+                    <Stop offset="0" stopColor="#FB923C" stopOpacity="0.42" />
+                    <Stop offset="1" stopColor="#FB923C" stopOpacity="0.02" />
+                  </LinearGradient>
+                </Defs>
+
+                {/* Horizontal Baseline at ₹0 */}
+                <Line x1="32" y1="125" x2="312" y2="125" stroke={isDark ? '#2A364F' : '#E7E5E4'} strokeWidth="1" />
+
+                {/* Y-Axis Labels (₹6k, ₹4k, ₹2k, ₹0) */}
+                {liveSalesChartData.yAxisLabels.map((lbl, i) => (
+                  <SvgText
+                    key={i}
+                    x="28"
+                    y={lbl.y}
+                    fontSize="9.5"
+                    fill={isDark ? '#94A3B8' : '#78716C'}
+                    textAnchor="end"
+                    fontWeight="500"
+                  >
+                    {toDevanagari(lbl.label)}
+                  </SvgText>
+                ))}
+
+                {/* Moveable Vertical Scrubber Line */}
+                {selectedSalesPointIdx !== null && liveSalesChartData.points[selectedSalesPointIdx] && (
+                  <Line
+                    x1={liveSalesChartData.points[selectedSalesPointIdx].x}
+                    y1="18"
+                    x2={liveSalesChartData.points[selectedSalesPointIdx].x}
+                    y2="125"
+                    stroke="#EA580C"
+                    strokeWidth="1.5"
+                    strokeDasharray="4, 3"
+                    opacity={0.85}
+                  />
+                )}
+
+                {/* Gradient Fill Under Curve */}
+                <Path d={liveSalesChartData.areaPath} fill="url(#salesGrad)" />
+
+                {/* Smooth Orange Curved Line */}
+                <Path
+                  d={liveSalesChartData.linePath}
+                  fill="none"
+                  stroke="#EA580C"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+
+                {/* Data Points on Line */}
+                {liveSalesChartData.points.map((pt, idx) => {
+                  const isSelected = selectedSalesPointIdx === idx;
+                  return (
+                    <React.Fragment key={pt.id}>
+                      <Circle
+                        cx={pt.x}
+                        cy={pt.y}
+                        r={isSelected ? 6.5 : 4.5}
+                        fill="#FFFFFF"
+                        stroke="#EA580C"
+                        strokeWidth={2.5}
+                        onPress={() => setSelectedSalesPointIdx(isSelected ? null : idx)}
+                      />
+                      {isSelected && (
+                        <Circle
+                          cx={pt.x}
+                          cy={pt.y}
+                          r={13}
+                          fill="rgba(234, 88, 12, 0.2)"
+                          stroke="#EA580C"
+                          strokeWidth={1.5}
+                        />
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+
+                {/* Moveable Floating Scrubber Value Badge */}
+                {selectedSalesPointIdx !== null && liveSalesChartData.points[selectedSalesPointIdx] && (() => {
+                  const activePt = liveSalesChartData.points[selectedSalesPointIdx];
+                  const formatAmt = (val: number): string => {
+                    if (val >= 100000) return `₹${(val / 100000).toFixed(1)}L`;
+                    if (val >= 1000) return `₹${Math.round(val / 1000)}k`;
+                    return `₹${Math.round(val)}`;
+                  };
+                  const badgeText = formatAmt(activePt.cumAmount);
+                  const badgeX = Math.min(Math.max(activePt.x, 32), 288);
+                  const badgeY = Math.max(activePt.y - 12, 16);
+                  return (
+                    <React.Fragment>
+                      <Rect
+                        x={badgeX - 25}
+                        y={badgeY - 14}
+                        width={50}
+                        height={16}
+                        rx={4}
+                        fill={isDark ? '#0F172A' : '#1C1917'}
+                        stroke="#EA580C"
+                        strokeWidth={1}
+                      />
+                      <SvgText
+                        x={badgeX}
+                        y={badgeY - 2.5}
+                        fontSize="8.5"
+                        fontWeight="800"
+                        fill="#FFFFFF"
+                        textAnchor="middle"
+                      >
+                        {toDevanagari(badgeText)}
+                      </SvgText>
+                    </React.Fragment>
+                  );
+                })()}
+
+                {/* X-Axis Time Labels (6 AM, 9 AM, 12 PM, 3 PM, 6 PM, 9 PM) */}
+                {liveSalesChartData.points.map((pt, idx) => {
+                  const isSelected = selectedSalesPointIdx === idx;
+                  return (
+                    <SvgText
+                      key={`lbl-${pt.id}`}
+                      x={pt.x}
+                      y="146"
+                      fontSize="9.5"
+                      fill={isSelected ? '#EA580C' : (isDark ? '#94A3B8' : '#78716C')}
+                      textAnchor="middle"
+                      fontWeight={isSelected ? '800' : '500'}
+                      onPress={() => setSelectedSalesPointIdx(isSelected ? null : idx)}
+                    >
+                      {pt.label}
+                    </SvgText>
+                  );
+                })}
+              </Svg>
+            </View>
+
+            {/* 3 Summary Badges (Exact Match to Screenshot) */}
+            <View style={styles.metricsTripleRow}>
+              <View style={styles.metricsBadgeCard}>
+                <Text style={styles.metricsBadgeLabel}>{t('avgBillValue', 'Average Bill Value')}</Text>
+                <Text style={styles.metricsBadgeValue}>
+                  {toDevanagari(`₹${liveSalesChartData.liveAvgBill}`)}
+                </Text>
+              </View>
+
+              <View style={styles.metricsBadgeCard}>
+                <Text style={styles.metricsBadgeLabel}>{t('totalCustomers', 'Total Customers')}</Text>
+                <Text style={styles.metricsBadgeValue}>
+                  {toDevanagari(String(liveSalesChartData.liveTotalCust))}
+                </Text>
+              </View>
+
+              <View style={styles.metricsBadgeCard}>
+                <Text style={styles.metricsBadgeLabel}>{t('totalDiscounts', 'Total Discounts')}</Text>
+                <Text style={styles.metricsBadgeValue}>
+                  {toDevanagari(`₹${liveSalesChartData.liveTotalDiscounts}`)}
+                </Text>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {/* ===================================================
+            SECTION 2: BILL REQUESTS (Screenshot Style)
+        =================================================== */}
+        {isOverviewOn && (
+          <View style={styles.sectionCard}>
+            <View style={styles.sectionHeaderBetween}>
+              <Text style={styles.sectionCardTitle}>{t('billRequests', 'BILL REQUESTS')}</Text>
+              <TouchableOpacity onPress={handleOpenBillingStep1}>
+                <Text style={styles.viewAllOrangeText}>{t('viewAll', 'View All →')}</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.billRequestsList}>
+              {liveBillRequests.length === 0 ? (
+                <View style={styles.emptyBillRequestsBox}>
+                  <CheckCircle2 size={24} color="#16A34A" />
+                  <Text style={styles.emptyBillRequestsTitle}>
+                    {t('noBillRequests', 'No Bill Requests Pending')}
+                  </Text>
+                  <Text style={styles.emptyBillRequestsSub}>
+                    {t('noBillRequestsSub', 'No occupied-table orders currently waiting for billing.')}
+                  </Text>
+                </View>
+              ) : (
+                liveBillRequests.map((item) => {
+                  const isPartial = item.statusType === 'PARTIAL';
+                  const isBillReq = item.statusType === 'BILL_REQUESTED';
+                  const badgeBg = isBillReq ? '#FFEDD5' : isPartial ? '#FEF3C7' : '#FEE2E2';
+                  const badgeBorder = isBillReq ? '#FED7AA' : isPartial ? '#FDE68A' : '#FECACA';
+                  const badgeText = isBillReq ? '#C2410C' : isPartial ? '#B45309' : '#B91C1C';
+                  const badgeLabel = item.statusBadge === 'Unpaid'
+                    ? t('unpaid', 'Unpaid')
+                    : item.statusBadge === 'Partial'
+                      ? t('partial', 'Partial')
+                      : item.statusBadge === 'Bill Requested'
+                        ? t('billRequested', 'Bill Requested')
+                        : t('pending', 'Pending');
+
+                  const itemDisplayName = formatTableName(item.table);
+
+                  return (
+                    <View
+                      key={item.id}
+                      style={styles.billRequestItem}
+                    >
+                      <TouchableOpacity
+                        style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}
+                        onPress={() => handleOpenBillRequest(item)}
+                        activeOpacity={0.85}
+                      >
+                        <View style={styles.billReceiptIconWrap}>
+                          <ReceiptRupee size={16} color="#DC2626" strokeWidth={2.2} />
+                        </View>
+
+                        <View style={{ flex: 1, marginLeft: 10, marginRight: 8 }}>
+                          <Text style={styles.billTableName} numberOfLines={1}>
+                            {itemDisplayName}
+                          </Text>
+                          <Text style={styles.billAmountText}>
+                            {t('amount', 'Amount')}: <Text style={{ color: isDark ? '#F8FAFC' : '#1C1917', fontWeight: '700' }}>{toDevanagari(item.amount)}</Text>
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+
+                      <View style={{ alignItems: 'flex-end', justifyContent: 'center' }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                          <View style={[styles.billStatusPill, { backgroundColor: badgeBg, borderColor: badgeBorder }]}>
+                            <Text style={[styles.billStatusPillText, { color: badgeText }]}>{badgeLabel}</Text>
+                          </View>
+
+                          <TouchableOpacity
+                            style={styles.billActionBtn}
+                            onPress={() => handleOpenBillRequest(item)}
+                            activeOpacity={0.85}
+                          >
+                            <Text style={styles.billActionBtnText}>{t('bill', 'Bill')} →</Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    </View>
+                  );
+                })
+              )}
+            </View>
+          </View>
+        )}
+
+        {/* ===================================================
+            SECTION 3: PAYMENT SUMMARY (TODAY) with Donut Chart
+        =================================================== */}
+        {isOverviewOn && (
+          <View style={styles.sectionCard}>
+            <View style={styles.sectionHeaderBetween}>
+              <Text style={styles.sectionCardTitle}>{t('paymentSummary', 'PAYMENT SUMMARY (TODAY)')}</Text>
+              <TouchableOpacity onPress={() => navigation.navigate('Payments')}>
+                <Text style={styles.viewAllOrangeText}>{t('viewPayments', 'View Payments →')}</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.paymentSummaryBody}>
+              {/* SVG Donut Chart */}
+              <View style={styles.donutWrap}>
+                <Svg width={128} height={128} viewBox="0 0 128 128">
+                  {/* Background Ring */}
+                  <Circle cx="64" cy="64" r="48" stroke={isDark ? '#1E293B' : '#F1F5F9'} strokeWidth="11" fill="none" />
+
+                  {/* Dynamic Proportional Segments */}
+                  {paymentDonutSegments.segments.map((seg) => (
+                    <Circle
+                      key={seg.key}
+                      cx="64"
+                      cy="64"
+                      r="48"
+                      stroke={seg.color}
+                      strokeWidth="11"
+                      strokeDasharray={seg.strokeDasharray}
+                      strokeDashoffset={seg.strokeDashoffset}
+                      strokeLinecap="round"
+                      fill="none"
+                    />
+                  ))}
+                </Svg>
+                <View style={styles.donutCenterContent} pointerEvents="none">
+                  <Text style={styles.donutTotalLabel}>{t('total', 'TOTAL')}</Text>
+                  <Text
+                    style={[
+                      styles.donutTotalNumber,
+                      paymentTotalDisplay.length > 13
+                        ? { fontSize: 10, letterSpacing: -0.3 }
+                        : paymentTotalDisplay.length > 10
+                          ? { fontSize: 11 }
+                          : { fontSize: 12.5 },
+                    ]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit={true}
+                    minimumFontScale={0.7}
+                  >
+                    {paymentTotalDisplay}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Payment Method Breakdown List */}
+              <View style={styles.breakdownList}>
+                {/* Cash */}
+                <View style={styles.breakdownRow}>
+                  <View style={styles.breakdownLabelGroup}>
+                    <View style={[styles.dotMarker, { backgroundColor: '#16A34A' }]} />
+                    <Text style={styles.breakdownName}>{t('cash', 'Cash')}</Text>
+                  </View>
+                  <View style={styles.breakdownValues}>
+                    <Text style={styles.breakdownAmount}>{paymentCashAmount}</Text>
+                    <Text style={styles.breakdownPercent}> ({paymentCashPct}%)</Text>
+                  </View>
+                </View>
+
+                {/* UPI */}
+                <View style={styles.breakdownRow}>
+                  <View style={styles.breakdownLabelGroup}>
+                    <View style={[styles.dotMarker, { backgroundColor: '#2563EB' }]} />
+                    <Text style={styles.breakdownName}>{t('upi', 'UPI')}</Text>
+                  </View>
+                  <View style={styles.breakdownValues}>
+                    <Text style={styles.breakdownAmount}>{paymentUpiAmount}</Text>
+                    <Text style={styles.breakdownPercent}> ({paymentUpiPct}%)</Text>
+                  </View>
+                </View>
+
+                {/* Card */}
+                <View style={styles.breakdownRow}>
+                  <View style={styles.breakdownLabelGroup}>
+                    <View style={[styles.dotMarker, { backgroundColor: '#7C3AED' }]} />
+                    <Text style={styles.breakdownName}>{t('card', 'Card')}</Text>
+                  </View>
+                  <View style={styles.breakdownValues}>
+                    <Text style={styles.breakdownAmount}>{paymentCardAmount}</Text>
+                    <Text style={styles.breakdownPercent}> ({paymentCardPct}%)</Text>
+                  </View>
+                </View>
+
+                {/* Others */}
+                <View style={styles.breakdownRow}>
+                  <View style={styles.breakdownLabelGroup}>
+                    <View style={[styles.dotMarker, { backgroundColor: '#94A3B8' }]} />
+                    <Text style={styles.breakdownName}>{t('others', 'Others')}</Text>
+                  </View>
+                  <View style={styles.breakdownValues}>
+                    <Text style={styles.breakdownAmount}>{paymentOthersAmount}</Text>
+                    <Text style={styles.breakdownPercent}> ({paymentOthersPct}%)</Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+
+            {/* Total Collection Footer Card */}
+            <View style={styles.totalCollectionStrip}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Wallet size={16} color="#D97706" />
+                <Text style={styles.totalCollectionLabel}>{t('totalCollection', 'Total Collection')}</Text>
+              </View>
+              <Text style={styles.totalCollectionNumber}>{paymentTotalDisplay}</Text>
+            </View>
+          </View>
+        )}
+
+        {/* ===================================================
+            FESTIVE PROMOTIONAL BANNER (Multi-Language)
+        =================================================== */}
+        <View style={styles.festiveBannerCard}>
+          <View style={styles.festiveBannerLeft}>
+            <View style={styles.festiveIconWrap}>
+              <Sparkles size={18} color="#EA580C" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.festiveTitle}>{t('festiveSpecial', 'Navratri Festive Special')}</Text>
+            </View>
+          </View>
+
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+            <TouchableOpacity
+              style={styles.viewOffersBtn}
+              onPress={() => {
+                setOffersViewMode('LIST');
+                setShowOfferModal(true);
+              }}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.viewOffersText}>{t('viewOffers', 'View Offers →')}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+
+      {/* ===================================================
+          MODAL 1: LICENCE & SUBSCRIPTION (MANAGE PLAN)
+          Matching Screenshot 2 + Active Offers Integration
+      =================================================== */}
+      <Modal visible={showPlanModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            {/* Modal Header */}
+            <View style={styles.subModalHeader}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <ShieldCheck size={22} color="#EA580C" />
+                <Text style={styles.subModalTitle}>Licence & Subscription</Text>
+              </View>
+              <TouchableOpacity
+                style={styles.modalCloseCircle}
+                onPress={() => setShowPlanModal(false)}
+              >
+                <X size={16} color="#78716C" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 420 }}>
+              {/* Current Status Box (Screenshot 2) */}
+              <View style={styles.currentStatusBox}>
+                <View style={styles.currentStatusHeader}>
+                  <Text style={styles.currentStatusLabel}>{t('currentStatus', 'Current Status')}</Text>
+                  <View style={styles.currentStatusActivePill}>
+                    <Text style={styles.currentStatusActiveText}>{t('active', 'Active')}</Text>
+                  </View>
+                </View>
+
+                <Text style={styles.currentStatusTitle}>
+                  {planType === 'TRIAL'
+                    ? t('freeTrial28Days', '28 Days Free Trial')
+                    : planType === 'PRO'
+                      ? t('proEdition', 'Pro Edition')
+                      : t('enterpriseSuite', 'Enterprise Suite')}
+                </Text>
+                <Text style={styles.currentStatusSubtitle}>
+                  {t('daysRemaining', 'Days Remaining')}: <Text style={{ fontWeight: '700', color: '#1C1917' }}>{toDevanagari(daysLeft)} {t('daysLower', 'days')}</Text> • {t('validTill', 'Valid till')}: <Text style={{ fontWeight: '700', color: '#1C1917' }}>{formatDate('2028-11-14', { showDayOfWeek: false })}</Text>
+                </Text>
+              </View>
+
+              {/* All 3 Available Subscription Plans */}
+              {/* Plan 1: Starter / 28-Day Free Trial */}
+              <View style={styles.planOptionCard}>
+                <View style={{ flex: 1, paddingRight: 8 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Text style={styles.planOptionTitle}>{t('starterFreeTrial', 'Starter (Free Trial)')}</Text>
+                    <View style={{ backgroundColor: '#F1F5F9', paddingHorizontal: 5, paddingVertical: 1, borderRadius: 4 }}>
+                      <Text style={{ fontSize: 9, fontWeight: '800', color: '#64748B' }}>STARTER</Text>
+                    </View>
+                  </View>
+                  <Text style={{ fontSize: 12, fontWeight: '800', color: '#16A34A', marginTop: 1 }}>{toDevanagari('₹ 0')} <Text style={{ fontSize: 10, fontWeight: '600', color: '#64748B' }}>/ {toDevanagari(28)} {t('daysLower', 'days')}</Text></Text>
+                  <Text style={styles.planOptionDesc}>{t('starterPlanDesc', 'Basic hotel billing, KOT printing, and single counter support.')}</Text>
+                </View>
+
+                <TouchableOpacity
+                  style={[styles.activateProBtn, planType === 'TRIAL' ? { backgroundColor: '#E2E8F0' } : { backgroundColor: '#10B981' }]}
+                  onPress={handleActivateStarter}
+                  disabled={planType === 'TRIAL'}
+                  activeOpacity={0.85}
+                >
+                  <Text style={[styles.activateProBtnText, planType === 'TRIAL' && { color: '#64748B' }]}>
+                    {planType === 'TRIAL' ? t('currentPlan', 'Current Plan') : t('select', 'Select')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Plan 2: Pro Edition (Annual) */}
+              <View style={styles.planOptionCard}>
+                <View style={{ flex: 1, paddingRight: 8 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Text style={styles.planOptionTitle}>{t('proEdition', 'Pro Edition (Annual)')}</Text>
+                    <View style={{ backgroundColor: '#E0F2FE', paddingHorizontal: 5, paddingVertical: 1, borderRadius: 4 }}>
+                      <Text style={{ fontSize: 9, fontWeight: '800', color: '#0284C7' }}>POPULAR</Text>
+                    </View>
+                  </View>
+                  <Text style={{ fontSize: 12, fontWeight: '800', color: '#0284C7', marginTop: 1 }}>{toDevanagari('₹ 7,999')} <Text style={{ fontSize: 10, fontWeight: '600', color: '#64748B' }}>/ {t('year', 'year')}</Text></Text>
+                  <Text style={styles.planOptionDesc}>{t('proPlanDesc', 'Multi-counter billing, 80mm thermal receipt printing, and WhatsApp receipts.')}</Text>
+                </View>
+
+                <TouchableOpacity
+                  style={[styles.activateProBtn, planType === 'PRO' && { backgroundColor: '#E2E8F0' }]}
+                  onPress={handleActivatePro}
+                  disabled={planType === 'PRO'}
+                  activeOpacity={0.85}
+                >
+                  <Text style={[styles.activateProBtnText, planType === 'PRO' && { color: '#64748B' }]}>
+                    {planType === 'PRO' ? t('currentPlan', 'Current Plan') : t('activatePro', 'Activate Pro')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Plan 3: Enterprise Suite (Annual) */}
+              <View style={[styles.planOptionCard, styles.planOptionCardEnterprise]}>
+                <View style={{ flex: 1, paddingRight: 8 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Text style={[styles.planOptionTitle, { color: '#EA580C' }]}>{t('enterpriseSuite', 'Enterprise Suite (Annual)')}</Text>
+                    <View style={{ backgroundColor: '#FFEDD5', paddingHorizontal: 5, paddingVertical: 1, borderRadius: 4 }}>
+                      <Text style={{ fontSize: 9, fontWeight: '800', color: '#EA580C' }}>RECOMMENDED</Text>
+                    </View>
+                  </View>
+                  <Text style={{ fontSize: 12, fontWeight: '800', color: '#EA580C', marginTop: 1 }}>{toDevanagari('₹ 14,999')} <Text style={{ fontSize: 10, fontWeight: '600', color: '#64748B' }}>/ {t('year', 'year')}</Text></Text>
+                  <Text style={styles.planOptionDesc}>{t('enterprisePlanDesc', 'All Modules, GSTR-1/2/3B compliance & Financial Reports.')}</Text>
+                </View>
+
+                <TouchableOpacity
+                  style={[styles.activateEnterpriseBtn, planType === 'ENTERPRISE' && { backgroundColor: '#E2E8F0' }]}
+                  onPress={handleActivateEnterprise}
+                  disabled={planType === 'ENTERPRISE'}
+                  activeOpacity={0.85}
+                >
+                  <Text style={[styles.activateEnterpriseBtnText, planType === 'ENTERPRISE' && { color: '#64748B' }]}>
+                    {planType === 'ENTERPRISE' ? t('currentPlan', 'Current Plan') : t('activateEnterprise', 'Activate Enterprise')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Modal Bottom Close */}
+              <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 10 }}>
+                <TouchableOpacity
+                  style={styles.subModalCloseBtn}
+                  onPress={() => setShowPlanModal(false)}
+                >
+                  <Text style={styles.subModalCloseBtnText}>{t('close', 'Close')}</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* ===================================================
+          MODAL 2: ACTIVE OFFERS & PROMOTIONS (VIEW OFFERS)
+          Matching Screenshot 1 + Add Offers Form
+      =================================================== */}
+      <Modal visible={showOfferModal} transparent animationType="fade">
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={styles.modalOverlay}
+        >
+          <View style={[styles.modalContent, { maxHeight: '92%' }]}>
+            {/* Modal Header */}
+            <View style={styles.offersModalHeader}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+                <View style={styles.tagIconWrap}>
+                  <Tag size={20} color="#EA580C" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.offersModalTitle} numberOfLines={1}>
+                    {language === 'mr' ? 'सक्रिय ऑफर्स आणि सवलती' : language === 'hi' ? 'सक्रिय ऑफर्स और छूट' : 'Active Offers & Promotions'}
+                  </Text>
+                  <Text style={styles.offersModalSubtitle} numberOfLines={1}>
+                    {language === 'mr'
+                      ? `विशेष सवलती आणि कूपन्स • ${toDevanagari(activeOffersCount)} सक्रिय`
+                      : language === 'hi'
+                        ? `विशेष छूट और कूपन • ${toDevanagari(activeOffersCount)} सक्रिय`
+                        : `Special Discounts & Coupons • ${toDevanagari(activeOffersCount)} Active`}
+                  </Text>
+                </View>
+              </View>
+
+              <TouchableOpacity
+                style={styles.modalCloseCircle}
+                onPress={() => setShowOfferModal(false)}
+              >
+                <X size={16} color="#78716C" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Segmented Switcher Tabs: [📋 View Offers (3)] | [➕ Add New Offer] */}
+            <View style={styles.modalSegmentedTabs}>
+              <TouchableOpacity
+                style={[styles.modalSegmentedTab, offersViewMode === 'LIST' && styles.modalSegmentedTabActive]}
+                onPress={() => setOffersViewMode('LIST')}
+                activeOpacity={0.85}
+              >
+                <Tag size={14} color={offersViewMode === 'LIST' ? '#EA580C' : '#64748B'} />
+                <Text style={[styles.modalSegmentedTabText, offersViewMode === 'LIST' && styles.modalSegmentedTabTextActive]}>
+                  {language === 'mr'
+                    ? `ऑफर्स पहा (${toDevanagari(offers.length)})`
+                    : language === 'hi'
+                      ? `ऑफर्स देखें (${toDevanagari(offers.length)})`
+                      : `View Offers (${toDevanagari(offers.length)})`}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.modalSegmentedTab, offersViewMode === 'ADD' && styles.modalSegmentedTabActive]}
+                onPress={() => setOffersViewMode('ADD')}
+                activeOpacity={0.85}
+              >
+                <Plus size={14} color={offersViewMode === 'ADD' ? '#EA580C' : '#64748B'} />
+                <Text style={[styles.modalSegmentedTabText, offersViewMode === 'ADD' && styles.modalSegmentedTabTextActive]}>
+                  {language === 'mr' ? 'ऑफर जोडा' : language === 'hi' ? 'ऑफर जोड़ें' : 'Add Offer'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* In-Modal Success Alert if newly created */}
+            {offerSuccessToast ? (
+              <View style={styles.toastCard}>
+                <CheckCircle2 size={15} color="#15803D" />
+                <Text style={styles.toastText}>{offerSuccessToast}</Text>
+              </View>
+            ) : null}
+
+            {offersViewMode === 'LIST' ? (
+              <>
+                {/* Hero Add Offer Banner at the very top of the offers list */}
+                <TouchableOpacity
+                  style={styles.heroAddOfferBanner}
+                  onPress={() => setOffersViewMode('ADD')}
+                  activeOpacity={0.85}
+                >
+                  <View style={styles.heroAddOfferIconCircle}>
+                    <Plus size={16} color="#FFFFFF" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.heroAddOfferTitle}>
+                      {language === 'mr'
+                        ? '+ नवीन ऑफर किंवा सवलत जोडा'
+                        : language === 'hi'
+                          ? '+ नया ऑफर या छूट जोड़ें'
+                          : '+ Create New Offer / Discount'}
+                    </Text>
+                    <Text style={styles.heroAddOfferSub}>
+                      {language === 'mr'
+                        ? 'ग्राहकांसाठी प्रोमो कूपन कोड आणि डिस्काउंट तयार करा'
+                        : language === 'hi'
+                          ? 'ग्राहकों के लिए प्रोमो कूपन कोड और डिस्काउंट बनाएं'
+                          : 'Create promo coupon codes and discounts for customers'}
+                    </Text>
+                  </View>
+                  <ChevronRight size={16} color="#EA580C" />
+                </TouchableOpacity>
+
+                {/* Offers List (Matching Screenshot 1) */}
+                <ScrollView
+                  style={{ maxHeight: 360 }}
+                  showsVerticalScrollIndicator={false}
+                  keyboardShouldPersistTaps="handled"
+                >
+                  <View style={{ gap: 12, paddingVertical: 4 }}>
+                    {offers.map((off) => {
+                      const isActive = off.status === 'ACTIVE';
+                      const discountLabel = off.discountType === 'PERCENTAGE'
+                        ? `${off.discountValue}% OFF`
+                        : `₹${off.discountValue} OFF`;
+
+                      return (
+                        <View
+                          key={off.id}
+                          style={[
+                            styles.offerCardMain,
+                            isActive ? styles.offerCardMainActive : styles.offerCardMainInactive,
+                          ]}
+                        >
+                          {/* Top Row: Pill Tag, Big Orange Value, Deactivate/Activate & Trash */}
+                          <View style={styles.offerCardTopRow}>
+                            <View style={[styles.offerTagBadge, !isActive && { backgroundColor: '#78716C' }]}>
+                              <Text style={styles.offerTagBadgeText}>{discountLabel}</Text>
+                            </View>
+
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                              <Text style={[styles.offerBigValText, !isActive && { color: '#78716C' }]}>
+                                {discountLabel}
+                              </Text>
+
+                              {/* Deactivate / Activate Button */}
+                              <TouchableOpacity
+                                style={styles.deactivateBtn}
+                                onPress={() => handleToggleOfferStatus(off.id)}
+                                activeOpacity={0.7}
+                              >
+                                <Text style={[styles.deactivateBtnText, !isActive && { color: '#15803D' }]}>
+                                  {isActive
+                                    ? (language === 'mr' ? 'निष्क्रिय करा' : language === 'hi' ? 'निष्क्रिय करें' : 'Deactivate')
+                                    : (language === 'mr' ? 'सक्रिय करा' : language === 'hi' ? 'सक्रिय करें' : 'Activate')}
+                                </Text>
+                              </TouchableOpacity>
+
+                              {/* Delete Trash Button */}
+                              <TouchableOpacity
+                                style={styles.trashBtn}
+                                onPress={() => handleDeleteOffer(off.id)}
+                                activeOpacity={0.7}
+                              >
+                                <Trash2 size={13} color="#DC2626" />
+                              </TouchableOpacity>
+                            </View>
+                          </View>
+
+                          {/* Offer Title & Description (Multi-Language) */}
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                            <Text style={styles.offerCardTitle}>{getLocalizedOfferTitle(off.name)}</Text>
+                            {off.isCustom && (
+                              <View style={styles.newCustomBadge}>
+                                <Text style={styles.newCustomBadgeText}>
+                                  {language === 'mr' ? 'नवीन' : language === 'hi' ? 'नया' : 'NEW'}
+                                </Text>
+                              </View>
+                            )}
+                          </View>
+                          <Text style={styles.offerCardDesc}>{getLocalizedOfferDesc(off.desc)}</Text>
+
+                          {/* Bottom Row: Code Pill & Validity Dates */}
+                          <View style={styles.offerCardBottomRow}>
+                            <View style={styles.codePill}>
+                              <Text style={styles.codePillText}>
+                                {language === 'mr' ? 'कोड: ' : language === 'hi' ? 'कोड: ' : 'Code: '}
+                                <Text style={{ fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace', fontWeight: '800' }}>{off.code}</Text>
+                              </Text>
+                            </View>
+
+                            <Text style={styles.validDatesText}>
+                              {language === 'mr' ? 'वैध: ' : language === 'hi' ? 'वैध: ' : 'Valid: '}
+                              {toDevanagari(off.validFrom)} {language === 'mr' ? 'ते' : language === 'hi' ? 'से' : 'to'} {toDevanagari(off.validTo)}
+                            </Text>
+                          </View>
+                        </View>
+                      );
+                    })}
+                  </View>
+                </ScrollView>
+
+                {/* Bottom Row: Close Button */}
+                <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', marginTop: 14 }}>
+                  <TouchableOpacity
+                    style={styles.subModalCloseBtn}
+                    onPress={() => setShowOfferModal(false)}
+                  >
+                    <Text style={styles.subModalCloseBtnText}>
+                      {language === 'mr' ? 'बंद करा' : language === 'hi' ? 'बंद करें' : 'Close'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            ) : (
+              /* ADD NEW OFFER FORM (INLINE INSIDE MODAL) */
+              <ScrollView
+                style={{ maxHeight: 420 }}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+              >
+                <View style={{ marginBottom: 12 }}>
+                  <Text style={{ fontSize: 15, fontWeight: '800', color: '#1C1917' }}>
+                    {language === 'mr' ? 'नवीन ऑफर तयार करा' : language === 'hi' ? 'नया ऑफर बनाएं' : 'Create New Offer'}
+                  </Text>
+                  <Text style={{ fontSize: 11, color: '#78716C' }}>
+                    {language === 'mr' ? 'ऑफरची माहिती भरा आणि सेव्ह करा' : language === 'hi' ? 'ऑफर का विवरण भरें और सहेजें' : 'Fill in offer details and save'}
+                  </Text>
+                </View>
+
+                {/* Offer Name */}
+                <View style={styles.formGroup}>
+                  <Text style={styles.formLabel}>
+                    {language === 'mr' ? 'ऑफरचे नाव *' : language === 'hi' ? 'ऑफर का नाम *' : 'Offer Name *'}
+                  </Text>
+                  <TextInput
+                    style={styles.formInput}
+                    placeholder={language === 'mr' ? 'उदा. Diwali Special 20% Off' : language === 'hi' ? 'उदा. Diwali Special 20% Off' : 'e.g. Diwali Special 20% Off'}
+                    placeholderTextColor="#94A3B8"
+                    value={newOfferName}
+                    onChangeText={setNewOfferName}
+                  />
+                </View>
+
+                {/* Promo Code */}
+                <View style={styles.formGroup}>
+                  <Text style={styles.formLabel}>
+                    {language === 'mr' ? 'प्रोमो कूपन कोड *' : language === 'hi' ? 'प्रोमो कूपन कोड *' : 'Promo Coupon Code *'}
+                  </Text>
+                  <TextInput
+                    style={[styles.formInput, { textTransform: 'uppercase', fontWeight: '700' }]}
+                    placeholder={language === 'mr' ? 'उदा. FEST2026' : language === 'hi' ? 'उदा. FEST2026' : 'e.g. FEST2026'}
+                    placeholderTextColor="#94A3B8"
+                    value={newOfferCode}
+                    onChangeText={setNewOfferCode}
+                    autoCapitalize="characters"
+                  />
+                </View>
+
+                {/* Discount Type & Value Row */}
+                <View style={{ flexDirection: 'row', gap: 10, marginBottom: 12 }}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.formLabel}>
+                      {language === 'mr' ? 'सवलत प्रकार *' : language === 'hi' ? 'छूट प्रकार *' : 'Discount Type *'}
+                    </Text>
+                    <View style={styles.typeSelectorRow}>
+                      <TouchableOpacity
+                        style={[styles.typeBtn, newOfferType === 'PERCENTAGE' && styles.typeBtnActive]}
+                        onPress={() => setNewOfferType('PERCENTAGE')}
+                      >
+                        <Text style={[styles.typeBtnText, newOfferType === 'PERCENTAGE' && styles.typeBtnTextActive]}>
+                          % Off
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.typeBtn, newOfferType === 'FIXED' && styles.typeBtnActive]}
+                        onPress={() => setNewOfferType('FIXED')}
+                      >
+                        <Text style={[styles.typeBtnText, newOfferType === 'FIXED' && styles.typeBtnTextActive]}>
+                          ₹ Flat
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.formLabel}>
+                      {language === 'mr'
+                        ? `सवलत मूल्य * (${newOfferType === 'PERCENTAGE' ? '%' : '₹'})`
+                        : language === 'hi'
+                          ? `छूट मूल्य * (${newOfferType === 'PERCENTAGE' ? '%' : '₹'})`
+                          : `Discount Value * (${newOfferType === 'PERCENTAGE' ? '%' : '₹'})`}
+                    </Text>
+                    <TextInput
+                      style={styles.formInput}
+                      placeholder={newOfferType === 'PERCENTAGE' ? '20' : '150'}
+                      placeholderTextColor="#94A3B8"
+                      value={newOfferVal}
+                      onChangeText={setNewOfferVal}
+                      keyboardType="numeric"
+                    />
+                  </View>
+                </View>
+
+                {/* Applicable Category */}
+                <View style={styles.formGroup}>
+                  <Text style={styles.formLabel}>
+                    {language === 'mr' ? 'लागू विभाग' : language === 'hi' ? 'लागू श्रेणी' : 'Applicable Category'}
+                  </Text>
+                  <View style={styles.categorySelectorRow}>
+                    {[
+                      { id: 'All Menu Items', en: 'All Menu Items', mr: 'सर्व मेनू आयटम्स', hi: 'सभी मेनू' },
+                      { id: 'Dine-In', en: 'Dine-In', mr: 'डाइन-इन', hi: 'डाइन-इन' },
+                      { id: 'Online Delivery', en: 'Online Delivery', mr: 'ऑनलाइन डिलिव्हरी', hi: 'ऑनलाइन डिलीवरी' },
+                      { id: 'Beverages', en: 'Beverages', mr: 'पेये', hi: 'पेय पदार्थ' },
+                    ].map((cat) => (
+                      <TouchableOpacity
+                        key={cat.id}
+                        style={[styles.categoryPillBtn, newOfferCategory === cat.id && styles.categoryPillBtnActive]}
+                        onPress={() => setNewOfferCategory(cat.id)}
+                      >
+                        <Text style={[styles.categoryPillText, newOfferCategory === cat.id && styles.categoryPillTextActive]}>
+                          {language === 'mr' ? cat.mr : language === 'hi' ? cat.hi : cat.en}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+
+                {/* Description */}
+                <View style={styles.formGroup}>
+                  <Text style={styles.formLabel}>
+                    {language === 'mr' ? 'वर्णन' : language === 'hi' ? 'विवरण' : 'Description'}
+                  </Text>
+                  <TextInput
+                    style={[styles.formInput, { height: 50 }]}
+                    placeholder={
+                      language === 'mr'
+                        ? 'उदा. सर्व जेवणाच्या बिलावर 20% विशेष सवलत.'
+                        : language === 'hi'
+                          ? 'उदा. सभी भोजन बिलों पर 20% विशेष छूट।'
+                          : 'e.g. 20% special discount on all food orders.'
+                    }
+                    placeholderTextColor="#94A3B8"
+                    value={newOfferDesc}
+                    onChangeText={setNewOfferDesc}
+                    multiline
+                  />
+                </View>
+
+                {/* Validity Dates */}
+                <View style={{ flexDirection: 'row', gap: 10, marginBottom: 16 }}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.formLabel}>
+                      {language === 'mr' ? 'सुरुवात तारीख' : language === 'hi' ? 'प्रारंभ तिथि' : 'Start Date'}
+                    </Text>
+                    <TextInput
+                      style={styles.formInput}
+                      value={newOfferFrom}
+                      onChangeText={setNewOfferFrom}
+                      placeholder="YYYY-MM-DD"
+                    />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.formLabel}>
+                      {language === 'mr' ? 'समाप्ती तारीख' : language === 'hi' ? 'समाप्ति तिथि' : 'End Date'}
+                    </Text>
+                    <TextInput
+                      style={styles.formInput}
+                      value={newOfferTo}
+                      onChangeText={setNewOfferTo}
+                      placeholder="YYYY-MM-DD"
+                    />
+                  </View>
+                </View>
+
+                {/* Action Buttons */}
+                <View style={{ flexDirection: 'row', gap: 10, marginTop: 4, marginBottom: 12 }}>
+                  <TouchableOpacity
+                    style={[styles.subModalCloseBtn, { flex: 1, alignItems: 'center' }]}
+                    onPress={() => setOffersViewMode('LIST')}
+                  >
+                    <Text style={styles.subModalCloseBtnText}>
+                      {language === 'mr' ? 'मागे जा' : language === 'hi' ? 'वापस जाएं' : 'Back'}
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.saveOfferSubmitBtn, { flex: 2 }]}
+                    onPress={handleCreateNewOffer}
+                    activeOpacity={0.85}
+                  >
+                    <Text style={styles.saveOfferSubmitBtnText}>
+                      {language === 'mr' ? '💾 सेव्ह करा' : language === 'hi' ? '💾 सहेजें' : '💾 Save & Publish'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
+            )}
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* ===================================================
+          MODAL 3: DIRECT ADD OFFER FALLBACK
+      =================================================== */}
+      <Modal visible={showAddOfferModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.subModalHeader}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Plus size={20} color="#EA580C" />
+                <Text style={styles.subModalTitle}>
+                  {language === 'mr' ? 'नवीन ऑफर तयार करा' : language === 'hi' ? 'नया ऑफ़र बनाएं' : 'Create New Offer'}
+                </Text>
+              </View>
+              <TouchableOpacity
+                style={styles.modalCloseCircle}
+                onPress={() => {
+                  setShowAddOfferModal(false);
+                  setShowOfferModal(true);
+                  setOffersViewMode('LIST');
+                }}
+              >
+                <X size={16} color="#78716C" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={{ maxHeight: 400 }} showsVerticalScrollIndicator={false}>
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>
+                  {language === 'mr' ? 'ऑफरचे नाव *' : language === 'hi' ? 'ऑफ़र का नाम *' : 'Offer Name *'}
+                </Text>
+                <TextInput
+                  style={styles.formInput}
+                  placeholder={language === 'mr' ? 'उदा. Navratri Festive Special' : language === 'hi' ? 'उदा. Navratri Festive Special' : 'e.g. Navratri Festive Special'}
+                  placeholderTextColor="#94A3B8"
+                  value={newOfferName}
+                  onChangeText={setNewOfferName}
+                />
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>
+                  {language === 'mr' ? 'प्रोमो कूपन कोड *' : language === 'hi' ? 'प्रोमो कूपन कोड *' : 'Promo Coupon Code *'}
+                </Text>
+                <TextInput
+                  style={[styles.formInput, { textTransform: 'uppercase' }]}
+                  placeholder={language === 'mr' ? 'उदा. NAV2026' : language === 'hi' ? 'उदा. NAV2026' : 'e.g. NAV2026'}
+                  placeholderTextColor="#94A3B8"
+                  value={newOfferCode}
+                  onChangeText={setNewOfferCode}
+                  autoCapitalize="characters"
+                />
+              </View>
+
+              <View style={{ flexDirection: 'row', gap: 10, marginBottom: 12 }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.formLabel}>
+                    {language === 'mr' ? 'सवलत प्रकार *' : language === 'hi' ? 'छूट प्रकार *' : 'Discount Type *'}
+                  </Text>
+                  <View style={styles.typeSelectorRow}>
+                    <TouchableOpacity
+                      style={[styles.typeBtn, newOfferType === 'PERCENTAGE' && styles.typeBtnActive]}
+                      onPress={() => setNewOfferType('PERCENTAGE')}
+                    >
+                      <Text style={[styles.typeBtnText, newOfferType === 'PERCENTAGE' && styles.typeBtnTextActive]}>
+                        % Off
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.typeBtn, newOfferType === 'FIXED' && styles.typeBtnActive]}
+                      onPress={() => setNewOfferType('FIXED')}
+                    >
+                      <Text style={[styles.typeBtnText, newOfferType === 'FIXED' && styles.typeBtnTextActive]}>
+                        ₹ Flat
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.formLabel}>
+                    {language === 'mr'
+                      ? `सवलत मूल्य * (${newOfferType === 'PERCENTAGE' ? '%' : '₹'})`
+                      : language === 'hi'
+                        ? `छूट मूल्य * (${newOfferType === 'PERCENTAGE' ? '%' : '₹'})`
+                        : `Discount Value * (${newOfferType === 'PERCENTAGE' ? '%' : '₹'})`}
+                  </Text>
+                  <TextInput
+                    style={styles.formInput}
+                    placeholder="20"
+                    placeholderTextColor="#94A3B8"
+                    value={newOfferVal}
+                    onChangeText={setNewOfferVal}
+                    keyboardType="numeric"
+                  />
+                </View>
+              </View>
+
+              <TouchableOpacity
+                style={styles.saveOfferSubmitBtn}
+                onPress={handleCreateNewOffer}
+                activeOpacity={0.85}
+              >
+                <Text style={styles.saveOfferSubmitBtnText}>
+                  {language === 'mr' ? '💾 सेव्ह करा' : language === 'hi' ? '💾 सहेजें' : '💾 Save & Publish Offer'}
+                </Text>
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* ===================================================
+          MODAL 4: NOTIFICATIONS (9+ ALERTS)
+      =================================================== */}
+      <Modal visible={showNotificationModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.subModalHeader}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Bell size={20} color="#EA580C" />
+                <Text style={styles.subModalTitle}>{t('restaurantAlerts', 'Restaurant Alerts')}</Text>
+              </View>
+              <TouchableOpacity
+                style={styles.modalCloseCircle}
+                onPress={() => setShowNotificationModal(false)}
+              >
+                <X size={16} color="#64748B" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={{ maxHeight: 320 }}>
+              {notifications.map((n) => (
+                <View key={n.id} style={styles.notifItem}>
+                  <View style={styles.notifDot} />
+                  <View style={{ flex: 1 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                      <Text style={styles.notifTitle}>{translateNotifTitle(n.title, language)}</Text>
+                      <Text style={styles.notifTime}>{translateNotifTime(n.time, language)}</Text>
+                    </View>
+                    <Text style={styles.notifDesc}>{translateNotifDesc(n.desc, language)}</Text>
+                  </View>
+                </View>
+              ))}
+            </ScrollView>
+
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 12 }}>
+              <TouchableOpacity
+                style={styles.subModalCloseBtn}
+                onPress={() => setShowNotificationModal(false)}
+              >
+                <Text style={styles.subModalCloseBtnText}>{t('close', 'Close')}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+
+    </View>
+  );
+};
+
+const getStyles = (isDark: boolean) => StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: isDark ? '#0B0F19' : '#FBF9F5',
+  },
+
+  /* Brand Top Header */
+  topBrandBar: {
+    backgroundColor: isDark ? '#161F36' : '#431407',
+    paddingTop: Platform.OS === 'android' ? 36 : 48,
+    paddingBottom: 12,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: isDark ? '#2A364F' : 'rgba(255,255,255,0.1)',
+  },
+  topBrandLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  logoBadge: {
+    width: 34,
+    height: 34,
+    borderRadius: 8,
+    backgroundColor: '#EA580C',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  brandTitle: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '900',
+    letterSpacing: 0.8,
+  },
+  brandSubtitle: {
+    color: '#FED7AA',
+    fontSize: 9,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  topBrandRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  bellButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: isDark ? '#1E293B' : 'rgba(255,255,255,0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  notifBadge: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    backgroundColor: '#DC2626',
+    borderRadius: 10,
+    minWidth: 16,
+    height: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 3,
+  },
+  notifBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 9,
+    fontWeight: '800',
+  },
+  profileButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    backgroundColor: isDark ? '#1E293B' : 'rgba(255,255,255,0.12)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 20,
+  },
+  avatarCircle: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: '#EA580C',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  profileTextWrap: {
+    maxWidth: 80,
+  },
+  profileHotelName: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  profileRole: {
+    color: '#FED7AA',
+    fontSize: 9,
+  },
+
+  /* Sub Header Ribbon */
+  subHeaderRibbon: {
+    backgroundColor: isDark ? '#161F36' : '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: isDark ? '#2A364F' : '#F0EBE1',
+    paddingVertical: 8,
+  },
+  ribbonScroll: {
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  ribbonPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: isDark ? '#1E293B' : '#F8FAFC',
+    borderWidth: 1,
+    borderColor: isDark ? '#2A364F' : '#E2E8F0',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 16,
+    gap: 5,
+  },
+  ribbonPillText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: isDark ? '#F8FAFC' : '#334155',
+  },
+  trialRibbonPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: isDark ? '#2A1F0C' : '#FFFBEB',
+    borderWidth: 1,
+    borderColor: isDark ? '#B45309' : '#FDE68A',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 16,
+    gap: 6,
+  },
+  trialRibbonText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: isDark ? '#FDE68A' : '#92400E',
+  },
+  renewBadge: {
+    backgroundColor: '#EA580C',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  renewBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 9,
+    fontWeight: '800',
+  },
+
+  /* Scrollable Content */
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 40,
+  },
+
+  /* Dashboard Header */
+  dashboardHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 14,
+  },
+  dashboardHeading: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: isDark ? '#F8FAFC' : '#1C1917',
+    letterSpacing: -0.3,
+  },
+  headerDateBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: isDark ? '#1E293B' : '#F1F5F9',
+    borderWidth: 1,
+    borderColor: isDark ? '#334155' : '#E2E8F0',
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  headerDateBadgeText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: isDark ? '#CBD5E1' : '#475569',
+  },
+  headerLiveBadge: {
+    backgroundColor: isDark ? '#064E3B' : '#DCFCE7',
+    borderWidth: 1,
+    borderColor: isDark ? '#059669' : '#BBF7D0',
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  headerLiveBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: isDark ? '#6EE7B7' : '#15803D',
+  },
+  dashboardSubtitle: {
+    fontSize: 12,
+    color: isDark ? '#94A3B8' : '#78716C',
+    marginTop: 2,
+  },
+  boldUsername: {
+    fontWeight: '700',
+    color: isDark ? '#F8FAFC' : '#1C1917',
+  },
+  eyeToggleBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: isDark ? '#1E293B' : '#F8FAFC',
+    borderWidth: 1.5,
+    borderColor: isDark ? '#2A364F' : '#CBD5E1',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  eyeToggleBtnActive: {
+    backgroundColor: isDark ? '#261A0E' : '#FFF7ED',
+    borderColor: '#FED7AA',
+  },
+
+  /* Toast */
+  toastCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: isDark ? '#064E3B' : '#DCFCE7',
+    borderWidth: 1,
+    borderColor: isDark ? '#059669' : '#86EFAC',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginBottom: 12,
+  },
+  toastText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: isDark ? '#6EE7B7' : '#15803D',
+  },
+
+  /* Trial Card */
+  trialCard: {
+    backgroundColor: isDark ? '#161F36' : '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: isDark ? '#2A364F' : '#FED7AA',
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 16,
+    shadowColor: '#EA580C',
+    shadowOpacity: 0.06,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  trialCardLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  shieldIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: isDark ? '#2A1F0C' : '#FFF0E8',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  trialTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  trialTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: isDark ? '#F8FAFC' : '#1C1917',
+  },
+  activePill: {
+    backgroundColor: isDark ? '#064E3B' : '#DCFCE7',
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 6,
+  },
+  activePillText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: isDark ? '#6EE7B7' : '#15803D',
+  },
+  trialValidityText: {
+    fontSize: 11,
+    color: isDark ? '#94A3B8' : '#78716C',
+    marginTop: 2,
+  },
+  trialCardButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+    marginTop: 14,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: isDark ? '#2A364F' : '#F5F5F4',
+  },
+  managePlanBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: isDark ? '#1E293B' : '#FFFFFF',
+    borderWidth: 1,
+    borderColor: isDark ? '#334155' : '#CBD5E1',
+    paddingVertical: 9,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    minHeight: 38,
+  },
+  managePlanText: {
+    color: isDark ? '#CBD5E1' : '#334155',
+    fontSize: 12,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  upgradePlanBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: '#EA580C',
+    paddingVertical: 9,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    minHeight: 38,
+  },
+  upgradePlanText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+
+  /* Top 4 KPI Cards */
+  topCardsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 16,
+  },
+  kpiCard: {
+    flex: 1,
+    minWidth: SCREEN_WIDTH >= 600 ? 220 : '48%',
+    backgroundColor: isDark ? '#161F36' : '#FFFFFF',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: isDark ? '#2A364F' : '#E7E5E4',
+    paddingHorizontal: 10,
+    paddingVertical: 12,
+    shadowColor: '#000',
+    shadowOpacity: 0.04,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  kpiCardInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  kpiIconCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  kpiContentCol: {
+    flex: 1,
+    justifyContent: 'center',
+    minWidth: 0,
+  },
+  kpiLabel: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: isDark ? '#94A3B8' : '#57534E',
+    marginBottom: 2,
+  },
+  kpiValueMain: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: isDark ? '#F8FAFC' : '#1C1917',
+    marginVertical: 1,
+    letterSpacing: -0.2,
+  },
+  kpiFooterRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 3,
+  },
+  kpiFooterLeft: {
+    fontSize: 9.5,
+    color: isDark ? '#94A3B8' : '#78716C',
+    flexShrink: 1,
+  },
+  kpiFooterActive: {
+    fontSize: 9.5,
+    fontWeight: '700',
+    color: '#16A34A',
+    flexShrink: 0,
+    marginLeft: 3,
+  },
+
+  /* Section Cards */
+  sectionCard: {
+    backgroundColor: isDark ? '#161F36' : '#FFFFFF',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: isDark ? '#2A364F' : '#F0EBE1',
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.04,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    elevation: 1,
+  },
+  sectionCardTitle: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: isDark ? '#F8FAFC' : '#1C1917',
+    letterSpacing: 0.4,
+  },
+  sectionCardSubtitle: {
+    fontSize: 11,
+    color: isDark ? '#94A3B8' : '#78716C',
+    marginTop: 2,
+  },
+  /* 7-Day Sales Trend Card */
+  trendSectionCard: {
+    backgroundColor: isDark ? '#161F36' : '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: isDark ? '#2A364F' : '#F1F5F9',
+    marginTop: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: isDark ? 0.2 : 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  trendHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  trendTitleWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  trendSectionTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: isDark ? '#F8FAFC' : '#1C1917',
+    letterSpacing: -0.2,
+  },
+  trendBadge: {
+    backgroundColor: isDark ? '#2D2418' : '#FFF7ED',
+    borderWidth: 1,
+    borderColor: isDark ? '#78350F' : '#FFEDD5',
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+  },
+  trendBadgeText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#B45309',
+  },
+  salesHighlightAmount: {
+    fontSize: 26,
+    fontWeight: '900',
+    color: '#EA580C',
+    marginTop: 2,
+    letterSpacing: -0.5,
+  },
+  chartContainer: {
+    marginTop: 6,
+    alignItems: 'center',
+    width: '100%',
+  },
+  metricsTripleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 8,
+    marginTop: 14,
+    width: '100%',
+  },
+  metricsBadgeCard: {
+    flex: 1,
+    backgroundColor: isDark ? '#1E293B' : '#F0FDF4',
+    borderWidth: 1,
+    borderColor: isDark ? '#2A364F' : '#DCFCE7',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    alignItems: 'flex-start',
+  },
+  metricsBadgeLabel: {
+    fontSize: 10.5,
+    color: isDark ? '#94A3B8' : '#4B5563',
+    fontWeight: '600',
+  },
+  metricsBadgeValue: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: isDark ? '#4ADE80' : '#16A34A',
+    marginTop: 4,
+  },
+
+  /* Bill Requests */
+  sectionHeaderBetween: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  viewAllOrangeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#EA580C',
+  },
+  billRequestsList: {
+    gap: 8,
+  },
+  emptyBillRequestsBox: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+    backgroundColor: isDark ? '#1E293B' : '#F8FAFC',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: isDark ? '#2A364F' : '#E2E8F0',
+    borderStyle: 'dashed',
+  },
+  emptyBillRequestsTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: isDark ? '#E2E8F0' : '#334155',
+    marginTop: 8,
+  },
+  emptyBillRequestsSub: {
+    fontSize: 11,
+    color: isDark ? '#94A3B8' : '#64748B',
+    textAlign: 'center',
+    marginTop: 4,
+    maxWidth: 260,
+  },
+  billRequestItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: isDark ? '#1E293B' : '#FAFAF9',
+    borderWidth: 1,
+    borderColor: isDark ? '#2A364F' : '#F5F5F4',
+    borderRadius: 10,
+    padding: 10,
+  },
+  billReceiptIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: isDark ? '#2A1F0C' : '#FFF0ED',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  billTableName: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: isDark ? '#F8FAFC' : '#1C1917',
+  },
+  billAmountText: {
+    fontSize: 11,
+    color: isDark ? '#94A3B8' : '#78716C',
+    marginTop: 2,
+  },
+  pendingPill: {
+    backgroundColor: isDark ? '#2A1F0C' : '#FEF3C7',
+    borderWidth: 1,
+    borderColor: isDark ? '#B45309' : '#FDE68A',
+    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+  },
+  pendingPillText: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: '#B45309',
+  },
+  billStatusPill: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    borderWidth: 1,
+  },
+  billStatusPillText: {
+    fontSize: 9.5,
+    fontWeight: '700',
+  },
+  billActionBtn: {
+    backgroundColor: '#EA580C',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  billActionBtnText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  billTimeText: {
+    fontSize: 9,
+    color: isDark ? '#94A3B8' : '#A8A29E',
+    marginTop: 3,
+  },
+
+  /* Payment Summary Donut & Breakdown */
+  paymentSummaryBody: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+  },
+  donutWrap: {
+    width: 128,
+    height: 128,
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  donutCenterContent: {
+    position: 'absolute',
+    width: 82,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  donutTotalLabel: {
+    fontSize: 9,
+    color: isDark ? '#94A3B8' : '#78716C',
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  donutTotalNumber: {
+    fontWeight: '900',
+    color: isDark ? '#F8FAFC' : '#1C1917',
+    marginTop: 2,
+    textAlign: 'center',
+    width: '100%',
+  },
+  breakdownList: {
+    flex: 1,
+    marginLeft: 16,
+    justifyContent: 'center',
+    gap: 10,
+  },
+  breakdownRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  breakdownLabelGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+  },
+  dotMarker: {
+    width: 9,
+    height: 9,
+    borderRadius: 4.5,
+  },
+  breakdownName: {
+    fontSize: 12,
+    color: isDark ? '#CBD5E1' : '#44403C',
+    fontWeight: '600',
+  },
+  breakdownValues: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  breakdownAmount: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: isDark ? '#F8FAFC' : '#1C1917',
+  },
+  breakdownPercent: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: isDark ? '#94A3B8' : '#78716C',
+  },
+  totalCollectionStrip: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: isDark ? '#2A1D07' : '#FFFBEB',
+    borderWidth: 1,
+    borderColor: isDark ? '#B45309' : '#FEF3C7',
+    borderRadius: 10,
+    padding: 10,
+    marginTop: 12,
+  },
+  totalCollectionLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: isDark ? '#FDE68A' : '#92400E',
+  },
+  totalCollectionNumber: {
+    fontSize: 15,
+    fontWeight: '900',
+    color: isDark ? '#FDE68A' : '#92400E',
+  },
+
+  /* Festive Banner */
+  festiveBannerCard: {
+    backgroundColor: isDark ? '#161F36' : '#FFFFFF',
+    borderWidth: 1,
+    borderColor: isDark ? '#2A364F' : '#FED7AA',
+    borderRadius: 14,
+    padding: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  festiveBannerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+  },
+  festiveIconWrap: {
+    width: 34,
+    height: 34,
+    borderRadius: 8,
+    backgroundColor: isDark ? '#2A1F0C' : '#FFF7ED',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  festiveTitle: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: isDark ? '#F8FAFC' : '#1C1917',
+  },
+  festiveDesc: {
+    fontSize: 10,
+    color: isDark ? '#94A3B8' : '#78716C',
+    marginTop: 1,
+  },
+  viewOffersBtn: {
+    backgroundColor: isDark ? '#261A0E' : '#FFF7ED',
+    borderWidth: 1,
+    borderColor: isDark ? '#B45309' : '#FED7AA',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+  },
+  viewOffersText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#EA580C',
+  },
+
+  /* Operations & Modules Grid */
+  modulesSection: {
+    marginTop: 6,
+    marginBottom: 10,
+  },
+  modulesHeaderTitle: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: isDark ? '#94A3B8' : '#78716C',
+    letterSpacing: 0.6,
+    marginBottom: 10,
+  },
+  modulesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  moduleItemBtn: {
+    flex: 1,
+    minWidth: '47%',
+    backgroundColor: isDark ? '#161F36' : '#FFFFFF',
+    borderWidth: 1,
+    borderColor: isDark ? '#2A364F' : '#F0EBE1',
+    borderRadius: 12,
+    padding: 12,
+    alignItems: 'flex-start',
+    shadowColor: '#000',
+    shadowOpacity: 0.03,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 1,
+  },
+  moduleIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  moduleItemTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: isDark ? '#F8FAFC' : '#1C1917',
+  },
+  moduleItemDesc: {
+    fontSize: 10,
+    color: isDark ? '#94A3B8' : '#78716C',
+    marginTop: 2,
+  },
+
+  /* Modals Base */
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  modalContent: {
+    width: '100%',
+    maxWidth: 440,
+    backgroundColor: isDark ? '#161F36' : '#FFFFFF',
+    borderRadius: 18,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 6 },
+    shadowRadius: 16,
+    elevation: 6,
+  },
+  subModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  subModalTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: isDark ? '#F8FAFC' : '#1C1917',
+  },
+  modalCloseCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: isDark ? '#1E293B' : '#F5F5F4',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  subModalCloseBtn: {
+    backgroundColor: isDark ? '#1E293B' : '#F5F5F4',
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  subModalCloseBtnText: {
+    color: isDark ? '#F8FAFC' : '#44403C',
+    fontWeight: '700',
+    fontSize: 12,
+  },
+
+  /* Plan Modal Tabs (Licence vs Offers) */
+  planModalTabsRow: {
+    flexDirection: 'row',
+    backgroundColor: isDark ? '#1E293B' : '#F5F5F4',
+    borderRadius: 10,
+    padding: 3,
+    marginBottom: 14,
+    gap: 4,
+  },
+  planModalTabBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  planModalTabBtnActive: {
+    backgroundColor: isDark ? '#161F36' : '#FFFFFF',
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
+  },
+  planModalTabText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: isDark ? '#94A3B8' : '#78716C',
+  },
+  planModalTabTextActive: {
+    color: '#EA580C',
+  },
+  planUpgradeCallout: {
+    backgroundColor: isDark ? '#261A0E' : '#FFF7ED',
+    borderWidth: 1,
+    borderColor: isDark ? '#B45309' : '#FED7AA',
+    borderRadius: 10,
+    padding: 12,
+    marginTop: 4,
+    marginBottom: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  planUpgradeCalloutLeft: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  planUpgradeCalloutText: {
+    fontSize: 11,
+    color: isDark ? '#FED7AA' : '#9A3412',
+    fontWeight: '600',
+    flex: 1,
+  },
+  planUpgradeCalloutBtn: {
+    backgroundColor: isDark ? '#1E293B' : '#FFFFFF',
+    borderWidth: 1,
+    borderColor: isDark ? '#B45309' : '#FED7AA',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 6,
+  },
+  planUpgradeCalloutBtnText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#C2410C',
+  },
+  categorySelectorRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginTop: 4,
+  },
+  categoryPillBtn: {
+    backgroundColor: isDark ? '#1E293B' : '#F8FAFC',
+    borderWidth: 1,
+    borderColor: isDark ? '#2A364F' : '#CBD5E1',
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  categoryPillBtnActive: {
+    backgroundColor: '#EA580C',
+    borderColor: '#EA580C',
+  },
+  categoryPillText: {
+    fontSize: 11,
+    color: isDark ? '#94A3B8' : '#64748B',
+    fontWeight: '600',
+  },
+  categoryPillTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+  },
+  secondaryAddOfferBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    borderWidth: 1.5,
+    borderColor: isDark ? '#B45309' : '#FED7AA',
+    borderStyle: 'dashed',
+    backgroundColor: isDark ? '#1E293B' : '#FFFDF9',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  secondaryAddOfferBtnText: {
+    color: '#EA580C',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+
+  /* =========================================
+     MODAL 1: LICENCE & SUBSCRIPTION STYLES (Screenshot 2)
+  ========================================= */
+  currentStatusBox: {
+    backgroundColor: isDark ? '#261A0E' : '#FFF7ED',
+    borderWidth: 1,
+    borderColor: isDark ? '#B45309' : '#FED7AA',
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 12,
+  },
+  currentStatusHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  currentStatusLabel: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: isDark ? '#FDBA74' : '#9A3412',
+  },
+  currentStatusActivePill: {
+    backgroundColor: isDark ? '#064E3B' : '#DCFCE7',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  currentStatusActiveText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: isDark ? '#6EE7B7' : '#15803D',
+  },
+  currentStatusTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#EA580C',
+    marginTop: 6,
+  },
+  currentStatusSubtitle: {
+    fontSize: 11,
+    color: isDark ? '#94A3B8' : '#78716C',
+    marginTop: 4,
+  },
+  planOptionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: isDark ? '#1E293B' : '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: isDark ? '#2A364F' : '#E7E5E4',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 10,
+  },
+  planOptionCardEnterprise: {
+    backgroundColor: isDark ? '#261A0E' : '#FFFDFC',
+    borderColor: isDark ? '#B45309' : '#FED7AA',
+  },
+  planOptionTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: isDark ? '#F8FAFC' : '#1C1917',
+  },
+  planOptionDesc: {
+    fontSize: 10,
+    color: isDark ? '#94A3B8' : '#78716C',
+    marginTop: 2,
+    lineHeight: 14,
+  },
+  activateProBtn: {
+    backgroundColor: '#2563EB',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 7,
+  },
+  activateProBtnText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  activateEnterpriseBtn: {
+    backgroundColor: '#EA580C',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 7,
+  },
+  activateEnterpriseBtnText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+
+  /* =========================================
+     MODAL 2: OFFERS MODAL STYLES (Screenshot 1)
+  ========================================= */
+  offersModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: isDark ? '#2A364F' : '#F5F5F4',
+  },
+  tagIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: isDark ? '#2A1F0C' : '#FFF0E8',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  offersModalTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: isDark ? '#F8FAFC' : '#1C1917',
+  },
+  offersModalSubtitle: {
+    fontSize: 10,
+    color: isDark ? '#94A3B8' : '#78716C',
+    marginTop: 1,
+  },
+  addOffersHeaderBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#EA580C',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    shadowColor: '#EA580C',
+    shadowOpacity: 0.25,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  addOffersHeaderBtnText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+
+  /* Offer Card In Modal (Screenshot 1) */
+  offerCardMain: {
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1.5,
+  },
+  offerCardMainActive: {
+    backgroundColor: isDark ? '#1E293B' : '#FFFDF9',
+    borderColor: isDark ? '#B45309' : '#FED7AA',
+  },
+  offerCardMainInactive: {
+    backgroundColor: isDark ? '#0F172A' : '#FAFAF9',
+    borderColor: isDark ? '#2A364F' : '#E7E5E4',
+    opacity: 0.65,
+  },
+  offerCardTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  offerTagBadge: {
+    backgroundColor: '#EA580C',
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 5,
+  },
+  offerTagBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  offerBigValText: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#EA580C',
+  },
+  deactivateBtn: {
+    borderWidth: 1,
+    borderColor: isDark ? '#2A364F' : '#CBD5E1',
+    backgroundColor: isDark ? '#1E293B' : '#FFFFFF',
+    borderRadius: 5,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  deactivateBtnText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#B45309',
+  },
+  trashBtn: {
+    backgroundColor: isDark ? '#7F1D1D' : '#FEE2E2',
+    padding: 4,
+    borderRadius: 5,
+  },
+  offerCardTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: isDark ? '#F8FAFC' : '#1C1917',
+    marginTop: 2,
+  },
+  offerCardDesc: {
+    fontSize: 11,
+    color: isDark ? '#94A3B8' : '#57534E',
+    marginTop: 2,
+  },
+  offerCardBottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: isDark ? '#2A364F' : '#FEEAD8',
+  },
+  codePill: {
+    backgroundColor: isDark ? '#161F36' : '#FFFFFF',
+    borderWidth: 1,
+    borderColor: isDark ? '#B45309' : '#FED7AA',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  codePillText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#C2410C',
+  },
+  validDatesText: {
+    fontSize: 9,
+    color: isDark ? '#94A3B8' : '#78716C',
+  },
+
+  /* =========================================
+     MODAL 3: CREATE NEW OFFER FORM STYLES
+  ========================================= */
+  formGroup: {
+    marginBottom: 12,
+  },
+  formLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: isDark ? '#CBD5E1' : '#475569',
+    marginBottom: 4,
+  },
+  formInput: {
+    backgroundColor: isDark ? '#0F172A' : '#F8FAFC',
+    borderWidth: 1,
+    borderColor: isDark ? '#2A364F' : '#CBD5E1',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    fontSize: 12,
+    color: isDark ? '#F8FAFC' : '#1E293B',
+  },
+  typeSelectorRow: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  typeBtn: {
+    flex: 1,
+    backgroundColor: isDark ? '#1E293B' : '#F8FAFC',
+    borderWidth: 1,
+    borderColor: isDark ? '#2A364F' : '#CBD5E1',
+    borderRadius: 8,
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  typeBtnActive: {
+    backgroundColor: '#EA580C',
+    borderColor: '#EA580C',
+  },
+  typeBtnText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: isDark ? '#94A3B8' : '#475569',
+  },
+  typeBtnTextActive: {
+    color: '#FFFFFF',
+  },
+  saveOfferSubmitBtn: {
+    backgroundColor: '#EA580C',
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 4,
+    shadowColor: '#EA580C',
+    shadowOpacity: 0.25,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  saveOfferSubmitBtnText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  directAddOfferBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#EA580C',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    shadowColor: '#EA580C',
+    shadowOpacity: 0.25,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  directAddOfferBtnText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  modalSegmentedTabs: {
+    flexDirection: 'row',
+    backgroundColor: isDark ? '#1E293B' : '#F5F5F4',
+    borderRadius: 10,
+    padding: 3,
+    marginBottom: 12,
+    gap: 4,
+  },
+  modalSegmentedTab: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  modalSegmentedTabActive: {
+    backgroundColor: isDark ? '#161F36' : '#FFFFFF',
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
+  },
+  modalSegmentedTabText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: isDark ? '#94A3B8' : '#78716C',
+  },
+  modalSegmentedTabTextActive: {
+    color: '#EA580C',
+  },
+  heroAddOfferBanner: {
+    backgroundColor: isDark ? '#261A0E' : '#FFF7ED',
+    borderWidth: 1.5,
+    borderColor: isDark ? '#B45309' : '#FED7AA',
+    borderRadius: 12,
+    padding: 10,
+    marginBottom: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  heroAddOfferIconCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#EA580C',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  heroAddOfferTitle: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: isDark ? '#FDBA74' : '#9A3412',
+  },
+  heroAddOfferSub: {
+    fontSize: 10,
+    color: isDark ? '#94A3B8' : '#78716C',
+    marginTop: 1,
+  },
+  newCustomBadge: {
+    backgroundColor: isDark ? '#064E3B' : '#DCFCE7',
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 4,
+  },
+  newCustomBadgeText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: isDark ? '#6EE7B7' : '#15803D',
+  },
+
+  /* Notifications */
+  notifItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: isDark ? '#2A364F' : '#F1F5F9',
+  },
+  notifDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#EA580C',
+    marginTop: 4,
+  },
+  notifTitle: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: isDark ? '#F8FAFC' : '#1C1917',
+  },
+  notifTime: {
+    fontSize: 9,
+    color: isDark ? '#94A3B8' : '#94A3B8',
+  },
+  notifDesc: {
+    fontSize: 11,
+    color: isDark ? '#CBD5E1' : '#64748B',
+    marginTop: 1,
+  },
+
+  /* Branch Select */
+  branchSelectCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: isDark ? '#1E293B' : '#F8FAFC',
+    borderWidth: 1,
+    borderColor: isDark ? '#2A364F' : '#E2E8F0',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 8,
+  },
+  branchSelectCardActive: {
+    backgroundColor: isDark ? '#261A0E' : '#FFF7ED',
+    borderColor: isDark ? '#B45309' : '#FED7AA',
+  },
+  branchSelectName: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: isDark ? '#F8FAFC' : '#1C1917',
+  },
+  branchSelectLocation: {
+    fontSize: 11,
+    color: isDark ? '#94A3B8' : '#64748B',
+    marginTop: 1,
+  },
+  branchSelectStats: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#C2410C',
+    marginTop: 3,
+  },
+
+  /* Active Date Filter Banner (Web Dashboard Screenshot Match) */
+  activeDateFilterBanner: {
+    backgroundColor: isDark ? '#261A0E' : '#FFF7ED',
+    borderWidth: 1,
+    borderColor: isDark ? '#B45309' : '#FED7AA',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  dateFilterLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    minWidth: 240,
+  },
+  calendarIconSquare: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    backgroundColor: isDark ? '#2A1F0C' : '#FFEDD5',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  dateFilterTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  dateFilterLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: isDark ? '#FDBA74' : '#9A3412',
+  },
+  dateBadge: {
+    backgroundColor: '#EA580C',
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 5,
+  },
+  dateBadgeText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+  },
+  dateFilterDesc: {
+    fontSize: 11,
+    color: isDark ? '#FED7AA' : '#7C2D12',
+    marginTop: 2,
+  },
+  showTodayBtn: {
+    backgroundColor: '#EA580C',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 8,
+    alignSelf: 'center',
+  },
+  showTodayBtnText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+});

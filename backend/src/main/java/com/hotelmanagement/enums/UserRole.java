@@ -1,0 +1,5 @@
+package com.hotelmanagement.enums;
+
+public enum UserRole {
+    OWNER, ADMIN, BRANCH_ADMIN, MANAGER, RECEPTIONIST, ACCOUNTANT, STAFF, CASHIER, KITCHEN_STAFF, DELIVERY_STAFF
+}

@@ -1,0 +1,45 @@
+{
+  "info": {
+    "name": "Hotel Management - Multi Platform Integration Test",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key":"baseUrl","value":"http://localhost:8080"},
+    {"key":"token","value":"PASTE_JWT_TOKEN_HERE"},
+    {"key":"branchId","value":"1"}
+  ],
+  "item": [
+    {
+      "name":"Create Test Order - Zomato",
+      "request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{token}}"},{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"platform\": \"ZOMATO\",\n  \"branchId\": {{branchId}},\n  \"customerName\": \"Postman Zomato Customer\",\n  \"customerPhone\": \"9999999999\",\n  \"address\": \"Test Address\",\n  \"itemName\": \"Test Burger\",\n  \"quantity\": 2,\n  \"unitPrice\": 150\n}"},"url":{"raw":"{{baseUrl}}/api/v1/integrations/test-orders","host":["{{baseUrl}}"],"path":["api","v1","integrations","test-orders"]}}
+    },
+    {
+      "name":"Create Test Order - Swiggy",
+      "request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{token}}"},{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"platform\": \"SWIGGY\",\n  \"branchId\": {{branchId}},\n  \"customerName\": \"Postman Swiggy Customer\",\n  \"customerPhone\": \"9999999998\",\n  \"address\": \"Test Address\",\n  \"itemName\": \"Test Pizza\",\n  \"quantity\": 1,\n  \"unitPrice\": 250\n}"},"url":{"raw":"{{baseUrl}}/api/v1/integrations/test-orders","host":["{{baseUrl}}"],"path":["api","v1","integrations","test-orders"]}}
+    },
+    {
+      "name":"Create Test Order - ONDC",
+      "request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{token}}"},{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"platform\": \"ONDC\",\n  \"branchId\": {{branchId}},\n  \"customerName\": \"Postman ONDC Customer\",\n  \"customerPhone\": \"9999999997\",\n  \"address\": \"Test Address\",\n  \"itemName\": \"Test Meal\",\n  \"quantity\": 1,\n  \"unitPrice\": 180\n}"},"url":{"raw":"{{baseUrl}}/api/v1/integrations/test-orders","host":["{{baseUrl}}"],"path":["api","v1","integrations","test-orders"]}}
+    },
+    {
+      "name":"Create Test Order - Magicpin",
+      "request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{token}}"},{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"platform\": \"MAGICPIN\",\n  \"branchId\": {{branchId}},\n  \"customerName\": \"Postman Magicpin Customer\",\n  \"customerPhone\": \"9999999996\",\n  \"address\": \"Test Address\",\n  \"itemName\": \"Test Combo\",\n  \"quantity\": 1,\n  \"unitPrice\": 220\n}"},"url":{"raw":"{{baseUrl}}/api/v1/integrations/test-orders","host":["{{baseUrl}}"],"path":["api","v1","integrations","test-orders"]}}
+    },
+    {
+      "name":"Zomato Webhook - Duplicate Test",
+      "request":{"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"event_id\": \"POSTMAN-ZOMATO-001\",\n  \"order_id\": \"POSTMAN-ZOMATO-001\",\n  \"order_number\": \"POSTMAN-ZOMATO-001\",\n  \"outlet_id\": \"TEST-ZOMATO-BRANCH-{{branchId}}\",\n  \"customer_name\": \"Webhook Customer\",\n  \"customer_phone\": \"9999999995\",\n  \"address\": \"Webhook Test Address\",\n  \"status\": \"CONFIRMED\",\n  \"payment_status\": \"PENDING\",\n  \"items\": [{\"name\":\"Webhook Burger\",\"quantity\":1,\"unit_price\":199}],\n  \"total_amount\": 199\n}"},"url":{"raw":"{{baseUrl}}/api/webhooks/zomato","host":["{{baseUrl}}"],"path":["api","webhooks","zomato"]}}
+    },
+    {
+      "name":"Swiggy Webhook - Test",
+      "request":{"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"event_id\": \"POSTMAN-SWIGGY-001\",\n  \"order_id\": \"POSTMAN-SWIGGY-001\",\n  \"outlet_id\": \"TEST-SWIGGY-BRANCH-{{branchId}}\",\n  \"customer_name\": \"Webhook Customer\",\n  \"status\": \"CONFIRMED\",\n  \"payment_status\": \"PENDING\",\n  \"items\": [{\"name\":\"Webhook Item\",\"quantity\":1,\"unit_price\":199}],\n  \"total_amount\": 199\n}"},"url":{"raw":"{{baseUrl}}/api/webhooks/swiggy","host":["{{baseUrl}}"],"path":["api","webhooks","swiggy"]}}
+    },
+    {
+      "name":"ONDC Webhook - Test",
+      "request":{"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"event_id\": \"POSTMAN-ONDC-001\",\n  \"order_id\": \"POSTMAN-ONDC-001\",\n  \"seller_id\": \"TEST-ONDC-BRANCH-{{branchId}}\",\n  \"customer_name\": \"Webhook Customer\",\n  \"status\": \"CONFIRMED\",\n  \"payment_status\": \"PENDING\",\n  \"items\": [{\"name\":\"Webhook Meal\",\"quantity\":1,\"unit_price\":199}],\n  \"total_amount\": 199\n}"},"url":{"raw":"{{baseUrl}}/api/webhooks/ondc","host":["{{baseUrl}}"],"path":["api","webhooks","ondc"]}}
+    },
+    {
+      "name":"Magicpin Webhook - Test",
+      "request":{"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"event_id\": \"POSTMAN-MAGICPIN-001\",\n  \"order_id\": \"POSTMAN-MAGICPIN-001\",\n  \"store_id\": \"TEST-MAGICPIN-BRANCH-{{branchId}}\",\n  \"customer_name\": \"Webhook Customer\",\n  \"status\": \"CONFIRMED\",\n  \"payment_status\": \"PENDING\",\n  \"items\": [{\"name\":\"Webhook Combo\",\"quantity\":1,\"unit_price\":199}],\n  \"total_amount\": 199\n}"},"url":{"raw":"{{baseUrl}}/api/webhooks/magicpin","host":["{{baseUrl}}"],"path":["api","webhooks","magicpin"]}}
+    }
+  ]
+}
