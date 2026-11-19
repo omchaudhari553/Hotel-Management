@@ -3,6 +3,7 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { OwnerSidebar } from './OwnerSidebar';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 import SubscriptionModal from '../components/SubscriptionModal';
 import {
   LogOut,
@@ -11,11 +12,13 @@ import {
   Menu,
   Sun,
   Moon,
+  Globe,
 } from 'lucide-react';
 
 export const OwnerLayout: React.FC = () => {
   const { user, logout } = useAuth();
   const { theme, resolvedTheme, setTheme } = useTheme();
+  const { language, setLanguage } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -109,7 +112,7 @@ export const OwnerLayout: React.FC = () => {
                   letterSpacing: '0.02em',
                 }}
               >
-                Owner Administration Panel
+                {language === 'mr' ? 'मालक प्रशासन पॅनेल' : 'Owner Administration Panel'}
               </span>
               <span
                 className="owner-badge-pill"
@@ -125,14 +128,41 @@ export const OwnerLayout: React.FC = () => {
               >
                 <ShieldCheck size={14} color="currentColor" />
                 <span className="owner-badge-text" style={{ fontWeight: 700 }}>
-                  Multi-Branch Central
+                  {language === 'mr' ? 'मल्टी-ब्राँच सेंट्रल' : 'Multi-Branch Central'}
                 </span>
               </span>
             </div>
           </div>
 
           {/* Right Controls */}
-          <div className="owner-header-right" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div className="owner-header-right" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {/* Quick Language Toggle Button */}
+            <button
+              type="button"
+              onClick={() => setLanguage(language === 'mr' ? 'en' : 'mr')}
+              className="owner-lang-toggle-btn"
+              title={language === 'mr' ? 'इंग्रजीत बदला (Switch to English)' : 'मराठीत बदला (Switch to Marathi)'}
+              style={{
+                height: '34px',
+                padding: '0 10px',
+                borderRadius: '6px',
+                border: '1px solid var(--border-slate, #CBD5E1)',
+                backgroundColor: 'var(--card-white, #FFFFFF)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                cursor: 'pointer',
+                color: 'var(--text-heading, #0F172A)',
+                fontSize: '0.80rem',
+                fontWeight: 700,
+                transition: 'all 0.15s ease',
+                flexShrink: 0,
+              }}
+            >
+              <Globe size={15} color="#D97706" />
+              <span>{language === 'mr' ? 'मराठी' : 'English'}</span>
+            </button>
+
             {/* Quick Small Theme Button */}
             <button
               type="button"
@@ -171,7 +201,9 @@ export const OwnerLayout: React.FC = () => {
                   <span style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-heading, #1E293B)', lineHeight: 1.2 }}>
                     {user?.fullName || user?.username || 'Hotel Owner'}
                   </span>
-                  <span style={{ fontSize: '0.70rem', color: 'var(--text-muted, #64748B)' }}>Business Owner</span>
+                  <span style={{ fontSize: '0.70rem', color: 'var(--text-muted, #64748B)' }}>
+                    {language === 'mr' ? 'व्यवसाय मालक' : 'Business Owner'}
+                  </span>
                 </div>
               </div>
 
@@ -206,7 +238,7 @@ export const OwnerLayout: React.FC = () => {
                 title="Logout from session"
               >
                 <LogOut size={15} />
-                <span className="owner-logout-text">Logout</span>
+                <span className="owner-logout-text">{language === 'mr' ? 'लॉगआउट' : 'Logout'}</span>
               </button>
             </div>
           </div>
