@@ -1543,8 +1543,6 @@ export const SettingsScreen: React.FC<{ navigation?: any; route?: any }> = ({ na
       const res = await apiClient.post('/hotel/backup/send-email', null, {
         params: {
           customEmail: email,
-          senderEmail: smtpSenderEmail ? smtpSenderEmail.trim() : undefined,
-          appPassword: smtpAppPassword ? smtpAppPassword.trim() : undefined,
         }
       });
       const data = res.data?.data;
@@ -6194,99 +6192,22 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                       Every night at <Text style={{ fontWeight: '700' }}>11:00 PM</Text>, all daily sales, orders, invoices, payments, tables, and expenses are compiled and automatically sent to your Hotel Profile email (<Text style={{ fontWeight: '700', color: '#3B82F6' }}>{email || 'admin@royalpalace.com'}</Text>) with JSON data and PDF summary attachments.
                     </Text>
 
-                    {/* Form Grid: Sender Gmail & App Password */}
-                    <View style={{ flexDirection: 'row', gap: 12, flexWrap: 'wrap' }}>
-                      <View style={{ flex: 1, minWidth: 260 }}>
-                        <Text style={{ fontSize: 12, fontWeight: '700', color: isDark ? '#E2E8F0' : '#334155', marginBottom: 6 }}>
-                          Sender Gmail Address (प्रेषक ईमेल)
-                        </Text>
-                        <TextInput
-                          style={[styles.textInput, { fontSize: 12.5, height: 42, fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace' }]}
-                          value={smtpSenderEmail}
-                          onChangeText={setSmtpSenderEmail}
-                          placeholder="e.g. yourhotel@gmail.com"
-                          placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
-                          autoCapitalize="none"
-                          keyboardType="email-address"
-                        />
-                        <Text style={{ fontSize: 10.5, color: isDark ? '#94A3B8' : '#64748B', marginTop: 4 }}>
-                          ज्या Gmail खात्यावरून बॅकअप पाठवायचा आहे तो ईमेल.
-                        </Text>
-                      </View>
-
-                      <View style={{ flex: 1, minWidth: 260 }}>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                            <Key size={13} color="#D97706" />
-                            <Text style={{ fontSize: 12, fontWeight: '700', color: isDark ? '#E2E8F0' : '#334155' }}>
-                              Google App Password (16-digit)
-                            </Text>
-                          </View>
-                          <TouchableOpacity
-                            onPress={() => Linking.openURL('https://myaccount.google.com/apppasswords')}
-                            activeOpacity={0.7}
-                          >
-                            <Text style={{ fontSize: 11, color: '#2563EB', fontWeight: '600', textDecorationLine: 'underline' }}>
-                              गुगल ॲप पासवर्ड तयार करा ↗
-                            </Text>
-                          </TouchableOpacity>
-                        </View>
-                        <View style={{ position: 'relative', width: '100%', justifyContent: 'center' }}>
-                          <TextInput
-                            style={[
-                              styles.textInput,
-                              {
-                                fontSize: 12.5,
-                                height: 42,
-                                fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
-                                letterSpacing: 1,
-                                paddingRight: 40,
-                              }
-                            ]}
-                            value={smtpAppPassword}
-                            onChangeText={setSmtpAppPassword}
-                            placeholder="abcd efgh ijkl mnop"
-                            placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
-                            secureTextEntry={!showSmtpPassword}
-                            autoCapitalize="none"
-                          />
-                          <TouchableOpacity
-                            onPress={() => setShowSmtpPassword(!showSmtpPassword)}
-                            style={{ position: 'absolute', right: 12, top: 12 }}
-                            activeOpacity={0.7}
-                          >
-                            {showSmtpPassword ? (
-                              <EyeOff size={16} color={isDark ? '#94A3B8' : '#64748B'} />
-                            ) : (
-                              <Eye size={16} color={isDark ? '#94A3B8' : '#64748B'} />
-                            )}
-                          </TouchableOpacity>
-                        </View>
-                        <Text style={{ fontSize: 10.5, color: isDark ? '#94A3B8' : '#64748B', marginTop: 4 }}>
-                          Gmail वरून दररोज रात्री ११:०० वाजता बॅकअप मेल जाण्यासाठी गुगलचा 16-अंकी App Password येथे टाका.
-                        </Text>
-                      </View>
-                    </View>
-
-                    {/* 1-Minute Guide Alert Box */}
+                    {/* SMTP Status Notice */}
                     <View style={{
-                      backgroundColor: isDark ? '#0F172A' : '#F8FAFC',
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 8,
+                      paddingHorizontal: 12,
+                      paddingVertical: 10,
+                      borderRadius: 8,
+                      backgroundColor: isDark ? '#064E3B25' : '#F0FDF4',
                       borderWidth: 1,
-                      borderColor: isDark ? '#334155' : '#E2E8F0',
-                      borderRadius: 10,
-                      padding: 12,
-                      gap: 6,
+                      borderColor: isDark ? '#05966950' : '#BBF7D0',
+                      marginTop: 2,
                     }}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                        <Shield size={14} color="#3B82F6" />
-                        <Text style={{ fontSize: 11.5, fontWeight: '700', color: isDark ? '#F1F5F9' : '#0F172A' }}>
-                          1 मिनिटात Google 16-Digit App Password कसा मिळवायचा:
-                        </Text>
-                      </View>
-                      <Text style={{ fontSize: 11, color: isDark ? '#CBD5E1' : '#334155', lineHeight: 16 }}>
-                        1. तुमच्या Google खात्यात (उदा. {smtpSenderEmail || 'Gmail'}) 2-Step Verification चालू असल्याची खात्री करा.{'\n'}
-                        2. <Text style={{ color: '#2563EB', fontWeight: '600' }} onPress={() => Linking.openURL('https://myaccount.google.com/apppasswords')}>https://myaccount.google.com/apppasswords</Text> वर जा आणि App Name मध्ये <Text style={{ fontWeight: '700' }}>Hotel POS</Text> टाकून "Create" वर क्लिक करा.{'\n'}
-                        3. मिळालेला 16-अंकी पासवर्ड (उदा. abcd efgh ijkl mnop) वरील रकान्यात टाकून खालील <Text style={{ fontWeight: '700' }}>"Save SMTP Credentials"</Text> किंवा <Text style={{ fontWeight: '700' }}>"Send Daily Backup to Email Now"</Text> दाबा.
+                      <CheckCircle size={16} color="#10B981" />
+                      <Text style={{ fontSize: 11.5, fontWeight: '700', color: isDark ? '#34D399' : '#166534' }}>
+                        Gmail SMTP Connected via application.yml ({smtpSenderEmail || 'omchaudhari553@gmail.com'})
                       </Text>
                     </View>
 
@@ -6315,78 +6236,53 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                         onPress={handleSendDailyBackupNow}
                         disabled={backupSending}
                         activeOpacity={0.8}
+                        accessibilityLabel={backupSending ? 'Sending Backup...' : 'Send Daily Backup to Email Now'}
                         style={{
-                          flexDirection: 'row',
+                          width: 40,
+                          height: 40,
+                          borderRadius: 8,
                           alignItems: 'center',
-                          gap: 6,
+                          justifyContent: 'center',
                           backgroundColor: backupSending ? '#94A3B8' : '#3B82F6',
-                          paddingHorizontal: 16,
-                          paddingVertical: 10,
-                          borderRadius: 8,
                         }}
                       >
-                        <RefreshCw size={14} color="#FFFFFF" />
-                        <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: '700' }}>
-                          {backupSending ? 'Sending Backup...' : 'Send Daily Backup to Email Now'}
-                        </Text>
-                      </TouchableOpacity>
-
-                      <TouchableOpacity
-                        onPress={handleSaveSmtpSettings}
-                        disabled={savingSmtp}
-                        activeOpacity={0.8}
-                        style={{
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          gap: 6,
-                          backgroundColor: '#10B981',
-                          paddingHorizontal: 16,
-                          paddingVertical: 10,
-                          borderRadius: 8,
-                        }}
-                      >
-                        <Check size={14} color="#FFFFFF" />
-                        <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: '700' }}>
-                          {savingSmtp ? 'Saving...' : 'Save SMTP Credentials'}
-                        </Text>
+                        <RefreshCw size={18} color="#FFFFFF" />
                       </TouchableOpacity>
 
                       <TouchableOpacity
                         onPress={handleDownloadDailyBackup}
                         activeOpacity={0.8}
+                        accessibilityLabel="Download Backup (.json)"
                         style={{
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          gap: 6,
-                          backgroundColor: isDark ? '#334155' : '#E2E8F0',
-                          paddingHorizontal: 14,
-                          paddingVertical: 10,
+                          width: 40,
+                          height: 40,
                           borderRadius: 8,
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          backgroundColor: isDark ? '#334155' : '#E2E8F0',
+                          borderWidth: 1,
+                          borderColor: isDark ? '#475569' : '#CBD5E1',
                         }}
                       >
-                        <Download size={14} color={isDark ? '#F8FAFC' : '#1E293B'} />
-                        <Text style={{ color: isDark ? '#F8FAFC' : '#1E293B', fontSize: 12, fontWeight: '700' }}>
-                          Download Backup (.json)
-                        </Text>
+                        <Download size={18} color={isDark ? '#F8FAFC' : '#1E293B'} />
                       </TouchableOpacity>
 
                       <TouchableOpacity
                         onPress={handleDownloadDailyBackupPdf}
                         activeOpacity={0.8}
+                        accessibilityLabel="Download PDF Report (.pdf)"
                         style={{
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          gap: 6,
-                          backgroundColor: isDark ? '#334155' : '#E2E8F0',
-                          paddingHorizontal: 14,
-                          paddingVertical: 10,
+                          width: 40,
+                          height: 40,
                           borderRadius: 8,
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          backgroundColor: isDark ? '#334155' : '#E2E8F0',
+                          borderWidth: 1,
+                          borderColor: isDark ? '#475569' : '#CBD5E1',
                         }}
                       >
-                        <FileText size={14} color={isDark ? '#F8FAFC' : '#1E293B'} />
-                        <Text style={{ color: isDark ? '#F8FAFC' : '#1E293B', fontSize: 12, fontWeight: '700' }}>
-                          Download PDF Report (.pdf)
-                        </Text>
+                        <FileText size={18} color={isDark ? '#F8FAFC' : '#1E293B'} />
                       </TouchableOpacity>
                     </View>
                   </View>

@@ -150,8 +150,6 @@ export const OwnerSettings: React.FC = () => {
       const res = await apiClient.post('/hotel/backup/send-email', null, {
         params: {
           customEmail: settings.contactEmail || undefined,
-          senderEmail: smtpSenderEmail ? smtpSenderEmail.trim() : undefined,
-          appPassword: smtpAppPassword ? smtpAppPassword.trim() : undefined,
         }
       });
       const data = res.data?.data;
@@ -648,108 +646,28 @@ export const OwnerSettings: React.FC = () => {
           Every night at <strong>11:00 PM</strong>, all daily sales, orders, invoices, payments, tables, and expenses are compiled and automatically sent to your Hotel Profile email (<strong>{settings.contactEmail || 'admin@royalpalace.com'}</strong>) with JSON data and PDF summary attachments.
         </p>
 
-        <div style={{ marginBottom: '18px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-              <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-heading, #334155)', margin: 0 }}>
-                Sender Gmail Address (प्रेषक ईमेल)
-              </label>
-            </div>
-            <input
-              type="email"
-              value={smtpSenderEmail}
-              onChange={(e) => setSmtpSenderEmail(e.target.value)}
-              placeholder="e.g. yourhotel@gmail.com"
-              style={{
-                ...inputStyle,
-                fontFamily: 'monospace',
-              }}
-            />
-            <span style={{ fontSize: '0.74rem', color: 'var(--text-muted, #64748B)', marginTop: '4px', display: 'block' }}>
-              ज्या Gmail खात्यावरून बॅकअप पाठवायचा आहे तो ईमेल.
-            </span>
-          </div>
-
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-              <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-heading, #334155)', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Key size={14} color="#D97706" />
-                Google App Password (16-digit)
-              </label>
-              <a
-                href="https://myaccount.google.com/apppasswords"
-                target="_blank"
-                rel="noreferrer"
-                style={{ fontSize: '0.78rem', color: '#2563EB', textDecoration: 'underline', fontWeight: 600 }}
-              >
-                गुगल ॲप पासवर्ड तयार करा ↗
-              </a>
-            </div>
-            <div style={{ position: 'relative', width: '100%' }}>
-              <input
-                type={showPassword ? 'text' : 'password'}
-                value={smtpAppPassword}
-                onChange={(e) => setSmtpAppPassword(e.target.value)}
-                placeholder={hasCustomPassword ? '•••••••••••••••• (App Password Saved)' : 'abcd efgh ijkl mnop'}
-                style={{
-                  ...inputStyle,
-                  fontFamily: 'monospace',
-                  letterSpacing: '1px',
-                  paddingRight: '40px',
-                }}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                style={{
-                  position: 'absolute',
-                  right: '10px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  background: 'transparent',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  color: '#64748B',
-                }}
-              >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
-            <span style={{ fontSize: '0.74rem', color: 'var(--text-muted, #64748B)', marginTop: '4px', display: 'block' }}>
-              Gmail वरून दररोज रात्री ११:०० वाजता बॅकअप मेल जाण्यासाठी गुगलचा 16-अंकी App Password येथे टाका.
-            </span>
-          </div>
-        </div>
-
-        {/* 1-Minute Guide Alert Box */}
+        {/* SMTP Status Notice */}
         <div
           style={{
-            backgroundColor: '#F8FAFC',
-            border: '1px solid #E2E8F0',
-            borderRadius: '10px',
-            padding: '12px 16px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
             marginBottom: '18px',
-            fontSize: '0.8rem',
-            color: '#334155',
-            lineHeight: 1.5,
+            padding: '11px 16px',
+            backgroundColor: '#F0FDF4',
+            borderRadius: '10px',
+            border: '1px solid #BBF7D0',
           }}
         >
-          <div style={{ fontWeight: 700, marginBottom: '4px', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Shield size={14} color="#3B82F6" />
-            1 मिनिटात Google 16-Digit App Password कसा मिळवायचा:
+          <CheckCircle2 size={18} color="#16A34A" style={{ flexShrink: 0 }} />
+          <div>
+            <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#166534' }}>
+              Gmail SMTP Connected via application.yml
+            </span>
+            <span style={{ fontSize: '0.78rem', color: '#15803D', marginLeft: '6px' }}>
+              ({smtpSenderEmail || 'omchaudhari553@gmail.com'}) — Credentials already configured in application.yml.
+            </span>
           </div>
-          <ol style={{ margin: '4px 0 0 18px', padding: 0 }}>
-            <li>तुमच्या Google खात्यात (उदा. {smtpSenderEmail || 'Gmail'}) <strong>2-Step Verification</strong> चालू असल्याची खात्री करा.</li>
-            <li>
-              <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noreferrer" style={{ color: '#2563EB', fontWeight: 600 }}>
-                https://myaccount.google.com/apppasswords
-              </a> वर जा आणि App Name मध्ये <strong>Hotel POS</strong> टाकून "Create" वर क्लिक करा.
-            </li>
-            <li>मिळालेला 16-अंकी पासवर्ड (उदा. <code>abcd efgh ijkl mnop</code>) वरील रकान्यात टाकून खालील <strong>"Save SMTP Credentials"</strong> किंवा <strong>"Send Daily Backup to Email Now"</strong> दाबा.</li>
-          </ol>
         </div>
 
         {lastBackupStatus.status !== 'idle' && (
@@ -806,90 +724,68 @@ export const OwnerSettings: React.FC = () => {
             type="button"
             disabled={backupSending}
             onClick={handleSendDailyBackupNow}
+            title={backupSending ? 'Sending Backup Email...' : 'Send Daily Backup to Email Now'}
+            aria-label="Send Daily Backup to Email Now"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '8px',
-              padding: '9px 18px',
+              justifyContent: 'center',
+              width: '40px',
+              height: '40px',
               backgroundColor: backupSending ? '#94A3B8' : '#3B82F6',
               color: '#FFFFFF',
               border: 'none',
               borderRadius: '8px',
-              fontSize: '0.84rem',
-              fontWeight: 700,
               cursor: backupSending ? 'not-allowed' : 'pointer',
               boxShadow: '0 2px 4px rgba(59, 130, 246, 0.25)',
+              transition: 'background-color 0.2s ease',
             }}
           >
-            <RefreshCw size={15} style={backupSending ? { animation: 'spin 1s linear infinite' } : undefined} />
-            <span>{backupSending ? 'Sending Backup Email...' : 'Send Daily Backup to Email Now'}</span>
+            <RefreshCw size={18} style={backupSending ? { animation: 'spin 1s linear infinite' } : undefined} />
           </button>
-
-          {(smtpAppPassword || smtpSenderEmail) && (
-            <button
-              type="button"
-              disabled={savingSmtp}
-              onClick={handleSaveSmtpSettings}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '9px 16px',
-                backgroundColor: '#10B981',
-                color: '#FFFFFF',
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '0.84rem',
-                fontWeight: 700,
-                cursor: savingSmtp ? 'not-allowed' : 'pointer',
-                boxShadow: '0 2px 4px rgba(16, 185, 129, 0.25)',
-              }}
-            >
-              <Save size={15} />
-              <span>{savingSmtp ? 'Saving...' : 'Save SMTP Credentials'}</span>
-            </button>
-          )}
 
           <button
             type="button"
             onClick={handleDownloadDailyBackup}
+            title="Download Backup (.json)"
+            aria-label="Download Backup (.json)"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '8px',
-              padding: '9px 16px',
+              justifyContent: 'center',
+              width: '40px',
+              height: '40px',
               backgroundColor: 'var(--bg-secondary, #F1F5F9)',
               color: 'var(--text-heading, #1E293B)',
               border: '1px solid var(--border-slate, #CBD5E1)',
               borderRadius: '8px',
-              fontSize: '0.84rem',
-              fontWeight: 700,
               cursor: 'pointer',
+              transition: 'all 0.2s ease',
             }}
           >
-            <Download size={15} />
-            <span>Download Backup (.json)</span>
+            <Download size={18} />
           </button>
 
           <button
             type="button"
             onClick={handleDownloadDailyBackupPdf}
+            title="Download PDF Report (.pdf)"
+            aria-label="Download PDF Report (.pdf)"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '8px',
-              padding: '9px 16px',
+              justifyContent: 'center',
+              width: '40px',
+              height: '40px',
               backgroundColor: 'var(--bg-secondary, #F1F5F9)',
               color: 'var(--text-heading, #1E293B)',
               border: '1px solid var(--border-slate, #CBD5E1)',
               borderRadius: '8px',
-              fontSize: '0.84rem',
-              fontWeight: 700,
               cursor: 'pointer',
+              transition: 'all 0.2s ease',
             }}
           >
-            <FileText size={15} />
-            <span>Download PDF Report (.pdf)</span>
+            <FileText size={18} />
           </button>
         </div>
       </div>
