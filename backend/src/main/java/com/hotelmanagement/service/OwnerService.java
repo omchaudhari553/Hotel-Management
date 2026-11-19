@@ -785,6 +785,13 @@ public class OwnerService {
         }).toList();
     }
 
+    @Transactional
+    public void deleteStaff(Long id) {
+        ensureOwnerAccess();
+        Long bId = cu.businessId();
+        staffRepo.findByIdAndBusinessId(id, bId).ifPresent(staffRepo::delete);
+    }
+
     // =========================================================================
     // MODULE 6: BRANCH REPORTS
     // =========================================================================

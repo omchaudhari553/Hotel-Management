@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -33,6 +33,7 @@ import { ReceiptRupee } from './ReceiptRupeeIcon';
 import { useAppTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RenewPlanModal } from './RenewPlanModal';
 
 export interface AppSidebarProps {
@@ -84,9 +85,21 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   const styles = useMemo(() => getStyles(isDark), [isDark]);
   const insets = useSafeAreaInsets();
   const { t, language } = useLanguage();
-  const { business } = useAuth();
+  const { user, business } = useAuth();
+  const isBranchUser = Boolean(
+    user?.branchId ||
+    (user?.role && !['OWNER', 'ADMIN', 'SUPER_ADMIN'].includes(String(user.role).toUpperCase()) && user?.branchId) ||
+    user?.role === 'BRANCH'
+  );
   const { activeBranch } = useBranch();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [userMode, setUserMode] = useState<string>('SINGLE');
+
+  useEffect(() => {
+    AsyncStorage.getItem('@ajalkar_user_mode').then((val) => {
+      if (val) setUserMode(val);
+    });
+  }, []);
 
   // 9 Modules matching Vite Sidebar
   const NAV_ITEMS = [
@@ -180,30 +193,32 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
         contentContainerStyle={styles.navScrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Owner Admin Panel Portal Button (Matching Screenshot 2) */}
-        <TouchableOpacity
-          style={[
-            styles.ownerAdminBtn,
-            (activeRouteName?.toLowerCase().includes('owner')) && styles.ownerAdminBtnActive,
-          ]}
-          onPress={() => handleItemPress('OwnerAdmin')}
-          activeOpacity={0.8}
-        >
-          <View style={styles.ownerAdminIconBox}>
-            <Building2
-              size={17}
-              color={(activeRouteName?.toLowerCase().includes('owner')) ? '#FFFFFF' : '#F97316'}
-            />
-          </View>
-          <Text
+        {/* Owner Admin Panel Portal Button (Visible for Multi-Branch) */}
+        {!isBranchUser && userMode !== 'SINGLE' && (
+          <TouchableOpacity
             style={[
-              styles.ownerAdminBtnText,
-              (activeRouteName?.toLowerCase().includes('owner')) && styles.ownerAdminBtnTextActive,
+              styles.ownerAdminBtn,
+              (activeRouteName?.toLowerCase().includes('owner')) && styles.ownerAdminBtnActive,
             ]}
+            onPress={() => handleItemPress('OwnerAdmin')}
+            activeOpacity={0.8}
           >
-            {t('ownerAdminPanel', 'Owner Admin Panel')}
-          </Text>
-        </TouchableOpacity>
+            <View style={styles.ownerAdminIconBox}>
+              <Building2
+                size={17}
+                color={(activeRouteName?.toLowerCase().includes('owner')) ? '#FFFFFF' : '#F97316'}
+              />
+            </View>
+            <Text
+              style={[
+                styles.ownerAdminBtnText,
+                (activeRouteName?.toLowerCase().includes('owner')) && styles.ownerAdminBtnTextActive,
+              ]}
+            >
+              {t('ownerAdminPanel', 'Owner Admin Panel')}
+            </Text>
+          </TouchableOpacity>
+        )}
 
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
@@ -232,36 +247,38 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
       </ScrollView>
 
       {/* Bottom Trial Card matching Vite */}
-      <View
-        style={[
-          styles.trialCardWrapper,
-          isDrawer && {
-            paddingBottom: Math.max(Platform.OS === 'ios' ? 28 : 12, insets.bottom + 8),
-          },
-        ]}
-      >
-        <View style={styles.trialCard}>
-          <View style={styles.trialHeaderRow}>
-            <Crown size={14} color="#FBBF24" />
-            <Text style={styles.trialTitle}>
-              {t('trialBannerTitle', '28 Days Free Trial')}
+      {!isBranchUser && (
+        <View
+          style={[
+            styles.trialCardWrapper,
+            isDrawer && {
+              paddingBottom: Math.max(Platform.OS === 'ios' ? 28 : 12, insets.bottom + 8),
+            },
+          ]}
+        >
+          <View style={styles.trialCard}>
+            <View style={styles.trialHeaderRow}>
+              <Crown size={14} color="#FBBF24" />
+              <Text style={styles.trialTitle}>
+                {t('trialBannerTitle', '28 Days Free Trial')}
+              </Text>
+            </View>
+            <Text style={styles.trialDaysLeft}>
+              {t('trialDaysLeft', 'Trial: 18 Days Left')}
             </Text>
-          </View>
-          <Text style={styles.trialDaysLeft}>
-            {t('trialDaysLeft', 'Trial: 18 Days Left')}
-          </Text>
 
-          <TouchableOpacity
-            style={styles.upgradeBtn}
-            onPress={() => setShowUpgradeModal(true)}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.upgradeBtnText}>
-              {t('upgradePlan', 'Upgrade Plan')}
-            </Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.upgradeBtn}
+              onPress={() => setShowUpgradeModal(true)}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.upgradeBtnText}>
+                {t('upgradePlan', 'Upgrade Plan')}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
+      )}
 
       {/* Plan Upgrade & Renew Modal (AjalkarBill 3-Step Selection, UPI QR, and Verification) */}
       <RenewPlanModal

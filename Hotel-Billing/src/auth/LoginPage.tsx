@@ -17,6 +17,9 @@ import {
   Globe,
   KeyRound,
   ShieldCheck,
+  User,
+  Building2,
+  GitBranch,
 } from 'lucide-react';
 import { authService } from '../services/authService';
 
@@ -39,6 +42,16 @@ export const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
+
+  // User Role & Business Type Selection
+  const [selectedRole, setSelectedRole] = useState<'SINGLE_USER' | 'ADMIN_OWNER'>(() => {
+    const saved = localStorage.getItem('ajalkar_selected_role');
+    return saved === 'ADMIN_OWNER' ? 'ADMIN_OWNER' : 'SINGLE_USER';
+  });
+  const [selectedBusinessType, setSelectedBusinessType] = useState<'SINGLE' | 'MULTI_BRANCH'>(() => {
+    const saved = localStorage.getItem('ajalkar_business_type');
+    return saved === 'MULTI_BRANCH' ? 'MULTI_BRANCH' : 'SINGLE';
+  });
   // Forgot Password / OTP Flow States
   const [showForgotModal, setShowForgotModal] = useState(false);
   const [forgotStep, setForgotStep] = useState<'request' | 'verify' | 'success'>('request');
@@ -93,6 +106,21 @@ export const LoginPage: React.FC = () => {
         loggedInUser?.isOwner === true ||
         loggedInUser?.role === 'OWNER' ||
         (!isBranchUser && (loggedInUser?.roles?.includes('ROLE_OWNER') || loggedInUser?.roles?.includes('OWNER')));
+
+      const isSingleUserChosen = selectedRole === 'SINGLE_USER' || selectedBusinessType === 'SINGLE';
+
+      if (isSingleUserChosen) {
+        localStorage.setItem('ajalkar_user_mode', 'SINGLE');
+        localStorage.setItem('ajalkar_selected_role', selectedRole);
+        localStorage.setItem('ajalkar_business_type', selectedBusinessType);
+        localStorage.setItem('ajalkar_industry', 'HOTEL');
+        navigate('/hotel/dashboard', { replace: true });
+        return;
+      }
+
+      localStorage.setItem('ajalkar_user_mode', 'MULTI_BRANCH');
+      localStorage.setItem('ajalkar_selected_role', selectedRole);
+      localStorage.setItem('ajalkar_business_type', selectedBusinessType);
 
       if (isOwner && !isBranchUser) {
         navigate('/owner/dashboard', { replace: true });
@@ -317,6 +345,144 @@ export const LoginPage: React.FC = () => {
 
         {/* Login Form */}
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+          {/* Role & Business Type Selection Controls */}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px',
+              padding: '12px 14px',
+              backgroundColor: '#F8FAFC',
+              borderRadius: '12px',
+              border: '1.5px solid #E2E8F0',
+            }}
+          >
+            {/* 1. Role Selection */}
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1E293B' }}>
+                  {language === 'mr' ? 'भूमिका निवडा (Role)' : language === 'hi' ? 'भूमिका चुनें (Role)' : 'Select Role'}
+                </span>
+                <span style={{ fontSize: '0.72rem', color: '#EA580C', fontWeight: 700 }}>
+                  {selectedRole === 'SINGLE_USER'
+                    ? (language === 'mr' ? 'सिंगल युझर' : 'Single User')
+                    : (language === 'mr' ? 'अ‍ॅडमिन / ओनर' : 'Admin / Owner')}
+                </span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedRole('SINGLE_USER');
+                    setSelectedBusinessType('SINGLE');
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    padding: '8px 10px',
+                    borderRadius: '8px',
+                    border: selectedRole === 'SINGLE_USER' ? '2px solid #EA580C' : '1px solid #CBD5E1',
+                    backgroundColor: selectedRole === 'SINGLE_USER' ? '#FFF7ED' : '#FFFFFF',
+                    color: selectedRole === 'SINGLE_USER' ? '#C2410C' : '#475569',
+                    fontWeight: selectedRole === 'SINGLE_USER' ? 700 : 600,
+                    fontSize: '0.82rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  <User size={15} />
+                  <span>{language === 'mr' ? 'सिंगल युझर' : 'Single User'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedRole('ADMIN_OWNER');
+                    setSelectedBusinessType('MULTI_BRANCH');
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    padding: '8px 10px',
+                    borderRadius: '8px',
+                    border: selectedRole === 'ADMIN_OWNER' ? '2px solid #EA580C' : '1px solid #CBD5E1',
+                    backgroundColor: selectedRole === 'ADMIN_OWNER' ? '#FFF7ED' : '#FFFFFF',
+                    color: selectedRole === 'ADMIN_OWNER' ? '#C2410C' : '#475569',
+                    fontWeight: selectedRole === 'ADMIN_OWNER' ? 700 : 600,
+                    fontSize: '0.82rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  <ShieldCheck size={15} />
+                  <span>{language === 'mr' ? 'अ‍ॅडमिन / ओनर' : 'Admin / Owner'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* 2. Business Type Selection */}
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1E293B' }}>
+                  {language === 'mr' ? 'व्यवसाय प्रकार (Business Type)' : language === 'hi' ? 'व्यवसाय प्रकार (Business Type)' : 'Business Type'}
+                </span>
+                <span style={{ fontSize: '0.72rem', color: '#64748B', fontWeight: 600 }}>
+                  {selectedBusinessType === 'SINGLE'
+                    ? (language === 'mr' ? 'सिंगल युझर' : 'Single User')
+                    : (language === 'mr' ? 'मल्टिपल ब्रांच' : 'Multiple Branch')}
+                </span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => setSelectedBusinessType('SINGLE')}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    padding: '8px 10px',
+                    borderRadius: '8px',
+                    border: selectedBusinessType === 'SINGLE' ? '2px solid #EA580C' : '1px solid #CBD5E1',
+                    backgroundColor: selectedBusinessType === 'SINGLE' ? '#FFF7ED' : '#FFFFFF',
+                    color: selectedBusinessType === 'SINGLE' ? '#C2410C' : '#475569',
+                    fontWeight: selectedBusinessType === 'SINGLE' ? 700 : 600,
+                    fontSize: '0.82rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  <Building2 size={15} />
+                  <span>{language === 'mr' ? 'सिंगल युझर' : 'Single User'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedBusinessType('MULTI_BRANCH')}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    padding: '8px 10px',
+                    borderRadius: '8px',
+                    border: selectedBusinessType === 'MULTI_BRANCH' ? '2px solid #EA580C' : '1px solid #CBD5E1',
+                    backgroundColor: selectedBusinessType === 'MULTI_BRANCH' ? '#FFF7ED' : '#FFFFFF',
+                    color: selectedBusinessType === 'MULTI_BRANCH' ? '#C2410C' : '#475569',
+                    fontWeight: selectedBusinessType === 'MULTI_BRANCH' ? 700 : 600,
+                    fontSize: '0.82rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  <GitBranch size={15} />
+                  <span>{language === 'mr' ? 'मल्टिपल ब्रांच' : 'Multiple Branch'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
           {/* Email / Mobile Input */}
           <div className="form-group" style={{ marginBottom: 0 }}>
             <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem', color: '#090040' }}>

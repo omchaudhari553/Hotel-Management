@@ -236,6 +236,10 @@ export const ownerService = {
     return res.data?.data || [];
   },
 
+  deleteStaff: async (id: number): Promise<void> => {
+    await apiClient.delete(`/owner/staff/${id}`);
+  },
+
   // MODULE 6: REPORTS
   getReports: async (params?: { type?: string; branchId?: number; startDate?: string; endDate?: string; period?: string }): Promise<any> => {
     const res = await apiClient.get('/owner/reports', { params });

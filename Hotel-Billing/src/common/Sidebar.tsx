@@ -46,6 +46,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onCloseMob
   const { t, toDevanagari } = useLanguage();
   const { user } = useAuth();
   const { selectedBranch } = useBranch();
+  const isBranchUser = Boolean(
+    user?.branchId ||
+    user?.isBranchUser ||
+    (user?.role && !['OWNER', 'ADMIN', 'SUPER_ADMIN'].includes(String(user.role).toUpperCase()) && user?.branchId)
+  );
   const isOwner =
     user?.isOwner === true ||
     user?.role === 'OWNER' ||
@@ -302,7 +307,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onCloseMob
         <nav className="sidebar-nav" style={{ paddingTop: '8px' }}>
           {activeIndustryCode === 'HOTEL' && (
             <>
-              {isOwner && (
+              {isOwner && localStorage.getItem('ajalkar_user_mode') !== 'SINGLE' && (
                 <NavLink
                   to="/owner/dashboard"
                   className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
@@ -508,7 +513,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onCloseMob
           width: '100%',
         }}
       >
-        {activeIndustryCode === 'HOTEL' && (
+        {!isBranchUser && activeIndustryCode === 'HOTEL' && (
           <div
             style={{
               padding: '14px',

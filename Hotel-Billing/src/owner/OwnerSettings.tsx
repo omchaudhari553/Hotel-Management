@@ -63,11 +63,21 @@ export const OwnerSettings: React.FC = () => {
         ownerService.getSettings(),
         licenceService.getLicenceInfo().catch(() => null),
       ]);
+      let cachedBank: any = {};
+      try {
+        const rawBank = localStorage.getItem('ajalkar_owner_bank_details');
+        if (rawBank) cachedBank = JSON.parse(rawBank);
+      } catch {}
+
       if (settRes) {
-        setSettings(settRes);
-        if (settRes.theme && (settRes.theme === 'system' || settRes.theme === 'dark' || settRes.theme === 'light')) {
+        setSettings({ ...settRes, ...cachedBank });
+        if (settRes.theme && (settRes.theme === 'dark' || settRes.theme === 'light')) {
           setTheme(settRes.theme as ThemeType);
+        } else {
+          setTheme('light');
         }
+      } else if (Object.keys(cachedBank).length > 0) {
+        setSettings((prev: any) => ({ ...prev, ...cachedBank }));
       }
       if (licRes) setLicenceInfo(licRes);
 
@@ -112,9 +122,36 @@ export const OwnerSettings: React.FC = () => {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (settings.phone && !/^[6-9]\d{9}$/.test(settings.phone)) {
+      showToast('error', 'Phone number must be a 10-digit Indian number starting with 6, 7, 8, or 9.');
+      return;
+    }
+    if (settings.bankPhone && !/^[6-9]\d{9}$/.test(settings.bankPhone)) {
+      showToast('error', 'Bank registered phone number must be a 10-digit Indian number starting with 6, 7, 8, or 9.');
+      return;
+    }
     setSaving(true);
     try {
-      await ownerService.updateSettings({ ...settings, theme });
+      const bankDetails = {
+        bankName: settings.bankName || '',
+        accountHolderName: settings.accountHolderName || '',
+        accountNumber: settings.accountNumber || '',
+        ifscCode: settings.ifscCode || '',
+        upiId: settings.upiId || '',
+        bankPhone: settings.bankPhone || '',
+      };
+      try {
+        localStorage.setItem('ajalkar_owner_bank_details', JSON.stringify(bankDetails));
+      } catch {}
+
+      await Promise.allSettled([
+        ownerService.updateSettings({ ...settings, ...bankDetails, theme }),
+        apiClient.put('/hotel/settings', {
+          category: 'BANK',
+          settingKey: 'DETAILS',
+          settingValue: JSON.stringify(bankDetails),
+        }).catch(() => {}),
+      ]);
       showToast('success', 'Owner settings and business profile updated successfully.');
     } catch (err: any) {
       showToast('error', err?.response?.data?.message || 'Failed to update settings.');
@@ -239,14 +276,6 @@ export const OwnerSettings: React.FC = () => {
     colors: string[];
     icon: any;
   }> = [
-    {
-      id: 'system',
-      name: 'System Default / सिस्टीम डिफॉल्ट',
-      badge: 'Automatic',
-      desc: 'Automatically matches your device operating system theme (Light or Dark)',
-      colors: ['#FFFFFF', '#0B0F19', '#F59E0B', '#38BDF8'],
-      icon: Laptop,
-    },
     {
       id: 'light',
       name: 'Daylight / Classic Light',
@@ -516,11 +545,34 @@ export const OwnerSettings: React.FC = () => {
               <input
                 type="tel"
                 name="phone"
+                maxLength={10}
+                placeholder="10-digit mobile number (e.g. 9876543210)"
                 value={settings.phone || ''}
-                onChange={handleChange}
+                onChange={(e) => {
+                  const digits = e.target.value.replace(/\D/g, '').slice(0, 10);
+                  setSettings((prev: any) => ({ ...prev, phone: digits }));
+                }}
                 className="form-control owner-input-field"
-                style={inputStyle}
+                style={{
+                  ...inputStyle,
+                  borderColor: (settings.phone && (!/^[6-9]\d{9}$/.test(settings.phone))) ? '#EF4444' : undefined,
+                }}
               />
+              {settings.phone && !/^[6-9]/.test(settings.phone) && (
+                <span style={{ fontSize: '0.72rem', color: '#EF4444', marginTop: '3px', display: 'block' }}>
+                  Indian number must start with 6, 7, 8, or 9
+                </span>
+              )}
+              {settings.phone && /^[6-9]/.test(settings.phone) && settings.phone.length < 10 && (
+                <span style={{ fontSize: '0.72rem', color: '#EF4444', marginTop: '3px', display: 'block' }}>
+                  Must be 10 digits ({settings.phone.length}/10 entered)
+                </span>
+              )}
+              {settings.phone && /^[6-9]\d{9}$/.test(settings.phone) && (
+                <span style={{ fontSize: '0.72rem', color: '#10B981', marginTop: '3px', display: 'block' }}>
+                  ✓ Valid 10-digit mobile number
+                </span>
+              )}
             </div>
 
             <div>
@@ -582,6 +634,129 @@ export const OwnerSettings: React.FC = () => {
                 className="form-control owner-input-field"
                 style={inputStyle}
               />
+            </div>
+
+            {/* Optional Bank Details for Hotel Business Profile */}
+            <div style={{ gridColumn: '1 / -1', marginTop: '14px', paddingTop: '18px', borderTop: '1px solid var(--border-slate, #F1F5F9)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+                <div>
+                  <h4 style={{ margin: 0, fontSize: '0.96rem', fontWeight: 700, color: 'var(--text-heading, #1E293B)' }}>
+                    Bank Details (Optional)
+                  </h4>
+                  <p style={{ margin: '2px 0 0', fontSize: '0.78rem', color: 'var(--text-muted, #64748B)' }}>
+                    Used for invoices, payouts, and billing payment references.
+                  </p>
+                </div>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, background: 'var(--bg-secondary, #F1F5F9)', color: 'var(--text-muted, #64748B)', padding: '3px 8px', borderRadius: '6px' }}>
+                  OPTIONAL
+                </span>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
+                <div>
+                  <label style={labelStyle}>Bank Name</label>
+                  <input
+                    type="text"
+                    name="bankName"
+                    placeholder="e.g. State Bank of India"
+                    value={settings.bankName || ''}
+                    onChange={handleChange}
+                    className="form-control owner-input-field"
+                    style={inputStyle}
+                  />
+                </div>
+
+                <div>
+                  <label style={labelStyle}>Account Holder Name</label>
+                  <input
+                    type="text"
+                    name="accountHolderName"
+                    placeholder="e.g. Royal Palace Hotel"
+                    value={settings.accountHolderName || ''}
+                    onChange={handleChange}
+                    className="form-control owner-input-field"
+                    style={inputStyle}
+                  />
+                </div>
+
+                <div>
+                  <label style={labelStyle}>Account Number</label>
+                  <input
+                    type="text"
+                    name="accountNumber"
+                    placeholder="e.g. 123456789012"
+                    value={settings.accountNumber || ''}
+                    onChange={handleChange}
+                    className="form-control owner-input-field"
+                    style={inputStyle}
+                  />
+                </div>
+
+                <div>
+                  <label style={labelStyle}>IFSC Code</label>
+                  <input
+                    type="text"
+                    name="ifscCode"
+                    placeholder="e.g. SBIN0001234"
+                    maxLength={11}
+                    value={settings.ifscCode || ''}
+                    onChange={(e) => {
+                      const val = e.target.value.toUpperCase();
+                      setSettings((prev: any) => ({ ...prev, ifscCode: val }));
+                    }}
+                    className="form-control owner-input-field"
+                    style={inputStyle}
+                  />
+                </div>
+
+                <div>
+                  <label style={labelStyle}>UPI ID / VPA</label>
+                  <input
+                    type="text"
+                    name="upiId"
+                    placeholder="e.g. royalpalace@upi"
+                    value={settings.upiId || ''}
+                    onChange={handleChange}
+                    className="form-control owner-input-field"
+                    style={inputStyle}
+                  />
+                </div>
+
+                <div>
+                  <label style={labelStyle}>Bank / Account Registered Phone Number</label>
+                  <input
+                    type="tel"
+                    name="bankPhone"
+                    maxLength={10}
+                    placeholder="10-digit Indian number (e.g. 9876543210)"
+                    value={settings.bankPhone || ''}
+                    onChange={(e) => {
+                      const digits = e.target.value.replace(/\D/g, '').slice(0, 10);
+                      setSettings((prev: any) => ({ ...prev, bankPhone: digits }));
+                    }}
+                    className="form-control owner-input-field"
+                    style={{
+                      ...inputStyle,
+                      borderColor: (settings.bankPhone && (!/^[6-9]\d{9}$/.test(settings.bankPhone))) ? '#EF4444' : undefined,
+                    }}
+                  />
+                  {settings.bankPhone && !/^[6-9]/.test(settings.bankPhone) && (
+                    <span style={{ fontSize: '0.72rem', color: '#EF4444', marginTop: '3px', display: 'block' }}>
+                      Indian number must start with 6, 7, 8, or 9
+                    </span>
+                  )}
+                  {settings.bankPhone && /^[6-9]/.test(settings.bankPhone) && settings.bankPhone.length < 10 && (
+                    <span style={{ fontSize: '0.72rem', color: '#EF4444', marginTop: '3px', display: 'block' }}>
+                      Must be 10 digits ({settings.bankPhone.length}/10 entered)
+                    </span>
+                  )}
+                  {settings.bankPhone && /^[6-9]\d{9}$/.test(settings.bankPhone) && (
+                    <span style={{ fontSize: '0.72rem', color: '#10B981', marginTop: '3px', display: 'block' }}>
+                      ✓ Valid 10-digit mobile number
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 

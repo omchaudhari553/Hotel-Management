@@ -53,6 +53,7 @@ import {
   Briefcase,
   ChevronDown,
   CreditCard,
+  Trash2,
 } from 'lucide-react-native';
 
 export type StaffRole = 'Captain' | 'Waiter' | 'Chef' | 'Cashier' | 'Manager' | 'Receptionist' | 'Helper' | 'Cleaner' | 'Security';
@@ -396,6 +397,36 @@ export const StaffScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     );
     setStaffList(updated);
     AsyncStorage.setItem(STORAGE_STAFF_KEY, JSON.stringify(updated));
+  };
+
+  // Delete staff member with confirmation
+  const handleDeleteStaff = (member: StaffMember) => {
+    Alert.alert(
+      t('deleteStaff', 'Delete Staff'),
+      `${t('confirmDelete', 'Are you sure you want to delete')} ${localizeGuestName(member.name)}?`,
+      [
+        { text: t('cancel', 'Cancel'), style: 'cancel' },
+        {
+          text: t('delete', 'Delete'),
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const numericId = member.id.startsWith('s') ? member.id.substring(1) : member.id;
+              if (numericId && !isNaN(Number(numericId))) {
+                await apiClient.delete(`/hotel/staff/${numericId}`).catch(() => {});
+              }
+              const updated = staffList.filter((s) => s.id !== member.id);
+              setStaffList(updated);
+              await AsyncStorage.setItem(STORAGE_STAFF_KEY, JSON.stringify(updated));
+              Alert.alert(t('success', 'Success'), `${localizeGuestName(member.name)} ${t('staffDeleted', 'deleted successfully.')}`);
+            } catch (err: any) {
+              console.error('Failed to delete staff:', err);
+              Alert.alert(t('error', 'Error'), t('staffDeleteFailed', 'Failed to delete staff member.'));
+            }
+          },
+        },
+      ]
+    );
   };
 
   // Mark single day attendance
@@ -1442,8 +1473,26 @@ export const StaffScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                       <View style={{ flex: 1, marginLeft: 10 }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                           <Text style={styles.staffNameText}>{localizeGuestName(staff.name)}</Text>
-                          <View style={styles.roleBadge}>
-                            <Text style={styles.roleBadgeText}>{t(staff.role, staff.role)}</Text>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                            <View style={styles.roleBadge}>
+                              <Text style={styles.roleBadgeText}>{t(staff.role, staff.role)}</Text>
+                            </View>
+                            <TouchableOpacity
+                              onPress={() => handleDeleteStaff(staff)}
+                              activeOpacity={0.7}
+                              style={{
+                                width: 28,
+                                height: 28,
+                                borderRadius: 6,
+                                backgroundColor: '#FEF2F2',
+                                borderWidth: 1,
+                                borderColor: '#FECACA',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                              }}
+                            >
+                              <Trash2 size={13} color="#DC2626" />
+                            </TouchableOpacity>
                           </View>
                         </View>
                         <Text style={styles.staffSubText}>{t(staff.shift, staff.shift)} {t('shift', 'Shift')} • {toDevanagari(staff.phone)}</Text>
@@ -1741,15 +1790,34 @@ export const StaffScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                       <Text style={[styles.staffName, { flexShrink: 1 }]} numberOfLines={1}>
                         {localizeGuestName(member.name)}
                       </Text>
-                      <TouchableOpacity
-                        style={[styles.statusToggleBadge, member.status === 'ON_DUTY' ? styles.statusOn : styles.statusOff]}
-                        onPress={() => toggleDutyStatus(member.id)}
-                        activeOpacity={0.8}
-                      >
-                        <Text style={[styles.statusToggleText, member.status === 'ON_DUTY' ? styles.statusOnText : styles.statusOffText]}>
-                          {member.status === 'ON_DUTY' ? '● ' + t('onDuty', 'On Duty') : '○ ' + t('offDuty', 'Off Duty')}
-                        </Text>
-                      </TouchableOpacity>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <TouchableOpacity
+                          style={[styles.statusToggleBadge, member.status === 'ON_DUTY' ? styles.statusOn : styles.statusOff]}
+                          onPress={() => toggleDutyStatus(member.id)}
+                          activeOpacity={0.8}
+                        >
+                          <Text style={[styles.statusToggleText, member.status === 'ON_DUTY' ? styles.statusOnText : styles.statusOffText]}>
+                            {member.status === 'ON_DUTY' ? '● ' + t('onDuty', 'On Duty') : '○ ' + t('offDuty', 'Off Duty')}
+                          </Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                          onPress={() => handleDeleteStaff(member)}
+                          activeOpacity={0.7}
+                          style={{
+                            width: 28,
+                            height: 28,
+                            borderRadius: 6,
+                            backgroundColor: '#FEF2F2',
+                            borderWidth: 1,
+                            borderColor: '#FECACA',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <Trash2 size={13} color="#DC2626" />
+                        </TouchableOpacity>
+                      </View>
                     </View>
 
                     {/* Role Pill, Shift, and Salary */}

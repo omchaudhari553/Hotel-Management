@@ -19,7 +19,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Print from 'expo-print';
-import { downloadAndShareCsv } from '../../utils/reportExporter';
+import { downloadAndShareCsv, downloadAndSharePdf } from '../../utils/reportExporter';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   LayoutDashboard,
@@ -211,41 +211,25 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
   const [editBranchForm, setEditBranchForm] = useState<UpdateBranchPayload>({});
 
   // Owner Admin Panel Theme State (Decoupled from Hotel POS App Theme)
-  const [adminPanelTheme, setAdminPanelTheme] = useState<'system' | 'daylight' | 'midnight'>(() => {
+  const [adminPanelTheme, setAdminPanelTheme] = useState<'daylight' | 'midnight'>(() => {
     try {
       const cached = ownerService.getCachedSettings();
       if (cached?.theme === 'midnight' || cached?.theme === 'dark') return 'midnight';
-      if (cached?.theme === 'daylight' || cached?.theme === 'light') return 'daylight';
     } catch {}
     return 'daylight';
-  });
-  const [systemScheme, setSystemScheme] = useState<'light' | 'dark'>(() => {
-    try {
-      return Appearance.getColorScheme() === 'dark' ? 'dark' : 'light';
-    } catch {
-      return 'light';
-    }
   });
 
   useEffect(() => {
     AsyncStorage.getItem('@owner_admin_panel_theme').then((saved) => {
-      if (saved === 'system' || saved === 'daylight' || saved === 'midnight') {
-        setAdminPanelTheme(saved as 'system' | 'daylight' | 'midnight');
+      if (saved === 'midnight') {
+        setAdminPanelTheme('midnight');
+      } else {
+        setAdminPanelTheme('daylight');
       }
     }).catch(() => {});
-
-    let sub: any;
-    try {
-      sub = Appearance.addChangeListener(({ colorScheme }) => {
-        setSystemScheme(colorScheme === 'dark' ? 'dark' : 'light');
-      });
-    } catch {}
-    return () => {
-      if (sub && typeof sub.remove === 'function') sub.remove();
-    };
   }, []);
 
-  const isDarkAdmin = adminPanelTheme === 'midnight' || (adminPanelTheme === 'system' && systemScheme === 'dark');
+  const isDarkAdmin = adminPanelTheme === 'midnight';
   const tc: ThemeColors = isDarkAdmin ? DARK_THEME : LIGHT_THEME;
   const activeTheme = adminPanelTheme;
   const isDark = isDarkAdmin;
@@ -597,12 +581,24 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
         if (brs.status === 'fulfilled' && brs.value) setBranches(brs.value);
       } else if (activeModule === 'SETTINGS') {
         const sett = await ownerService.getSettings();
-        if (sett) setOwnerSettings(sett);
+        let cachedBank: any = {};
+        try {
+          const raw = await AsyncStorage.getItem('@owner_bank_details');
+          if (raw) cachedBank = JSON.parse(raw);
+        } catch {}
+        if (sett) {
+          setOwnerSettings({ ...sett, ...cachedBank });
+        } else if (Object.keys(cachedBank).length > 0) {
+          setOwnerSettings((prev: any) => ({ ...prev, ...cachedBank }));
+        }
       }
     } catch (e) {
       // offline fallback silent
     } finally {
-      if (isManualRefresh) setRefreshing(false);
+      if (isManualRefresh) {
+        setRefreshing(false);
+        Alert.alert('Refreshed', 'Admin panel data refreshed successfully.');
+      }
       setLoading(false);
     }
   }, [activeModule, reportType, reportPeriod, reportBranchId, reportStartDate, reportEndDate, salesBranchId, salesPeriod, salesStartDate, salesEndDate, salesMonth, salesYear, profitPeriod, profitBranchId, profitStartDate, profitEndDate, selectedBranchFilter, perfBranchId, perfStartDate, perfEndDate]);
@@ -612,7 +608,7 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
   }, [loadActiveModuleData]);
 
   // Select theme handler (Decoupled: Only Owner Admin Panel changes, Hotel App retains original theme)
-  const handleSelectTheme = async (themeId: 'system' | 'daylight' | 'midnight') => {
+  const handleSelectTheme = async (themeId: 'daylight' | 'midnight') => {
     setAdminPanelTheme(themeId);
     try {
       await AsyncStorage.setItem('@owner_admin_panel_theme', themeId);
@@ -1031,6 +1027,29 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
       </View>
 
       <View style={styles.headerRight}>
+        {/* Quick Refresh Button in Header */}
+        <TouchableOpacity
+          style={{
+            width: 32,
+            height: 32,
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: isDarkAdmin ? '#2A364F' : '#E2E8F0',
+            backgroundColor: isDarkAdmin ? '#161F36' : '#FFFFFF',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          onPress={loadData}
+          disabled={refreshing}
+          activeOpacity={0.8}
+        >
+          {refreshing ? (
+            <ActivityIndicator size="small" color="#F97316" />
+          ) : (
+            <RefreshCw size={14} color={isDarkAdmin ? '#FFFFFF' : '#0F172A'} />
+          )}
+        </TouchableOpacity>
+
         {/* Small Theme Toggle Button in Header */}
         <TouchableOpacity
           style={{
@@ -1096,9 +1115,14 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
             <TouchableOpacity
               style={styles.refreshBtn}
               onPress={loadData}
+              disabled={refreshing}
               activeOpacity={0.8}
             >
-              <RefreshCw size={14} color={isDarkAdmin ? '#FFFFFF' : '#0F172A'} />
+              {refreshing ? (
+                <ActivityIndicator size="small" color="#F97316" />
+              ) : (
+                <RefreshCw size={14} color={isDarkAdmin ? '#FFFFFF' : '#0F172A'} />
+              )}
             </TouchableOpacity>
           </View>
         </View>
@@ -1464,9 +1488,14 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
             <TouchableOpacity
               style={styles.refreshBtn}
               onPress={loadData}
+              disabled={refreshing}
               activeOpacity={0.8}
             >
-              <RefreshCw size={14} color={isDarkAdmin ? '#FFFFFF' : '#0F172A'} />
+              {refreshing ? (
+                <ActivityIndicator size="small" color="#F97316" />
+              ) : (
+                <RefreshCw size={14} color={isDarkAdmin ? '#FFFFFF' : '#0F172A'} />
+              )}
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -1759,10 +1788,15 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
           <View style={styles.moduleHeaderActions}>
             <TouchableOpacity
               style={styles.refreshBtn}
-              onPress={() => loadActiveModuleData(true)}
+              onPress={loadData}
+              disabled={refreshing}
               activeOpacity={0.8}
             >
-              <RefreshCw size={14} color={isDarkAdmin ? '#FFFFFF' : '#0F172A'} />
+              {refreshing ? (
+                <ActivityIndicator size="small" color="#F97316" />
+              ) : (
+                <RefreshCw size={14} color={isDarkAdmin ? '#FFFFFF' : '#0F172A'} />
+              )}
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -2163,10 +2197,15 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
           <View style={styles.moduleHeaderActions}>
             <TouchableOpacity
               style={styles.refreshBtn}
-              onPress={() => loadActiveModuleData(true)}
+              onPress={loadData}
+              disabled={refreshing}
               activeOpacity={0.8}
             >
-              <RefreshCw size={14} color={isDarkAdmin ? '#FFFFFF' : '#0F172A'} />
+              {refreshing ? (
+                <ActivityIndicator size="small" color="#F97316" />
+              ) : (
+                <RefreshCw size={14} color={isDarkAdmin ? '#FFFFFF' : '#0F172A'} />
+              )}
             </TouchableOpacity>
           </View>
         </View>
@@ -2588,10 +2627,15 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
           <View style={styles.headingButtonsRow}>
             <TouchableOpacity
               style={styles.refreshBtn}
-              onPress={() => loadActiveModuleData(true)}
+              onPress={loadData}
+              disabled={refreshing}
               activeOpacity={0.8}
             >
-              <RefreshCw size={14} color={isDarkAdmin ? '#FFFFFF' : '#0F172A'} />
+              {refreshing ? (
+                <ActivityIndicator size="small" color="#F97316" />
+              ) : (
+                <RefreshCw size={14} color={isDarkAdmin ? '#FFFFFF' : '#0F172A'} />
+              )}
             </TouchableOpacity>
           </View>
         </View>
@@ -2857,25 +2901,24 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
       }
     };
 
-    // Fully working Print for HOTEL, GST, and EXPENSES
-    const handlePrintReport = async () => {
-      try {
-        const hotelName = ownerSettings?.businessName || 'Royal Palace Hotel';
-        const hotelAddress = ownerSettings?.address || 'Hotel Premises, Pune';
-        const dateFormatted = new Date().toLocaleString('en-IN', { dateStyle: 'long', timeStyle: 'short' });
-        const reportTitle = reportType === 'HOTEL'
-          ? 'Consolidated Hotel Operational Report'
-          : reportType === 'GST'
-          ? 'GST Filing & Tax Breakdown Report'
-          : 'Consolidated Multi-Branch Expenses Report';
+    // Build HTML for Printing and PDF Export
+    const buildReportHTML = () => {
+      const hotelName = ownerSettings?.businessName || 'Royal Palace Hotel';
+      const hotelAddress = ownerSettings?.address || 'Hotel Premises, Pune';
+      const dateFormatted = new Date().toLocaleString('en-IN', { dateStyle: 'long', timeStyle: 'short' });
+      const reportTitle = reportType === 'HOTEL'
+        ? 'Consolidated Hotel Operational Report'
+        : reportType === 'GST'
+        ? 'GST Filing & Tax Breakdown Report'
+        : 'Consolidated Multi-Branch Expenses Report';
 
-        const fmt = (amt: number | undefined) => {
-          return '₹' + Number(amt || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        };
+      const fmt = (amt: number | undefined) => {
+        return '₹' + Number(amt || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      };
 
-        let contentHTML = '';
+      let contentHTML = '';
 
-        if (reportType === 'HOTEL') {
+      if (reportType === 'HOTEL') {
           contentHTML = `
             <div class="kpi-grid">
               <div class="kpi-card" style="border-left: 4px solid #B45309;">
@@ -3233,10 +3276,34 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
           </html>
         `;
 
+        return fullHTML;
+    };
+
+    // Print Report
+    const handlePrintReport = async () => {
+      try {
+        const fullHTML = buildReportHTML();
         await Print.printAsync({ html: fullHTML });
       } catch (err: any) {
         console.error('Print Report Error:', err);
         Alert.alert('Print Error', err?.message || 'Could not initiate printing.');
+      }
+    };
+
+    // Export PDF Document
+    const handleExportReportPDF = async () => {
+      try {
+        const fullHTML = buildReportHTML();
+        const dateStr = new Date().toISOString().slice(0, 10);
+        const reportTitle = reportType === 'HOTEL'
+          ? 'Hotel_Operational_Report'
+          : reportType === 'GST'
+          ? 'GST_Tax_Breakdown_Report'
+          : 'Branch_Expenses_Report';
+        await downloadAndSharePdf(`${reportTitle}_${dateStr}`, fullHTML);
+      } catch (err: any) {
+        console.error('PDF Export Error:', err);
+        Alert.alert('PDF Export Error', err?.message || 'Could not export PDF report file.');
       }
     };
 
@@ -3250,9 +3317,19 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
             </Text>
           </View>
           <View style={styles.headingButtonsRow}>
-            <TouchableOpacity style={styles.refreshBtn} onPress={loadData} activeOpacity={0.8}>
-              <RefreshCw size={14} color={isDarkAdmin ? '#FFFFFF' : '#0F172A'} />
+            <TouchableOpacity
+              style={styles.refreshBtn}
+              onPress={loadData}
+              disabled={refreshing}
+              activeOpacity={0.8}
+            >
+              {refreshing ? (
+                <ActivityIndicator size="small" color="#F97316" />
+              ) : (
+                <RefreshCw size={14} color={isDarkAdmin ? '#FFFFFF' : '#0F172A'} />
+              )}
             </TouchableOpacity>
+
             <TouchableOpacity
               style={styles.refreshBtn}
               onPress={handlePrintReport}
@@ -3260,13 +3337,25 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
             >
               <Printer size={14} color={isDarkAdmin ? '#FFFFFF' : '#0F172A'} />
             </TouchableOpacity>
+
+            {/* Excel Download Button */}
             <TouchableOpacity
-              style={styles.addBranchActionBtn}
+              style={[styles.addBranchActionBtn, { backgroundColor: '#15803D' }]}
               onPress={handleExportReportCSV}
               activeOpacity={0.85}
             >
-              <Download size={13} color="#FFFFFF" />
-              <Text style={styles.addBranchActionText}>{isMobile ? 'CSV' : 'Export CSV'}</Text>
+              <FileSpreadsheet size={13} color="#FFFFFF" />
+              <Text style={styles.addBranchActionText}>{isMobile ? 'Excel' : 'Export Excel'}</Text>
+            </TouchableOpacity>
+
+            {/* PDF Download Button */}
+            <TouchableOpacity
+              style={[styles.addBranchActionBtn, { backgroundColor: '#B91C1C' }]}
+              onPress={handleExportReportPDF}
+              activeOpacity={0.85}
+            >
+              <FileText size={13} color="#FFFFFF" />
+              <Text style={styles.addBranchActionText}>{isMobile ? 'PDF' : 'Export PDF'}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -3819,10 +3908,15 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
           <View style={styles.headingButtonsRow}>
             <TouchableOpacity
               style={styles.refreshBtn}
-              onPress={() => loadActiveModuleData(true)}
+              onPress={loadData}
+              disabled={refreshing}
               activeOpacity={0.8}
             >
-              <RefreshCw size={14} color={isDarkAdmin ? '#FFFFFF' : '#0F172A'} />
+              {refreshing ? (
+                <ActivityIndicator size="small" color="#F97316" />
+              ) : (
+                <RefreshCw size={14} color={isDarkAdmin ? '#FFFFFF' : '#0F172A'} />
+              )}
             </TouchableOpacity>
           </View>
         </View>
@@ -4099,7 +4193,6 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
           {[
             { id: 'daylight', label: 'Light', icon: Sun },
             { id: 'midnight', label: 'Dark', icon: Moon },
-            { id: 'system', label: 'System', icon: Laptop },
           ].map((th) => {
             const isSelected = activeTheme === th.id;
             const IconComponent = th.icon;
@@ -4119,7 +4212,7 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
                     ? (isDarkAdmin ? '#78350F' : '#FEF3C7')
                     : (isDarkAdmin ? '#0F172A' : '#F8FAFC'),
                 }}
-                onPress={() => handleSelectTheme(th.id as 'system' | 'daylight' | 'midnight')}
+                onPress={() => handleSelectTheme(th.id as 'daylight' | 'midnight')}
                 activeOpacity={0.8}
               >
                 <IconComponent size={14} color={isSelected ? '#D97706' : tc.textMuted} />
@@ -4190,13 +4283,35 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
             <View style={isMobile ? { width: '100%' } : { flex: 1 }}>
               <Text style={styles.settingsInputLabel}>Phone Number</Text>
               <TextInput
-                style={styles.settingsTextInput}
-                placeholder="e.g. 9876543210"
+                style={[
+                  styles.settingsTextInput,
+                  ownerSettings?.phone && !/^[6-9]\d{9}$/.test(ownerSettings.phone) && { borderColor: '#EF4444' },
+                ]}
+                placeholder="10-digit mobile number (e.g. 9876543210)"
                 placeholderTextColor="#94A3B8"
                 keyboardType="phone-pad"
-                value={ownerSettings?.phone || '9876543210'}
-                onChangeText={(val) => setOwnerSettings({ ...ownerSettings, phone: val })}
+                maxLength={10}
+                value={ownerSettings?.phone || ''}
+                onChangeText={(val) => {
+                  const digits = val.replace(/\D/g, '').slice(0, 10);
+                  setOwnerSettings({ ...ownerSettings, phone: digits });
+                }}
               />
+              {ownerSettings?.phone && !/^[6-9]/.test(ownerSettings.phone) && (
+                <Text style={{ fontSize: 10.5, color: '#EF4444', marginTop: 2 }}>
+                  Must start with 6, 7, 8, or 9
+                </Text>
+              )}
+              {ownerSettings?.phone && /^[6-9]/.test(ownerSettings.phone) && ownerSettings.phone.length < 10 && (
+                <Text style={{ fontSize: 10.5, color: '#EF4444', marginTop: 2 }}>
+                  Must be 10 digits ({ownerSettings.phone.length}/10 entered)
+                </Text>
+              )}
+              {ownerSettings?.phone && /^[6-9]\d{9}$/.test(ownerSettings.phone) && (
+                <Text style={{ fontSize: 10.5, color: '#10B981', marginTop: 2 }}>
+                  ✓ Valid 10-digit mobile number
+                </Text>
+              )}
             </View>
           </View>
 
@@ -4261,13 +4376,135 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
             />
           </View>
 
+          {/* Bank Details (Optional) */}
+          <View style={{ width: '100%', marginTop: 14, paddingTop: 14, borderTopWidth: 1, borderTopColor: isDarkAdmin ? '#2A364F' : '#E5E7EB', marginBottom: 4 }}>
+            <Text style={{ fontSize: 13, fontWeight: '800', color: isDarkAdmin ? '#F9FAFB' : '#111827' }}>
+              Bank Details (Optional)
+            </Text>
+            <Text style={{ fontSize: 11, color: isDarkAdmin ? '#94A3B8' : '#64748B', marginTop: 2 }}>
+              Used for invoices, payouts, and billing payment references.
+            </Text>
+          </View>
+
+          {/* Row: Bank Name & Account Holder Name */}
+          <View style={[styles.settingsFormRow, isMobile && styles.settingsFormCol]}>
+            <View style={isMobile ? { width: '100%' } : { flex: 1 }}>
+              <Text style={styles.settingsInputLabel}>Bank Name</Text>
+              <TextInput
+                style={styles.settingsTextInput}
+                placeholder="e.g. State Bank of India"
+                placeholderTextColor="#94A3B8"
+                value={ownerSettings?.bankName || ''}
+                onChangeText={(val) => setOwnerSettings({ ...ownerSettings, bankName: val })}
+              />
+            </View>
+            <View style={isMobile ? { width: '100%' } : { flex: 1 }}>
+              <Text style={styles.settingsInputLabel}>Account Holder Name</Text>
+              <TextInput
+                style={styles.settingsTextInput}
+                placeholder="e.g. Royal Palace Hotel"
+                placeholderTextColor="#94A3B8"
+                value={ownerSettings?.accountHolderName || ''}
+                onChangeText={(val) => setOwnerSettings({ ...ownerSettings, accountHolderName: val })}
+              />
+            </View>
+          </View>
+
+          {/* Row: Account Number, IFSC & UPI */}
+          <View style={[styles.settingsFormRow, isMobile && styles.settingsFormCol]}>
+            <View style={isMobile ? { width: '100%' } : { flex: 1 }}>
+              <Text style={styles.settingsInputLabel}>Account Number</Text>
+              <TextInput
+                style={styles.settingsTextInput}
+                placeholder="e.g. 123456789012"
+                placeholderTextColor="#94A3B8"
+                keyboardType="numeric"
+                value={ownerSettings?.accountNumber || ''}
+                onChangeText={(val) => setOwnerSettings({ ...ownerSettings, accountNumber: val })}
+              />
+            </View>
+            <View style={isMobile ? { width: '100%' } : { flex: 1 }}>
+              <Text style={styles.settingsInputLabel}>IFSC Code</Text>
+              <TextInput
+                style={styles.settingsTextInput}
+                placeholder="e.g. SBIN0001234"
+                placeholderTextColor="#94A3B8"
+                autoCapitalize="characters"
+                maxLength={11}
+                value={ownerSettings?.ifscCode || ''}
+                onChangeText={(val) => setOwnerSettings({ ...ownerSettings, ifscCode: val.toUpperCase() })}
+              />
+            </View>
+            <View style={isMobile ? { width: '100%' } : { flex: 1 }}>
+              <Text style={styles.settingsInputLabel}>UPI ID / VPA</Text>
+              <TextInput
+                style={styles.settingsTextInput}
+                placeholder="e.g. royalpalace@upi"
+                placeholderTextColor="#94A3B8"
+                autoCapitalize="none"
+                value={ownerSettings?.upiId || ''}
+                onChangeText={(val) => setOwnerSettings({ ...ownerSettings, upiId: val })}
+              />
+            </View>
+            <View style={isMobile ? { width: '100%' } : { flex: 1 }}>
+              <Text style={styles.settingsInputLabel}>Bank Registered Mobile Number</Text>
+              <TextInput
+                style={[
+                  styles.settingsTextInput,
+                  ownerSettings?.bankPhone && !/^[6-9]\d{9}$/.test(ownerSettings.bankPhone) && { borderColor: '#EF4444' },
+                ]}
+                placeholder="10-digit mobile number"
+                placeholderTextColor="#94A3B8"
+                keyboardType="phone-pad"
+                maxLength={10}
+                value={ownerSettings?.bankPhone || ''}
+                onChangeText={(val) => {
+                  const digits = val.replace(/\D/g, '').slice(0, 10);
+                  setOwnerSettings({ ...ownerSettings, bankPhone: digits });
+                }}
+              />
+              {ownerSettings?.bankPhone && !/^[6-9]/.test(ownerSettings.bankPhone) && (
+                <Text style={{ fontSize: 10.5, color: '#EF4444', marginTop: 2 }}>
+                  Must start with 6, 7, 8, or 9
+                </Text>
+              )}
+              {ownerSettings?.bankPhone && /^[6-9]/.test(ownerSettings.bankPhone) && ownerSettings.bankPhone.length < 10 && (
+                <Text style={{ fontSize: 10.5, color: '#EF4444', marginTop: 2 }}>
+                  Must be 10 digits ({ownerSettings.bankPhone.length}/10 entered)
+                </Text>
+              )}
+              {ownerSettings?.bankPhone && /^[6-9]\d{9}$/.test(ownerSettings.bankPhone) && (
+                <Text style={{ fontSize: 10.5, color: '#10B981', marginTop: 2 }}>
+                  ✓ Valid 10-digit mobile number
+                </Text>
+              )}
+            </View>
+          </View>
+
           {/* Save Button at bottom right */}
           <View style={{ alignItems: isMobile ? 'stretch' : 'flex-end', marginTop: 8 }}>
             <TouchableOpacity
               style={styles.saveSettingsActionBtn}
               onPress={async () => {
+                if (ownerSettings?.phone && !/^[6-9]\d{9}$/.test(ownerSettings.phone)) {
+                  Alert.alert('Validation Error', 'Phone Number must be a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9.');
+                  return;
+                }
+                if (ownerSettings?.bankPhone && !/^[6-9]\d{9}$/.test(ownerSettings.bankPhone)) {
+                  Alert.alert('Validation Error', 'Bank Registered Mobile Number must be a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9.');
+                  return;
+                }
                 try {
-                  await ownerService.updateSettings(ownerSettings);
+                  const bankDetails = {
+                    bankName: ownerSettings?.bankName || '',
+                    accountHolderName: ownerSettings?.accountHolderName || '',
+                    accountNumber: ownerSettings?.accountNumber || '',
+                    ifscCode: ownerSettings?.ifscCode || '',
+                    upiId: ownerSettings?.upiId || '',
+                    bankPhone: ownerSettings?.bankPhone || '',
+                  };
+                  await ownerService.updateSettings({ ...ownerSettings, ...bankDetails });
+                  await AsyncStorage.setItem('@owner_bank_details', JSON.stringify(bankDetails));
                   Alert.alert('Settings Saved', 'Central hotel enterprise settings updated successfully!');
                 } catch {
                   Alert.alert('Error', 'Failed to update settings.');

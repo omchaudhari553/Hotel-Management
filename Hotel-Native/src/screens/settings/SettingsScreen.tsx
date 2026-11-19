@@ -476,6 +476,13 @@ export const SettingsScreen: React.FC<{ navigation?: any; route?: any }> = ({ na
   const isDesktopLayout = width >= 860;
 
   const { user, logout } = useAuth();
+  const isBranchUser = Boolean(
+    user?.branchId ||
+    (user?.role && !['OWNER', 'ADMIN', 'SUPER_ADMIN'].includes(String(user.role).toUpperCase()) && user?.branchId) ||
+    user?.role === 'BRANCH' ||
+    user?.role === 'BRANCH_MANAGER' ||
+    user?.role === 'BRANCH_CASHIER'
+  );
   const { language, setLanguage, t, formatDate, formatTime, toDevanagari, translateStatus } = useLanguage();
   const { activeBranch, activeBranchNumId } = useBranch();
   const { themeMode, setThemeMode, isDark } = useAppTheme();
@@ -611,6 +618,7 @@ export const SettingsScreen: React.FC<{ navigation?: any; route?: any }> = ({ na
   const [accountNumber, setAccountNumber] = useState<string>('');
   const [ifscCode, setIfscCode] = useState<string>('');
   const [upiId, setUpiId] = useState<string>('');
+  const [bankPhone, setBankPhone] = useState<string>('');
   const [profileSavedNotice, setProfileSavedNotice] = useState(false);
   const [backupSending, setBackupSending] = useState(false);
   const [backupStatusMsg, setBackupStatusMsg] = useState('');
@@ -1168,6 +1176,7 @@ export const SettingsScreen: React.FC<{ navigation?: any; route?: any }> = ({ na
           if (p.accountNumber) setAccountNumber(p.accountNumber);
           if (p.ifscCode) setIfscCode(p.ifscCode);
           if (p.upiId) setUpiId(p.upiId);
+          if (p.bankPhone) setBankPhone(p.bankPhone);
           if (p.logo && !savedLogo) setHotelLogo(p.logo);
         }
 
@@ -1238,7 +1247,7 @@ export const SettingsScreen: React.FC<{ navigation?: any; route?: any }> = ({ na
         apiClient.get('/hotel/backup/status').then((res) => {
           const d = res.data?.data;
           if (d?.sender) setSmtpSenderEmail(d.sender);
-        }).catch(() => {});
+        }).catch(() => { });
       } catch (e) {
         console.warn('Failed to load settings', e);
       }
@@ -1479,6 +1488,15 @@ export const SettingsScreen: React.FC<{ navigation?: any; route?: any }> = ({ na
   const handleSaveProfile = async () => {
     try {
       const cleanMobile = (mobile || '').replace(/\D/g, '');
+      if (cleanMobile && !/^[6-9]\d{9}$/.test(cleanMobile)) {
+        Alert.alert('Validation Error', 'Mobile Number must be a valid 10-digit Indian number starting with 6, 7, 8, or 9.');
+        return;
+      }
+      const cleanBankPhone = (bankPhone || '').replace(/\D/g, '');
+      if (cleanBankPhone && !/^[6-9]\d{9}$/.test(cleanBankPhone)) {
+        Alert.alert('Validation Error', 'Bank Registered Mobile Number must be a valid 10-digit Indian number starting with 6, 7, 8, or 9.');
+        return;
+      }
       const profileData = {
         name: hotelName,
         hotelName,
@@ -1498,6 +1516,7 @@ export const SettingsScreen: React.FC<{ navigation?: any; route?: any }> = ({ na
         accountNumber,
         ifscCode,
         upiId,
+        bankPhone: cleanBankPhone,
         logo: hotelLogo,
       };
       await AsyncStorage.setItem('@hotel_profile_settings', JSON.stringify(profileData));
@@ -1538,7 +1557,7 @@ export const SettingsScreen: React.FC<{ navigation?: any; route?: any }> = ({ na
         mobile: cleanMobile,
         address,
         city,
-      }).catch(() => {});
+      }).catch(() => { });
 
       const res = await apiClient.post('/hotel/backup/send-email', null, {
         params: {
@@ -2145,13 +2164,13 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
         { key: 'printer', label: getNavItemLabel('printer'), desc: getNavItemDesc('printer'), icon: Printer },
         { key: 'notifications', label: getNavItemLabel('notifications'), desc: getNavItemDesc('notifications'), icon: Bell },
         { key: 'system', label: getNavItemLabel('system'), desc: getNavItemDesc('system'), icon: SlidersHorizontal },
-        { key: 'licence', label: getNavItemLabel('licence'), desc: getNavItemDesc('licence'), icon: Shield },
+        ...(!isBranchUser ? [{ key: 'licence' as SettingsTabKey, label: getNavItemLabel('licence'), desc: getNavItemDesc('licence'), icon: Shield }] : []),
         { key: 'reports', label: getNavItemLabel('reports'), desc: getNavItemDesc('reports'), icon: BarChart3 },
         { key: 'gst-reports', label: getNavItemLabel('gst-reports'), desc: getNavItemDesc('gst-reports'), icon: FileText },
       ];
     if (!searchQuery.trim()) return rawItems;
     const q = searchQuery.toLowerCase().trim();
-    const matchingTabs = new Set(matchingSettings.map((m) => m.tabKey));
+    const matchingTabs = new Set(matchingSettings.filter((m) => !isBranchUser || m.tabKey !== 'licence').map((m) => m.tabKey));
     return rawItems.filter(
       (item) =>
         matchingTabs.has(item.key) ||
@@ -2719,9 +2738,6 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                         <Text style={styles.cardSubtitle}>
                           {t('gstSettingsDesc', 'Manage restaurant GSTIN, tax rates, food slabs and tax configuration.')}
                         </Text>
-                      </View>
-                      <View style={styles.alertsBadge}>
-                        <Text style={styles.alertsBadgeText}>GST</Text>
                       </View>
                     </View>
 
@@ -3624,9 +3640,6 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                 {/* Expenses & Reports Sub-header */}
                 <View style={styles.subReportBanner}>
                   <View>
-                    <View style={styles.hotelFinanceBadge}>
-                      <Text style={styles.hotelFinanceBadgeText}>{t('hotelFinance', 'HOTEL FINANCE')}</Text>
-                    </View>
                     <Text style={styles.subReportTitle}>{t('expensesAndReports', 'Expenses & Reports')}</Text>
                     <Text style={styles.subReportSubtitle}>
                       {t('manageHotelExpenses', 'Manage your hotel expenses and view business insights')}
@@ -4651,22 +4664,22 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                           <View style={styles.gstPointBadgeActive}>
                             <Text style={styles.gstPointBadgeTextActive}>
                               {kpiSelectedGstReport === 'sales-summary' ? 'A' :
-                               kpiSelectedGstReport === 'rate-wise' ? 'B' :
-                               kpiSelectedGstReport === 'invoice-wise' ? 'C' : 'D'}
+                                kpiSelectedGstReport === 'rate-wise' ? 'B' :
+                                  kpiSelectedGstReport === 'invoice-wise' ? 'C' : 'D'}
                             </Text>
                           </View>
                           <View style={{ flex: 1 }}>
                             <Text style={styles.gstReportDropdownSelectedTitle} numberOfLines={1}>
                               {kpiSelectedGstReport === 'sales-summary' ? t('gstSalesSummary', 'A. GST Sales Summary') :
-                               kpiSelectedGstReport === 'rate-wise' ? t('gstRateWiseReport', 'B. GST Rate-wise Report') :
-                               kpiSelectedGstReport === 'invoice-wise' ? t('invoiceWiseGstReport', 'C. Invoice-wise GST Report') :
-                               t('purchaseGstItc', 'D. Purchase GST (ITC)')}
+                                kpiSelectedGstReport === 'rate-wise' ? t('gstRateWiseReport', 'B. GST Rate-wise Report') :
+                                  kpiSelectedGstReport === 'invoice-wise' ? t('invoiceWiseGstReport', 'C. Invoice-wise GST Report') :
+                                    t('purchaseGstItc', 'D. Purchase GST (ITC)')}
                             </Text>
                             <Text style={styles.gstReportDropdownSelectedSubtitle} numberOfLines={1}>
                               {kpiSelectedGstReport === 'sales-summary' ? t('salesTurnoverStatement', 'Turnover & Tax Summary') :
-                               kpiSelectedGstReport === 'rate-wise' ? t('rateWiseBreakdown', '0%, 5%, 12%, 18% Slabs') :
-                               kpiSelectedGstReport === 'invoice-wise' ? t('itemizedBillsGst', 'Itemized Bills Statement') :
-                               t('inputTaxCreditVendor', 'Vendor Invoices ITC')}
+                                kpiSelectedGstReport === 'rate-wise' ? t('rateWiseBreakdown', '0%, 5%, 12%, 18% Slabs') :
+                                  kpiSelectedGstReport === 'invoice-wise' ? t('itemizedBillsGst', 'Itemized Bills Statement') :
+                                    t('inputTaxCreditVendor', 'Vendor Invoices ITC')}
                             </Text>
                           </View>
                         </View>
@@ -4737,8 +4750,8 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                                 <Text style={styles.gstPeriodDropdownText}>
                                   {kpiGstPeriod === 'today' ? t('today', 'Today')
                                     : kpiGstPeriod === 'this-week' ? t('thisWeek', 'This Week')
-                                    : kpiGstPeriod === 'this-month' ? t('thisMonth', 'This Month')
-                                    : t('allTime', 'All Time')} ▼
+                                      : kpiGstPeriod === 'this-month' ? t('thisMonth', 'This Month')
+                                        : t('allTime', 'All Time')} ▼
                                 </Text>
                               </TouchableOpacity>
                               <TouchableOpacity
@@ -4880,8 +4893,8 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                                 <Text style={styles.gstPeriodDropdownText}>
                                   {kpiGstPeriod === 'today' ? t('today', 'Today')
                                     : kpiGstPeriod === 'this-week' ? t('thisWeek', 'This Week')
-                                    : kpiGstPeriod === 'this-month' ? t('thisMonth', 'This Month')
-                                    : t('allTime', 'All Time')} ▼
+                                      : kpiGstPeriod === 'this-month' ? t('thisMonth', 'This Month')
+                                        : t('allTime', 'All Time')} ▼
                                 </Text>
                               </TouchableOpacity>
                               <TouchableOpacity
@@ -5015,8 +5028,8 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                                 <Text style={styles.gstPeriodDropdownText}>
                                   {kpiGstPeriod === 'today' ? t('today', 'Today')
                                     : kpiGstPeriod === 'this-week' ? t('thisWeek', 'This Week')
-                                    : kpiGstPeriod === 'this-month' ? t('thisMonth', 'This Month')
-                                    : t('allTime', 'All Time')} ▼
+                                      : kpiGstPeriod === 'this-month' ? t('thisMonth', 'This Month')
+                                        : t('allTime', 'All Time')} ▼
                                 </Text>
                               </TouchableOpacity>
                               <TouchableOpacity
@@ -5119,8 +5132,8 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                                 <Text style={styles.gstPeriodDropdownText}>
                                   {kpiGstPeriod === 'today' ? t('today', 'Today')
                                     : kpiGstPeriod === 'this-week' ? t('thisWeek', 'This Week')
-                                    : kpiGstPeriod === 'this-month' ? t('thisMonth', 'This Month')
-                                    : t('allTime', 'All Time')} ▼
+                                      : kpiGstPeriod === 'this-month' ? t('thisMonth', 'This Month')
+                                        : t('allTime', 'All Time')} ▼
                                 </Text>
                               </TouchableOpacity>
                               <TouchableOpacity
@@ -5503,14 +5516,11 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
             {/* ----------------------------------------------------
                 3. LICENCE & SUBSCRIPTION TAB (Fully Working)
             ---------------------------------------------------- */}
-            {activeTab === 'licence' && (
+            {!isBranchUser && activeTab === 'licence' && (
               <View style={styles.settingsCard}>
                 <View style={styles.cardHeader}>
                   <View>
                     <Text style={styles.cardTitle}>{t('licenceAndSubscription', 'Licence & Subscription')}</Text>
-                  </View>
-                  <View style={styles.systemBadge}>
-                    <Text style={styles.systemBadgeText}>LICENCE</Text>
                   </View>
                 </View>
 
@@ -5666,9 +5676,6 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                   <View>
                     <Text style={styles.cardTitle}>{t('notifications', 'Notification Settings')}</Text>
                   </View>
-                  <View style={styles.alertsBadge}>
-                    <Text style={styles.alertsBadgeText}>ALERTS</Text>
-                  </View>
                 </View>
 
                 <View style={styles.toggleList}>
@@ -5778,9 +5785,6 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                   <View>
                     <Text style={styles.cardTitle}>{t('billing', 'Billing Settings')}</Text>
                     <Text style={styles.cardSubtitle}>{t('invoicePreferences', 'Manage invoice preferences.')}</Text>
-                  </View>
-                  <View style={styles.billingBadge}>
-                    <Text style={styles.billingBadgeText}>{t('billing', 'Billing')}</Text>
                   </View>
                 </View>
 
@@ -6078,9 +6082,6 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                         {t('systemAndBackup', 'Manage regional preferences and automatic backup.')}
                       </Text>
                     </View>
-                    <View style={[styles.systemBadge, isDark && { backgroundColor: '#1E293B', borderColor: '#334155' }]}>
-                      <Text style={[styles.systemBadgeText, isDark && { color: '#38BDF8' }]}>SYSTEM</Text>
-                    </View>
                   </View>
 
                   <View style={styles.formRow}>
@@ -6368,9 +6369,6 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                       {t('hotelProfileDesc', "Manage your hotel's basic business and contact information.")}
                     </Text>
                   </View>
-                  <View style={styles.alertsBadge}>
-                    <Text style={styles.alertsBadgeText}>PROFILE</Text>
-                  </View>
                 </View>
 
                 {/* Hotel Brand Logo Box (Matches Desktop / Image Exactly) */}
@@ -6523,83 +6521,118 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                 </View>
 
                 {/* Bank Details (Optional) */}
-                <View style={{ width: '100%', marginTop: 14, paddingTop: 14, borderTopWidth: 1, borderTopColor: isDark ? '#334155' : '#E5E7EB', marginBottom: 10 }}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Text style={{ fontSize: 13, fontWeight: '800', color: isDark ? '#F9FAFB' : '#111827' }}>
-                      {t('bankDetailsOptional', 'Bank Details (Optional)')}
-                    </Text>
-                    <View style={{ backgroundColor: isDark ? '#334155' : '#F1F5F9', paddingHorizontal: 7, paddingVertical: 2, borderRadius: 6 }}>
-                      <Text style={{ fontSize: 9.5, fontWeight: '700', color: '#6B7280' }}>OPTIONAL</Text>
+                {!isBranchUser && (
+                  <>
+                    <View style={{ width: '100%', marginTop: 14, paddingTop: 14, borderTopWidth: 1, borderTopColor: isDark ? '#334155' : '#E5E7EB', marginBottom: 10 }}>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Text style={{ fontSize: 13, fontWeight: '800', color: isDark ? '#F9FAFB' : '#111827' }}>
+                          {t('bankDetailsOptional', 'Bank Details (Optional)')}
+                        </Text>
+                      </View>
                     </View>
-                  </View>
-                </View>
 
-                {/* Row 5: Bank Name & Account Holder Name */}
-                <View style={styles.formRow}>
-                  <View style={styles.formCol}>
-                    <Text style={styles.fieldLabel}>{t('bankName', 'Bank Name')}</Text>
-                    <TextInput
-                      style={styles.textInput}
-                      value={bankName}
-                      onChangeText={setBankName}
-                      placeholder="e.g. State Bank of India"
-                      placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
-                    />
-                  </View>
+                    {/* Row 5: Bank Name & Account Holder Name */}
+                    <View style={styles.formRow}>
+                      <View style={styles.formCol}>
+                        <Text style={styles.fieldLabel}>{t('bankName', 'Bank Name')}</Text>
+                        <TextInput
+                          style={styles.textInput}
+                          value={bankName}
+                          onChangeText={setBankName}
+                          placeholder="e.g. State Bank of India"
+                          placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
+                        />
+                      </View>
 
-                  <View style={styles.formCol}>
-                    <Text style={styles.fieldLabel}>{t('accountHolderName', 'Account Holder Name')}</Text>
-                    <TextInput
-                      style={styles.textInput}
-                      value={accountHolderName}
-                      onChangeText={setAccountHolderName}
-                      placeholder="e.g. Royal Palace Hotel"
-                      placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
-                    />
-                  </View>
-                </View>
+                      <View style={styles.formCol}>
+                        <Text style={styles.fieldLabel}>{t('accountHolderName', 'Account Holder Name')}</Text>
+                        <TextInput
+                          style={styles.textInput}
+                          value={accountHolderName}
+                          onChangeText={setAccountHolderName}
+                          placeholder="e.g. Royal Palace Hotel"
+                          placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
+                        />
+                      </View>
+                    </View>
 
-                {/* Row 6: Account Number & IFSC Code */}
-                <View style={styles.formRow}>
-                  <View style={styles.formCol}>
-                    <Text style={styles.fieldLabel}>{t('accountNumber', 'Account Number')}</Text>
-                    <TextInput
-                      style={styles.textInput}
-                      value={accountNumber}
-                      onChangeText={setAccountNumber}
-                      placeholder="e.g. 123456789012"
-                      keyboardType="numeric"
-                      placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
-                    />
-                  </View>
+                    {/* Row 6: Account Number & IFSC Code */}
+                    <View style={styles.formRow}>
+                      <View style={styles.formCol}>
+                        <Text style={styles.fieldLabel}>{t('accountNumber', 'Account Number')}</Text>
+                        <TextInput
+                          style={styles.textInput}
+                          value={accountNumber}
+                          onChangeText={setAccountNumber}
+                          placeholder="e.g. 123456789012"
+                          keyboardType="numeric"
+                          placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
+                        />
+                      </View>
 
-                  <View style={styles.formCol}>
-                    <Text style={styles.fieldLabel}>{t('ifscCode', 'IFSC Code')}</Text>
-                    <TextInput
-                      style={styles.textInput}
-                      value={ifscCode}
-                      onChangeText={(v) => setIfscCode(v.toUpperCase())}
-                      placeholder="e.g. SBIN0001234"
-                      autoCapitalize="characters"
-                      maxLength={11}
-                      placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
-                    />
-                  </View>
-                </View>
+                      <View style={styles.formCol}>
+                        <Text style={styles.fieldLabel}>{t('ifscCode', 'IFSC Code')}</Text>
+                        <TextInput
+                          style={styles.textInput}
+                          value={ifscCode}
+                          onChangeText={(v) => setIfscCode(v.toUpperCase())}
+                          placeholder="e.g. SBIN0001234"
+                          autoCapitalize="characters"
+                          maxLength={11}
+                          placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
+                        />
+                      </View>
+                    </View>
 
-                {/* Row 7: UPI ID / VPA */}
-                <View style={styles.formRow}>
-                  <View style={styles.formCol}>
-                    <Text style={styles.fieldLabel}>{t('upiId', 'UPI ID / VPA')}</Text>
-                    <TextInput
-                      style={styles.textInput}
-                      value={upiId}
-                      onChangeText={setUpiId}
-                      placeholder="e.g. royalpalace@upi"
-                      placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
-                    />
-                  </View>
-                </View>
+                    {/* Row 7: UPI ID & Bank Registered Phone */}
+                    <View style={styles.formRow}>
+                      <View style={styles.formCol}>
+                        <Text style={styles.fieldLabel}>{t('upiId', 'UPI ID / VPA')}</Text>
+                        <TextInput
+                          style={styles.textInput}
+                          value={upiId}
+                          onChangeText={setUpiId}
+                          placeholder="e.g. royalpalace@upi"
+                          placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
+                        />
+                      </View>
+
+                      <View style={styles.formCol}>
+                        <Text style={styles.fieldLabel}>{t('bankPhone', 'Bank Registered Phone Number')}</Text>
+                        <TextInput
+                          style={[
+                            styles.textInput,
+                            bankPhone && !/^[6-9]\d{9}$/.test(bankPhone) && { borderColor: '#EF4444' },
+                          ]}
+                          value={bankPhone}
+                          onChangeText={(val) => {
+                            const digits = val.replace(/\D/g, '').slice(0, 10);
+                            setBankPhone(digits);
+                          }}
+                          placeholder="10-digit mobile number"
+                          keyboardType="phone-pad"
+                          maxLength={10}
+                          placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
+                        />
+                        {bankPhone && !/^[6-9]/.test(bankPhone) && (
+                          <Text style={{ fontSize: 10.5, color: '#EF4444', marginTop: 2 }}>
+                            Must start with 6, 7, 8, or 9
+                          </Text>
+                        )}
+                        {bankPhone && /^[6-9]/.test(bankPhone) && bankPhone.length < 10 && (
+                          <Text style={{ fontSize: 10.5, color: '#EF4444', marginTop: 2 }}>
+                            Must be 10 digits ({bankPhone.length}/10 entered)
+                          </Text>
+                        )}
+                        {bankPhone && /^[6-9]\d{9}$/.test(bankPhone) && (
+                          <Text style={{ fontSize: 10.5, color: '#10B981', marginTop: 2 }}>
+                            ✓ Valid 10-digit mobile number
+                          </Text>
+                        )}
+                      </View>
+                    </View>
+                  </>
+                )}
 
                 <View style={[styles.cardActionsRow, { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 10 }]}>
                   {profileSavedNotice && (

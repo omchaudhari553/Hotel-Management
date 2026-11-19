@@ -15,6 +15,7 @@ import {
 import { Colors } from '../../theme/colors';
 import { useAuth } from '../../context/AuthContext';
 import { authService } from '../../api/authService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   Hotel,
   Lock,
@@ -26,6 +27,9 @@ import {
   CheckCircle2,
   X,
   ShieldCheck,
+  User,
+  Building2,
+  GitBranch,
 } from 'lucide-react-native';
 
 export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
@@ -33,6 +37,21 @@ export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [usernameOrEmail, setUsernameOrEmail] = useState('hoteladmin');
   const [password, setPassword] = useState('Admin@12345');
   const [showPassword, setShowPassword] = useState(false);
+
+  // Role & Business Type Selection
+  const [selectedRole, setSelectedRole] = useState<'SINGLE_USER' | 'ADMIN_OWNER'>('SINGLE_USER');
+  const [selectedBusinessType, setSelectedBusinessType] = useState<'SINGLE' | 'MULTI_BRANCH'>('SINGLE');
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const savedRole = await AsyncStorage.getItem('@ajalkar_selected_role');
+        const savedType = await AsyncStorage.getItem('@ajalkar_business_type');
+        if (savedRole === 'ADMIN_OWNER') setSelectedRole('ADMIN_OWNER');
+        if (savedType === 'MULTI_BRANCH') setSelectedBusinessType('MULTI_BRANCH');
+      } catch (e) {}
+    })();
+  }, []);
 
   // Forgot Password / OTP Flow States
   const [showForgotModal, setShowForgotModal] = useState(false);
@@ -62,6 +81,10 @@ export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       return;
     }
     try {
+      const isSingle = selectedRole === 'SINGLE_USER' || selectedBusinessType === 'SINGLE';
+      await AsyncStorage.setItem('@ajalkar_user_mode', isSingle ? 'SINGLE' : 'MULTI_BRANCH');
+      await AsyncStorage.setItem('@ajalkar_selected_role', selectedRole);
+      await AsyncStorage.setItem('@ajalkar_business_type', selectedBusinessType);
       await login({ usernameOrEmail, password });
     } catch (err: any) {
       Alert.alert('Login Error', err?.message || 'Failed to authenticate');
@@ -148,6 +171,125 @@ export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         <View style={styles.formCard}>
           <Text style={styles.formHeading}>Sign In to Dashboard</Text>
           <Text style={styles.formSubheading}>Enter your credentials to access operations</Text>
+
+          {/* Role & Business Type Selection Controls */}
+          <View style={styles.selectorCard}>
+            {/* 1. Role Selection */}
+            <View style={{ marginBottom: 12 }}>
+              <View style={styles.selectorHeaderRow}>
+                <Text style={styles.selectorLabel}>भूमिका निवडा (Role)</Text>
+                <Text style={styles.selectorBadge}>
+                  {selectedRole === 'SINGLE_USER' ? 'सिंगल युझर' : 'अ‍ॅडमिन / ओनर'}
+                </Text>
+              </View>
+              <View style={styles.selectorBtnRow}>
+                <TouchableOpacity
+                  style={[
+                    styles.selectorBtn,
+                    selectedRole === 'SINGLE_USER' && styles.selectorBtnActive,
+                  ]}
+                  onPress={() => {
+                    setSelectedRole('SINGLE_USER');
+                    setSelectedBusinessType('SINGLE');
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <User
+                    size={16}
+                    color={selectedRole === 'SINGLE_USER' ? '#EA580C' : '#64748B'}
+                  />
+                  <Text
+                    style={[
+                      styles.selectorBtnText,
+                      selectedRole === 'SINGLE_USER' && styles.selectorBtnTextActive,
+                    ]}
+                  >
+                    Single User
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.selectorBtn,
+                    selectedRole === 'ADMIN_OWNER' && styles.selectorBtnActive,
+                  ]}
+                  onPress={() => {
+                    setSelectedRole('ADMIN_OWNER');
+                    setSelectedBusinessType('MULTI_BRANCH');
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <ShieldCheck
+                    size={16}
+                    color={selectedRole === 'ADMIN_OWNER' ? '#EA580C' : '#64748B'}
+                  />
+                  <Text
+                    style={[
+                      styles.selectorBtnText,
+                      selectedRole === 'ADMIN_OWNER' && styles.selectorBtnTextActive,
+                    ]}
+                  >
+                    Admin / Owner
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* 2. Business Type Selection */}
+            <View>
+              <View style={styles.selectorHeaderRow}>
+                <Text style={styles.selectorLabel}>व्यवसाय प्रकार (Business Type)</Text>
+                <Text style={[styles.selectorBadge, { color: '#64748B' }]}>
+                  {selectedBusinessType === 'SINGLE' ? 'सिंगल युझर' : 'मल्टिपल ब्रांच'}
+                </Text>
+              </View>
+              <View style={styles.selectorBtnRow}>
+                <TouchableOpacity
+                  style={[
+                    styles.selectorBtn,
+                    selectedBusinessType === 'SINGLE' && styles.selectorBtnActive,
+                  ]}
+                  onPress={() => setSelectedBusinessType('SINGLE')}
+                  activeOpacity={0.8}
+                >
+                  <Building2
+                    size={16}
+                    color={selectedBusinessType === 'SINGLE' ? '#EA580C' : '#64748B'}
+                  />
+                  <Text
+                    style={[
+                      styles.selectorBtnText,
+                      selectedBusinessType === 'SINGLE' && styles.selectorBtnTextActive,
+                    ]}
+                  >
+                    Single User
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.selectorBtn,
+                    selectedBusinessType === 'MULTI_BRANCH' && styles.selectorBtnActive,
+                  ]}
+                  onPress={() => setSelectedBusinessType('MULTI_BRANCH')}
+                  activeOpacity={0.8}
+                >
+                  <GitBranch
+                    size={16}
+                    color={selectedBusinessType === 'MULTI_BRANCH' ? '#EA580C' : '#64748B'}
+                  />
+                  <Text
+                    style={[
+                      styles.selectorBtnText,
+                      selectedBusinessType === 'MULTI_BRANCH' && styles.selectorBtnTextActive,
+                    ]}
+                  >
+                    Multiple Branch
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
 
           {/* Email / Username Input */}
           <View style={styles.inputGroup}>
@@ -717,5 +859,60 @@ const styles = StyleSheet.create({
     marginTop: 6,
     lineHeight: 18,
     paddingHorizontal: 12,
+  },
+  selectorCard: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    padding: 12,
+    marginBottom: 16,
+  },
+  selectorHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  selectorLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#1E293B',
+  },
+  selectorBadge: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#EA580C',
+  },
+  selectorBtnRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  selectorBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 9,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    backgroundColor: '#FFFFFF',
+  },
+  selectorBtnActive: {
+    borderWidth: 2,
+    borderColor: '#EA580C',
+    backgroundColor: '#FFF7ED',
+  },
+  selectorBtnText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  selectorBtnTextActive: {
+    fontWeight: '700',
+    color: '#C2410C',
   },
 });

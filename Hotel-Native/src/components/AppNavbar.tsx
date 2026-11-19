@@ -67,6 +67,13 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({
   const { language, setLanguage, t } = useLanguage();
   const { branches, activeBranchId, activeBranch, switchBranch, getBranchName } = useBranch();
   const { logout, business } = useAuth();
+  const [userMode, setUserMode] = useState<string>('SINGLE');
+
+  useEffect(() => {
+    AsyncStorage.getItem('@ajalkar_user_mode').then((val) => {
+      if (val) setUserMode(val);
+    });
+  }, []);
 
   // Auto-detect current active route if not passed explicitly
   const resolvedActiveRoute = useMemo(() => {
@@ -523,7 +530,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({
                 </Text>
               </TouchableOpacity>
 
-              {navigation && (
+              {navigation && userMode !== 'SINGLE' && (
                 <TouchableOpacity
                   style={[styles.profileActionBtn, { backgroundColor: '#FEF3C7', borderColor: '#FDE68A' }]}
                   onPress={() => {

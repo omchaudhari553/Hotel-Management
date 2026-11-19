@@ -28,24 +28,30 @@ import {
 } from 'recharts';
 import { ownerService, OwnerDashboardData } from './ownerService';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 export const OwnerDashboard: React.FC = () => {
   const [data, setData] = useState<OwnerDashboardData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { showToast } = useToast();
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = async (isManual = false) => {
     try {
-      setLoading(true);
+      if (isManual) setRefreshing(true);
+      else setLoading(true);
       setError(null);
       const res = await ownerService.getDashboard();
       setData(res);
+      if (isManual) showToast('success', 'Dashboard refreshed successfully!');
     } catch (err: any) {
       setError(err?.response?.data?.message || err?.message || 'Failed to load owner dashboard data');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -193,9 +199,11 @@ export const OwnerDashboard: React.FC = () => {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <button
-            onClick={fetchDashboardData}
+            type="button"
+            onClick={() => fetchDashboardData(true)}
+            disabled={refreshing || loading}
             className="owner-btn-secondary"
-            title="Refresh"
+            title="Refresh Dashboard Data"
             aria-label="Refresh"
             style={{
               display: 'flex',
@@ -206,11 +214,12 @@ export const OwnerDashboard: React.FC = () => {
               minHeight: '38px',
               padding: 0,
               borderRadius: '8px',
-              cursor: 'pointer',
+              cursor: (refreshing || loading) ? 'not-allowed' : 'pointer',
               border: '1.5px solid var(--border-slate, #CBD5E1)',
+              opacity: (refreshing || loading) ? 0.7 : 1,
             }}
           >
-            <RefreshCw size={16} />
+            <RefreshCw size={16} style={{ animation: refreshing ? 'spin 1s linear infinite' : 'none' }} />
           </button>
         </div>
       </div>

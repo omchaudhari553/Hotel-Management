@@ -95,6 +95,13 @@ public class OwnerController {
         return ApiResponse.ok("Staff information fetched", service.getStaff(branchId));
     }
 
+    @DeleteMapping("/staff/{id}")
+    @Operation(summary = "Delete staff member")
+    public ApiResponse<Void> deleteStaff(@PathVariable("id") Long id) {
+        service.deleteStaff(id);
+        return ApiResponse.ok("Staff deleted successfully", null);
+    }
+
     // MODULE 6: BRANCH REPORTS
     @GetMapping("/reports")
     @Operation(summary = "Get consolidated and branch-level reports (Hotel & GST Reports)")

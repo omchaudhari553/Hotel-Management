@@ -11,6 +11,7 @@ import { licenceService } from "../services/licenceService";
 import { branchService } from "../services/branchService";
 import { useLanguage } from "../context/LanguageContext";
 import { dialogService } from "../context/DialogContext";
+import { useAuth } from "../context/AuthContext";
 import HotelReport from "./hotelreport";
 import GstReportComponent from "./GstReportComponent";
 import {
@@ -126,6 +127,7 @@ const INITIAL_PROFILE = {
   accountNumber: "",
   ifscCode: "",
   upiId: "",
+  bankPhone: "",
 };
 
 const INITIAL_BILLING = {
@@ -244,17 +246,18 @@ function sanitizeEmailInput(value) {
 
 function validateMobile(value, required = true) {
   if (!value && required) return "Mobile number is required";
+  if (!value && !required) return "";
 
   if (value && !/^[0-9]+$/.test(value)) {
     return "Only digits are allowed";
   }
 
-  if (value && value.length !== 10) {
-    return "Mobile number must contain 10 digits";
+  if (value && !/^[6-9]/.test(value)) {
+    return "Indian mobile number must start with 6, 7, 8, or 9";
   }
 
-  if (value && !/^[6-9][0-9]{9}$/.test(value)) {
-    return "Enter a valid mobile number";
+  if (value && value.length !== 10) {
+    return `Mobile number must contain 10 digits (${value.length}/10 entered)`;
   }
 
   return "";
@@ -699,9 +702,22 @@ function Popup({
 }
 
 export default function Settings() {
+  const { user } = useAuth();
+  const isBranchUser = Boolean(
+    user?.branchId ||
+    user?.isBranchUser ||
+    (user?.role && !['OWNER', 'ADMIN', 'SUPER_ADMIN'].includes(String(user.role).toUpperCase()) && user?.branchId)
+  );
+
   const [activeSection, setActiveSection] =
     useState("profile");
   const [reportsSubView, setReportsSubView] = useState("gst");
+
+  useEffect(() => {
+    if (isBranchUser && activeSection === "licence") {
+      setActiveSection("profile");
+    }
+  }, [isBranchUser, activeSection]);
 
   const [profile, setProfile] =
     useState(INITIAL_PROFILE);
@@ -2139,58 +2155,88 @@ export default function Settings() {
               </div>
 
               {/* Optional Bank Details for Hotel Profile */}
-              <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid #E2E8F0' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-                  <div>
-                    <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#0F172A' }}>
-                      {t('bankDetailsOptional', 'Bank Details (Optional)')}
-                    </h3>
+              {!isBranchUser && (
+                <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid #E2E8F0' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#0F172A' }}>
+                        {t('bankDetailsOptional', 'Bank Details (Optional)')}
+                      </h3>
+                    </div>
+                    <span style={{ fontSize: '11px', fontWeight: 700, background: '#F1F5F9', color: '#475569', padding: '3px 8px', borderRadius: '6px' }}>
+                      {t('optional', 'OPTIONAL')}
+                    </span>
                   </div>
-                  <span style={{ fontSize: '11px', fontWeight: 700, background: '#F1F5F9', color: '#475569', padding: '3px 8px', borderRadius: '6px' }}>
-                    {t('optional', 'OPTIONAL')}
-                  </span>
+
+                  <div className="grid-three">
+                    <InputField
+                      label={t('bankName', 'Bank Name')}
+                      value={profile.bankName || ''}
+                      placeholder="e.g. State Bank of India"
+                      onChange={(value) => updateProfile("bankName", value)}
+                    />
+
+                    <InputField
+                      label={t('accountHolderName', 'Account Holder Name')}
+                      value={profile.accountHolderName || ''}
+                      placeholder="e.g. Royal Palace Hotel"
+                      onChange={(value) => updateProfile("accountHolderName", value)}
+                    />
+
+                    <InputField
+                      label={t('accountNumber', 'Account Number')}
+                      value={profile.accountNumber || ''}
+                      placeholder="e.g. 123456789012"
+                      onChange={(value) => updateProfile("accountNumber", value)}
+                    />
+                  </div>
+
+                  <div className="grid-three" style={{ marginTop: '14px' }}>
+                    <InputField
+                      label={t('ifscCode', 'IFSC Code')}
+                      value={profile.ifscCode || ''}
+                      placeholder="e.g. SBIN0001234"
+                      maxLength={11}
+                      onChange={(value) => updateProfile("ifscCode", value.toUpperCase())}
+                    />
+
+                    <InputField
+                      label={t('upiId', 'UPI ID / VPA')}
+                      value={profile.upiId || ''}
+                      placeholder="e.g. royalpalace@upi"
+                      onChange={(value) => updateProfile("upiId", value)}
+                    />
+
+                    <div>
+                      <InputField
+                        label={t('bankPhone', 'Bank Registered Phone Number')}
+                        value={profile.bankPhone || ''}
+                        placeholder="10-digit mobile number"
+                        maxLength={10}
+                        onChange={(value) => {
+                          const digits = value.replace(/\D/g, '').slice(0, 10);
+                          updateProfile("bankPhone", digits);
+                        }}
+                      />
+                      {profile.bankPhone && !/^[6-9]/.test(profile.bankPhone) && (
+                        <span style={{ fontSize: '11px', color: '#EF4444', marginTop: '2px', display: 'block' }}>
+                          Must start with 6, 7, 8, or 9
+                        </span>
+                      )}
+                      {profile.bankPhone && /^[6-9]/.test(profile.bankPhone) && profile.bankPhone.length < 10 && (
+                        <span style={{ fontSize: '11px', color: '#EF4444', marginTop: '2px', display: 'block' }}>
+                          Must be 10 digits ({profile.bankPhone.length}/10 entered)
+                        </span>
+                      )}
+                      {profile.bankPhone && /^[6-9]\d{9}$/.test(profile.bankPhone) && (
+                        <span style={{ fontSize: '11px', color: '#10B981', marginTop: '2px', display: 'block' }}>
+                          ✓ Valid 10-digit mobile number
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
-
-                <div className="grid-three">
-                  <InputField
-                    label={t('bankName', 'Bank Name')}
-                    value={profile.bankName || ''}
-                    placeholder="e.g. State Bank of India"
-                    onChange={(value) => updateProfile("bankName", value)}
-                  />
-
-                  <InputField
-                    label={t('accountHolderName', 'Account Holder Name')}
-                    value={profile.accountHolderName || ''}
-                    placeholder="e.g. Royal Palace Hotel"
-                    onChange={(value) => updateProfile("accountHolderName", value)}
-                  />
-
-                  <InputField
-                    label={t('accountNumber', 'Account Number')}
-                    value={profile.accountNumber || ''}
-                    placeholder="e.g. 123456789012"
-                    onChange={(value) => updateProfile("accountNumber", value)}
-                  />
-                </div>
-
-                <div className="grid-two" style={{ marginTop: '14px' }}>
-                  <InputField
-                    label={t('ifscCode', 'IFSC Code')}
-                    value={profile.ifscCode || ''}
-                    placeholder="e.g. SBIN0001234"
-                    maxLength={11}
-                    onChange={(value) => updateProfile("ifscCode", value.toUpperCase())}
-                  />
-
-                  <InputField
-                    label={t('upiId', 'UPI ID / VPA')}
-                    value={profile.upiId || ''}
-                    placeholder="e.g. royalpalace@upi"
-                    onChange={(value) => updateProfile("upiId", value)}
-                  />
-                </div>
-              </div>
+              )}
             </div>
 
             <div className="profile-meter">
@@ -5370,8 +5416,9 @@ return (
     </div>
 
     {/* Prominent Licence & Subscription Hero Card matching user screenshot */}
-    <div
-      className="licence-hero-card"
+    {!isBranchUser && (
+      <div
+        className="licence-hero-card"
       style={{
         background: "#FFFFFF",
         borderRadius: "16px",
@@ -5514,12 +5561,13 @@ return (
         </div>
       </div>
     </div>
+    )}
 
     <div className="settings-layout">
       <aside
         className="settings-sidebar"
       >
-        {SETTINGS_SECTIONS.filter(sectionMatchesSearch).map(
+        {SETTINGS_SECTIONS.filter((s) => !isBranchUser || s.id !== "licence").filter(sectionMatchesSearch).map(
           (section) => (
             <button
               type="button"

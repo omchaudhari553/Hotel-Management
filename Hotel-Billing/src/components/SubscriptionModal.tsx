@@ -348,6 +348,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
 
   return createPortal(
     <div
+      className="no-scrollbar"
       style={{
         position: 'fixed',
         inset: 0,
@@ -359,6 +360,8 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         justifyContent: 'center',
         padding: '16px',
         overflowY: 'auto',
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none',
       }}
       onPaste={handlePaste}
     >
@@ -545,7 +548,16 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         )}
 
         {/* ================= MODAL SCROLLABLE CONTENT ================= */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
+        <div
+          className="no-scrollbar"
+          style={{
+            flex: 1,
+            overflowY: 'auto',
+            padding: '20px',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+          }}
+        >
           {/* ========================================================================= */}
           {/* ============================ STEP 1: SELECT PLAN ======================== */}
           {/* ========================================================================= */}

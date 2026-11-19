@@ -495,6 +495,15 @@ export const ownerService = {
     return [...localStaffList];
   },
 
+  deleteStaff: async (id: number): Promise<void> => {
+    try {
+      await apiClient.delete(`/owner/staff/${id}`);
+    } catch {
+      await apiClient.delete(`/hotel/staff/${id}`).catch(() => {});
+    }
+    localStaffList = localStaffList.filter((s) => s.id !== id);
+  },
+
   // MODULE 6: REPORTS
   getReports: async (params?: { type?: string; branchId?: number; startDate?: string; endDate?: string; period?: string }): Promise<any> => {
     try {

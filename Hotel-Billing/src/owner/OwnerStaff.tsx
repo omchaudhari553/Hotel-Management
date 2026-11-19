@@ -9,6 +9,7 @@ import {
   UserX,
   Shield,
   Search,
+  Trash2,
 } from 'lucide-react';
 import { ownerService, OwnerStaffItem, BranchRecord } from './ownerService';
 import { useToast } from '../context/ToastContext';
@@ -21,6 +22,7 @@ export const OwnerStaff: React.FC = () => {
   const [search, setSearch] = useState<string>('');
 
   const { showToast } = useToast();
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const fetchStaffData = async () => {
     try {
@@ -38,6 +40,22 @@ export const OwnerStaff: React.FC = () => {
       showToast('error', err?.response?.data?.message || 'Failed to fetch staff records.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteStaff = async (s: OwnerStaffItem) => {
+    if (!window.confirm(`Are you sure you want to delete staff member "${s.name}" (${s.staffCode})?`)) {
+      return;
+    }
+    try {
+      setDeletingId(s.id);
+      await ownerService.deleteStaff(s.id);
+      setStaffList((prev) => prev.filter((item) => item.id !== s.id));
+      showToast('success', `Staff member "${s.name}" deleted successfully.`);
+    } catch (err: any) {
+      showToast('error', err?.response?.data?.message || 'Failed to delete staff member.');
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -170,12 +188,13 @@ export const OwnerStaff: React.FC = () => {
                 <th style={thStyle}>Designation</th>
                 <th style={thStyle}>Status</th>
                 <th style={{ ...thStyle, textAlign: 'right' }}>Basic Salary</th>
+                <th style={{ ...thStyle, textAlign: 'center', width: '70px' }}>Action</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={7} style={{ textAlign: 'center', padding: '36px', color: 'var(--text-muted, #64748B)' }}>
+                  <td colSpan={8} style={{ textAlign: 'center', padding: '36px', color: 'var(--text-muted, #64748B)' }}>
                     Loading staff records...
                   </td>
                 </tr>
@@ -254,11 +273,44 @@ export const OwnerStaff: React.FC = () => {
                       ₹{s.basicSalary ? Number(s.basicSalary).toLocaleString('en-IN') : '—'}
                       {s.salaryFrequency && <span style={{ fontSize: '0.72rem', color: 'var(--text-muted, #64748B)' }}>/{s.salaryFrequency}</span>}
                     </td>
+                    <td style={{ ...tdStyle, textAlign: 'center' }}>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteStaff(s)}
+                        disabled={deletingId === s.id}
+                        title={`Delete ${s.name}`}
+                        aria-label={`Delete ${s.name}`}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '6px',
+                          border: '1px solid #FECACA',
+                          backgroundColor: '#FEF2F2',
+                          color: '#DC2626',
+                          cursor: deletingId === s.id ? 'not-allowed' : 'pointer',
+                          opacity: deletingId === s.id ? 0.6 : 1,
+                          transition: 'all 0.15s ease',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#FEE2E2';
+                          e.currentTarget.style.borderColor = '#FCA5A5';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = '#FEF2F2';
+                          e.currentTarget.style.borderColor = '#FECACA';
+                        }}
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7} style={{ textAlign: 'center', padding: '36px', color: '#94A3B8' }}>
+                  <td colSpan={8} style={{ textAlign: 'center', padding: '36px', color: '#94A3B8' }}>
                     No staff members found matching criteria.
                   </td>
                 </tr>

@@ -257,8 +257,19 @@ export default function HotelSettingsModule() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, business } = useAuth();
+  const isBranchUser = Boolean(
+    user?.branchId ||
+    user?.isBranchUser ||
+    (user?.role && !['OWNER', 'ADMIN', 'SUPER_ADMIN'].includes(String(user.role).toUpperCase()) && user?.branchId)
+  );
   const { t, formatNumber } = useLanguage();
   const [active, setActive] = useState<SettingKey>("dashboard");
+
+  useEffect(() => {
+    if (isBranchUser && active === "licence") {
+      setActive("dashboard");
+    }
+  }, [isBranchUser, active]);
   const [globalSearch, setGlobalSearch] = useState("");
   const [settingsPopup, setSettingsPopup] = useState<SettingKey | null>(null);
   const [toast, setToast] = useState<string>("");
@@ -1454,6 +1465,7 @@ export default function HotelSettingsModule() {
         <PageTitle title="Settings" subtitle="" action={<Button icon={<Save size={16} />} onClick={() => requestSave("All settings saved", () => save("All settings saved"))}>Save All Changes</Button>} />
 
         {/* Prominent Licence & Subscription Hero Card matching user screenshot */}
+        {!isBranchUser && (
         <div
           style={{
             background: "#FFFFFF",
@@ -1596,12 +1608,15 @@ export default function HotelSettingsModule() {
             </div>
           </div>
         </div>
+        )}
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0,1fr))", gap: 14, marginBottom: 22 }}>
+        <div style={{ display: "grid", gridTemplateColumns: isBranchUser ? "repeat(3, minmax(0,1fr))" : "repeat(4, minmax(0,1fr))", gap: 14, marginBottom: 22 }}>
           <StatCard title="Hotel Setup" value="95%" icon={Building2} note="Almost complete" onClick={() => { setActive("hotel"); setSettingsPopup("hotel"); }} />
           <StatCard title="Active Users" value={String(users.filter(u => u.status === "Active").length)} icon={Users} note="Access controlled" onClick={() => { setActive("users"); setSettingsPopup("users"); }} />
           <StatCard title="Integrations" value="08" icon={Zap} note="7 connected" onClick={() => { setActive("restaurant"); setSettingsPopup("restaurant"); }} />
-          <StatCard title="Licence" value="Active" icon={Shield} note="Trial verified" onClick={() => { setActive("licence"); setSettingsPopup("licence"); }} />
+          {!isBranchUser && (
+            <StatCard title="Licence" value="Active" icon={Shield} note="Trial verified" onClick={() => { setActive("licence"); setSettingsPopup("licence"); }} />
+          )}
         </div>
 
         <div style={{ ...css.card, padding: 20, marginBottom: 20 }}>
@@ -3197,7 +3212,7 @@ export default function HotelSettingsModule() {
       case "backup": return renderBackup();
       case "audit": return renderAudit();
       case "maintenance": return renderMaintenance();
-      case "licence": return renderLicence();
+      case "licence": return !isBranchUser ? renderLicence() : renderDashboard();
       case "reports": return <ReportsModule />;
       case "gstSettings": return <GstReportComponent initialTab="settings" />;
       case "gstReport": return <GstReportComponent initialTab="sales" />;
@@ -3209,7 +3224,7 @@ export default function HotelSettingsModule() {
     <div style={css.page}>
       <div style={{ ...css.content, marginLeft: 0 }}>
         <div style={{ position: "sticky", top: 0, zIndex: 9, background: "#fff", borderBottom: `1px solid ${COLORS.border}`, padding: "6px 16px", display: "flex", gap: 6, flexWrap: "nowrap", overflowX: "auto", whiteSpace: "nowrap", scrollbarWidth: "thin" }}>
-          {NAV_ITEMS.map(item => {
+          {NAV_ITEMS.filter(item => !isBranchUser || item.key !== "licence").map(item => {
             const Icon = item.icon;
             const selected = active === item.key;
             return <button key={item.key} type="button" onClick={() => setActive(item.key)} aria-current={selected ? "page" : undefined}
