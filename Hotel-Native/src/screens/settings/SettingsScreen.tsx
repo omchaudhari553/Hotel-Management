@@ -18,6 +18,8 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import Svg, { Rect, G, Circle, Path, Text as SvgText } from 'react-native-svg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as FileSystem from 'expo-file-system/legacy';
+import * as Sharing from 'expo-sharing';
 import { AppNavbar } from '../../components/AppNavbar';
 import { RenewPlanModal } from '../../components/RenewPlanModal';
 import { useAuth } from '../../context/AuthContext';
@@ -1592,10 +1594,10 @@ export const SettingsScreen: React.FC<{ navigation?: any; route?: any }> = ({ na
   const handleDownloadDailyBackupExcel = async () => {
     try {
       await ensureBackendToken();
-      const res = await apiClient.get('/hotel/backup/download-excel', {
-        responseType: 'blob',
-      });
       if (Platform.OS === 'web') {
+        const res = await apiClient.get('/hotel/backup/download-excel', {
+          responseType: 'blob',
+        });
         const blob = new Blob([res.data], {
           type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         });
@@ -1608,10 +1610,38 @@ export const SettingsScreen: React.FC<{ navigation?: any; route?: any }> = ({ na
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       } else {
-        Alert.alert('Excel Ready', 'Daily backup Excel (.xlsx) generated successfully with all worksheets.');
+        const token = await AsyncStorage.getItem(STORAGE_KEYS.TOKEN);
+        const baseUrl = await getApiBaseUrl();
+        const downloadUrl = `${baseUrl.replace(/\/+$/, '')}/hotel/backup/download-excel`;
+        const baseDir = FileSystem.cacheDirectory || FileSystem.documentDirectory;
+        if (!baseDir) throw new Error('Local file storage is not accessible.');
+        const sep = baseDir.endsWith('/') ? '' : '/';
+        const targetUri = `${baseDir}${sep}hotel_daily_backup_${Date.now()}.xlsx`;
+
+        const downloadResult = await FileSystem.downloadAsync(downloadUrl, targetUri, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+
+        if (downloadResult.status === 404) {
+          throw new Error('Backend server is still restarting or endpoint not ready. Please wait a moment and try again.');
+        }
+        if (downloadResult.status !== 200) {
+          throw new Error(`Download failed with server status ${downloadResult.status}`);
+        }
+
+        const isAvailable = await Sharing.isAvailableAsync();
+        if (isAvailable) {
+          await Sharing.shareAsync(downloadResult.uri, {
+            mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            dialogTitle: language === 'mr' ? 'हॉटेल Excel बॅकअप (.xlsx) उघडा किंवा शेअर करा' : 'Open or Share Hotel Excel Backup (.xlsx)',
+            UTI: 'com.microsoft.excel.xlsx',
+          });
+        } else {
+          Alert.alert('Excel Saved', 'Daily backup Excel (.xlsx) downloaded successfully.');
+        }
       }
     } catch (e: any) {
-      Alert.alert('Download Error', e.message || 'Failed to download Excel backup');
+      Alert.alert('Download Error', e?.message || 'Failed to download Excel backup');
     }
   };
 
@@ -1634,31 +1664,59 @@ export const SettingsScreen: React.FC<{ navigation?: any; route?: any }> = ({ na
         Alert.alert('Backup Ready', 'Daily backup JSON generated successfully.');
       }
     } catch (e: any) {
-      Alert.alert('Download Error', e.message || 'Failed to download backup');
+      Alert.alert('Download Error', e?.message || 'Failed to download backup');
     }
   };
 
   const handleDownloadDailyBackupPdf = async () => {
     try {
       await ensureBackendToken();
-      const res = await apiClient.get('/hotel/backup/download-pdf', {
-        responseType: 'blob',
-      });
       if (Platform.OS === 'web') {
+        const res = await apiClient.get('/hotel/backup/download-pdf', {
+          responseType: 'blob',
+        });
         const blob = new Blob([res.data], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `hotel_daily_backup_summary_${Date.now()}.pdf`;
+        a.download = `hotel_daily_backup_report_${Date.now()}.pdf`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       } else {
-        Alert.alert('PDF Ready', 'Daily backup PDF summary generated successfully.');
+        const token = await AsyncStorage.getItem(STORAGE_KEYS.TOKEN);
+        const baseUrl = await getApiBaseUrl();
+        const downloadUrl = `${baseUrl.replace(/\/+$/, '')}/hotel/backup/download-pdf`;
+        const baseDir = FileSystem.cacheDirectory || FileSystem.documentDirectory;
+        if (!baseDir) throw new Error('Local file storage is not accessible.');
+        const sep = baseDir.endsWith('/') ? '' : '/';
+        const targetUri = `${baseDir}${sep}hotel_daily_backup_report_${Date.now()}.pdf`;
+
+        const downloadResult = await FileSystem.downloadAsync(downloadUrl, targetUri, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+
+        if (downloadResult.status === 404) {
+          throw new Error('Backend server is still restarting or endpoint not ready. Please wait a moment and try again.');
+        }
+        if (downloadResult.status !== 200) {
+          throw new Error(`Download failed with server status ${downloadResult.status}`);
+        }
+
+        const isAvailable = await Sharing.isAvailableAsync();
+        if (isAvailable) {
+          await Sharing.shareAsync(downloadResult.uri, {
+            mimeType: 'application/pdf',
+            dialogTitle: language === 'mr' ? 'हॉटेल PDF अहवाल उघडा किंवा शेअर करा' : 'Open or Share Hotel PDF Backup Report',
+            UTI: 'com.adobe.pdf',
+          });
+        } else {
+          Alert.alert('PDF Saved', 'Daily backup PDF report downloaded successfully.');
+        }
       }
     } catch (e: any) {
-      Alert.alert('Download Error', e.message || 'Failed to download PDF summary');
+      Alert.alert('Download Error', e?.message || 'Failed to download PDF summary');
     }
   };
 
@@ -6069,7 +6127,15 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
 
                     {/* Explanatory description */}
                     <Text style={{ fontSize: 12, color: isDark ? '#CBD5E1' : '#475569', lineHeight: 18 }}>
-                      Every night at <Text style={{ fontWeight: '700' }}>11:00 PM</Text>, all daily sales, orders, invoices, payments, tables, and expenses are compiled and automatically sent to your Hotel Profile email (<Text style={{ fontWeight: '700', color: '#2563EB' }}>{email || 'admin@royalpalace.com'}</Text>) with JSON data and PDF summary attachments.
+                      {language === 'mr' ? (
+                        <>
+                          दररोज रात्री <Text style={{ fontWeight: '700' }}>११:०० वाजता</Text>, सर्व दैनंदिन विक्री, ऑर्डर्स, इनव्हॉइसेस, पेमेंट्स, टेबल्स आणि खर्च संकलित केले जातात आणि <Text style={{ fontWeight: '700', color: '#10B981' }}>Microsoft Excel (.xlsx)</Text> व <Text style={{ fontWeight: '700', color: '#2563EB' }}>संपूर्ण PDF अहवाल</Text> स्वरूपात तुमच्या हॉटेल प्रोफाइल ईमेलवर (<Text style={{ fontWeight: '700', color: '#2563EB' }}>{email || 'admin@royalpalace.com'}</Text>) आपोआप पाठवले जातात.
+                        </>
+                      ) : (
+                        <>
+                          Every night at <Text style={{ fontWeight: '700' }}>11:00 PM</Text>, all daily sales, orders, invoices, payments, tables, and expenses are compiled and automatically sent to your Hotel Profile email (<Text style={{ fontWeight: '700', color: '#2563EB' }}>{email || 'admin@royalpalace.com'}</Text>) with <Text style={{ fontWeight: '700', color: '#10B981' }}>Microsoft Excel (.xlsx)</Text> and complete <Text style={{ fontWeight: '700', color: '#2563EB' }}>PDF report</Text> attachments.
+                        </>
+                      )}
                     </Text>
 
                     {/* SMTP Status Notice */}

@@ -1005,11 +1005,11 @@ export const OwnerSettings: React.FC = () => {
         <p style={{ fontSize: '0.86rem', color: 'var(--text-body, #475569)', lineHeight: 1.6, margin: '0 0 16px 0' }}>
           {language === 'mr' ? (
             <>
-              दररोज रात्री <strong>११:०० वाजता</strong>, सर्व दैनंदिन विक्री, ऑर्डर्स, इनव्हॉइसेस, पेमेंट्स, टेबल्स आणि खर्च संकलित केले जातात आणि JSON डेटा व PDF अहवाल स्वरूपात तुमच्या हॉटेल प्रोफाइल ईमेलवर (<strong>{settings.contactEmail || 'admin@royalpalace.com'}</strong>) आपोआप पाठवले जातात.
+              दररोज रात्री <strong>११:०० वाजता</strong>, सर्व दैनंदिन विक्री, ऑर्डर्स, इनव्हॉइसेस, पेमेंट्स, टेबल्स आणि खर्च संकलित केले जातात आणि Microsoft Excel (.xlsx) व संपूर्ण PDF अहवाल स्वरूपात तुमच्या हॉटेल प्रोफाइल ईमेलवर (<strong>{settings.contactEmail || 'admin@royalpalace.com'}</strong>) आपोआप पाठवले जातात.
             </>
           ) : (
             <>
-              Every night at <strong>11:00 PM</strong>, all daily sales, orders, invoices, payments, tables, and expenses are compiled and automatically sent to your Hotel Profile email (<strong>{settings.contactEmail || 'admin@royalpalace.com'}</strong>) with JSON data and PDF summary attachments.
+              Every night at <strong>11:00 PM</strong>, all daily sales, orders, invoices, payments, tables, and expenses are compiled and automatically sent to your Hotel Profile email (<strong>{settings.contactEmail || 'admin@royalpalace.com'}</strong>) with Microsoft Excel (.xlsx) and complete PDF report attachments.
             </>
           )}
         </p>
@@ -1152,38 +1152,6 @@ export const OwnerSettings: React.FC = () => {
           <button
             type="button"
             onClick={handleDownloadDailyBackupPdf}
-            title={language === 'mr' ? 'बॅकअप डाउनलोड करा (.json)' : 'Download Backup (.json)'}
-            aria-label="Download Backup (.json)"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '9px 16px',
-              backgroundColor: 'var(--bg-subtle, #F1F5F9)',
-              color: 'var(--text-heading, #0F172A)',
-              border: '1px solid var(--border-slate, #CBD5E1)',
-              borderRadius: '8px',
-              fontSize: '0.84rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = '#D97706';
-              e.currentTarget.style.color = '#D97706';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = 'var(--border-slate, #CBD5E1)';
-              e.currentTarget.style.color = 'var(--text-heading, #0F172A)';
-            }}
-          >
-            <Download size={16} color="currentColor" />
-            <span>{language === 'mr' ? 'बॅकअप डाउनलोड (.json)' : 'Download Backup (.json)'}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={handleDownloadDailyBackupPdf}
             title={language === 'mr' ? 'PDF अहवाल डाउनलोड करा (.pdf)' : 'Download PDF Report (.pdf)'}
             aria-label="Download PDF Report (.pdf)"
             style={{
@@ -1210,7 +1178,39 @@ export const OwnerSettings: React.FC = () => {
             }}
           >
             <FileText size={16} color="currentColor" />
-            <span>{language === 'mr' ? 'PDF अहवाल डाउनलोड (.pdf)' : 'Download PDF Report (.pdf)'}</span>
+            <span>{language === 'mr' ? 'PDF अहवाल (.pdf)' : 'Download PDF (.pdf)'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleDownloadDailyBackup}
+            title={language === 'mr' ? 'बॅकअप डाउनलोड करा (.json)' : 'Download Backup (.json)'}
+            aria-label="Download Backup (.json)"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '9px 16px',
+              backgroundColor: 'var(--bg-subtle, #F1F5F9)',
+              color: 'var(--text-heading, #0F172A)',
+              border: '1px solid var(--border-slate, #CBD5E1)',
+              borderRadius: '8px',
+              fontSize: '0.84rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#D97706';
+              e.currentTarget.style.color = '#D97706';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = 'var(--border-slate, #CBD5E1)';
+              e.currentTarget.style.color = 'var(--text-heading, #0F172A)';
+            }}
+          >
+            <Download size={16} color="currentColor" />
+            <span>{language === 'mr' ? 'बॅकअप (.json)' : 'Download Backup (.json)'}</span>
           </button>
         </div>
       </div>
