@@ -240,7 +240,7 @@ export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               <View style={styles.selectorHeaderRow}>
                 <Text style={styles.selectorLabel}>व्यवसाय प्रकार (Business Type)</Text>
                 <Text style={[styles.selectorBadge, { color: '#64748B' }]}>
-                  {selectedBusinessType === 'SINGLE' ? 'सिंगल युझर' : 'मल्टिपल ब्रांच'}
+                  {selectedBusinessType === 'SINGLE' ? 'सिंगल' : 'मल्टिपल'}
                 </Text>
               </View>
               <View style={styles.selectorBtnRow}>
@@ -262,7 +262,7 @@ export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                       selectedBusinessType === 'SINGLE' && styles.selectorBtnTextActive,
                     ]}
                   >
-                    Single User
+                    Single
                   </Text>
                 </TouchableOpacity>
 
@@ -284,7 +284,7 @@ export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                       selectedBusinessType === 'MULTI_BRANCH' && styles.selectorBtnTextActive,
                     ]}
                   >
-                    Multiple Branch
+                    Multiple
                   </Text>
                 </TouchableOpacity>
               </View>

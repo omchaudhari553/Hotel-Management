@@ -86,14 +86,14 @@ export interface ThemeContextType {
 const STORAGE_KEY = '@hotel_app_theme_mode';
 
 const ThemeContext = createContext<ThemeContextType>({
-  themeMode: 'default',
+  themeMode: 'light',
   setThemeMode: async () => {},
   isDark: false,
   theme: LIGHT_THEME,
 });
 
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [themeMode, setThemeModeState] = useState<AppThemeMode>('default');
+  const [themeMode, setThemeModeState] = useState<AppThemeMode>('light');
   const [systemScheme, setSystemScheme] = useState<ColorSchemeName | null | undefined>(() => {
     try {
       return typeof Appearance !== 'undefined' && Appearance.getColorScheme ? Appearance.getColorScheme() : 'light';

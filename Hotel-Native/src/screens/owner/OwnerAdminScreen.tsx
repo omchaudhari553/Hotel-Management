@@ -19,7 +19,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Print from 'expo-print';
-import { downloadAndShareCsv, downloadAndSharePdf } from '../../utils/reportExporter';
+import { downloadAndShareCsv, downloadAndSharePdf, buildBranchSalesReportHTML } from '../../utils/reportExporter';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   LayoutDashboard,
@@ -259,6 +259,13 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
     setProfitEndDate('');
   };
 
+  const handleResetReportFilters = () => {
+    setReportBranchId('');
+    setReportPeriod('this-month');
+    setReportStartDate('');
+    setReportEndDate('');
+  };
+
   // Reports Module states (Matching Images 1, 2, 3)
   const [reportType, setReportType] = useState<'HOTEL' | 'GST' | 'EXPENSES'>('HOTEL');
   const [reportPeriod, setReportPeriod] = useState<string>('this-month');
@@ -382,6 +389,7 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
   const [showSalesMonthPicker, setShowSalesMonthPicker] = useState<boolean>(false);
   const [showSalesYearPicker, setShowSalesYearPicker] = useState<boolean>(false);
   const [salesExportLoading, setSalesExportLoading] = useState<boolean>(false);
+  const [salesPdfExportLoading, setSalesPdfExportLoading] = useState<boolean>(false);
 
   // Billing Performance Filter states (Matching Screenshot 1)
   const [perfBranchId, setPerfBranchId] = useState<string>('');
@@ -411,26 +419,71 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
         return;
       }
       setSalesExportLoading(true);
-      const headers = ['Branch Name', 'City', 'Today Sales', 'Weekly Sales', 'Monthly Sales', 'Yearly Sales', 'Total Sales', 'Invoices Count'];
-      const rows = salesData.branches.map((b) => [
-        `"${b.branchName}"`,
-        `"${b.city || '—'}"`,
-        b.todaySales,
-        b.weeklySales,
-        b.monthlySales,
-        b.yearlySales,
-        b.totalSales,
-        b.invoiceCount,
+      const dateStr = new Date().toISOString().slice(0, 10);
+      const headers = ['Sr No', 'Branch Name', 'Branch Code', 'City', "Today's Sales (INR)", 'Weekly Sales (INR)', 'Monthly Sales (INR)', 'Yearly Sales (INR)', 'Total Sales (INR)', 'Invoices Count'];
+      const rows = salesData.branches.map((b, idx) => [
+        idx + 1,
+        `"${(b.branchName || '').replace(/"/g, '""')}"`,
+        `"${b.code || ''}"`,
+        `"${(b.city || '—').replace(/"/g, '""')}"`,
+        Number(b.todaySales || 0),
+        Number(b.weeklySales || 0),
+        Number(b.monthlySales || 0),
+        Number(b.yearlySales || 0),
+        Number(b.totalSales || 0),
+        Number(b.invoiceCount || 0),
       ]);
+      if (salesData.consolidated) {
+        rows.push([
+          'Total',
+          '"Consolidated All Branches Total"',
+          '""',
+          '""',
+          Number(salesData.consolidated.todaySales || 0),
+          Number(salesData.consolidated.weeklySales || 0),
+          Number(salesData.consolidated.monthlySales || 0),
+          Number(salesData.consolidated.yearlySales || 0),
+          Number(salesData.consolidated.totalSales || 0),
+          Number(salesData.consolidated.totalInvoices || 0),
+        ]);
+      }
       const csvContent = [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
-      await Share.share({
-        title: `branch_sales_report_${new Date().toISOString().slice(0, 10)}.csv`,
-        message: csvContent,
-      });
+      await downloadAndShareCsv(`branch_sales_report_${dateStr}.csv`, csvContent, 'Branch-wise Sales Excel Report');
     } catch (e: any) {
-      Alert.alert('Export Error', e?.message || 'Could not export CSV');
+      Alert.alert('Export Error', e?.message || 'Could not export Excel file');
     } finally {
       setSalesExportLoading(false);
+    }
+  };
+
+  const handleExportSalesPDF = async () => {
+    try {
+      if (!salesData?.branches?.length) {
+        Alert.alert('No Data', 'No sales data available to export.');
+        return;
+      }
+      setSalesPdfExportLoading(true);
+      const dateStr = new Date().toISOString().slice(0, 10);
+      const selectedBranchName = salesBranchId
+        ? branches.find((b) => String(b.id) === salesBranchId)?.name || 'Single Branch'
+        : 'All Branches (Consolidated)';
+      const periodLabel = salesPeriod === 'today' ? 'Today' : salesPeriod === 'this-month' ? 'This Month' : salesPeriod === 'this-year' ? 'This Year' : 'All Time';
+
+      const html = buildBranchSalesReportHTML({
+        hotelName: ownerSettings?.businessName || 'Royal Palace Hotel',
+        hotelAddress: ownerSettings?.address || 'Pune, Maharashtra',
+        scopeLabel: selectedBranchName,
+        periodLabel,
+        generatedDate: new Date().toLocaleString('en-IN'),
+        branches: salesData.branches,
+        consolidated: salesData.consolidated,
+      });
+
+      await downloadAndSharePdf(`Branch_Sales_Report_${dateStr}`, html);
+    } catch (e: any) {
+      Alert.alert('Export Error', e?.message || 'Could not export PDF report');
+    } finally {
+      setSalesPdfExportLoading(false);
     }
   };
 
@@ -447,15 +500,27 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
         if (dash.status === 'fulfilled' && dash.value) setDashboardData(dash.value);
         if (brs.status === 'fulfilled' && brs.value) setBranches(brs.value);
       } else if (activeModule === 'BRANCHES') {
+        if (isManualRefresh) {
+          setBranchSearch('');
+        }
         const brs = await ownerService.getBranches();
         if (brs) setBranches(brs);
       } else if (activeModule === 'SALES') {
+        if (isManualRefresh) {
+          setSalesBranchId('');
+          setSalesPeriod('this-month');
+          setSalesStartDate('');
+          setSalesEndDate('');
+          setSalesMonth('');
+          setSalesYear('2026');
+        }
         const salesParams: any = {};
-        if (salesBranchId) salesParams.branchId = Number(salesBranchId);
+        if (!isManualRefresh && salesBranchId) salesParams.branchId = Number(salesBranchId);
 
-        let fStart = salesStartDate;
-        let fEnd = salesEndDate;
-        if (salesPeriod !== 'custom') {
+        let fStart = isManualRefresh ? '' : salesStartDate;
+        let fEnd = isManualRefresh ? '' : salesEndDate;
+        const currentSalesPeriod = isManualRefresh ? 'this-month' : salesPeriod;
+        if (currentSalesPeriod !== 'custom') {
           const today = new Date();
           const toYmd = (d: Date) => {
             const y = d.getFullYear();
@@ -463,10 +528,10 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
             const day = String(d.getDate()).padStart(2, '0');
             return `${y}-${m}-${day}`;
           };
-          if (salesPeriod === 'today') {
+          if (currentSalesPeriod === 'today') {
             fStart = toYmd(today);
             fEnd = toYmd(today);
-          } else if (salesPeriod === 'this-week') {
+          } else if (currentSalesPeriod === 'this-week') {
             const day = today.getDay();
             const diffToMon = today.getDate() - day + (day === 0 ? -6 : 1);
             const mon = new Date(today.getFullYear(), today.getMonth(), diffToMon);
@@ -474,17 +539,17 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
             sun.setDate(mon.getDate() + 6);
             fStart = toYmd(mon);
             fEnd = toYmd(sun);
-          } else if (salesPeriod === 'this-month') {
+          } else if (currentSalesPeriod === 'this-month') {
             const first = new Date(today.getFullYear(), today.getMonth(), 1);
             const last = new Date(today.getFullYear(), today.getMonth() + 1, 0);
             fStart = toYmd(first);
             fEnd = toYmd(last);
-          } else if (salesPeriod === 'this-year') {
+          } else if (currentSalesPeriod === 'this-year') {
             const first = new Date(today.getFullYear(), 0, 1);
             const last = new Date(today.getFullYear(), 11, 31);
             fStart = toYmd(first);
             fEnd = toYmd(last);
-          } else if (salesPeriod === 'all-time') {
+          } else if (currentSalesPeriod === 'all-time') {
             fStart = '';
             fEnd = '';
           }
@@ -499,12 +564,19 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
         if (sls.status === 'fulfilled' && sls.value) setSalesData(sls.value);
         if (brs.status === 'fulfilled' && brs.value) setBranches(brs.value);
       } else if (activeModule === 'PROFIT') {
+        if (isManualRefresh) {
+          setProfitBranchId('');
+          setProfitPeriod('this-month');
+          setProfitStartDate('');
+          setProfitEndDate('');
+        }
         const profitParams: any = {};
-        if (profitBranchId) profitParams.branchId = Number(profitBranchId);
+        if (!isManualRefresh && profitBranchId) profitParams.branchId = Number(profitBranchId);
         
-        let fStart = profitStartDate;
-        let fEnd = profitEndDate;
-        if (profitPeriod !== 'custom') {
+        let fStart = isManualRefresh ? '' : profitStartDate;
+        let fEnd = isManualRefresh ? '' : profitEndDate;
+        const currentProfitPeriod = isManualRefresh ? 'this-month' : profitPeriod;
+        if (currentProfitPeriod !== 'custom') {
           const today = new Date();
           const toYmd = (d: Date) => {
             const y = d.getFullYear();
@@ -512,10 +584,10 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
             const day = String(d.getDate()).padStart(2, '0');
             return `${y}-${m}-${day}`;
           };
-          if (profitPeriod === 'today') {
+          if (currentProfitPeriod === 'today') {
             fStart = toYmd(today);
             fEnd = toYmd(today);
-          } else if (profitPeriod === 'this-week') {
+          } else if (currentProfitPeriod === 'this-week') {
             const day = today.getDay();
             const diffToMon = today.getDate() - day + (day === 0 ? -6 : 1);
             const mon = new Date(today.getFullYear(), today.getMonth(), diffToMon);
@@ -523,17 +595,17 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
             sun.setDate(mon.getDate() + 6);
             fStart = toYmd(mon);
             fEnd = toYmd(sun);
-          } else if (profitPeriod === 'this-month') {
+          } else if (currentProfitPeriod === 'this-month') {
             const first = new Date(today.getFullYear(), today.getMonth(), 1);
             const last = new Date(today.getFullYear(), today.getMonth() + 1, 0);
             fStart = toYmd(first);
             fEnd = toYmd(last);
-          } else if (profitPeriod === 'this-year') {
+          } else if (currentProfitPeriod === 'this-year') {
             const first = new Date(today.getFullYear(), 0, 1);
             const last = new Date(today.getFullYear(), 11, 31);
             fStart = toYmd(first);
             fEnd = toYmd(last);
-          } else if (profitPeriod === 'all-time') {
+          } else if (currentProfitPeriod === 'all-time') {
             fStart = '';
             fEnd = '';
           }
@@ -548,8 +620,12 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
         if (prf.status === 'fulfilled' && prf.value) setProfitData(prf.value);
         if (brs.status === 'fulfilled' && brs.value) setBranches(brs.value);
       } else if (activeModule === 'STAFF') {
+        if (isManualRefresh) {
+          setSelectedBranchFilter('ALL');
+          setStaffSearch('');
+        }
         const staffParams: any = {};
-        if (selectedBranchFilter !== 'ALL') staffParams.branchId = Number(selectedBranchFilter);
+        if (!isManualRefresh && selectedBranchFilter !== 'ALL') staffParams.branchId = Number(selectedBranchFilter);
         const [stf, brs] = await Promise.allSettled([
           ownerService.getStaff(staffParams),
           ownerService.getBranches(),
@@ -557,22 +633,33 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
         if (stf.status === 'fulfilled' && stf.value) setStaffList(stf.value);
         if (brs.status === 'fulfilled' && brs.value) setBranches(brs.value);
       } else if (activeModule === 'REPORTS') {
+        if (isManualRefresh) {
+          setReportBranchId('');
+          setReportPeriod('this-month');
+          setReportStartDate('');
+          setReportEndDate('');
+        }
         const repParams: any = {
           type: reportType === 'GST' ? 'GST_REPORT' : reportType === 'EXPENSES' ? 'EXPENSES_REPORT' : 'HOTEL_REPORT',
-          period: reportPeriod,
+          period: isManualRefresh ? 'this-month' : reportPeriod,
         };
-        if (reportBranchId) repParams.branchId = Number(reportBranchId);
-        if (reportPeriod === 'custom') {
+        if (!isManualRefresh && reportBranchId) repParams.branchId = Number(reportBranchId);
+        if (!isManualRefresh && reportPeriod === 'custom') {
           if (reportStartDate) repParams.startDate = reportStartDate;
           if (reportEndDate) repParams.endDate = reportEndDate;
         }
         const rep = await ownerService.getReports(repParams);
         if (rep) setReportsData(rep);
       } else if (activeModule === 'PERFORMANCE') {
+        if (isManualRefresh) {
+          setPerfBranchId('');
+          setPerfStartDate('');
+          setPerfEndDate('');
+        }
         const perfParams: any = {};
-        if (perfBranchId) perfParams.branchId = Number(perfBranchId);
-        if (perfStartDate) perfParams.startDate = perfStartDate;
-        if (perfEndDate) perfParams.endDate = perfEndDate;
+        if (!isManualRefresh && perfBranchId) perfParams.branchId = Number(perfBranchId);
+        if (!isManualRefresh && perfStartDate) perfParams.startDate = perfStartDate;
+        if (!isManualRefresh && perfEndDate) perfParams.endDate = perfEndDate;
         const [perf, brs] = await Promise.allSettled([
           ownerService.getBillingPerformance(perfParams),
           ownerService.getBranches(),
@@ -597,7 +684,6 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
     } finally {
       if (isManualRefresh) {
         setRefreshing(false);
-        Alert.alert('Refreshed', 'Admin panel data refreshed successfully.');
       }
       setLoading(false);
     }
@@ -1027,29 +1113,6 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
       </View>
 
       <View style={styles.headerRight}>
-        {/* Quick Refresh Button in Header */}
-        <TouchableOpacity
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: 8,
-            borderWidth: 1,
-            borderColor: isDarkAdmin ? '#2A364F' : '#E2E8F0',
-            backgroundColor: isDarkAdmin ? '#161F36' : '#FFFFFF',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-          onPress={loadData}
-          disabled={refreshing}
-          activeOpacity={0.8}
-        >
-          {refreshing ? (
-            <ActivityIndicator size="small" color="#F97316" />
-          ) : (
-            <RefreshCw size={14} color={isDarkAdmin ? '#FFFFFF' : '#0F172A'} />
-          )}
-        </TouchableOpacity>
-
         {/* Small Theme Toggle Button in Header */}
         <TouchableOpacity
           style={{
@@ -1799,14 +1862,34 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
               )}
             </TouchableOpacity>
 
+            {/* Excel Download Button */}
             <TouchableOpacity
-              style={styles.salesExportCsvBtn}
+              style={[styles.addBranchActionBtn, { backgroundColor: '#15803D' }]}
               onPress={handleExportSalesCSV}
-              activeOpacity={0.8}
+              activeOpacity={0.85}
               disabled={salesExportLoading}
             >
-              <Download size={14} color="#FFFFFF" />
-              <Text style={styles.salesExportCsvBtnText}>{isMobile ? 'CSV' : 'Export CSV'}</Text>
+              {salesExportLoading ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <FileSpreadsheet size={13} color="#FFFFFF" />
+              )}
+              <Text style={styles.addBranchActionText}>{isMobile ? 'Excel' : 'Export Excel'}</Text>
+            </TouchableOpacity>
+
+            {/* PDF Download Button */}
+            <TouchableOpacity
+              style={[styles.addBranchActionBtn, { backgroundColor: '#B91C1C' }]}
+              onPress={handleExportSalesPDF}
+              activeOpacity={0.85}
+              disabled={salesPdfExportLoading}
+            >
+              {salesPdfExportLoading ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <FileText size={13} color="#FFFFFF" />
+              )}
+              <Text style={styles.addBranchActionText}>{isMobile ? 'PDF' : 'Export PDF'}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -1880,6 +1963,16 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
               </TouchableOpacity>
             </View>
           )}
+
+          {(salesBranchId || salesPeriod !== 'this-month' || salesStartDate || salesEndDate) ? (
+            <TouchableOpacity
+              style={styles.salesResetFilterBtn}
+              onPress={handleResetSalesFilters}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.salesResetFilterBtnText}>Clear Filters</Text>
+            </TouchableOpacity>
+          ) : null}
         </View>
 
         {/* Consolidated Summary 5 Cards (3 on Top Row, 2 on Bottom Row as requested) */}
@@ -2279,6 +2372,16 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
               </TouchableOpacity>
             </View>
           )}
+
+          {(profitBranchId || profitPeriod !== 'this-month' || profitStartDate || profitEndDate) ? (
+            <TouchableOpacity
+              style={styles.salesResetFilterBtn}
+              onPress={handleResetProfitFilters}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.salesResetFilterBtnText}>Clear Filters</Text>
+            </TouchableOpacity>
+          ) : null}
         </View>
 
         {/* 4 Financial KPI Cards (Equal 50% width on mobile, no squeeze) */}
@@ -2671,6 +2774,19 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
               </TouchableOpacity>
             ) : null}
           </View>
+
+          {(selectedBranchFilter !== 'ALL' || staffSearch.length > 0) ? (
+            <TouchableOpacity
+              style={styles.salesResetFilterBtn}
+              onPress={() => {
+                setSelectedBranchFilter('ALL');
+                setStaffSearch('');
+              }}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.salesResetFilterBtnText}>Clear Filters</Text>
+            </TouchableOpacity>
+          ) : null}
         </View>
 
         {/* Staff Table matching Screenshot 2 with Horizontal Scroll for Mobile */}
@@ -3455,6 +3571,16 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
               </TouchableOpacity>
             </View>
           )}
+
+          {(reportBranchId || reportPeriod !== 'this-month' || reportStartDate || reportEndDate) ? (
+            <TouchableOpacity
+              style={styles.salesResetFilterBtn}
+              onPress={handleResetReportFilters}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.salesResetFilterBtnText}>Clear Filters</Text>
+            </TouchableOpacity>
+          ) : null}
         </View>
 
         {/* =========================================================
@@ -4146,26 +4272,278 @@ export const OwnerAdminScreen: React.FC<OwnerAdminScreenProps> = ({ navigation }
         </View>
       </View>
 
-      {/* Plan Subscription Banner matching Screenshot 2 */}
-      <View style={[styles.planBannerCard, { backgroundColor: isDarkAdmin ? '#161F36' : '#FFFDF7', borderColor: isDarkAdmin ? '#2A364F' : '#FDE68A' }, isMobile && styles.planBannerCardMobile]}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-          <View style={styles.planCrownCircle}>
-            <Crown size={22} color="#D97706" />
+      {/* Licence & Subscription Full Section (Matching Enterprise Standard) */}
+      <View
+        style={[
+          styles.sectionCard,
+          {
+            backgroundColor: isDarkAdmin ? '#161F36' : '#FFFFFF',
+            borderColor: isDarkAdmin ? '#2A364F' : '#E2E8F0',
+            borderWidth: 1,
+            borderRadius: 12,
+            padding: 16,
+            marginBottom: 16,
+          },
+        ]}
+      >
+        {/* Section Header */}
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: isMobile ? 'flex-start' : 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: 12,
+            paddingBottom: 14,
+            borderBottomWidth: 1,
+            borderBottomColor: isDarkAdmin ? '#243049' : '#F1F5F9',
+            marginBottom: 14,
+          }}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1, minWidth: 220 }}>
+            <View
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 10,
+                backgroundColor: isDarkAdmin ? '#064E3B' : '#DCFCE7',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderWidth: 1,
+                borderColor: isDarkAdmin ? '#059669' : '#86EFAC',
+              }}
+            >
+              <Shield size={22} color="#16A34A" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 16, fontWeight: '800', color: tc.textHeading }}>
+                {language === 'mr' ? 'लायसन्स आणि सबस्क्रिप्शन' : 'Licence & Subscription'}
+              </Text>
+              <Text style={{ fontSize: 12, color: tc.textMuted, fontWeight: '500', marginTop: 2 }}>
+                {language === 'mr'
+                  ? 'एंटरप्राइझ सॉफ्टवेअर परवाना, २८-दिवस ट्रायल व सबस्क्रिप्शन तपशील'
+                  : 'Enterprise software licence verification, 28-day trial status and plan details'}
+              </Text>
+            </View>
           </View>
-          <View>
-            <Text style={styles.planTitleText}>Hotel Enterprise</Text>
-            <Text style={styles.planStatusText}>
-              <Text style={{ fontWeight: '700', color: '#16A34A' }}>Status: Active</Text> • 8 Days Remaining
+          <View
+            style={{
+              backgroundColor: isDarkAdmin ? '#064E3B' : '#DCFCE7',
+              borderColor: isDarkAdmin ? '#059669' : '#86EFAC',
+              borderWidth: 1,
+              paddingHorizontal: 12,
+              paddingVertical: 5,
+              borderRadius: 20,
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 5,
+            }}
+          >
+            <Text style={{ color: isDarkAdmin ? '#34D399' : '#15803D', fontSize: 12, fontWeight: '800' }}>
+              ⚡ {language === 'mr' ? 'सक्रिय व प्रमाणित' : 'Active & Verified'}
             </Text>
           </View>
         </View>
-        <TouchableOpacity
-          style={styles.planUpgradeBtn}
-          onPress={() => setShowRenewModal(true)}
-          activeOpacity={0.85}
+
+        {/* 3 Detail Cards Grid */}
+        <View style={{ flexDirection: isMobile ? 'column' : 'row', flexWrap: 'wrap', gap: 12, marginBottom: 14 }}>
+          {/* Card 1: Licence Version & Subscription Plan */}
+          <View
+            style={{
+              flex: 1,
+              minWidth: isMobile ? '100%' : 240,
+              backgroundColor: isDarkAdmin ? '#0B0F19' : '#F8FAFC',
+              borderWidth: 1,
+              borderColor: isDarkAdmin ? '#243049' : '#E2E8F0',
+              borderRadius: 10,
+              padding: 14,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                paddingBottom: 8,
+                borderBottomWidth: 1,
+                borderBottomColor: isDarkAdmin ? '#1F2937' : '#E2E8F0',
+                marginBottom: 8,
+              }}
+            >
+              <View>
+                <Text style={{ fontSize: 10.5, fontWeight: '700', color: tc.textMuted, textTransform: 'uppercase' }}>
+                  {language === 'mr' ? 'परवाना आवृत्ती' : 'Licence Version'}
+                </Text>
+                <Text style={{ fontSize: 15, fontWeight: '800', color: tc.textHeading, marginTop: 2 }}>v2.4.0</Text>
+              </View>
+              <View style={{ backgroundColor: isDarkAdmin ? '#1E3A8A' : '#EFF6FF', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 12 }}>
+                <Text style={{ fontSize: 11, fontWeight: '700', color: '#3B82F6' }}>Enterprise</Text>
+              </View>
+            </View>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <View>
+                <Text style={{ fontSize: 10.5, fontWeight: '700', color: tc.textMuted, textTransform: 'uppercase' }}>
+                  {language === 'mr' ? 'सबस्क्रिप्शन प्लॅन' : 'Subscription Plan'}
+                </Text>
+                <Text style={{ fontSize: 14, fontWeight: '800', color: tc.textHeading, marginTop: 2 }}>Hotel Enterprise Suite</Text>
+              </View>
+              <View style={{ backgroundColor: isDarkAdmin ? '#064E3B' : '#F0FDF4', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 12 }}>
+                <Text style={{ fontSize: 11, fontWeight: '700', color: '#16A34A' }}>{language === 'mr' ? 'सक्रिय' : 'Active'}</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Card 2: Trial Start & End Date */}
+          <View
+            style={{
+              flex: 1,
+              minWidth: isMobile ? '100%' : 240,
+              backgroundColor: isDarkAdmin ? '#0B0F19' : '#F8FAFC',
+              borderWidth: 1,
+              borderColor: isDarkAdmin ? '#243049' : '#E2E8F0',
+              borderRadius: 10,
+              padding: 14,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                paddingBottom: 8,
+                borderBottomWidth: 1,
+                borderBottomColor: isDarkAdmin ? '#1F2937' : '#E2E8F0',
+                marginBottom: 8,
+              }}
+            >
+              <View>
+                <Text style={{ fontSize: 10.5, fontWeight: '700', color: tc.textMuted, textTransform: 'uppercase' }}>
+                  {language === 'mr' ? 'ट्रायल कालावधी' : 'Trial Duration'}
+                </Text>
+                <Text style={{ fontSize: 14, fontWeight: '700', color: tc.textHeading, marginTop: 2 }}>
+                  {toDevanagari('28')} {language === 'mr' ? 'दिवस मोफत ट्रायल' : 'Days Free Trial'}
+                </Text>
+              </View>
+              <View style={{ backgroundColor: isDarkAdmin ? '#78350F' : '#FEF3C7', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 12 }}>
+                <Text style={{ fontSize: 11, fontWeight: '700', color: '#D97706' }}>28-Day Tier</Text>
+              </View>
+            </View>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <View>
+                <Text style={{ fontSize: 10.5, fontWeight: '700', color: tc.textMuted, textTransform: 'uppercase' }}>
+                  {language === 'mr' ? 'शिल्लक कालावधी' : 'Validity'}
+                </Text>
+                <Text style={{ fontSize: 14, fontWeight: '800', color: '#16A34A', marginTop: 2 }}>
+                  {toDevanagari('28')} {language === 'mr' ? 'दिवस शिल्लक' : 'Days Left'}
+                </Text>
+              </View>
+              <View style={{ backgroundColor: isDarkAdmin ? '#064E3B' : '#F0FDF4', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 12 }}>
+                <Text style={{ fontSize: 11, fontWeight: '700', color: '#16A34A' }}>✓ {language === 'mr' ? 'सक्रिय प्रवेश' : 'Full Access'}</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Card 3: Renewal & Action */}
+          <View
+            style={{
+              flex: 1,
+              minWidth: isMobile ? '100%' : 240,
+              backgroundColor: isDarkAdmin ? '#0B0F19' : '#F8FAFC',
+              borderWidth: 1,
+              borderColor: isDarkAdmin ? '#243049' : '#E2E8F0',
+              borderRadius: 10,
+              padding: 14,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                paddingBottom: 8,
+                borderBottomWidth: 1,
+                borderBottomColor: isDarkAdmin ? '#1F2937' : '#E2E8F0',
+                marginBottom: 8,
+              }}
+            >
+              <View>
+                <Text style={{ fontSize: 10.5, fontWeight: '700', color: tc.textMuted, textTransform: 'uppercase' }}>
+                  {language === 'mr' ? 'नूतनीकरण स्थिती' : 'Renewal Status'}
+                </Text>
+                <Text style={{ fontSize: 14, fontWeight: '700', color: tc.textHeading, marginTop: 2 }}>
+                  {language === 'mr' ? 'स्वयं-नूतनीकरण सक्रिय' : 'Auto-Renew Ready'}
+                </Text>
+              </View>
+              <View style={{ backgroundColor: isDarkAdmin ? '#1E293B' : '#F1F5F9', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 12 }}>
+                <Text style={{ fontSize: 11, fontWeight: '700', color: tc.textMuted }}>{language === 'mr' ? 'सुरक्षित' : 'Secured'}</Text>
+              </View>
+            </View>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <View>
+                <Text style={{ fontSize: 10.5, fontWeight: '700', color: tc.textMuted, textTransform: 'uppercase' }}>
+                  {language === 'mr' ? 'परवाना स्थिती' : 'License Status'}
+                </Text>
+                <Text style={{ fontSize: 14, fontWeight: '800', color: '#16A34A', marginTop: 2 }}>
+                  {language === 'mr' ? 'सक्रिय' : 'Active'}
+                </Text>
+              </View>
+              <TouchableOpacity
+                style={{
+                  backgroundColor: '#16A34A',
+                  paddingHorizontal: 12,
+                  paddingVertical: 5,
+                  borderRadius: 7,
+                }}
+                onPress={() => setShowRenewModal(true)}
+                activeOpacity={0.85}
+              >
+                <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: '700' }}>
+                  {language === 'mr' ? 'नूतनीकरण करा' : 'Renew'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+
+        {/* Upgrade / Renew Action Bar */}
+        <View
+          style={[
+            styles.planBannerCard,
+            {
+              backgroundColor: isDarkAdmin ? '#1F2937' : '#FFFDF7',
+              borderColor: isDarkAdmin ? '#374151' : '#FDE68A',
+              marginBottom: 0,
+            },
+            isMobile && styles.planBannerCardMobile,
+          ]}
         >
-          <Text style={styles.planUpgradeBtnText}>Upgrade / Renew Plan</Text>
-        </TouchableOpacity>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
+            <View style={styles.planCrownCircle}>
+              <Crown size={22} color="#D97706" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.planTitleText}>
+                {language === 'mr' ? 'हॉटेल एंटरप्राइझ सबस्क्रिप्शन' : 'Hotel Enterprise Subscription'}
+              </Text>
+              <Text style={styles.planStatusText}>
+                <Text style={{ fontWeight: '700', color: '#16A34A' }}>
+                  {language === 'mr' ? 'स्थिती: सक्रिय' : 'Status: Active'}
+                </Text>
+                {' • '}
+                {toDevanagari('28')} {language === 'mr' ? 'दिवस शिल्लक (२८-दिवस ट्रायल)' : 'Days Remaining (28-Day Trial)'}
+              </Text>
+            </View>
+          </View>
+          <TouchableOpacity
+            style={styles.planUpgradeBtn}
+            onPress={() => setShowRenewModal(true)}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.planUpgradeBtnText}>
+              {language === 'mr' ? 'प्लॅन अपग्रेड / नूतनीकरण करा' : 'Upgrade / Renew Plan'}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Small Compact Theme Switcher Buttons - Verbose garbage text removed */}

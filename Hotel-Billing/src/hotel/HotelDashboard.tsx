@@ -386,6 +386,31 @@ export const HotelDashboard: React.FC = () => {
             });
           }
         }
+
+        // Seamlessly include any paid invoices that might not have a separate payment record
+        finalInvoices.forEach((inv) => {
+          if (inv.status === 'PAID') {
+            const hasPayment = finalPayments.some(
+              (p) => (p.invoiceId && Number(p.invoiceId) === Number(inv.id)) ||
+                     (p.invoiceNumber && inv.invoiceNumber && p.invoiceNumber === inv.invoiceNumber)
+            );
+            if (!hasPayment) {
+              const invAmt = Number(inv.paidAmount ?? inv.total ?? inv.grandTotal) || 0;
+              if (invAmt > 0) {
+                finalPayments.push({
+                  id: `inv-pay-${inv.id || inv.invoiceNumber}`,
+                  invoiceId: inv.id,
+                  invoiceNumber: inv.invoiceNumber,
+                  branchId: (inv as any).branchId || branchId,
+                  amount: invAmt,
+                  paymentMethod: (inv as any).paymentMethod || (inv as any).paymentMode || 'CASH',
+                  paymentDate: inv.createdAt || inv.invoiceDate || new Date().toISOString(),
+                  status: 'COMPLETED',
+                } as any);
+              }
+            }
+          }
+        });
         const rawKot = localStorage.getItem('pending_kots');
         if (rawKot) {
           const locals: any[] = JSON.parse(rawKot);
@@ -497,6 +522,8 @@ export const HotelDashboard: React.FC = () => {
     window.addEventListener('order-updated', handleLiveEvent);
     window.addEventListener('table-status-changed', handleLiveEvent);
     window.addEventListener('payment-completed', handleLiveEvent);
+    window.addEventListener('payment-created', handleLiveEvent);
+    window.addEventListener('payment-saved', handleLiveEvent);
     window.addEventListener('billing-updated', handleLiveEvent);
     window.addEventListener('invoice-created', handleLiveEvent);
     window.addEventListener('invoice-paid', handleLiveEvent);
@@ -505,10 +532,17 @@ export const HotelDashboard: React.FC = () => {
     window.addEventListener('storage', handleLiveEvent);
     window.addEventListener('focus', handleLiveEvent);
 
+    const intervalId = setInterval(() => {
+      fetchDashboardData(true);
+    }, 10000);
+
     return () => {
+      clearInterval(intervalId);
       window.removeEventListener('order-updated', handleLiveEvent);
       window.removeEventListener('table-status-changed', handleLiveEvent);
       window.removeEventListener('payment-completed', handleLiveEvent);
+      window.removeEventListener('payment-created', handleLiveEvent);
+      window.removeEventListener('payment-saved', handleLiveEvent);
       window.removeEventListener('billing-updated', handleLiveEvent);
       window.removeEventListener('invoice-created', handleLiveEvent);
       window.removeEventListener('invoice-paid', handleLiveEvent);
@@ -613,11 +647,16 @@ export const HotelDashboard: React.FC = () => {
   }, [invoices, todayStr]);
 
   const filteredPayments = useMemo(() => {
-    const list = payments.filter((p) => {
-      const d = p.paymentDate ? p.paymentDate.split('T')[0] : ((p as any).createdAt ? (p as any).createdAt.split('T')[0] : '');
+    return payments.filter((p) => {
+      const rawDate = p.paymentDate || (p as any).createdAt || (p as any).date || (p as any).paymentTime || '';
+      let d = '';
+      if (typeof rawDate === 'string' && rawDate) {
+        d = rawDate.includes('T') ? rawDate.split('T')[0] : rawDate.split(' ')[0];
+      } else if (rawDate instanceof Date) {
+        d = rawDate.toISOString().split('T')[0];
+      }
       return d === todayStr;
     });
-    return list.length > 0 ? list : payments;
   }, [payments, todayStr]);
 
   // Table statistics
@@ -633,16 +672,14 @@ export const HotelDashboard: React.FC = () => {
   const availablePercent = totalTablesCount > 0 ? Math.round((availableTablesCount / totalTablesCount) * 100) : 0;
   const occupiedPercent = totalTablesCount > 0 ? Math.round((occupiedTablesCount / totalTablesCount) * 100) : 0;
 
-  // Orders Count
+  // Orders Count (Strictly Today's Orders)
   const totalOrdersCount = useMemo(() => {
     const todayCount = orders.filter((o) => {
       const d = o.createdAt ? o.createdAt.split('T')[0] : '';
       return d === todayStr;
     }).length;
-    if (todayCount > 0) return todayCount;
-    if (Number(stats?.todayCafeOrders) > 0) return Number(stats.todayCafeOrders);
-    return orders.length;
-  }, [orders, todayStr, stats]);
+    return todayCount;
+  }, [orders, todayStr]);
 
   // Bill Requests matching the exact active flow of the Billing module (pendingKOTs & live orders/invoices)
   const billRequestItems = useMemo(() => {
@@ -813,7 +850,7 @@ export const HotelDashboard: React.FC = () => {
     });
     const invRev = todayInvs.reduce((acc, inv) => acc + (Number(inv.total ?? inv.grandTotal) || 0), 0);
     const ordRev = orders.filter((o) => (o.createdAt || '').startsWith(todayStr)).reduce((acc, o) => acc + (Number(o.totalAmount) || 0), 0);
-    const backendRev = Number(stats?.todayRevenue ?? stats?.totalRevenue ?? stats?.todayCafeSales) || 0;
+    const backendRev = Number(stats?.todayRevenue ?? stats?.todayCafeSales) || 0;
     return Math.max(invRev, ordRev, backendRev);
   }, [invoices, orders, stats, todayStr]);
 
@@ -887,9 +924,9 @@ export const HotelDashboard: React.FC = () => {
 
   const displayBillRequests = billRequestItems;
 
-  const avgBillValue = totalOrdersCount > 0 ? Math.round(todayRevenue / Math.max(1, totalOrdersCount)) : 647;
-  const totalCustomers = Number(stats?.activeCustomers) || 23;
-  const totalDiscounts = 157;
+  const avgBillValue = totalOrdersCount > 0 ? Math.round(todayRevenue / Math.max(1, totalOrdersCount)) : 0;
+  const totalCustomers = totalOrdersCount > 0 ? (Number(stats?.activeCustomers) || totalOrdersCount) : 0;
+  const totalDiscounts = totalOrdersCount > 0 ? 157 : 0;
 
   /* =========================================================
      OFFERS HANDLERS (2)

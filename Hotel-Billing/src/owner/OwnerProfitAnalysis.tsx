@@ -106,6 +106,13 @@ export const OwnerProfitAnalysis: React.FC = () => {
     fetchData();
   }, [selectedBranchId, period, startDate, endDate]);
 
+  const handleResetFilters = () => {
+    setSelectedBranchId('');
+    setPeriod('this-month');
+    setStartDate('');
+    setEndDate('');
+  };
+
   const formatCurrency = (amt: number | undefined) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -125,7 +132,7 @@ export const OwnerProfitAnalysis: React.FC = () => {
         </div>
 
         <button
-          onClick={fetchData}
+          onClick={() => window.location.reload()}
           className="owner-btn-secondary"
           title="Refresh Data"
           aria-label="Refresh Data"
@@ -223,6 +230,27 @@ export const OwnerProfitAnalysis: React.FC = () => {
               />
             </div>
           </>
+        )}
+
+        {(selectedBranchId || period !== 'this-month' || startDate || endDate) && (
+          <button
+            type="button"
+            onClick={handleResetFilters}
+            className="owner-btn-secondary"
+            style={{
+              padding: '6px 14px',
+              backgroundColor: 'var(--bg-subtle, #F1F5F9)',
+              border: '1px solid var(--border-slate, #CBD5E1)',
+              borderRadius: '6px',
+              fontSize: '0.82rem',
+              color: 'var(--text-heading, #475569)',
+              cursor: 'pointer',
+              fontWeight: 600,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Clear Filters
+          </button>
         )}
       </div>
 

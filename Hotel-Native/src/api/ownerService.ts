@@ -193,7 +193,7 @@ let localSettings = {
   state: '',
   currency: 'INR',
   taxNumber: '',
-  theme: 'system',
+  theme: 'daylight',
 };
 
 let localDashboardData: OwnerDashboardData = {

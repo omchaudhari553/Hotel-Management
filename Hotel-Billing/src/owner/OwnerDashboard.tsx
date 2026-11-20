@@ -46,7 +46,6 @@ export const OwnerDashboard: React.FC = () => {
       setError(null);
       const res = await ownerService.getDashboard();
       setData(res);
-      if (isManual) showToast('success', 'Dashboard refreshed successfully!');
     } catch (err: any) {
       setError(err?.response?.data?.message || err?.message || 'Failed to load owner dashboard data');
     } finally {
@@ -160,7 +159,7 @@ export const OwnerDashboard: React.FC = () => {
             </>
           )}
           <button
-            onClick={fetchDashboardData}
+            onClick={() => fetchDashboardData()}
             style={{
               padding: '8px 16px',
               backgroundColor: isForbidden ? '#6B7280' : '#DC2626',
@@ -200,11 +199,11 @@ export const OwnerDashboard: React.FC = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <button
             type="button"
-            onClick={() => fetchDashboardData(true)}
+            onClick={() => window.location.reload()}
             disabled={refreshing || loading}
             className="owner-btn-secondary"
-            title="Refresh Dashboard Data"
-            aria-label="Refresh"
+            title="Refresh Dashboard"
+            aria-label="Refresh Dashboard"
             style={{
               display: 'flex',
               alignItems: 'center',

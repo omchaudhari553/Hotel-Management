@@ -431,8 +431,8 @@ export const LoginPage: React.FC = () => {
                 </span>
                 <span style={{ fontSize: '0.72rem', color: '#64748B', fontWeight: 600 }}>
                   {selectedBusinessType === 'SINGLE'
-                    ? (language === 'mr' ? 'सिंगल युझर' : 'Single User')
-                    : (language === 'mr' ? 'मल्टिपल ब्रांच' : 'Multiple Branch')}
+                    ? (language === 'mr' ? 'सिंगल' : 'Single')
+                    : (language === 'mr' ? 'मल्टिपल' : 'Multiple')}
                 </span>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
@@ -456,7 +456,7 @@ export const LoginPage: React.FC = () => {
                   }}
                 >
                   <Building2 size={15} />
-                  <span>{language === 'mr' ? 'सिंगल युझर' : 'Single User'}</span>
+                  <span>{language === 'mr' ? 'सिंगल' : 'Single'}</span>
                 </button>
                 <button
                   type="button"
@@ -478,7 +478,7 @@ export const LoginPage: React.FC = () => {
                   }}
                 >
                   <GitBranch size={15} />
-                  <span>{language === 'mr' ? 'मल्टिपल ब्रांच' : 'Multiple Branch'}</span>
+                  <span>{language === 'mr' ? 'मल्टिपल' : 'Multiple'}</span>
                 </button>
               </div>
             </div>

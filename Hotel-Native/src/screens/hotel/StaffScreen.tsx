@@ -24,6 +24,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import { useAppTheme } from '../../context/ThemeContext';
 import { apiClient, ensureBackendToken } from '../../api/client';
 import { sanitizeMobileInput, validatePhoneNumber } from '../../utils/phoneUtils';
+import { downloadAndShareCsv, downloadAndSharePdf } from '../../utils/reportExporter';
 import {
   Users,
   ChefHat,
@@ -306,7 +307,7 @@ export const StaffScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const saveAttendanceData = async (data: Record<string, AttendanceStatus>) => {
     try {
       await AsyncStorage.setItem(STORAGE_ATTENDANCE_PREFIX + selectedMonth, JSON.stringify(data));
-    } catch {}
+    } catch { }
   };
 
   // Generate realistic baseline attendance for selected month (strictly past/today only, NO future data)
@@ -413,7 +414,7 @@ export const StaffScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             try {
               const numericId = member.id.startsWith('s') ? member.id.substring(1) : member.id;
               if (numericId && !isNaN(Number(numericId))) {
-                await apiClient.delete(`/hotel/staff/${numericId}`).catch(() => {});
+                await apiClient.delete(`/hotel/staff/${numericId}`).catch(() => { });
               }
               const updated = staffList.filter((s) => s.id !== member.id);
               setStaffList(updated);
@@ -740,7 +741,7 @@ export const StaffScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     });
   }, [staffList, searchQuery, selectedRole]);
 
-  // Export report as CSV / text share
+  // Export report as Excel / PDF document share
   const handleExportMonthlyReport = async () => {
     let csv = `Staff Monthly Attendance & Salary Report - ${monthDisplayName}\n`;
     csv += `Branch: ${activeBranch.name}\n\n`;
@@ -755,23 +756,116 @@ export const StaffScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     csv += `Average Attendance: ${overallMonthlyKPI.avgAttendance}%\n`;
     csv += `Total Monthly Payroll Payout: ₹${overallMonthlyKPI.totalSalaryPayout}\n`;
 
-    try {
-      if (Platform.OS === 'web') {
-        if (typeof window !== 'undefined' && (window as any).navigator?.clipboard) {
-          await (window as any).navigator.clipboard.writeText(csv);
-          Alert.alert('Report Copied', 'Full monthly staff payroll report copied to clipboard!');
-        } else {
-          Alert.alert('Monthly Report', csv);
-        }
-      } else {
-        await Share.share({
-          message: csv,
-          title: `Staff_Monthly_Report_${selectedMonth}`,
-        });
+    const cleanMonth = selectedMonth.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const filename = `Staff_Monthly_Report_${cleanMonth}.csv`;
+
+    const exportAsExcel = async () => {
+      try {
+        await downloadAndShareCsv(filename, csv, 'Staff Monthly Payroll Excel Report');
+      } catch (err: any) {
+        Alert.alert(t('error', 'Error'), err?.message || 'Could not export Excel file.');
       }
-    } catch (e) {
-      Alert.alert('Export', 'Report generated successfully.');
-    }
+    };
+
+    const exportAsPdf = async () => {
+      try {
+        const html = `
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="utf-8" />
+              <title>Staff Monthly Attendance & Salary Report</title>
+              <style>
+                body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 24px; color: #1E293B; }
+                .header { border-bottom: 2px solid #2563EB; padding-bottom: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: flex-end; }
+                .hotel-name { font-size: 20px; font-weight: 800; color: #1E3A8A; margin: 0; }
+                .sub { font-size: 12px; color: #64748B; margin-top: 4px; }
+                .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+                .stat-card { background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; padding: 12px; }
+                .stat-label { font-size: 11px; font-weight: 700; color: #1D4ED8; }
+                .stat-val { font-size: 18px; font-weight: 900; color: #1E3A8A; margin-top: 4px; }
+                table { width: 100%; border-collapse: collapse; font-size: 11px; }
+                th { background: #2563EB; color: #FFFFFF; font-weight: 700; text-align: left; padding: 8px; }
+                td { padding: 8px; border-bottom: 1px solid #E2E8F0; }
+              </style>
+            </head>
+            <body>
+              <div class="header">
+                <div>
+                  <h1 class="hotel-name">${activeBranch.name || 'Royal Palace Hotel'}</h1>
+                  <div class="sub">Staff Monthly Attendance & Salary Report • ${monthDisplayName}</div>
+                </div>
+                <div style="text-align: right; font-size: 11px; color: #64748B;">
+                  Generated: ${new Date().toLocaleDateString('en-IN')}
+                </div>
+              </div>
+              <div class="stats-grid">
+                <div class="stat-card">
+                  <div class="stat-label">Total Staff</div>
+                  <div class="stat-val">${staffList.length}</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-label">Avg Attendance</div>
+                  <div class="stat-val">${overallMonthlyKPI.avgAttendance}%</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-label">Monthly Payroll</div>
+                  <div class="stat-val">₹ ${overallMonthlyKPI.totalSalaryPayout}</div>
+                </div>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width: 30px;">#</th>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Phone</th>
+                    <th style="text-align: center;">P</th>
+                    <th style="text-align: center;">HD</th>
+                    <th style="text-align: center;">A</th>
+                    <th style="text-align: right;">Gross (₹)</th>
+                    <th style="text-align: right;">Deduction (₹)</th>
+                    <th style="text-align: right;">Net (₹)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${staffList.map((s, idx) => {
+                    const stats = getStaffMonthlyStats(s.id);
+                    return `
+                      <tr>
+                        <td>${idx + 1}</td>
+                        <td style="font-weight: 700;">${s.name}</td>
+                        <td>${s.role}</td>
+                        <td>${s.phone}</td>
+                        <td style="text-align: center; color: #16A34A; font-weight: 700;">${stats.present}</td>
+                        <td style="text-align: center; color: #D97706;">${stats.halfDay}</td>
+                        <td style="text-align: center; color: #DC2626;">${stats.absent}</td>
+                        <td style="text-align: right;">₹ ${stats.grossSalary}</td>
+                        <td style="text-align: right; color: #DC2626;">₹ ${stats.deduction}</td>
+                        <td style="text-align: right; font-weight: 800; color: #16A34A;">₹ ${stats.netSalary}</td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            </body>
+          </html>
+        `;
+        await downloadAndSharePdf(`Staff_Payroll_Report_${cleanMonth}`, html);
+      } catch (err: any) {
+        Alert.alert(t('error', 'Error'), err?.message || 'Could not export PDF report.');
+      }
+    };
+
+    Alert.alert(
+      language === 'mr' ? 'कर्मचारी अहवाल शेअर करा' : 'Export Staff Report',
+      language === 'mr' ? 'फॉर्मॅट निवडा:' : 'Choose the format to export/share:',
+      [
+        { text: '📊 Excel Format', onPress: exportAsExcel },
+        { text: '📄 PDF Format', onPress: exportAsPdf },
+        { text: language === 'mr' ? 'रद्द करा' : 'Cancel', style: 'cancel' }
+      ]
+    );
   };
 
   const onDutyCount = staffList.filter((s) => s.status === 'ON_DUTY').length;
@@ -976,8 +1070,8 @@ export const StaffScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               style={[
                 styles.textInput,
                 formSubmitted &&
-                (!form.idProofNumber.trim() ||
-                  validateIdProofNumber(form.idProofType, form.idProofNumber, language as any))
+                  (!form.idProofNumber.trim() ||
+                    validateIdProofNumber(form.idProofType, form.idProofNumber, language as any))
                   ? styles.inputErrorBorder
                   : null,
               ]}
@@ -995,10 +1089,10 @@ export const StaffScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 form.idProofType === 'Aadhar Card'
                   ? '880990909008'
                   : form.idProofType === 'PAN Card'
-                  ? 'ABCDE1234F'
-                  : form.idProofType === 'Driving License'
-                  ? 'MH1220241234567'
-                  : 'ABC1234567'
+                    ? 'ABCDE1234F'
+                    : form.idProofType === 'Driving License'
+                      ? 'MH1220241234567'
+                      : 'ABC1234567'
               }
               placeholderTextColor="#94A3B8"
               keyboardType={form.idProofType === 'Aadhar Card' ? 'numeric' : 'default'}
@@ -1006,10 +1100,10 @@ export const StaffScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 form.idProofType === 'Aadhar Card'
                   ? 12
                   : form.idProofType === 'PAN Card'
-                  ? 10
-                  : form.idProofType === 'Driving License'
-                  ? 15
-                  : 10
+                    ? 10
+                    : form.idProofType === 'Driving License'
+                      ? 15
+                      : 10
               }
               autoCapitalize="characters"
             />
@@ -1267,10 +1361,10 @@ export const StaffScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             activeTab === 'ADD'
               ? undefined
               : activeTab === 'MONTHLY'
-              ? `${t('monthlyStaffReport', 'Monthly Staff Report')} • ${monthDisplayName}`
-              : activeTab === 'DAILY'
-              ? `${t('dailyAttendance', 'Daily Attendance Roll-Call')} • ${dailyDate}`
-              : `${t('staffRoster', 'Staff Roster & Shifts')} (${staffList.length} Staff)`
+                ? `${t('monthlyStaffReport', 'Monthly Staff Report')} • ${monthDisplayName}`
+                : activeTab === 'DAILY'
+                  ? `${t('dailyAttendance', 'Daily Attendance Roll-Call')} • ${dailyDate}`
+                  : `${t('staffRoster', 'Staff Roster & Shifts')} (${staffList.length} Staff)`
           }
           rightAction={
             <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
@@ -1924,8 +2018,8 @@ export const StaffScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     const dayName = language === 'mr'
                       ? ['रवि', 'सोम', 'मंगळ', 'बुध', 'गुरु', 'शुक्र', 'शनि'][dayOfWeekIdx]
                       : language === 'hi'
-                      ? ['रवि', 'सोम', 'मंगल', 'बुध', 'गुरु', 'शुक्र', 'शनि'][dayOfWeekIdx]
-                      : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][dayOfWeekIdx];
+                        ? ['रवि', 'सोम', 'मंगल', 'बुध', 'गुरु', 'शुक्र', 'शनि'][dayOfWeekIdx]
+                        : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][dayOfWeekIdx];
 
                     return (
                       <TouchableOpacity
@@ -1993,8 +2087,8 @@ export const StaffScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 {pickerModalType === 'DESIGNATION'
                   ? t('selectDesignation', 'Select Designation')
                   : pickerModalType === 'ID_PROOF'
-                  ? t('selectIdProof', 'Select ID Proof')
-                  : t('salaryFrequency', 'Salary Frequency')}
+                    ? t('selectIdProof', 'Select ID Proof')
+                    : t('salaryFrequency', 'Salary Frequency')}
               </Text>
               <TouchableOpacity onPress={() => setPickerModalType(null)}>
                 <X size={20} color="#64748B" />
@@ -2079,982 +2173,982 @@ const getStyles = (isDark: boolean) => {
   const subBg = isDark ? '#1E293B' : '#F8FAFC';
 
   return StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: isDark ? '#0B0F19' : '#F8FAFC',
-  },
-  content: {
-    padding: 14,
-    paddingBottom: 40,
-  },
-  webContentContainer: {
-    maxWidth: 960,
-    width: '100%',
-    alignSelf: 'center',
-  },
-  headerExportBtn: {
-    height: 34,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    gap: 5,
-  },
-  headerExportText: {
-    color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  subTabBar: {
-    flexDirection: 'row',
-    backgroundColor: cardBg,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: cardBorder,
-    padding: 6,
-    marginBottom: 14,
-    gap: 8,
-    shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  subTabItem: {
-    flex: 1,
-    height: 44,
-    borderRadius: 10,
-    backgroundColor: subBg,
-    borderWidth: 1,
-    borderColor: cardBorder,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  subTabItemActive: {
-    backgroundColor: '#4F46E5',
-    borderColor: '#4338CA',
-    shadowColor: '#4F46E5',
-    shadowOpacity: 0.3,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  branchPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFF7ED',
-    borderWidth: 1,
-    borderColor: '#FED7AA',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    gap: 8,
-    marginBottom: 12,
-  },
-  branchPillName: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#9A3412',
-  },
-  branchPillSub: {
-    fontSize: 10,
-    color: '#C2410C',
-  },
-  branchBadge: {
-    backgroundColor: '#EA580C',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  branchBadgeText: {
-    fontSize: 9,
-    fontWeight: '800',
-    color: '#FFFFFF',
-  },
-  monthSelectorBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: cardBg,
-    borderWidth: 1,
-    borderColor: cardBorder,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginBottom: 12,
-  },
-  monthArrowBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#EEF2FF',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  monthDisplayCenter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  monthDisplayTitle: {
-    fontSize: 15,
-    fontWeight: '900',
-    color: textPrimary,
-  },
-  monthDisplaySub: {
-    fontSize: 12,
-    color: '#64748B',
-    fontWeight: '600',
-  },
-  kpiGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-    marginBottom: 14,
-  },
-  kpiCard: {
-    flex: 1,
-    minWidth: '47%',
-    backgroundColor: cardBg,
-    borderRadius: 10,
-    borderWidth: 1.5,
-    padding: 9,
-  },
-  kpiTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  kpiLabel: {
-    fontSize: 10.5,
-    fontWeight: '700',
-    color: '#64748B',
-  },
-  kpiIconCircle: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  kpiNumber: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: textPrimary,
-  },
-  kpiHint: {
-    fontSize: 10,
-    color: '#64748B',
-    marginTop: 2,
-    fontWeight: '600',
-  },
-  filterSection: {
-    marginBottom: 12,
-  },
-  searchBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: cardBg,
-    borderWidth: 1,
-    borderColor: cardBorder,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    height: 42,
-    gap: 8,
-    marginBottom: 8,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 13,
-    color: textPrimary,
-  },
-  roleChipsRow: {
-    gap: 6,
-    paddingVertical: 2,
-  },
-  roleChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 20,
-    backgroundColor: '#F1F5F9',
-    borderWidth: 1,
-    borderColor: cardBorder,
-  },
-  roleChipActive: {
-    backgroundColor: '#4F46E5',
-    borderColor: '#4F46E5',
-  },
-  roleChipText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: textSecondary,
-  },
-  roleChipTextActive: {
-    color: '#FFFFFF',
-  },
-  staffCardsContainer: {
-    gap: 12,
-  },
-  monthlyStaffCard: {
-    backgroundColor: cardBg,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: cardBorder,
-    padding: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  monthlyCardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  avatarCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: '#EEF2FF',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarChar: {
-    fontSize: 16,
-    fontWeight: '900',
-    color: '#4F46E5',
-  },
-  staffNameText: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: textPrimary,
-  },
-  roleBadge: {
-    backgroundColor: '#F1F5F9',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: cardBorder,
-  },
-  roleBadgeText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: textSecondary,
-  },
-  staffSubText: {
-    fontSize: 11,
-    color: '#64748B',
-    marginTop: 2,
-  },
-  attendanceBarContainer: {
-    flexDirection: 'row',
-    backgroundColor: subBg,
-    borderRadius: 10,
-    paddingVertical: 8,
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#F1F5F9',
-  },
-  attCountBox: {
-    alignItems: 'center',
-  },
-  attCountNum: {
-    fontSize: 16,
-    fontWeight: '900',
-  },
-  attCountLabel: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#64748B',
-    marginTop: 1,
-  },
-  attDivider: {
-    width: 1,
-    height: 24,
-    backgroundColor: '#E2E8F0',
-  },
-  progressContainer: {
-    marginBottom: 10,
-  },
-  progressLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: textSecondary,
-  },
-  progressVal: {
-    fontSize: 12,
-    fontWeight: '800',
-  },
-  progressTrack: {
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#E2E8F0',
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    borderRadius: 3,
-  },
-  salarySection: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#F1F5F9',
-    marginBottom: 10,
-  },
-  salaryLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: textSecondary,
-  },
-  deductionLabel: {
-    fontSize: 10,
-    color: '#DC2626',
-    fontWeight: '600',
-  },
-  netPayoutBadge: {
-    backgroundColor: '#F0FDF4',
-    borderWidth: 1,
-    borderColor: '#BBF7D0',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    alignItems: 'flex-end',
-  },
-  netPayoutLabel: {
-    fontSize: 9,
-    fontWeight: '800',
-    color: '#15803D',
-  },
-  netPayoutAmount: {
-    fontSize: 14,
-    fontWeight: '900',
-    color: '#15803D',
-  },
-  openMatrixBtn: {
-    minHeight: 36,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#EEF2FF',
-    borderRadius: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    gap: 6,
-  },
-  openMatrixText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#4F46E5',
-  },
-  // Daily Roll-call
-  dailyDateBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: cardBg,
-    borderRadius: 12,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: cardBorder,
-    marginBottom: 12,
-  },
-  dailyDateLabel: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#4F46E5',
-    letterSpacing: 0.5,
-  },
-  dailyDateValue: {
-    fontSize: 16,
-    fontWeight: '900',
-    color: textPrimary,
-  },
-  markAllBtn: {
-    minHeight: 34,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#16A34A',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    gap: 6,
-  },
-  markAllText: {
-    color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: '800',
-  },
-  dailyCardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  dailyStaffCard: {
-    backgroundColor: cardBg,
-    borderRadius: 10,
-    padding: 9,
-    borderWidth: 1,
-    borderColor: cardBorder,
-  },
-  avatarCircleSmall: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#EEF2FF',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarCharSmall: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: '#4F46E5',
-  },
-  statusPillsRow: {
-    flexDirection: 'row',
-    gap: 6,
-    marginTop: 10,
-  },
-  statusPill: {
-    flex: 1,
-    minHeight: 32,
-    backgroundColor: subBg,
-    borderWidth: 1,
-    borderColor: cardBorder,
-    borderRadius: 8,
-    paddingVertical: 6,
-    paddingHorizontal: 4,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  statusPillPresent: {
-    backgroundColor: '#DCFCE7',
-    borderColor: '#86EFAC',
-  },
-  statusPillHalf: {
-    backgroundColor: '#FEF3C7',
-    borderColor: '#FCD34D',
-  },
-  statusPillAbsent: {
-    backgroundColor: '#FEE2E2',
-    borderColor: '#FCA5A5',
-  },
-  statusPillOff: {
-    backgroundColor: '#DBEAFE',
-    borderColor: '#93C5FD',
-  },
-  statusPillText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#64748B',
-  },
-  statusPillTextActive: {
-    color: textPrimary,
-    fontWeight: '900',
-  },
-  // Staff Roster
-  summaryCard: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: cardBg,
-    borderWidth: 1.5,
-    borderColor: '#E0E7FF',
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 12,
-  },
-  summaryLabel: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#4F46E5',
-    letterSpacing: 0.5,
-  },
-  summaryNumber: {
-    fontSize: 22,
-    fontWeight: '900',
-    color: textPrimary,
-    marginTop: 2,
-  },
-  usersIconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: '#EEF2FF',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  actionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 10,
-  },
-  rosterSearchBox: {
-    flex: 1,
-    height: 42,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: cardBg,
-    borderWidth: 1,
-    borderColor: cardBorder,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    gap: 8,
-  },
-  addBtn: {
-    height: 42,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#4F46E5',
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    gap: 6,
-  },
-  addBtnText: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  staffCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: cardBg,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#F0EBE1',
-    padding: 9,
-  },
-  staffName: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: textPrimary,
-  },
-  statusToggleBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 12,
-  },
-  statusOn: { backgroundColor: '#DCFCE7' },
-  statusOff: { backgroundColor: '#F1F5F9' },
-  statusToggleText: { fontSize: 10, fontWeight: '700' },
-  statusOnText: { color: '#15803D' },
-  statusOffText: { color: '#64748B' },
-  rolePill: {
-    backgroundColor: subBg,
-    borderWidth: 1,
-    borderColor: cardBorder,
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-    borderRadius: 6,
-  },
-  roleText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: textSecondary,
-  },
-  shiftText: {
-    fontSize: 11,
-    color: '#64748B',
-  },
-  phoneText: {
-    fontSize: 11,
-    color: '#64748B',
-  },
-  // Matrix modal
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 16,
-  },
-  modalContentLarge: {
-    width: '100%',
-    maxWidth: 500,
-    height: '80%',
-    backgroundColor: cardBg,
-    borderRadius: 16,
-    padding: 16,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  modalTitle: {
-    fontSize: 17,
-    fontWeight: '900',
-    color: textPrimary,
-  },
-  modalSubtitle: {
-    fontSize: 12,
-    color: '#64748B',
-    marginTop: 2,
-  },
-  matrixMetricsBox: {
-    flexDirection: 'row',
-    backgroundColor: subBg,
-    borderRadius: 10,
-    padding: 8,
-    justifyContent: 'space-around',
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: cardBorder,
-  },
-  matrixMetricItem: {
-    alignItems: 'center',
-  },
-  matrixMetricNum: {
-    fontSize: 15,
-    fontWeight: '900',
-    color: textPrimary,
-  },
-  matrixMetricLabel: {
-    fontSize: 10,
-    color: '#64748B',
-    fontWeight: '700',
-    marginTop: 1,
-  },
-  matrixInstruction: {
-    fontSize: 11,
-    color: '#64748B',
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  calendarGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    paddingBottom: 20,
-  },
-  calDayBox: {
-    width: '22%',
-    aspectRatio: 1.1,
-    borderRadius: 8,
-    borderWidth: 1.5,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: cardBg,
-  },
-  calDayPresent: {
-    backgroundColor: '#F0FDF4',
-    borderColor: '#86EFAC',
-  },
-  calDayHalf: {
-    backgroundColor: '#FFFBEB',
-    borderColor: '#FCD34D',
-  },
-  calDayAbsent: {
-    backgroundColor: '#FEF2F2',
-    borderColor: '#FCA5A5',
-  },
-  calDayOff: {
-    backgroundColor: '#EFF6FF',
-    borderColor: '#93C5FD',
-  },
-  calDayNum: {
-    fontSize: 12,
-    fontWeight: '900',
-    color: textPrimary,
-  },
-  calDayName: {
-    fontSize: 9,
-    color: '#64748B',
-    fontWeight: '600',
-  },
-  calStatusBadge: {
-    marginTop: 2,
-    paddingHorizontal: 4,
-    borderRadius: 4,
-  },
-  calStatusText: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: textPrimary,
-  },
-  closeMatrixBtn: {
-    backgroundColor: '#4F46E5',
-    borderRadius: 10,
-    paddingVertical: 12,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  closeMatrixBtnText: {
-    color: '#FFFFFF',
-    fontWeight: '800',
-    fontSize: 13,
-  },
-  // Header Add Staff button
-  headerAddBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: '#EA580C',
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 8,
-    shadowColor: '#EA580C',
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
-  },
-  headerAddText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-    fontSize: 12,
-  },
+    container: {
+      flex: 1,
+      backgroundColor: isDark ? '#0B0F19' : '#F8FAFC',
+    },
+    content: {
+      padding: 14,
+      paddingBottom: 40,
+    },
+    webContentContainer: {
+      maxWidth: 960,
+      width: '100%',
+      alignSelf: 'center',
+    },
+    headerExportBtn: {
+      height: 34,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: 'rgba(255, 255, 255, 0.2)',
+      paddingHorizontal: 12,
+      borderRadius: 8,
+      gap: 5,
+    },
+    headerExportText: {
+      color: '#FFFFFF',
+      fontSize: 11,
+      fontWeight: '700',
+    },
+    subTabBar: {
+      flexDirection: 'row',
+      backgroundColor: cardBg,
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: cardBorder,
+      padding: 6,
+      marginBottom: 14,
+      gap: 8,
+      shadowColor: '#000',
+      shadowOpacity: 0.04,
+      shadowOffset: { width: 0, height: 2 },
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    subTabItem: {
+      flex: 1,
+      height: 44,
+      borderRadius: 10,
+      backgroundColor: subBg,
+      borderWidth: 1,
+      borderColor: cardBorder,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    subTabItemActive: {
+      backgroundColor: '#4F46E5',
+      borderColor: '#4338CA',
+      shadowColor: '#4F46E5',
+      shadowOpacity: 0.3,
+      shadowOffset: { width: 0, height: 2 },
+      shadowRadius: 4,
+      elevation: 3,
+    },
+    branchPill: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: '#FFF7ED',
+      borderWidth: 1,
+      borderColor: '#FED7AA',
+      borderRadius: 10,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      gap: 8,
+      marginBottom: 12,
+    },
+    branchPillName: {
+      fontSize: 12,
+      fontWeight: '800',
+      color: '#9A3412',
+    },
+    branchPillSub: {
+      fontSize: 10,
+      color: '#C2410C',
+    },
+    branchBadge: {
+      backgroundColor: '#EA580C',
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 4,
+    },
+    branchBadgeText: {
+      fontSize: 9,
+      fontWeight: '800',
+      color: '#FFFFFF',
+    },
+    monthSelectorBar: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: cardBg,
+      borderWidth: 1,
+      borderColor: cardBorder,
+      borderRadius: 12,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      marginBottom: 12,
+    },
+    monthArrowBtn: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: '#EEF2FF',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    monthDisplayCenter: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
+    monthDisplayTitle: {
+      fontSize: 15,
+      fontWeight: '900',
+      color: textPrimary,
+    },
+    monthDisplaySub: {
+      fontSize: 12,
+      color: '#64748B',
+      fontWeight: '600',
+    },
+    kpiGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 10,
+      marginBottom: 14,
+    },
+    kpiCard: {
+      flex: 1,
+      minWidth: '47%',
+      backgroundColor: cardBg,
+      borderRadius: 10,
+      borderWidth: 1.5,
+      padding: 9,
+    },
+    kpiTop: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 4,
+    },
+    kpiLabel: {
+      fontSize: 10.5,
+      fontWeight: '700',
+      color: '#64748B',
+    },
+    kpiIconCircle: {
+      width: 26,
+      height: 26,
+      borderRadius: 13,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    kpiNumber: {
+      fontSize: 18,
+      fontWeight: '900',
+      color: textPrimary,
+    },
+    kpiHint: {
+      fontSize: 10,
+      color: '#64748B',
+      marginTop: 2,
+      fontWeight: '600',
+    },
+    filterSection: {
+      marginBottom: 12,
+    },
+    searchBox: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: cardBg,
+      borderWidth: 1,
+      borderColor: cardBorder,
+      borderRadius: 10,
+      paddingHorizontal: 12,
+      height: 42,
+      gap: 8,
+      marginBottom: 8,
+    },
+    searchInput: {
+      flex: 1,
+      fontSize: 13,
+      color: textPrimary,
+    },
+    roleChipsRow: {
+      gap: 6,
+      paddingVertical: 2,
+    },
+    roleChip: {
+      paddingHorizontal: 12,
+      paddingVertical: 5,
+      borderRadius: 20,
+      backgroundColor: '#F1F5F9',
+      borderWidth: 1,
+      borderColor: cardBorder,
+    },
+    roleChipActive: {
+      backgroundColor: '#4F46E5',
+      borderColor: '#4F46E5',
+    },
+    roleChipText: {
+      fontSize: 11,
+      fontWeight: '700',
+      color: textSecondary,
+    },
+    roleChipTextActive: {
+      color: '#FFFFFF',
+    },
+    staffCardsContainer: {
+      gap: 12,
+    },
+    monthlyStaffCard: {
+      backgroundColor: cardBg,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: cardBorder,
+      padding: 10,
+      shadowColor: '#000',
+      shadowOpacity: 0.04,
+      shadowOffset: { width: 0, height: 2 },
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    monthlyCardHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 8,
+    },
+    avatarCircle: {
+      width: 38,
+      height: 38,
+      borderRadius: 19,
+      backgroundColor: '#EEF2FF',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    avatarChar: {
+      fontSize: 16,
+      fontWeight: '900',
+      color: '#4F46E5',
+    },
+    staffNameText: {
+      fontSize: 15,
+      fontWeight: '800',
+      color: textPrimary,
+    },
+    roleBadge: {
+      backgroundColor: '#F1F5F9',
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: cardBorder,
+    },
+    roleBadgeText: {
+      fontSize: 10,
+      fontWeight: '700',
+      color: textSecondary,
+    },
+    staffSubText: {
+      fontSize: 11,
+      color: '#64748B',
+      marginTop: 2,
+    },
+    attendanceBarContainer: {
+      flexDirection: 'row',
+      backgroundColor: subBg,
+      borderRadius: 10,
+      paddingVertical: 8,
+      alignItems: 'center',
+      justifyContent: 'space-around',
+      marginBottom: 10,
+      borderWidth: 1,
+      borderColor: '#F1F5F9',
+    },
+    attCountBox: {
+      alignItems: 'center',
+    },
+    attCountNum: {
+      fontSize: 16,
+      fontWeight: '900',
+    },
+    attCountLabel: {
+      fontSize: 10,
+      fontWeight: '700',
+      color: '#64748B',
+      marginTop: 1,
+    },
+    attDivider: {
+      width: 1,
+      height: 24,
+      backgroundColor: '#E2E8F0',
+    },
+    progressContainer: {
+      marginBottom: 10,
+    },
+    progressLabel: {
+      fontSize: 11,
+      fontWeight: '700',
+      color: textSecondary,
+    },
+    progressVal: {
+      fontSize: 12,
+      fontWeight: '800',
+    },
+    progressTrack: {
+      height: 6,
+      borderRadius: 3,
+      backgroundColor: '#E2E8F0',
+      overflow: 'hidden',
+    },
+    progressFill: {
+      height: '100%',
+      borderRadius: 3,
+    },
+    salarySection: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingTop: 8,
+      borderTopWidth: 1,
+      borderTopColor: '#F1F5F9',
+      marginBottom: 10,
+    },
+    salaryLabel: {
+      fontSize: 11,
+      fontWeight: '700',
+      color: textSecondary,
+    },
+    deductionLabel: {
+      fontSize: 10,
+      color: '#DC2626',
+      fontWeight: '600',
+    },
+    netPayoutBadge: {
+      backgroundColor: '#F0FDF4',
+      borderWidth: 1,
+      borderColor: '#BBF7D0',
+      borderRadius: 8,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      alignItems: 'flex-end',
+    },
+    netPayoutLabel: {
+      fontSize: 9,
+      fontWeight: '800',
+      color: '#15803D',
+    },
+    netPayoutAmount: {
+      fontSize: 14,
+      fontWeight: '900',
+      color: '#15803D',
+    },
+    openMatrixBtn: {
+      minHeight: 36,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: '#EEF2FF',
+      borderRadius: 8,
+      paddingVertical: 8,
+      paddingHorizontal: 10,
+      gap: 6,
+    },
+    openMatrixText: {
+      fontSize: 11,
+      fontWeight: '800',
+      color: '#4F46E5',
+    },
+    // Daily Roll-call
+    dailyDateBar: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      backgroundColor: cardBg,
+      borderRadius: 12,
+      padding: 12,
+      borderWidth: 1,
+      borderColor: cardBorder,
+      marginBottom: 12,
+    },
+    dailyDateLabel: {
+      fontSize: 10,
+      fontWeight: '800',
+      color: '#4F46E5',
+      letterSpacing: 0.5,
+    },
+    dailyDateValue: {
+      fontSize: 16,
+      fontWeight: '900',
+      color: textPrimary,
+    },
+    markAllBtn: {
+      minHeight: 34,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: '#16A34A',
+      borderRadius: 8,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      gap: 6,
+    },
+    markAllText: {
+      color: '#FFFFFF',
+      fontSize: 11,
+      fontWeight: '800',
+    },
+    dailyCardHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    dailyStaffCard: {
+      backgroundColor: cardBg,
+      borderRadius: 10,
+      padding: 9,
+      borderWidth: 1,
+      borderColor: cardBorder,
+    },
+    avatarCircleSmall: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: '#EEF2FF',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    avatarCharSmall: {
+      fontSize: 15,
+      fontWeight: '800',
+      color: '#4F46E5',
+    },
+    statusPillsRow: {
+      flexDirection: 'row',
+      gap: 6,
+      marginTop: 10,
+    },
+    statusPill: {
+      flex: 1,
+      minHeight: 32,
+      backgroundColor: subBg,
+      borderWidth: 1,
+      borderColor: cardBorder,
+      borderRadius: 8,
+      paddingVertical: 6,
+      paddingHorizontal: 4,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    statusPillPresent: {
+      backgroundColor: '#DCFCE7',
+      borderColor: '#86EFAC',
+    },
+    statusPillHalf: {
+      backgroundColor: '#FEF3C7',
+      borderColor: '#FCD34D',
+    },
+    statusPillAbsent: {
+      backgroundColor: '#FEE2E2',
+      borderColor: '#FCA5A5',
+    },
+    statusPillOff: {
+      backgroundColor: '#DBEAFE',
+      borderColor: '#93C5FD',
+    },
+    statusPillText: {
+      fontSize: 10,
+      fontWeight: '700',
+      color: '#64748B',
+    },
+    statusPillTextActive: {
+      color: textPrimary,
+      fontWeight: '900',
+    },
+    // Staff Roster
+    summaryCard: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      backgroundColor: cardBg,
+      borderWidth: 1.5,
+      borderColor: '#E0E7FF',
+      borderRadius: 14,
+      padding: 16,
+      marginBottom: 12,
+    },
+    summaryLabel: {
+      fontSize: 10,
+      fontWeight: '800',
+      color: '#4F46E5',
+      letterSpacing: 0.5,
+    },
+    summaryNumber: {
+      fontSize: 22,
+      fontWeight: '900',
+      color: textPrimary,
+      marginTop: 2,
+    },
+    usersIconBox: {
+      width: 44,
+      height: 44,
+      borderRadius: 12,
+      backgroundColor: '#EEF2FF',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    actionRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      marginBottom: 10,
+    },
+    rosterSearchBox: {
+      flex: 1,
+      height: 42,
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: cardBg,
+      borderWidth: 1,
+      borderColor: cardBorder,
+      borderRadius: 10,
+      paddingHorizontal: 12,
+      gap: 8,
+    },
+    addBtn: {
+      height: 42,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: '#4F46E5',
+      borderRadius: 10,
+      paddingHorizontal: 14,
+      gap: 6,
+    },
+    addBtnText: {
+      color: '#FFFFFF',
+      fontSize: 13,
+      fontWeight: '700',
+    },
+    staffCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: cardBg,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: '#F0EBE1',
+      padding: 9,
+    },
+    staffName: {
+      fontSize: 14,
+      fontWeight: '800',
+      color: textPrimary,
+    },
+    statusToggleBadge: {
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      borderRadius: 12,
+    },
+    statusOn: { backgroundColor: '#DCFCE7' },
+    statusOff: { backgroundColor: '#F1F5F9' },
+    statusToggleText: { fontSize: 10, fontWeight: '700' },
+    statusOnText: { color: '#15803D' },
+    statusOffText: { color: '#64748B' },
+    rolePill: {
+      backgroundColor: subBg,
+      borderWidth: 1,
+      borderColor: cardBorder,
+      paddingHorizontal: 6,
+      paddingVertical: 1,
+      borderRadius: 6,
+    },
+    roleText: {
+      fontSize: 10,
+      fontWeight: '700',
+      color: textSecondary,
+    },
+    shiftText: {
+      fontSize: 11,
+      color: '#64748B',
+    },
+    phoneText: {
+      fontSize: 11,
+      color: '#64748B',
+    },
+    // Matrix modal
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 16,
+    },
+    modalContentLarge: {
+      width: '100%',
+      maxWidth: 500,
+      height: '80%',
+      backgroundColor: cardBg,
+      borderRadius: 16,
+      padding: 16,
+    },
+    modalHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 12,
+    },
+    modalTitle: {
+      fontSize: 17,
+      fontWeight: '900',
+      color: textPrimary,
+    },
+    modalSubtitle: {
+      fontSize: 12,
+      color: '#64748B',
+      marginTop: 2,
+    },
+    matrixMetricsBox: {
+      flexDirection: 'row',
+      backgroundColor: subBg,
+      borderRadius: 10,
+      padding: 8,
+      justifyContent: 'space-around',
+      marginBottom: 10,
+      borderWidth: 1,
+      borderColor: cardBorder,
+    },
+    matrixMetricItem: {
+      alignItems: 'center',
+    },
+    matrixMetricNum: {
+      fontSize: 15,
+      fontWeight: '900',
+      color: textPrimary,
+    },
+    matrixMetricLabel: {
+      fontSize: 10,
+      color: '#64748B',
+      fontWeight: '700',
+      marginTop: 1,
+    },
+    matrixInstruction: {
+      fontSize: 11,
+      color: '#64748B',
+      marginBottom: 10,
+      textAlign: 'center',
+    },
+    calendarGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 8,
+      paddingBottom: 20,
+    },
+    calDayBox: {
+      width: '22%',
+      aspectRatio: 1.1,
+      borderRadius: 8,
+      borderWidth: 1.5,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: cardBg,
+    },
+    calDayPresent: {
+      backgroundColor: '#F0FDF4',
+      borderColor: '#86EFAC',
+    },
+    calDayHalf: {
+      backgroundColor: '#FFFBEB',
+      borderColor: '#FCD34D',
+    },
+    calDayAbsent: {
+      backgroundColor: '#FEF2F2',
+      borderColor: '#FCA5A5',
+    },
+    calDayOff: {
+      backgroundColor: '#EFF6FF',
+      borderColor: '#93C5FD',
+    },
+    calDayNum: {
+      fontSize: 12,
+      fontWeight: '900',
+      color: textPrimary,
+    },
+    calDayName: {
+      fontSize: 9,
+      color: '#64748B',
+      fontWeight: '600',
+    },
+    calStatusBadge: {
+      marginTop: 2,
+      paddingHorizontal: 4,
+      borderRadius: 4,
+    },
+    calStatusText: {
+      fontSize: 10,
+      fontWeight: '900',
+      color: textPrimary,
+    },
+    closeMatrixBtn: {
+      backgroundColor: '#4F46E5',
+      borderRadius: 10,
+      paddingVertical: 12,
+      alignItems: 'center',
+      marginTop: 8,
+    },
+    closeMatrixBtnText: {
+      color: '#FFFFFF',
+      fontWeight: '800',
+      fontSize: 13,
+    },
+    // Header Add Staff button
+    headerAddBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      backgroundColor: '#EA580C',
+      paddingHorizontal: 12,
+      paddingVertical: 7,
+      borderRadius: 8,
+      shadowColor: '#EA580C',
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      shadowOffset: { width: 0, height: 2 },
+      elevation: 2,
+    },
+    headerAddText: {
+      color: '#FFFFFF',
+      fontWeight: '700',
+      fontSize: 12,
+    },
 
-  // Vite Add Staff Card & Modal Styling
-  modalContentViteWrapper: {
-    width: '100%',
-    maxWidth: 720,
-    maxHeight: '92%',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  viteStaffCard: {
-    width: '100%',
-    maxWidth: 720,
-    backgroundColor: cardBg,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: cardBorder,
-    padding: 18,
-    shadowColor: '#000000',
-    shadowOpacity: isDark ? 0.35 : 0.08,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 6,
-  },
-  viteStaffCardWide: {
-    padding: 22,
-  },
-  viteFormHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingBottom: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: cardBorder,
-    marginBottom: 16,
-  },
-  viteFormIconBadge: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: isDark ? '#3E1C0A' : '#FFF7ED',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  viteFormTitle: {
-    fontSize: 17,
-    fontWeight: '800',
-    color: textPrimary,
-  },
-  viteModalCloseBtn: {
-    padding: 6,
-    borderRadius: 8,
-    backgroundColor: subBg,
-  },
-  fieldRow: {
-    gap: 12,
-    marginBottom: 4,
-  },
-  fieldRow3Col: {
-    flexDirection: 'row',
-  },
-  formSectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginTop: 14,
-    marginBottom: 10,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: isDark ? '#1F2937' : '#F1F5F9',
-  },
-  formSectionTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: textPrimary,
-  },
-  modalField: {
-    marginBottom: 8,
-  },
-  fieldLabel: {
-    fontSize: 12.5,
-    fontWeight: '600',
-    color: textSecondary,
-    marginBottom: 5,
-  },
-  requiredStar: {
-    color: '#EF4444',
-    fontWeight: '700',
-  },
-  inputWithIcon: {
-    position: 'relative',
-    justifyContent: 'center',
-  },
-  textInput: {
-    backgroundColor: subBg,
-    borderWidth: 1,
-    borderColor: isDark ? '#334155' : '#D1D5DB',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: Platform.OS === 'ios' ? 12 : 9,
-    fontSize: 13.5,
-    color: textPrimary,
-    minHeight: 46,
-  },
-  inputErrorBorder: {
-    borderColor: '#EF4444',
-    borderWidth: 1.5,
-  },
-  inputInnerIcon: {
-    position: 'absolute',
-    right: 12,
-  },
-  inputPrefixIcon: {
-    position: 'absolute',
-    left: 10,
-    zIndex: 1,
-  },
-  selectBox: {
-    backgroundColor: subBg,
-    borderWidth: 1,
-    borderColor: isDark ? '#334155' : '#D1D5DB',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 11,
-    minHeight: 46,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  selectBoxText: {
-    fontSize: 13,
-    color: textPrimary,
-    fontWeight: '500',
-    flex: 1,
-    marginRight: 6,
-  },
-  errorText: {
-    color: '#EF4444',
-    fontSize: 11,
-    marginTop: 4,
-    fontWeight: '500',
-  },
-  formButtonRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: 12,
-    marginTop: 18,
-    paddingTop: 14,
-    borderTopWidth: 1,
-    borderTopColor: cardBorder,
-  },
-  formButtonRowMobile: {
-    justifyContent: 'space-between',
-  },
-  saveStaffBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    backgroundColor: '#EA580C',
-    paddingVertical: 13,
-    paddingHorizontal: 22,
-    borderRadius: 8,
-    shadowColor: '#EA580C',
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
-  },
-  saveStaffBtnText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-    fontSize: 14,
-  },
-  cancelStaffBtn: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 13,
-    paddingHorizontal: 18,
-    borderRadius: 8,
-    backgroundColor: isDark ? '#334155' : '#64748B',
-  },
-  cancelStaffBtnText: {
-    color: '#FFFFFF',
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  pickerBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.55)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  pickerModalBox: {
-    width: '100%',
-    maxWidth: 380,
-    backgroundColor: cardBg,
-    borderRadius: 14,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-    elevation: 6,
-  },
-  pickerModalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: cardBorder,
-    marginBottom: 8,
-  },
-  pickerModalTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: textPrimary,
-  },
-  pickerItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    marginBottom: 4,
-  },
-  pickerItemActive: {
-    backgroundColor: isDark ? '#3E1C0A' : '#FFF7ED',
-  },
-  pickerItemText: {
-    fontSize: 13,
-    color: textPrimary,
-    fontWeight: '500',
-  },
-  pickerItemTextActive: {
-    color: '#EA580C',
-    fontWeight: '700',
-  },
+    // Vite Add Staff Card & Modal Styling
+    modalContentViteWrapper: {
+      width: '100%',
+      maxWidth: 720,
+      maxHeight: '92%',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    viteStaffCard: {
+      width: '100%',
+      maxWidth: 720,
+      backgroundColor: cardBg,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: cardBorder,
+      padding: 18,
+      shadowColor: '#000000',
+      shadowOpacity: isDark ? 0.35 : 0.08,
+      shadowRadius: 14,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 6,
+    },
+    viteStaffCardWide: {
+      padding: 22,
+    },
+    viteFormHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingBottom: 14,
+      borderBottomWidth: 1,
+      borderBottomColor: cardBorder,
+      marginBottom: 16,
+    },
+    viteFormIconBadge: {
+      width: 36,
+      height: 36,
+      borderRadius: 10,
+      backgroundColor: isDark ? '#3E1C0A' : '#FFF7ED',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    viteFormTitle: {
+      fontSize: 17,
+      fontWeight: '800',
+      color: textPrimary,
+    },
+    viteModalCloseBtn: {
+      padding: 6,
+      borderRadius: 8,
+      backgroundColor: subBg,
+    },
+    fieldRow: {
+      gap: 12,
+      marginBottom: 4,
+    },
+    fieldRow3Col: {
+      flexDirection: 'row',
+    },
+    formSectionHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      marginTop: 14,
+      marginBottom: 10,
+      paddingTop: 12,
+      borderTopWidth: 1,
+      borderTopColor: isDark ? '#1F2937' : '#F1F5F9',
+    },
+    formSectionTitle: {
+      fontSize: 14,
+      fontWeight: '700',
+      color: textPrimary,
+    },
+    modalField: {
+      marginBottom: 8,
+    },
+    fieldLabel: {
+      fontSize: 12.5,
+      fontWeight: '600',
+      color: textSecondary,
+      marginBottom: 5,
+    },
+    requiredStar: {
+      color: '#EF4444',
+      fontWeight: '700',
+    },
+    inputWithIcon: {
+      position: 'relative',
+      justifyContent: 'center',
+    },
+    textInput: {
+      backgroundColor: subBg,
+      borderWidth: 1,
+      borderColor: isDark ? '#334155' : '#D1D5DB',
+      borderRadius: 8,
+      paddingHorizontal: 12,
+      paddingVertical: Platform.OS === 'ios' ? 12 : 9,
+      fontSize: 13.5,
+      color: textPrimary,
+      minHeight: 46,
+    },
+    inputErrorBorder: {
+      borderColor: '#EF4444',
+      borderWidth: 1.5,
+    },
+    inputInnerIcon: {
+      position: 'absolute',
+      right: 12,
+    },
+    inputPrefixIcon: {
+      position: 'absolute',
+      left: 10,
+      zIndex: 1,
+    },
+    selectBox: {
+      backgroundColor: subBg,
+      borderWidth: 1,
+      borderColor: isDark ? '#334155' : '#D1D5DB',
+      borderRadius: 8,
+      paddingHorizontal: 12,
+      paddingVertical: 11,
+      minHeight: 46,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    selectBoxText: {
+      fontSize: 13,
+      color: textPrimary,
+      fontWeight: '500',
+      flex: 1,
+      marginRight: 6,
+    },
+    errorText: {
+      color: '#EF4444',
+      fontSize: 11,
+      marginTop: 4,
+      fontWeight: '500',
+    },
+    formButtonRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'flex-end',
+      gap: 12,
+      marginTop: 18,
+      paddingTop: 14,
+      borderTopWidth: 1,
+      borderTopColor: cardBorder,
+    },
+    formButtonRowMobile: {
+      justifyContent: 'space-between',
+    },
+    saveStaffBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 6,
+      backgroundColor: '#EA580C',
+      paddingVertical: 13,
+      paddingHorizontal: 22,
+      borderRadius: 8,
+      shadowColor: '#EA580C',
+      shadowOpacity: 0.3,
+      shadowRadius: 5,
+      shadowOffset: { width: 0, height: 2 },
+      elevation: 3,
+    },
+    saveStaffBtnText: {
+      color: '#FFFFFF',
+      fontWeight: '700',
+      fontSize: 14,
+    },
+    cancelStaffBtn: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 13,
+      paddingHorizontal: 18,
+      borderRadius: 8,
+      backgroundColor: isDark ? '#334155' : '#64748B',
+    },
+    cancelStaffBtnText: {
+      color: '#FFFFFF',
+      fontWeight: '600',
+      fontSize: 14,
+    },
+    pickerBackdrop: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.55)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 20,
+    },
+    pickerModalBox: {
+      width: '100%',
+      maxWidth: 380,
+      backgroundColor: cardBg,
+      borderRadius: 14,
+      padding: 16,
+      shadowColor: '#000',
+      shadowOpacity: 0.25,
+      shadowRadius: 10,
+      elevation: 6,
+    },
+    pickerModalHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingBottom: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: cardBorder,
+      marginBottom: 8,
+    },
+    pickerModalTitle: {
+      fontSize: 15,
+      fontWeight: '700',
+      color: textPrimary,
+    },
+    pickerItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 12,
+      paddingHorizontal: 12,
+      borderRadius: 8,
+      marginBottom: 4,
+    },
+    pickerItemActive: {
+      backgroundColor: isDark ? '#3E1C0A' : '#FFF7ED',
+    },
+    pickerItemText: {
+      fontSize: 13,
+      color: textPrimary,
+      fontWeight: '500',
+    },
+    pickerItemTextActive: {
+      color: '#EA580C',
+      fontWeight: '700',
+    },
   });
 };

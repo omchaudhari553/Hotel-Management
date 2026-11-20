@@ -1,6 +1,7 @@
 import { Platform, Alert, Linking, Share } from 'react-native';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
+import * as FileSystem from 'expo-file-system/legacy';
 
 /**
  * Downloads / shares a styled PDF report to web or mobile device
@@ -70,7 +71,6 @@ export async function downloadAndSharePdf(title: string, htmlContent: string): P
 
       let shareUri = uri;
       try {
-        const FileSystem = require('expo-file-system');
         const baseDir = FileSystem.cacheDirectory || FileSystem.documentDirectory;
         if (baseDir) {
           const cleanTitle = (title || 'Report').replace(/[^a-zA-Z0-9_-]/g, '_');
@@ -97,6 +97,7 @@ export async function downloadAndSharePdf(title: string, htmlContent: string): P
         await Sharing.shareAsync(shareUri, {
           mimeType: 'application/pdf',
           dialogTitle: `${title || 'Hotel Report'}`,
+          UTI: 'com.adobe.pdf',
         });
         return;
       }
@@ -123,14 +124,19 @@ export async function downloadAndSharePdf(title: string, htmlContent: string): P
 }
 
 /**
- * Downloads / shares a CSV file cross-platform
+ * Downloads / shares a CSV / Excel-compatible spreadsheet file cross-platform
  */
-export async function downloadAndShareCsv(filename: string, csvData: string): Promise<void> {
+export async function downloadAndShareCsv(
+  filename: string,
+  csvData: string,
+  dialogTitle?: string
+): Promise<void> {
   try {
     const cleanFilename = filename.endsWith('.csv') ? filename : `${filename}.csv`;
 
     if (Platform.OS === 'web' && typeof document !== 'undefined') {
-      const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+      const contentWithBom = csvData.startsWith('\uFEFF') ? csvData : `\uFEFF${csvData}`;
+      const blob = new Blob([contentWithBom], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.setAttribute('href', url);
@@ -146,35 +152,56 @@ export async function downloadAndShareCsv(filename: string, csvData: string): Pr
       return;
     }
 
-    // Mobile fallback: Try expo-file-system if present, else native Share
+    // Mobile (Android / iOS): Write file to disk and share via expo-sharing as actual document attachment
     try {
-      const FileSystem = require('expo-file-system');
-      const baseDir = FileSystem.documentDirectory || FileSystem.cacheDirectory;
-      const sep = baseDir && !baseDir.endsWith('/') ? '/' : '';
+      const baseDir = FileSystem.cacheDirectory || FileSystem.documentDirectory;
+      if (!baseDir) {
+        throw new Error('Local file storage is not accessible.');
+      }
+      const sep = baseDir.endsWith('/') ? '' : '/';
       const targetUri = `${baseDir}${sep}${cleanFilename}`;
-      await FileSystem.writeAsStringAsync(targetUri, csvData, {
-        encoding: FileSystem.EncodingType?.UTF8 || 'utf8',
+
+      // Write UTF-8 BOM so Excel on Android/iOS/Windows displays UTF-8 and ₹ properly
+      const contentWithBom = csvData.startsWith('\uFEFF') ? csvData : `\uFEFF${csvData}`;
+
+      try {
+        const info = await FileSystem.getInfoAsync(targetUri);
+        if (info.exists) {
+          await FileSystem.deleteAsync(targetUri, { idempotent: true });
+        }
+      } catch {}
+
+      await FileSystem.writeAsStringAsync(targetUri, contentWithBom, {
+        encoding: FileSystem.EncodingType.UTF8,
       });
 
       const isAvailable = await Sharing.isAvailableAsync();
       if (isAvailable) {
+        // Use application/vnd.ms-excel so WhatsApp and other apps share as Excel file attachment, NOT text message
         await Sharing.shareAsync(targetUri, {
-          mimeType: 'text/csv',
-          dialogTitle: `Download ${cleanFilename}`,
-          UTI: 'public.comma-separated-values-text',
+          mimeType: 'application/vnd.ms-excel',
+          dialogTitle: dialogTitle || `Share ${cleanFilename}`,
+          UTI: 'com.microsoft.excel.xls',
         });
         return;
+      } else {
+        Alert.alert('Excel Saved', `File saved to ${cleanFilename}`);
       }
-    } catch {
-      // Fallback to React Native Share text
-      await Share.share({
-        title: cleanFilename,
-        message: csvData,
-      });
+    } catch (fsErr: any) {
+      if (
+        fsErr?.message &&
+        (fsErr.message.includes('dismissed') ||
+          fsErr.message.includes('cancelled') ||
+          fsErr.message.includes('User did not share'))
+      ) {
+        return;
+      }
+      console.warn('FileSystem / Sharing failed for CSV/Excel:', fsErr);
+      Alert.alert('Export Error', fsErr?.message || 'Could not export Excel file.');
     }
   } catch (error: any) {
-    console.error('CSV export error:', error);
-    Alert.alert('Export Error', error?.message || 'Could not export or download CSV file.');
+    console.error('CSV/Excel export error:', error);
+    Alert.alert('Export Error', error?.message || 'Could not export or download Excel file.');
   }
 }
 
@@ -1012,4 +1039,197 @@ export function buildGstTaxReportHtml(params: {
       </table>
     </body>
   </html>`;
+}
+
+// ============================================================================
+// BRANCH-WISE SALES PERFORMANCE REPORT HTML (Matches Screenshot 100%)
+// ============================================================================
+
+export interface BranchSalesReportParams {
+  hotelName: string;
+  hotelAddress?: string;
+  scopeLabel: string;
+  periodLabel: string;
+  generatedDate: string;
+  branches: Array<{
+    branchName: string;
+    code?: string;
+    city?: string;
+    todaySales: number;
+    weeklySales: number;
+    monthlySales: number;
+    yearlySales: number;
+    totalSales: number;
+    invoiceCount: number;
+  }>;
+  consolidated?: {
+    todaySales: number;
+    weeklySales: number;
+    monthlySales: number;
+    yearlySales: number;
+    totalSales: number;
+    totalInvoices: number;
+  };
+}
+
+export function buildBranchSalesReportHTML(params: BranchSalesReportParams): string {
+  const hotelName = params.hotelName || 'Royal Palace Hotel';
+  const hotelAddress = params.hotelAddress || 'Pune, Maharashtra';
+  const fmt = (amt: number | undefined) =>
+    '₹ ' + Number(amt || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const totalToday = params.consolidated?.todaySales ?? params.branches.reduce((acc, b) => acc + (b.todaySales || 0), 0);
+  const totalWeekly = params.consolidated?.weeklySales ?? params.branches.reduce((acc, b) => acc + (b.weeklySales || 0), 0);
+  const totalMonthly = params.consolidated?.monthlySales ?? params.branches.reduce((acc, b) => acc + (b.monthlySales || 0), 0);
+  const totalSales = params.consolidated?.totalSales ?? params.branches.reduce((acc, b) => acc + (b.totalSales || 0), 0);
+  const totalInvoices = params.consolidated?.totalInvoices ?? params.branches.reduce((acc, b) => acc + (b.invoiceCount || 0), 0);
+
+  const rows = params.branches.map((b, idx) => `
+    <tr style="background: ${idx % 2 === 0 ? '#FFFFFF' : '#F8FAFC'};">
+      <td style="padding: 10px 8px; border-bottom: 1px solid #E2E8F0; text-align: center; color: #64748B;">${idx + 1}</td>
+      <td style="padding: 10px 8px; border-bottom: 1px solid #E2E8F0;">
+        <div style="font-weight: 700; color: #0F172A; font-size: 13px;">${b.branchName}</div>
+        <div style="font-size: 10.5px; color: #64748B;">Code: ${b.code || 'BR-' + (idx + 1)}</div>
+      </td>
+      <td style="padding: 10px 8px; border-bottom: 1px solid #E2E8F0; color: #334155;">${b.city || '—'}</td>
+      <td style="padding: 10px 8px; border-bottom: 1px solid #E2E8F0; text-align: right; font-weight: 600; color: #16A34A;">${fmt(b.todaySales)}</td>
+      <td style="padding: 10px 8px; border-bottom: 1px solid #E2E8F0; text-align: right; font-weight: 600; color: #2563EB;">${fmt(b.weeklySales)}</td>
+      <td style="padding: 10px 8px; border-bottom: 1px solid #E2E8F0; text-align: right; font-weight: 600; color: #0284C7;">${fmt(b.monthlySales)}</td>
+      <td style="padding: 10px 8px; border-bottom: 1px solid #E2E8F0; text-align: right; font-weight: 800; color: #0F172A;">${fmt(b.totalSales)}</td>
+      <td style="padding: 10px 8px; border-bottom: 1px solid #E2E8F0; text-align: center; font-weight: 700; color: #475569;">${b.invoiceCount || 0}</td>
+    </tr>
+  `).join('');
+
+  return `
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <meta charset="utf-8" />
+      <title>Branch-wise Sales Performance Report</title>
+      <style>
+        * { box-sizing: border-box; }
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+          color: #1E293B;
+          margin: 0;
+          padding: 24px;
+          background: #FFFFFF;
+        }
+        .header {
+          border-bottom: 2px solid #B45309;
+          padding-bottom: 14px;
+          margin-bottom: 18px;
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-end;
+        }
+        .hotel-name { font-size: 22px; font-weight: 900; color: #78350F; margin: 0; }
+        .sub { font-size: 12px; color: #64748B; margin-top: 4px; }
+        .meta-box { text-align: right; }
+        .badge-title { font-size: 13px; font-weight: 800; color: #B45309; text-transform: uppercase; }
+        .kpi-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 12px;
+          margin-bottom: 20px;
+        }
+        .kpi-card {
+          background: #FFFBEB;
+          border: 1px solid #FDE68A;
+          border-radius: 8px;
+          padding: 12px;
+        }
+        .kpi-label { font-size: 11px; font-weight: 700; color: #92400E; text-transform: uppercase; }
+        .kpi-val { font-size: 17px; font-weight: 900; color: #78350F; margin-top: 4px; }
+        table { width: 100%; border-collapse: collapse; font-size: 11.5px; margin-top: 10px; }
+        thead th {
+          background: #B45309;
+          color: #FFFFFF;
+          font-weight: 700;
+          text-align: left;
+          padding: 10px 8px;
+          font-size: 11px;
+          letter-spacing: 0.3px;
+        }
+        .total-row {
+          background: #FEF3C7 !important;
+          font-weight: 900;
+          color: #78350F;
+          border-top: 2px solid #B45309;
+        }
+        .footer {
+          margin-top: 28px;
+          padding-top: 12px;
+          border-top: 1px solid #E2E8F0;
+          display: flex;
+          justify-content: space-between;
+          font-size: 10.5px;
+          color: #94A3B8;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <div>
+          <h1 class="hotel-name">${hotelName}</h1>
+          <div class="sub">${hotelAddress} • Scope: ${params.scopeLabel} • Period: ${params.periodLabel}</div>
+        </div>
+        <div class="meta-box">
+          <div class="badge-title">Branch-wise Sales Report</div>
+          <div class="sub">Generated: ${params.generatedDate}</div>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">Today's Total Sales</div>
+          <div class="kpi-val" style="color: #16A34A;">${fmt(totalToday)}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Weekly Total Sales</div>
+          <div class="kpi-val" style="color: #2563EB;">${fmt(totalWeekly)}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Monthly Total Sales</div>
+          <div class="kpi-val" style="color: #0284C7;">${fmt(totalMonthly)}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Total Realized Revenue</div>
+          <div class="kpi-val" style="color: #78350F;">${fmt(totalSales)}</div>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 32px; text-align: center;">#</th>
+            <th>BRANCH NAME</th>
+            <th style="width: 90px;">CITY</th>
+            <th style="text-align: right; width: 110px;">TODAY'S SALES</th>
+            <th style="text-align: right; width: 110px;">WEEKLY SALES</th>
+            <th style="text-align: right; width: 110px;">MONTHLY SALES</th>
+            <th style="text-align: right; width: 120px;">TOTAL SALES</th>
+            <th style="text-align: center; width: 80px;">INVOICES</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows}
+          <tr class="total-row">
+            <td colspan="3" style="padding: 10px 8px; text-align: right; font-weight: 900; font-size: 12px;">CONSOLIDATED TOTAL:</td>
+            <td style="padding: 10px 8px; text-align: right; font-weight: 900; color: #16A34A;">${fmt(totalToday)}</td>
+            <td style="padding: 10px 8px; text-align: right; font-weight: 900; color: #2563EB;">${fmt(totalWeekly)}</td>
+            <td style="padding: 10px 8px; text-align: right; font-weight: 900; color: #0284C7;">${fmt(totalMonthly)}</td>
+            <td style="padding: 10px 8px; text-align: right; font-weight: 900; color: #78350F; font-size: 13px;">${fmt(totalSales)}</td>
+            <td style="padding: 10px 8px; text-align: center; font-weight: 900;">${totalInvoices}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="footer">
+        <div>Ajalkar POS • Multi-Branch Hotel Management System</div>
+        <div>Confidential & Proprietary • Page 1 of 1</div>
+      </div>
+    </body>
+  </html>
+  `;
 }

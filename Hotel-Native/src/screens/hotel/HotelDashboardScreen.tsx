@@ -284,18 +284,29 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
   }, [branchTables, activeBranch?.stats?.totalTables]);
 
   const liveOccupiedTables = useMemo(() => {
-    // Only tables that have an active order or billing TODAY are considered occupied
-    const occupiedToday = branchTables.filter((t) => {
-      if (t.status !== 'OCCUPIED' && t.status !== 'BILLING') return false;
-      const tKey = (t.tableNumber || '').toLowerCase().trim();
-      return branchOrdersToday.some((o) => {
-        if (o.status === 'PAID') return false;
-        const oKey = (o.tableNumber || '').toLowerCase().trim();
-        return oKey === tKey || o.id === t.currentOrderId;
+    if (branchTables.length > 0) {
+      const activeOrderTableKeys = new Set<string>();
+      branchOrders.forEach((o) => {
+        if (o.status !== 'PAID' && o.tableNumber) {
+          activeOrderTableKeys.add(o.tableNumber.toLowerCase().trim());
+        }
       });
-    }).length;
-    return occupiedToday;
-  }, [branchTables, branchOrdersToday]);
+
+      return branchTables.filter((t) => {
+        if (
+          t.status === 'OCCUPIED' ||
+          t.status === 'BILLING' ||
+          Boolean(t.currentOrderId) ||
+          (Boolean(t.activeBillAmount) && Number(t.activeBillAmount) > 0)
+        ) {
+          return true;
+        }
+        const tKey = (t.tableNumber || '').toLowerCase().trim();
+        return activeOrderTableKeys.has(tKey);
+      }).length;
+    }
+    return activeBranch?.stats?.occupiedTables || 0;
+  }, [branchTables, branchOrders, activeBranch?.stats?.occupiedTables]);
 
   const liveAvailableTables = Math.max(0, liveTotalTables - liveOccupiedTables);
 
@@ -1926,19 +1937,10 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
             ) : (
               /* ADD NEW OFFER FORM (INLINE INSIDE MODAL) */
               <ScrollView
-                style={{ maxHeight: 420 }}
+                style={{ maxHeight: 460 }}
                 showsVerticalScrollIndicator={false}
                 keyboardShouldPersistTaps="handled"
               >
-                <View style={{ marginBottom: 12 }}>
-                  <Text style={{ fontSize: 15, fontWeight: '800', color: '#1C1917' }}>
-                    {language === 'mr' ? 'नवीन ऑफर तयार करा' : language === 'hi' ? 'नया ऑफर बनाएं' : 'Create New Offer'}
-                  </Text>
-                  <Text style={{ fontSize: 11, color: '#78716C' }}>
-                    {language === 'mr' ? 'ऑफरची माहिती भरा आणि सेव्ह करा' : language === 'hi' ? 'ऑफर का विवरण भरें और सहेजें' : 'Fill in offer details and save'}
-                  </Text>
-                </View>
-
                 {/* Offer Name */}
                 <View style={styles.formGroup}>
                   <Text style={styles.formLabel}>
@@ -1978,6 +1980,7 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
                       <TouchableOpacity
                         style={[styles.typeBtn, newOfferType === 'PERCENTAGE' && styles.typeBtnActive]}
                         onPress={() => setNewOfferType('PERCENTAGE')}
+                        activeOpacity={0.8}
                       >
                         <Text style={[styles.typeBtnText, newOfferType === 'PERCENTAGE' && styles.typeBtnTextActive]}>
                           % Off
@@ -1986,6 +1989,7 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
                       <TouchableOpacity
                         style={[styles.typeBtn, newOfferType === 'FIXED' && styles.typeBtnActive]}
                         onPress={() => setNewOfferType('FIXED')}
+                        activeOpacity={0.8}
                       >
                         <Text style={[styles.typeBtnText, newOfferType === 'FIXED' && styles.typeBtnTextActive]}>
                           ₹ Flat
@@ -2029,6 +2033,7 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
                         key={cat.id}
                         style={[styles.categoryPillBtn, newOfferCategory === cat.id && styles.categoryPillBtnActive]}
                         onPress={() => setNewOfferCategory(cat.id)}
+                        activeOpacity={0.8}
                       >
                         <Text style={[styles.categoryPillText, newOfferCategory === cat.id && styles.categoryPillTextActive]}>
                           {language === 'mr' ? cat.mr : language === 'hi' ? cat.hi : cat.en}
@@ -2044,7 +2049,7 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
                     {language === 'mr' ? 'वर्णन' : language === 'hi' ? 'विवरण' : 'Description'}
                   </Text>
                   <TextInput
-                    style={[styles.formInput, { height: 50 }]}
+                    style={[styles.formInput, { height: 54, textAlignVertical: 'top' }]}
                     placeholder={
                       language === 'mr'
                         ? 'उदा. सर्व जेवणाच्या बिलावर 20% विशेष सवलत.'
@@ -2060,7 +2065,7 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
                 </View>
 
                 {/* Validity Dates */}
-                <View style={{ flexDirection: 'row', gap: 10, marginBottom: 16 }}>
+                <View style={{ flexDirection: 'row', gap: 10, marginBottom: 14 }}>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.formLabel}>
                       {language === 'mr' ? 'सुरुवात तारीख' : language === 'hi' ? 'प्रारंभ तिथि' : 'Start Date'}
@@ -2070,6 +2075,7 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
                       value={newOfferFrom}
                       onChangeText={setNewOfferFrom}
                       placeholder="YYYY-MM-DD"
+                      placeholderTextColor="#94A3B8"
                     />
                   </View>
                   <View style={{ flex: 1 }}>
@@ -2081,23 +2087,25 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
                       value={newOfferTo}
                       onChangeText={setNewOfferTo}
                       placeholder="YYYY-MM-DD"
+                      placeholderTextColor="#94A3B8"
                     />
                   </View>
                 </View>
 
                 {/* Action Buttons */}
-                <View style={{ flexDirection: 'row', gap: 10, marginTop: 4, marginBottom: 12 }}>
+                <View style={{ flexDirection: 'row', gap: 10, marginTop: 4, marginBottom: 10 }}>
                   <TouchableOpacity
-                    style={[styles.subModalCloseBtn, { flex: 1, alignItems: 'center' }]}
+                    style={styles.offerBackBtn}
                     onPress={() => setOffersViewMode('LIST')}
+                    activeOpacity={0.8}
                   >
-                    <Text style={styles.subModalCloseBtnText}>
+                    <Text style={styles.offerBackBtnText}>
                       {language === 'mr' ? 'मागे जा' : language === 'hi' ? 'वापस जाएं' : 'Back'}
                     </Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    style={[styles.saveOfferSubmitBtn, { flex: 2 }]}
+                    style={styles.saveOfferSubmitBtn}
                     onPress={handleCreateNewOffer}
                     activeOpacity={0.85}
                   >
@@ -3242,29 +3250,32 @@ const getStyles = (isDark: boolean) => StyleSheet.create({
   categorySelectorRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 6,
-    marginTop: 4,
+    gap: 8,
   },
   categoryPillBtn: {
+    width: '48.5%',
     backgroundColor: isDark ? '#1E293B' : '#F8FAFC',
     borderWidth: 1,
     borderColor: isDark ? '#2A364F' : '#CBD5E1',
-    borderRadius: 6,
+    borderRadius: 8,
+    paddingVertical: 9,
     paddingHorizontal: 10,
-    paddingVertical: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   categoryPillBtnActive: {
     backgroundColor: '#EA580C',
     borderColor: '#EA580C',
   },
   categoryPillText: {
-    fontSize: 11,
+    fontSize: 11.5,
     color: isDark ? '#94A3B8' : '#64748B',
-    fontWeight: '600',
+    fontWeight: '700',
+    textAlign: 'center',
   },
   categoryPillTextActive: {
     color: '#FFFFFF',
-    fontWeight: '700',
+    fontWeight: '800',
   },
   secondaryAddOfferBtn: {
     flexDirection: 'row',
@@ -3533,14 +3544,15 @@ const getStyles = (isDark: boolean) => StyleSheet.create({
     marginBottom: 4,
   },
   formInput: {
+    height: 42,
     backgroundColor: isDark ? '#0F172A' : '#F8FAFC',
     borderWidth: 1,
     borderColor: isDark ? '#2A364F' : '#CBD5E1',
     borderRadius: 8,
     paddingHorizontal: 12,
-    paddingVertical: 8,
-    fontSize: 12,
+    fontSize: 12.5,
     color: isDark ? '#F8FAFC' : '#1E293B',
+    justifyContent: 'center',
   },
   typeSelectorRow: {
     flexDirection: 'row',
@@ -3548,31 +3560,49 @@ const getStyles = (isDark: boolean) => StyleSheet.create({
   },
   typeBtn: {
     flex: 1,
+    height: 42,
     backgroundColor: isDark ? '#1E293B' : '#F8FAFC',
     borderWidth: 1,
     borderColor: isDark ? '#2A364F' : '#CBD5E1',
     borderRadius: 8,
-    paddingVertical: 8,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   typeBtnActive: {
     backgroundColor: '#EA580C',
     borderColor: '#EA580C',
   },
   typeBtnText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
     color: isDark ? '#94A3B8' : '#475569',
   },
   typeBtnTextActive: {
     color: '#FFFFFF',
+    fontWeight: '800',
+  },
+  offerBackBtn: {
+    flex: 1,
+    height: 44,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: isDark ? '#334155' : '#CBD5E1',
+    backgroundColor: isDark ? '#1E293B' : '#F8FAFC',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  offerBackBtnText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: isDark ? '#F8FAFC' : '#475569',
   },
   saveOfferSubmitBtn: {
+    flex: 1.5,
+    height: 44,
     backgroundColor: '#EA580C',
-    paddingVertical: 12,
     borderRadius: 10,
     alignItems: 'center',
-    marginTop: 4,
+    justifyContent: 'center',
     shadowColor: '#EA580C',
     shadowOpacity: 0.25,
     shadowOffset: { width: 0, height: 2 },
@@ -3580,7 +3610,7 @@ const getStyles = (isDark: boolean) => StyleSheet.create({
   },
   saveOfferSubmitBtnText: {
     color: '#FFFFFF',
-    fontSize: 13,
+    fontSize: 13.5,
     fontWeight: '800',
   },
   directAddOfferBtn: {

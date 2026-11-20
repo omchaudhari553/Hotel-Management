@@ -72,7 +72,7 @@ export const OwnerBillingPerformance: React.FC = () => {
         </div>
 
         <button
-          onClick={fetchData}
+          onClick={() => window.location.reload()}
           className="owner-btn-secondary"
           title="Refresh"
           aria-label="Refresh"

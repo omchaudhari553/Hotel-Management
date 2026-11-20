@@ -145,7 +145,7 @@ export const TablesKOTScreen: React.FC<{ navigation: any; route?: any }> = ({ na
       .loadMenuItemsFromBackend()
       .then((mList) => {
         if (Array.isArray(mList) && mList.length > 0) {
-          setMenuItems(mList);
+          setMenuItems(restaurantStore.getMenuItems());
         }
       })
       .catch(() => {});
@@ -325,14 +325,21 @@ export const TablesKOTScreen: React.FC<{ navigation: any; route?: any }> = ({ na
 
   const handlePunchKOT = async () => {
     if (!activeTable) return;
-    const itemsList: KOTOrderItem[] = Object.entries(selectedItems).map(([id, qty]) => {
+    const itemsMap = new Map<string, KOTOrderItem>();
+    Object.entries(selectedItems).forEach(([id, qty]) => {
       const item = menuItems.find((m) => m.id === id);
-      return {
-        name: item?.name || 'Item',
-        quantity: qty,
-        price: item?.price || 0,
-      };
+      const name = String(item?.name || 'Item').trim();
+      const price = item?.price || 0;
+      const key = name.toLowerCase();
+      if (itemsMap.has(key)) {
+        const ex = itemsMap.get(key)!;
+        ex.quantity += qty;
+        if (ex.price <= 0 && price > 0) ex.price = price;
+      } else {
+        itemsMap.set(key, { name, quantity: qty, price });
+      }
     });
+    const itemsList: KOTOrderItem[] = Array.from(itemsMap.values());
 
     if (itemsList.length === 0) {
       Alert.alert(
@@ -424,10 +431,28 @@ export const TablesKOTScreen: React.FC<{ navigation: any; route?: any }> = ({ na
 
   const filteredMenuItems = useMemo(() => {
     const q = menuSearch.trim().toLowerCase();
-    return menuItems.filter((item) => {
+    const seenNames = new Set<string>();
+    const seenIds = new Set<string>();
+    const deduplicated: MenuItemData[] = [];
+
+    for (const item of (menuItems || [])) {
+      if (!item || !item.name) continue;
+      const cleanName = item.name.trim().toLowerCase();
+      const cleanId = String(item.id || '').trim();
+      if (seenNames.has(cleanName) || (cleanId && seenIds.has(cleanId))) continue;
+      seenNames.add(cleanName);
+      if (cleanId) seenIds.add(cleanId);
+      deduplicated.push({
+        ...item,
+        name: item.name.trim(),
+      });
+    }
+
+    return deduplicated.filter((item) => {
       if (selectedCategory !== 'All' && item.category !== selectedCategory) return false;
       if (q) {
-        return item.name.toLowerCase().includes(q);
+        const localized = getLocalizedMenuItemName(item.name).toLowerCase();
+        return item.name.toLowerCase().includes(q) || localized.includes(q);
       }
       return true;
     });
@@ -473,146 +498,101 @@ export const TablesKOTScreen: React.FC<{ navigation: any; route?: any }> = ({ na
         </View>
 
         {/* ===================================================
-            6 METRIC STAT CARDS (3 and 3 Small Grid, No Garbage)
+            ACTION METRIC CARDS (4 on Row 1, 3 on Row 2)
         =================================================== */}
-        <View style={styles.kpiRow}>
+        <View style={styles.kpiRow4}>
           {/* 1. Total Tables */}
           <TouchableOpacity
-            style={[styles.kpiCard, selectedFilter === 'All' && styles.kpiCardActiveBorder]}
+            style={[styles.kpiCard4, selectedFilter === 'All' && styles.kpiCardActiveBorder]}
             onPress={() => setSelectedFilter('All')}
             activeOpacity={0.75}
           >
             <View style={styles.kpiTopRow}>
               <View style={[styles.kpiDot, { backgroundColor: '#78716C' }]} />
-              <Text style={styles.kpiLabel} numberOfLines={1}>{t('totalTables', 'Total')}</Text>
+              <Text style={styles.kpiLabel4} numberOfLines={1}>{t('totalTables', 'Total')}</Text>
             </View>
-            <Text style={styles.kpiNumber}>{toDevanagari(totalCount)}</Text>
+            <Text style={styles.kpiNumber4}>{toDevanagari(totalCount)}</Text>
           </TouchableOpacity>
 
           {/* 2. Available */}
           <TouchableOpacity
-            style={[styles.kpiCard, selectedFilter === 'Available' && styles.kpiCardActiveBorder]}
-            onPress={() => setSelectedFilter('Available')}
+            style={[styles.kpiCard4, selectedFilter === 'Available' && styles.kpiCardActiveBorder]}
+            onPress={() => setSelectedFilter(selectedFilter === 'Available' ? 'All' : 'Available')}
             activeOpacity={0.75}
           >
             <View style={styles.kpiTopRow}>
               <View style={[styles.kpiDot, { backgroundColor: '#16A34A' }]} />
-              <Text style={styles.kpiLabel} numberOfLines={1}>{t('available', 'Available')}</Text>
+              <Text style={styles.kpiLabel4} numberOfLines={1}>{t('available', 'Available')}</Text>
             </View>
-            <Text style={[styles.kpiNumber, { color: '#16A34A' }]}>{toDevanagari(availableCount)}</Text>
+            <Text style={[styles.kpiNumber4, { color: '#16A34A' }]}>{toDevanagari(availableCount)}</Text>
           </TouchableOpacity>
 
           {/* 3. Occupied */}
           <TouchableOpacity
-            style={[styles.kpiCard, selectedFilter === 'Occupied' && styles.kpiCardActiveBorder]}
-            onPress={() => setSelectedFilter('Occupied')}
+            style={[styles.kpiCard4, selectedFilter === 'Occupied' && styles.kpiCardActiveBorder]}
+            onPress={() => setSelectedFilter(selectedFilter === 'Occupied' ? 'All' : 'Occupied')}
             activeOpacity={0.75}
           >
             <View style={styles.kpiTopRow}>
               <View style={[styles.kpiDot, { backgroundColor: '#EA580C' }]} />
-              <Text style={styles.kpiLabel} numberOfLines={1}>{t('occupied', 'Occupied')}</Text>
+              <Text style={styles.kpiLabel4} numberOfLines={1}>{t('occupied', 'Occupied')}</Text>
             </View>
-            <Text style={[styles.kpiNumber, { color: '#EA580C' }]}>{toDevanagari(occupiedCount)}</Text>
+            <Text style={[styles.kpiNumber4, { color: '#EA580C' }]}>{toDevanagari(occupiedCount)}</Text>
           </TouchableOpacity>
 
-          {/* 4. Reserved */}
+          {/* 4. Cleaning */}
           <TouchableOpacity
-            style={[styles.kpiCard, selectedFilter === 'Reserved' && styles.kpiCardActiveBorder]}
-            onPress={() => setSelectedFilter('Reserved')}
+            style={[styles.kpiCard4, selectedFilter === 'Cleaning' && styles.kpiCardActiveBorder]}
+            onPress={() => setSelectedFilter(selectedFilter === 'Cleaning' ? 'All' : 'Cleaning')}
+            activeOpacity={0.75}
+          >
+            <View style={styles.kpiTopRow}>
+              <View style={[styles.kpiDot, { backgroundColor: '#94461B' }]} />
+              <Text style={styles.kpiLabel4} numberOfLines={1}>{t('cleaning', 'Cleaning')}</Text>
+            </View>
+            <Text style={[styles.kpiNumber4, { color: '#94461B' }]}>{toDevanagari(cleaningCount)}</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.kpiRow3}>
+          {/* 5. Reserved */}
+          <TouchableOpacity
+            style={[styles.kpiCard3, selectedFilter === 'Reserved' && styles.kpiCardActiveBorder]}
+            onPress={() => setSelectedFilter(selectedFilter === 'Reserved' ? 'All' : 'Reserved')}
             activeOpacity={0.75}
           >
             <View style={styles.kpiTopRow}>
               <View style={[styles.kpiDot, { backgroundColor: '#9333EA' }]} />
-              <Text style={styles.kpiLabel} numberOfLines={1}>{t('reserved', 'Reserved')}</Text>
+              <Text style={styles.kpiLabel3} numberOfLines={1}>{t('reserved', 'Reserved')}</Text>
             </View>
-            <Text style={[styles.kpiNumber, { color: '#9333EA' }]}>{toDevanagari(reservedCount)}</Text>
+            <Text style={[styles.kpiNumber3, { color: '#9333EA' }]}>{toDevanagari(reservedCount)}</Text>
           </TouchableOpacity>
 
-          {/* 5. Billed */}
+          {/* 6. Billed */}
           <TouchableOpacity
-            style={[styles.kpiCard, selectedFilter === 'Billing' && styles.kpiCardActiveBorder]}
-            onPress={() => setSelectedFilter('Billing')}
+            style={[styles.kpiCard3, selectedFilter === 'Billing' && styles.kpiCardActiveBorder]}
+            onPress={() => setSelectedFilter(selectedFilter === 'Billing' ? 'All' : 'Billing')}
             activeOpacity={0.75}
           >
             <View style={styles.kpiTopRow}>
               <View style={[styles.kpiDot, { backgroundColor: '#D97706' }]} />
-              <Text style={styles.kpiLabel} numberOfLines={1}>{t('billed', 'Billed')}</Text>
+              <Text style={styles.kpiLabel3} numberOfLines={1}>{t('billed', 'Billed')}</Text>
             </View>
-            <Text style={[styles.kpiNumber, { color: '#D97706' }]}>{toDevanagari(billingCount)}</Text>
+            <Text style={[styles.kpiNumber3, { color: '#D97706' }]}>{toDevanagari(billingCount)}</Text>
           </TouchableOpacity>
 
-          {/* 6. Occupancy */}
+          {/* 7. Occupancy */}
           <TouchableOpacity
-            style={styles.kpiCard}
-            onPress={() => setSelectedFilter('Occupied')}
+            style={styles.kpiCard3}
+            onPress={() => setSelectedFilter(selectedFilter === 'Occupied' ? 'All' : 'Occupied')}
             activeOpacity={0.75}
           >
             <View style={styles.kpiTopRow}>
               <View style={[styles.kpiDot, { backgroundColor: '#2563EB' }]} />
-              <Text style={styles.kpiLabel} numberOfLines={1}>{t('occupancy', 'Occupancy')}</Text>
+              <Text style={styles.kpiLabel3} numberOfLines={1}>{t('occupancy', 'Occupancy')}</Text>
             </View>
-            <Text style={[styles.kpiNumber, { color: '#2563EB' }]}>{toDevanagari(occupancyPercent)}%</Text>
+            <Text style={[styles.kpiNumber3, { color: '#2563EB' }]}>{toDevanagari(occupancyPercent)}%</Text>
           </TouchableOpacity>
-        </View>
-
-        {/* ===================================================
-            FILTER PILLS & SEARCH (Screenshot 3)
-        =================================================== */}
-        <View style={styles.filterSection}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterTabsScroll}>
-            {[
-              { id: 'All', label: `${t('all', 'All')} ${toDevanagari(totalCount)}` },
-              { id: 'Available', label: `${translateStatus('AVAILABLE')} ${toDevanagari(availableCount)}` },
-              { id: 'Occupied', label: `${translateStatus('OCCUPIED')} ${toDevanagari(occupiedCount)}` },
-              { id: 'Reserved', label: `${translateStatus('RESERVED')} ${toDevanagari(reservedCount)}` },
-              { id: 'Billing', label: `${translateStatus('BILLED')} ${toDevanagari(billingCount)}` },
-              { id: 'Cleaning', label: `${translateStatus('CLEANING')} ${toDevanagari(cleaningCount)}` },
-            ].map((tab) => {
-              const active = selectedFilter === tab.id;
-              return (
-                <TouchableOpacity
-                  key={tab.id}
-                  style={[styles.filterPill, active && styles.filterPillActive]}
-                  onPress={() => setSelectedFilter(tab.id)}
-                  activeOpacity={0.8}
-                >
-                  <Text style={[styles.filterPillText, active && styles.filterPillTextActive]}>
-                    {tab.label}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
-
-          {/* Search Table */}
-          <View style={styles.searchRow}>
-            <View style={styles.searchBox}>
-              <Search size={16} color="#78716C" />
-              <TextInput
-                style={styles.searchInput}
-                placeholder={t('searchTableOrGuest', 'Search table or guest...')}
-                placeholderTextColor="#A8A29E"
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-              />
-              {searchQuery.length > 0 && (
-                <TouchableOpacity onPress={() => setSearchQuery('')}>
-                  <X size={15} color="#78716C" />
-                </TouchableOpacity>
-              )}
-            </View>
-
-            {selectedFilter !== 'All' && (
-              <TouchableOpacity
-                style={styles.resetBtn}
-                onPress={() => setSelectedFilter('All')}
-                activeOpacity={0.8}
-              >
-                <RotateCcw size={14} color="#78716C" />
-                <Text style={styles.resetText}>{t('reset', 'Reset')}</Text>
-              </TouchableOpacity>
-            )}
-          </View>
         </View>
 
         {/* Floor Tables Title */}
@@ -827,16 +807,18 @@ export const TablesKOTScreen: React.FC<{ navigation: any; route?: any }> = ({ na
             <Text style={styles.emptyTableSub}>
               {language === 'mr' ? 'सध्या कोणतेही टेबल उपलब्ध नाही.' : language === 'hi' ? 'वर्तमान में कोई टेबल उपलब्ध नहीं है।' : 'No tables available currently.'}
             </Text>
-            <TouchableOpacity
-              style={styles.emptyAddBtn}
-              onPress={() => setAddTableModalVisible(true)}
-              activeOpacity={0.85}
-            >
-              <Plus size={16} color="#FFFFFF" />
-              <Text style={styles.emptyAddBtnText}>
-                {language === 'mr' ? 'नवीन टेबल जोडा' : language === 'hi' ? 'नया टेबल जोड़ें' : 'Add Table'}
-              </Text>
-            </TouchableOpacity>
+            {totalCount === 0 && selectedFilter === 'All' && (
+              <TouchableOpacity
+                style={styles.emptyAddBtn}
+                onPress={() => setAddTableModalVisible(true)}
+                activeOpacity={0.85}
+              >
+                <Plus size={16} color="#FFFFFF" />
+                <Text style={styles.emptyAddBtnText}>
+                  {language === 'mr' ? 'नवीन टेबल जोडा' : language === 'hi' ? 'नया टेबल जोड़ें' : 'Add Table'}
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         )}
 
@@ -1608,26 +1590,64 @@ const getStyles = (isDark: boolean) => {
     padding: 16,
   },
 
-  /* 6 KPI Cards */
-  kpiRow: {
+  /* Action Metric Cards (4 on Row 1, 3 on Row 2) */
+  kpiRow4: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  kpiCard: {
-    width: '31.8%',
-    backgroundColor: cardBg,
-    borderRadius: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 8,
     marginBottom: 8,
+    gap: 6,
+  },
+  kpiCard4: {
+    flex: 1,
+    backgroundColor: cardBg,
+    borderRadius: 9,
+    paddingVertical: 7,
+    paddingHorizontal: 5,
     borderWidth: 1.5,
     borderColor: cardBorder,
   },
+  kpiLabel4: {
+    fontSize: 9.5,
+    fontWeight: '700',
+    color: isDark ? '#E2E8F0' : '#44403C',
+    flexShrink: 1,
+  },
+  kpiNumber4: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: textPrimary,
+    marginTop: 2,
+  },
+  kpiRow3: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 14,
+    gap: 6,
+  },
+  kpiCard3: {
+    flex: 1,
+    backgroundColor: cardBg,
+    borderRadius: 9,
+    paddingVertical: 7,
+    paddingHorizontal: 8,
+    borderWidth: 1.5,
+    borderColor: cardBorder,
+  },
+  kpiLabel3: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: isDark ? '#E2E8F0' : '#44403C',
+    flexShrink: 1,
+  },
+  kpiNumber3: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: textPrimary,
+    marginTop: 2,
+  },
   kpiCardActiveBorder: {
     borderColor: '#9A3412',
-    backgroundColor: '#FFFBF5',
+    backgroundColor: isDark ? '#1C1917' : '#FFFBF5',
   },
   kpiTopRow: {
     flexDirection: 'row',
@@ -1639,17 +1659,6 @@ const getStyles = (isDark: boolean) => {
     height: 6,
     borderRadius: 3,
     marginRight: 4,
-  },
-  kpiLabel: {
-    fontSize: 10.5,
-    fontWeight: '700',
-    color: '#44403C',
-  },
-  kpiNumber: {
-    fontSize: 16.5,
-    fontWeight: '800',
-    color: textPrimary,
-    marginTop: 2,
   },
 
   /* Filter Section */

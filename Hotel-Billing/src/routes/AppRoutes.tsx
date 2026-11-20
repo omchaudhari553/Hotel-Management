@@ -14,7 +14,7 @@ import { BookingManagement } from '../hotel/BookingManagement';
 import { GuestDirectory } from '../hotel/GuestDirectory';
 import HotelReport from '../hotel/hotelreport';
 import { PurchaseDashboard } from "../hotel/PurchaseDashboard.jsx";
-import Settings from "../hotel/Settings";
+import Settings from "../hotel/Settings.jsx";
 import GstReportComponent from "../hotel/GstReportComponent";
 import StaffManagement from '../hotel/StaffManagement';
 import { KOTModule } from '../hotel/KOTModule';

@@ -183,7 +183,6 @@ const NAV_ITEMS: Array<{
   { key: "backup", label: "Backup & Restore", icon: Database },
   { key: "audit", label: "Audit Logs", icon: FileClock },
   { key: "maintenance", label: "System Maintenance", icon: Server },
-  { key: "licence", label: "Licence & Subscription", icon: Shield },
   { key: "reports", label: "Reports & KPIs", icon: BarChart3 },
   { key: "gstSettings", label: "GST Settings", icon: Zap },
   { key: "gstReport", label: "GST Report", icon: FileText },
@@ -408,15 +407,7 @@ export default function HotelSettingsModule() {
       icon: Shield,
       targetKey: "security" as SettingKey,
     },
-    {
-      id: "licence_subscription",
-      title: "Licence & Subscription (लायसन्स व सबस्क्रिप्शन)",
-      description: "Enterprise software licence verification, 28-day trial status, and plan renewal details.",
-      category: "Licence",
-      keywords: ["licence", "license", "subscription", "plan", "trial", "renewal", "enterprise", "लायसन्स", "सबस्क्रिप्शन"],
-      icon: Shield,
-      targetKey: "licence" as SettingKey,
-    },
+
     {
       id: "gst_reports_filing",
       title: "GST Returns & Tax Reports (जीएसटी रिटर्न्स अहवाल)",
@@ -3212,7 +3203,6 @@ export default function HotelSettingsModule() {
       case "backup": return renderBackup();
       case "audit": return renderAudit();
       case "maintenance": return renderMaintenance();
-      case "licence": return !isBranchUser ? renderLicence() : renderDashboard();
       case "reports": return <ReportsModule />;
       case "gstSettings": return <GstReportComponent initialTab="settings" />;
       case "gstReport": return <GstReportComponent initialTab="sales" />;

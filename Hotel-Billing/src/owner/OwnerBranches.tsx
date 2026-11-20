@@ -168,7 +168,7 @@ export const OwnerBranches: React.FC = () => {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <button
-            onClick={loadBranches}
+            onClick={() => window.location.reload()}
             className="owner-btn-secondary"
             title="Refresh"
             aria-label="Refresh"

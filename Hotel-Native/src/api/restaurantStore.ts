@@ -115,14 +115,38 @@ export const INITIAL_MENU_ITEMS: MenuItemData[] = [
   { id: 'm19', name: 'Test Burger', category: 'Starters', price: 150, taxRate: 5 },
 ];
 
-let dynamicMenuItems: MenuItemData[] = [...INITIAL_MENU_ITEMS];
+export function deduplicateMenuItems(items: MenuItemData[]): MenuItemData[] {
+  if (!Array.isArray(items)) return [];
+  const seenNames = new Set<string>();
+  const seenIds = new Set<string>();
+  const unique: MenuItemData[] = [];
+
+  for (const item of items) {
+    if (!item || !item.name) continue;
+    const cleanName = item.name.trim().toLowerCase();
+    const cleanId = String(item.id || '').trim();
+
+    if (seenNames.has(cleanName)) continue;
+    if (cleanId && seenIds.has(cleanId)) continue;
+
+    seenNames.add(cleanName);
+    if (cleanId) seenIds.add(cleanId);
+    unique.push({
+      ...item,
+      name: item.name.trim(),
+    });
+  }
+  return unique;
+}
+
+let dynamicMenuItems: MenuItemData[] = deduplicateMenuItems(INITIAL_MENU_ITEMS);
 (async () => {
   try {
     const saved = await AsyncStorage.getItem('@hotel_custom_menu_items');
     if (saved) {
       const parsed = JSON.parse(saved);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        dynamicMenuItems = [...parsed, ...INITIAL_MENU_ITEMS];
+        dynamicMenuItems = deduplicateMenuItems([...parsed, ...dynamicMenuItems]);
       }
     }
   } catch { }
@@ -245,7 +269,7 @@ const normalizeOrderItemsList = (
 ): KOTOrderItem[] => {
   const arr: KOTOrderItem[] = Array.isArray(items)
     ? items.map((it: any) => ({
-        name: String(it?.name || it?.itemName || it?.description || 'Dish'),
+        name: String(it?.name || it?.itemName || it?.description || 'Dish').trim(),
         quantity: Math.max(1, Number(it?.quantity ?? it?.qty ?? 1) || 1),
         price: Number(it?.price ?? it?.unitPrice ?? 0) || 0,
         ...(it?.notes ? { notes: String(it.notes) } : {}),
@@ -265,11 +289,26 @@ const normalizeOrderItemsList = (
     return [{ name: 'Order Dishes', quantity: qty, price: unitPrice }];
   }
 
-  const currentSub = arr.reduce((sum, it) => sum + it.price * it.quantity, 0);
-  if (currentSub === 0 && targetSub > 0) {
-    arr[0] = { ...arr[0], price: Math.round(targetSub / arr[0].quantity) };
+  // Deduplicate and merge items with the same dish name
+  const itemMap = new Map<string, KOTOrderItem>();
+  for (const it of arr) {
+    const cleanName = it.name.trim();
+    const key = cleanName.toLowerCase();
+    if (itemMap.has(key)) {
+      const ex = itemMap.get(key)!;
+      ex.quantity += it.quantity;
+      if (ex.price <= 0 && it.price > 0) ex.price = it.price;
+    } else {
+      itemMap.set(key, { ...it, name: cleanName });
+    }
   }
-  return arr;
+  const merged = Array.from(itemMap.values());
+
+  const currentSub = merged.reduce((sum, it) => sum + it.price * it.quantity, 0);
+  if (currentSub === 0 && targetSub > 0) {
+    merged[0] = { ...merged[0], price: Math.round(targetSub / merged[0].quantity) };
+  }
+  return merged;
 };
 
 const normalizeTableKey = (tbl?: string): string =>
@@ -670,21 +709,12 @@ export const restaurantStore = {
               if (paidEntry && now < paidEntry.expiresAt) return false;
               if (o.status === 'PAID') return false;
 
-              // Only active orders from today can hold a table occupied
-              if (o.date && o.date !== 'Today' && !o.date.toLowerCase().startsWith('today')) {
-                if (!o.date.includes(todayStr)) {
-                  const d = new Date(o.date);
-                  if (!isNaN(d.getTime())) {
-                    const itemYmd = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-                    if (itemYmd !== todayStr) return false;
-                  }
-                }
-              }
-
               return (
                 o.tableNumber.toLowerCase().trim() === tableKey ||
                 (normalizeTableKey(o.tableNumber) !== '' &&
-                  normalizeTableKey(o.tableNumber) === normalizeTableKey(tableNumStr))
+                  normalizeTableKey(o.tableNumber) === normalizeTableKey(tableNumStr)) ||
+                (t.id && (o as any).tableId && String((o as any).tableId) === String(t.id)) ||
+                (t.currentOrderId && String(o.id) === String(t.currentOrderId))
               );
             });
 
@@ -693,13 +723,13 @@ export const restaurantStore = {
               Boolean(backendOrderId && paidMap[backendOrderId] && now < paidMap[backendOrderId].expiresAt);
 
             const hasActiveUnbilledOrder = Boolean(activeOrd && activeOrd.status !== 'PAID');
+            const isBackendOccupied = t.status === 'OCCUPIED' || t.status === 'BILLING' || t.status === 'BILL_REQUESTED';
             const isBill =
               !backendOrderWasPaid &&
-              hasActiveUnbilledOrder &&
-              (t.status === 'BILLING' || t.status === 'BILL_REQUESTED' || activeOrd?.status === 'BILL GENERATED');
+              (t.status === 'BILLING' || t.status === 'BILL_REQUESTED' || (hasActiveUnbilledOrder && activeOrd?.status === 'BILL GENERATED'));
             const isOcc =
               !backendOrderWasPaid &&
-              (isBill || (hasActiveUnbilledOrder && t.status === 'OCCUPIED') || (hasActiveUnbilledOrder && activeOrd !== undefined));
+              (isBill || isBackendOccupied || (hasActiveUnbilledOrder && activeOrd !== undefined));
 
             const parsedStatus: TableItem['status'] = (
               isBill
@@ -1005,11 +1035,21 @@ export const restaurantStore = {
             activeHotelOrders = rawOrders
               .filter((ord: any) => !ord.branchId || Number(ord.branchId) === bId)
               .map((ord: any) => {
-                const rawItems: KOTOrderItem[] = (ord.items || []).map((it: any) => ({
-                  name: it.itemName || it.name || 'Dish',
-                  quantity: Number(it.quantity || it.qty || 1),
-                  price: Number(it.unitPrice || it.price || 0),
-                }));
+                const itemMap = new Map<string, KOTOrderItem>();
+                for (const it of (ord.items || [])) {
+                  const name = String(it.itemName || it.name || 'Dish').trim();
+                  const qty = Number(it.quantity || it.qty || 1);
+                  const price = Number(it.unitPrice || it.price || 0);
+                  const key = name.toLowerCase();
+                  if (itemMap.has(key)) {
+                    const ex = itemMap.get(key)!;
+                    ex.quantity += qty;
+                    if (ex.price <= 0 && price > 0) ex.price = price;
+                  } else {
+                    itemMap.set(key, { name, quantity: qty, price });
+                  }
+                }
+                const rawItems: KOTOrderItem[] = Array.from(itemMap.values());
                 const sub = rawItems.reduce((acc, i) => acc + i.price * i.quantity, 0) || Number(ord.totalAmount) || 0;
                 const tax = Math.round(sub * 0.05);
                 const tot = Number(ord.totalAmount) || sub + tax;
@@ -1054,11 +1094,21 @@ export const restaurantStore = {
             invoiceOrders = rawInvoices
               .filter((inv: any) => !inv.branchId || Number(inv.branchId) === bId)
               .map((inv: any) => {
-                const rawItems: KOTOrderItem[] = (inv.items || []).map((it: any) => ({
-                  name: it.itemName || it.description || it.name || 'Dish',
-                  quantity: Number(it.quantity || it.qty || 1),
-                  price: Number(it.unitPrice || it.price || 0),
-                }));
+                const invItemMap = new Map<string, KOTOrderItem>();
+                for (const it of (inv.items || [])) {
+                  const name = String(it.itemName || it.description || it.name || 'Dish').trim();
+                  const qty = Number(it.quantity || it.qty || 1);
+                  const price = Number(it.unitPrice || it.price || 0);
+                  const key = name.toLowerCase();
+                  if (invItemMap.has(key)) {
+                    const ex = invItemMap.get(key)!;
+                    ex.quantity += qty;
+                    if (ex.price <= 0 && price > 0) ex.price = price;
+                  } else {
+                    invItemMap.set(key, { name, quantity: qty, price });
+                  }
+                }
+                const rawItems: KOTOrderItem[] = Array.from(invItemMap.values());
                 const sub = Number(inv.subtotal || inv.taxableAmount || 0);
                 const tax = Number(inv.taxAmount || (inv.cgst || 0) + (inv.sgst || 0));
                 const tot = Number(inv.grandTotal || inv.total || sub + tax);
@@ -1215,14 +1265,14 @@ export const restaurantStore = {
       hasLoadedBackendMenu = true;
       restaurantStore.loadMenuItemsFromBackend().catch(() => { });
     }
-    return dynamicMenuItems;
+    return deduplicateMenuItems(dynamicMenuItems);
   },
 
   async loadMenuItemsFromBackend(): Promise<MenuItemData[]> {
     try {
       await ensureBackendToken();
       const res = await apiClient.get('/hotel/menu-items');
-      const itemsList = res.data?.data;
+      const itemsList = res.data?.data || res.data;
       if (Array.isArray(itemsList) && itemsList.length > 0) {
         const backendItems: MenuItemData[] = itemsList.map((m: any) => {
           const c = String(m.category || '').toLowerCase().trim();
@@ -1235,16 +1285,16 @@ export const restaurantStore = {
 
           return {
             id: `backend-${m.id}`,
-            name: m.name,
+            name: String(m.name || '').trim(),
             category: cat,
             price: Number(m.price) || 100,
             taxRate: 5,
           };
         });
-        // Merge with initial, avoiding duplicate names
-        const existingNames = new Set(backendItems.map(b => b.name.toLowerCase()));
-        const unseeded = dynamicMenuItems.filter(i => !existingNames.has(i.name.toLowerCase()));
-        dynamicMenuItems = [...backendItems, ...unseeded];
+        const cleanBackend = deduplicateMenuItems(backendItems);
+        const existingNames = new Set(cleanBackend.map(b => b.name.toLowerCase()));
+        const unseeded = dynamicMenuItems.filter(i => !existingNames.has(i.name.trim().toLowerCase()));
+        dynamicMenuItems = deduplicateMenuItems([...cleanBackend, ...unseeded]);
         notifyListeners();
       } else if (Array.isArray(itemsList) && itemsList.length === 0) {
         // Backend DB has 0 menu items; seed INITIAL_MENU_ITEMS into database in background
@@ -1264,7 +1314,7 @@ export const restaurantStore = {
         })();
       }
     } catch { }
-    return dynamicMenuItems;
+    return deduplicateMenuItems(dynamicMenuItems);
   },
 
   async addMenuItem(item: { name: string; category?: string; price: number; description?: string }): Promise<MenuItemData> {
@@ -1302,14 +1352,14 @@ export const restaurantStore = {
       console.warn('Backend addMenuItem sync failed, saved locally:', e);
     }
 
-    dynamicMenuItems = [newItem, ...dynamicMenuItems.filter(m => m.id !== newItem.id && m.name.toLowerCase() !== newItem.name.toLowerCase())];
+    dynamicMenuItems = deduplicateMenuItems([newItem, ...dynamicMenuItems]);
     notifyListeners();
 
     try {
       const saved = await AsyncStorage.getItem('@hotel_custom_menu_items');
       const list = saved ? JSON.parse(saved) : [];
-      list.unshift(newItem);
-      await AsyncStorage.setItem('@hotel_custom_menu_items', JSON.stringify(list));
+      const cleanList = deduplicateMenuItems([newItem, ...list]);
+      await AsyncStorage.setItem('@hotel_custom_menu_items', JSON.stringify(cleanList));
     } catch { }
 
     return newItem;
@@ -1329,7 +1379,22 @@ export const restaurantStore = {
   ): Promise<{ order: ActiveOrder; kot: KOTTicket }> {
     const bId = branchId !== undefined && !isNaN(Number(branchId)) ? Number(branchId) : currentBranchId;
 
-    const rawSubtotal = items.reduce((acc, i) => acc + i.price * i.quantity, 0);
+    // Deduplicate and merge items by dish name
+    const startItemsMap = new Map<string, KOTOrderItem>();
+    for (const it of (items || [])) {
+      const cleanName = String(it.name || '').trim();
+      const key = cleanName.toLowerCase();
+      if (startItemsMap.has(key)) {
+        const ex = startItemsMap.get(key)!;
+        ex.quantity += Number(it.quantity || 1);
+        if (ex.price <= 0 && Number(it.price) > 0) ex.price = Number(it.price);
+      } else {
+        startItemsMap.set(key, { ...it, name: cleanName, quantity: Number(it.quantity || 1), price: Number(it.price || 0) });
+      }
+    }
+    const cleanItems = Array.from(startItemsMap.values());
+
+    const rawSubtotal = cleanItems.reduce((acc, i) => acc + i.price * i.quantity, 0);
     const tax = Math.round(rawSubtotal * 0.05);
     const total = rawSubtotal + tax;
 
@@ -1359,8 +1424,8 @@ export const restaurantStore = {
       date: 'Today, ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       customer: cleanGuest,
       tableNumber,
-      items: [...items],
-      itemsCount: items.reduce((acc, i) => acc + i.quantity, 0) || items.length,
+      items: [...cleanItems],
+      itemsCount: cleanItems.reduce((acc, i) => acc + i.quantity, 0) || cleanItems.length,
       subtotal: rawSubtotal,
       cgst: Math.round(tax / 2),
       sgst: Math.round(tax / 2),
@@ -1379,8 +1444,8 @@ export const restaurantStore = {
       guestName: cleanGuest,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       date: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
-      items: [...items],
-      totalQty: items.reduce((acc, i) => acc + i.quantity, 0),
+      items: [...cleanItems],
+      totalQty: cleanItems.reduce((acc, i) => acc + i.quantity, 0),
       kitchenStatus: 'New / Sent',
       billingStatus: 'Not Billed',
       note: `Table No: ${tableNumber} - ${cleanGuest}`,
@@ -2388,15 +2453,30 @@ export const restaurantStore = {
       if (idx >= 0) {
         const current = orders[idx];
 
-        const subtotal = items.reduce((sum, it) => sum + it.price * it.quantity, 0);
+        // Deduplicate and merge items by dish name
+        const updateItemsMap = new Map<string, KOTOrderItem>();
+        for (const it of (items || [])) {
+          const cleanName = String(it.name || '').trim();
+          const key = cleanName.toLowerCase();
+          if (updateItemsMap.has(key)) {
+            const ex = updateItemsMap.get(key)!;
+            ex.quantity += Number(it.quantity || 1);
+            if (ex.price <= 0 && Number(it.price) > 0) ex.price = Number(it.price);
+          } else {
+            updateItemsMap.set(key, { ...it, name: cleanName, quantity: Number(it.quantity || 1), price: Number(it.price || 0) });
+          }
+        }
+        const cleanItems = Array.from(updateItemsMap.values());
+
+        const subtotal = cleanItems.reduce((sum, it) => sum + it.price * it.quantity, 0);
         const taxAmount = Math.round(subtotal * 0.05);
         const cgst = Number((taxAmount / 2).toFixed(2));
         const sgst = Number((taxAmount / 2).toFixed(2));
         const total = Math.max(0, subtotal + taxAmount - current.discountAmount);
         const updated: ActiveOrder = {
           ...current,
-          items: [...items],
-          itemsCount: items.reduce((sum, it) => sum + it.quantity, 0),
+          items: cleanItems,
+          itemsCount: cleanItems.reduce((sum, it) => sum + it.quantity, 0),
           subtotal,
           taxAmount,
           cgst,

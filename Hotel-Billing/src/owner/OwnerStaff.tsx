@@ -85,7 +85,7 @@ export const OwnerStaff: React.FC = () => {
         </div>
 
         <button
-          onClick={fetchStaffData}
+          onClick={() => window.location.reload()}
           className="owner-btn-secondary"
           title="Refresh"
           aria-label="Refresh"
@@ -164,6 +164,30 @@ export const OwnerStaff: React.FC = () => {
             spellCheck={false}
           />
         </div>
+
+        {(selectedBranchId || search) && (
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedBranchId('');
+              setSearch('');
+            }}
+            className="owner-btn-secondary"
+            style={{
+              padding: '8px 14px',
+              backgroundColor: 'var(--bg-subtle, #F1F5F9)',
+              border: '1px solid var(--border-slate, #CBD5E1)',
+              borderRadius: '6px',
+              fontSize: '0.82rem',
+              color: 'var(--text-heading, #475569)',
+              cursor: 'pointer',
+              fontWeight: 600,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Clear Filters
+          </button>
+        )}
       </div>
 
       {/* Staff Table */}

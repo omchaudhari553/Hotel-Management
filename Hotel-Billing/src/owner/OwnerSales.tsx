@@ -164,7 +164,7 @@ export const OwnerSales: React.FC = () => {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <button
-            onClick={fetchSales}
+            onClick={() => window.location.reload()}
             className="owner-btn-secondary"
             title="Refresh"
             aria-label="Refresh"
@@ -286,6 +286,27 @@ export const OwnerSales: React.FC = () => {
               />
             </div>
           </>
+        )}
+
+        {(selectedBranchId || period !== 'this-month' || startDate || endDate || selectedMonth) && (
+          <button
+            type="button"
+            onClick={handleResetFilters}
+            className="owner-btn-secondary"
+            style={{
+              padding: '6px 14px',
+              backgroundColor: 'var(--bg-subtle, #F1F5F9)',
+              border: '1px solid var(--border-slate, #CBD5E1)',
+              borderRadius: '6px',
+              fontSize: '0.82rem',
+              color: 'var(--text-heading, #475569)',
+              cursor: 'pointer',
+              fontWeight: 600,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Clear Filters
+          </button>
         )}
       </div>
 

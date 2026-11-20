@@ -2,12 +2,12 @@ import { webBluetoothPrinter } from "../services/webBluetoothPrinter";
 import { webUsbPrinter } from "../services/webUsbPrinter";
 import { webWifiPrinter } from "../services/webWifiPrinter";
 import { printService } from "../services/printService";
-import { Bluetooth, Printer, Check, Loader2, AlertCircle, CheckCircle2, Wifi, Usb, Save, X, Upload, Building2, Trash2 } from "lucide-react";
+import { Bluetooth, Printer, Check, Loader2, AlertCircle, CheckCircle2, Wifi, Usb, Save, X, Upload, Building2, Trash2, Mail, RefreshCw, Download, FileText } from "lucide-react";
 import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
+import apiClient from "../services/api";
 import { settingsService } from "../services/settingsService";
-import { licenceService } from "../services/licenceService";
 import { branchService } from "../services/branchService";
 import { useLanguage } from "../context/LanguageContext";
 import { dialogService } from "../context/DialogContext";
@@ -122,12 +122,6 @@ const INITIAL_PROFILE = {
   currency: "INR",
   checkIn: "12:00",
   checkOut: "11:00",
-  bankName: "",
-  accountHolderName: "",
-  accountNumber: "",
-  ifscCode: "",
-  upiId: "",
-  bankPhone: "",
 };
 
 const INITIAL_BILLING = {
@@ -189,12 +183,6 @@ const SETTINGS_SECTIONS = [
     description: "System & backup",
   },
   {
-    id: "licence",
-    icon: "🛡️",
-    title: "Licence & Subscription",
-    description: "Enterprise licence & 28-day trial",
-  },
-    {
     id: "reports",
     icon: "📊",
     title: "Report & KPI",
@@ -713,12 +701,6 @@ export default function Settings() {
     useState("profile");
   const [reportsSubView, setReportsSubView] = useState("gst");
 
-  useEffect(() => {
-    if (isBranchUser && activeSection === "licence") {
-      setActiveSection("profile");
-    }
-  }, [isBranchUser, activeSection]);
-
   const [profile, setProfile] =
     useState(INITIAL_PROFILE);
 
@@ -1008,6 +990,116 @@ export default function Settings() {
       language: currentLanguageCode === "mr" ? "Marathi" : currentLanguageCode === "hi" ? "Hindi" : "English",
     }));
 
+  const [backupSending, setBackupSending] = useState(false);
+  const [lastBackupStatus, setLastBackupStatus] = useState({ status: 'idle', message: '', ref: '' });
+  const [smtpSenderEmail, setSmtpSenderEmail] = useState('omchaudhari553@gmail.com');
+
+  const handleSendDailyBackupNow = async () => {
+    setBackupSending(true);
+    try {
+      const res = await apiClient.post('/hotel/backup/send-email', null, {
+        params: {
+          customEmail: profile?.email || undefined,
+        }
+      });
+      const data = res.data?.data;
+      const ref = data?.reference || 'HTL-SUCCESS';
+      const target = data?.recipientEmail || profile?.email || 'Profile Email';
+      if (data?.success) {
+        setLastBackupStatus({
+          status: 'success',
+          message: `Daily hotel data backup email dispatched to ${target}! Reference: ${ref}`,
+          ref,
+        });
+        setPopup({
+          type: "success",
+          title: currentLanguageCode === 'mr' ? 'बॅकअप पाठवला' : 'Backup Dispatched',
+          message: `Daily hotel data backup email dispatched to ${target}! Reference: ${ref}`,
+        });
+      } else {
+        const errDetail = data?.error || 'Authentication failed';
+        setLastBackupStatus({
+          status: 'warning',
+          message: `Daily backup generated and saved securely on server (${ref})! ${errDetail}`,
+          ref,
+        });
+        setPopup({
+          type: "warning",
+          title: currentLanguageCode === 'mr' ? 'बॅकअप सेव्ह झाला' : 'Backup Saved',
+          message: `Daily backup generated and saved securely on server (${ref})!`,
+        });
+      }
+    } catch (err) {
+      const msg = err?.response?.data?.message || 'Failed to trigger backup';
+      setLastBackupStatus({
+        status: 'error',
+        message: msg,
+      });
+      setPopup({
+        type: "error",
+        title: currentLanguageCode === 'mr' ? 'त्रुटी' : 'Error',
+        message: msg,
+      });
+    } finally {
+      setBackupSending(false);
+    }
+  };
+
+  const handleDownloadDailyBackup = async () => {
+    try {
+      const res = await apiClient.get('/hotel/backup/download');
+      const jsonContent = JSON.stringify(res.data, null, 2);
+      const blob = new Blob([jsonContent], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `hotel_daily_backup_${Date.now()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      setPopup({
+        type: "success",
+        title: currentLanguageCode === 'mr' ? 'डाउनलोड यशस्वी' : 'Download Complete',
+        message: 'Daily backup JSON downloaded successfully!',
+      });
+    } catch {
+      setPopup({
+        type: "error",
+        title: currentLanguageCode === 'mr' ? 'त्रुटी' : 'Error',
+        message: 'Failed to download backup JSON',
+      });
+    }
+  };
+
+  const handleDownloadDailyBackupPdf = async () => {
+    try {
+      const res = await apiClient.get('/hotel/backup/download-pdf', {
+        responseType: 'blob',
+      });
+      const blob = new Blob([res.data], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `hotel_daily_backup_summary_${Date.now()}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      setPopup({
+        type: "success",
+        title: currentLanguageCode === 'mr' ? 'डाउनलोड यशस्वी' : 'Download Complete',
+        message: 'Daily backup PDF summary downloaded successfully!',
+      });
+    } catch {
+      setPopup({
+        type: "error",
+        title: currentLanguageCode === 'mr' ? 'त्रुटी' : 'Error',
+        message: 'Failed to download backup PDF',
+      });
+    }
+  };
+
   const [dashboardDisplay, setDashboardDisplay] = useState(() => {
     try {
       const cached = localStorage.getItem("dashboard_display_config");
@@ -1074,71 +1166,6 @@ export default function Settings() {
   const [hsnSearchQuery, setHsnSearchQuery] = useState("");
 
   const navigate = useNavigate();
-  const [licenceInfo, setLicenceInfo] = useState({
-    licenceVersion: "Enterprise",
-    subscriptionPlan: "Enterprise",
-    trialDurationDays: 28,
-    trialStatus: "Active",
-    trialStartDate: null,
-    trialEndDate: null,
-    subscriptionStatus: "Active & Verified",
-    renewalDate: null,
-    daysRemaining: 28,
-    isEligibleForTrial: false,
-  });
-  const [licenceLoading, setLicenceLoading] = useState(false);
-
-  const fetchLicence = async () => {
-    try {
-      const data = await licenceService.getLicenceInfo();
-      setLicenceInfo(data);
-    } catch (e) {
-      console.warn("Failed to load licence info", e);
-    }
-  };
-
-  useEffect(() => {
-    fetchLicence();
-    window.addEventListener("licence-updated", fetchLicence);
-    return () => window.removeEventListener("licence-updated", fetchLicence);
-  }, []);
-
-  const handleStartTrial = async () => {
-    try {
-      setLicenceLoading(true);
-      const updated = await licenceService.startFreeTrial();
-      setLicenceInfo(updated);
-      setPopup({
-        type: "success",
-        title: "28 Days Free Trial Activated!",
-        message:
-          "You have successfully activated your 28-day Enterprise trial. Enjoy full access to all features!",
-      });
-    } catch (err) {
-      setPopup({
-        type: "error",
-        title: "Trial Activation Failed",
-        message: err.message || "Failed to start free trial. Please try again.",
-      });
-    } finally {
-      setLicenceLoading(false);
-    }
-  };
-  const handleRenewSubscription = () => {
-    window.dispatchEvent(
-      new CustomEvent('open-subscription-modal', {
-        detail: { mode: 'renew' },
-      })
-    );
-  };
-
-  const handleUpgradePlan = () => {
-    window.dispatchEvent(
-      new CustomEvent('open-subscription-modal', {
-        detail: { mode: 'upgrade' },
-      })
-    );
-  };
 
   useEffect(() => {
     // 1. Fetch Profile
@@ -2153,90 +2180,6 @@ export default function Settings() {
                   }
                 />
               </div>
-
-              {/* Optional Bank Details for Hotel Profile */}
-              {!isBranchUser && (
-                <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid #E2E8F0' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-                    <div>
-                      <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#0F172A' }}>
-                        {t('bankDetailsOptional', 'Bank Details (Optional)')}
-                      </h3>
-                    </div>
-                    <span style={{ fontSize: '11px', fontWeight: 700, background: '#F1F5F9', color: '#475569', padding: '3px 8px', borderRadius: '6px' }}>
-                      {t('optional', 'OPTIONAL')}
-                    </span>
-                  </div>
-
-                  <div className="grid-three">
-                    <InputField
-                      label={t('bankName', 'Bank Name')}
-                      value={profile.bankName || ''}
-                      placeholder="e.g. State Bank of India"
-                      onChange={(value) => updateProfile("bankName", value)}
-                    />
-
-                    <InputField
-                      label={t('accountHolderName', 'Account Holder Name')}
-                      value={profile.accountHolderName || ''}
-                      placeholder="e.g. Royal Palace Hotel"
-                      onChange={(value) => updateProfile("accountHolderName", value)}
-                    />
-
-                    <InputField
-                      label={t('accountNumber', 'Account Number')}
-                      value={profile.accountNumber || ''}
-                      placeholder="e.g. 123456789012"
-                      onChange={(value) => updateProfile("accountNumber", value)}
-                    />
-                  </div>
-
-                  <div className="grid-three" style={{ marginTop: '14px' }}>
-                    <InputField
-                      label={t('ifscCode', 'IFSC Code')}
-                      value={profile.ifscCode || ''}
-                      placeholder="e.g. SBIN0001234"
-                      maxLength={11}
-                      onChange={(value) => updateProfile("ifscCode", value.toUpperCase())}
-                    />
-
-                    <InputField
-                      label={t('upiId', 'UPI ID / VPA')}
-                      value={profile.upiId || ''}
-                      placeholder="e.g. royalpalace@upi"
-                      onChange={(value) => updateProfile("upiId", value)}
-                    />
-
-                    <div>
-                      <InputField
-                        label={t('bankPhone', 'Bank Registered Phone Number')}
-                        value={profile.bankPhone || ''}
-                        placeholder="10-digit mobile number"
-                        maxLength={10}
-                        onChange={(value) => {
-                          const digits = value.replace(/\D/g, '').slice(0, 10);
-                          updateProfile("bankPhone", digits);
-                        }}
-                      />
-                      {profile.bankPhone && !/^[6-9]/.test(profile.bankPhone) && (
-                        <span style={{ fontSize: '11px', color: '#EF4444', marginTop: '2px', display: 'block' }}>
-                          Must start with 6, 7, 8, or 9
-                        </span>
-                      )}
-                      {profile.bankPhone && /^[6-9]/.test(profile.bankPhone) && profile.bankPhone.length < 10 && (
-                        <span style={{ fontSize: '11px', color: '#EF4444', marginTop: '2px', display: 'block' }}>
-                          Must be 10 digits ({profile.bankPhone.length}/10 entered)
-                        </span>
-                      )}
-                      {profile.bankPhone && /^[6-9]\d{9}$/.test(profile.bankPhone) && (
-                        <span style={{ fontSize: '11px', color: '#10B981', marginTop: '2px', display: 'block' }}>
-                          ✓ Valid 10-digit mobile number
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
 
             <div className="profile-meter">
@@ -4001,26 +3944,221 @@ const renderSystem = () => {
         />
       </div>
 
-      <div className="backup-panel">
-        <div>
-          <div className="backup-title">
-            {t('dataManagement', 'Data Management')}
+      {/* Daily Automated Backup (11:00 PM) Card */}
+      <div
+        className="owner-card"
+        style={{
+          backgroundColor: '#FFFFFF',
+          borderRadius: '12px',
+          border: '1px solid #E2E8F0',
+          padding: '24px 28px',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+          marginTop: '20px',
+          marginBottom: '20px',
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#3B82F6', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFFFFF', flexShrink: 0 }}>
+              <Mail size={20} />
+            </div>
+            <div>
+              <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#0F172A' }}>
+                {currentLanguageCode === 'mr' ? 'दैनिक स्वयंचलित हॉटेल बॅकअप (रात्री ११:००)' : 'Daily Automated Hotel Backup (11:00 PM)'}
+              </h3>
+              <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: '#64748B' }}>
+                {currentLanguageCode === 'mr'
+                  ? 'दैनिक हॉटेल डेटा बॅकअप • रोज रात्री ११:०० वाजता ऑटोमॅटिक ईमेल'
+                  : 'Daily hotel data backup • Automatic email every night at 11:00 PM'}
+              </p>
+            </div>
+          </div>
+          <span
+            style={{
+              backgroundColor: 'rgba(16, 185, 129, 0.15)',
+              color: '#10B981',
+              border: '1px solid rgba(16, 185, 129, 0.35)',
+              padding: '4px 10px',
+              borderRadius: '6px',
+              fontSize: '0.75rem',
+              fontWeight: 800,
+              letterSpacing: '0.02em',
+            }}
+          >
+            {currentLanguageCode === 'mr' ? 'दररोज रात्री नियोजित (२३:००)' : 'SCHEDULED EVERY NIGHT (23:00)'}
+          </span>
+        </div>
+
+        <p style={{ fontSize: '0.86rem', color: '#475569', lineHeight: 1.6, margin: '0 0 16px 0' }}>
+          {currentLanguageCode === 'mr' ? (
+            <>
+              दररोज रात्री <strong>११:०० वाजता</strong>, सर्व दैनंदिन विक्री, ऑर्डर्स, इनव्हॉइसेस, पेमेंट्स, टेबल्स आणि खर्च संकलित केले जातात आणि JSON डेटा व PDF अहवाल स्वरूपात तुमच्या हॉटेल प्रोफाइल ईमेलवर (<strong>{profile.email || 'admin@royalpalace.com'}</strong>) आपोआप पाठवले जातात.
+            </>
+          ) : (
+            <>
+              Every night at <strong>11:00 PM</strong>, all daily sales, orders, invoices, payments, tables, and expenses are compiled and automatically sent to your Hotel Profile email (<strong>{profile.email || 'admin@royalpalace.com'}</strong>) with JSON data and PDF summary attachments.
+            </>
+          )}
+        </p>
+
+        {/* SMTP Status Notice */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            marginBottom: '18px',
+            padding: '11px 16px',
+            backgroundColor: 'rgba(16, 185, 129, 0.10)',
+            borderRadius: '10px',
+            border: '1px solid rgba(16, 185, 129, 0.28)',
+          }}
+        >
+          <CheckCircle2 size={18} color="#10B981" style={{ flexShrink: 0 }} />
+          <div>
+            <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#10B981' }}>
+              {currentLanguageCode === 'mr' ? 'Gmail SMTP कनेक्टेड (application.yml द्वारे)' : 'Gmail SMTP Connected via application.yml'}
+            </span>
+            <span style={{ fontSize: '0.78rem', color: '#64748B', marginLeft: '6px' }}>
+              ({smtpSenderEmail || 'omchaudhari553@gmail.com'}) — {currentLanguageCode === 'mr' ? 'क्रेडेन्शियल्स आधीच application.yml मध्ये कॉन्फिगर केलेले आहेत.' : 'Credentials already configured in application.yml.'}
+            </span>
           </div>
         </div>
 
-        <button
-          type="button"
-          className="backup-button"
-          onClick={() =>
-            setPopup({
-              type: "success",
-              title: t('backupCreated', 'Backup Created'),
-              message: t('backupCreatedDesc', 'Your latest system backup has been created successfully.'),
-            })
-          }
-        >
-          {t('createBackup', 'Create Backup')}
-        </button>
+        {lastBackupStatus.status !== 'idle' && (
+          <div
+            style={{
+              padding: '12px 16px',
+              borderRadius: '8px',
+              marginBottom: '16px',
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '10px',
+              fontSize: '0.84rem',
+              backgroundColor:
+                lastBackupStatus.status === 'success'
+                  ? 'rgba(16, 185, 129, 0.12)'
+                  : lastBackupStatus.status === 'warning'
+                  ? 'rgba(245, 158, 11, 0.12)'
+                  : 'rgba(239, 68, 68, 0.12)',
+              border: `1px solid ${
+                lastBackupStatus.status === 'success'
+                  ? 'rgba(16, 185, 129, 0.35)'
+                  : lastBackupStatus.status === 'warning'
+                  ? 'rgba(245, 158, 11, 0.35)'
+                  : 'rgba(239, 68, 68, 0.35)'
+              }`,
+              color:
+                lastBackupStatus.status === 'success'
+                  ? '#10B981'
+                  : lastBackupStatus.status === 'warning'
+                  ? '#F59E0B'
+                  : '#EF4444',
+            }}
+          >
+            {lastBackupStatus.status === 'success' ? (
+              <CheckCircle2 size={18} color="#10B981" style={{ flexShrink: 0, marginTop: '2px' }} />
+            ) : (
+              <AlertCircle size={18} color="#F59E0B" style={{ flexShrink: 0, marginTop: '2px' }} />
+            )}
+            <div>
+              <div style={{ fontWeight: 700 }}>
+                {lastBackupStatus.status === 'success'
+                  ? (currentLanguageCode === 'mr' ? 'बॅकअप ईमेल यशस्वीरीत्या पाठवला!' : 'Backup Email Dispatched Successfully!')
+                  : (currentLanguageCode === 'mr' ? 'बॅकअप फाइल सर्व्हरवर सेव्ह केली!' : 'Backup File Saved Locally on Server!')}
+              </div>
+              <div style={{ marginTop: '2px', lineHeight: 1.4 }}>
+                {lastBackupStatus.message}
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            disabled={backupSending}
+            onClick={handleSendDailyBackupNow}
+            title={currentLanguageCode === 'mr' ? 'बॅकअप ईमेल आता पाठवा' : (backupSending ? 'Sending Backup Email...' : 'Send Daily Backup to Email Now')}
+            aria-label="Send Daily Backup to Email Now"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '40px',
+              height: '40px',
+              backgroundColor: backupSending ? '#94A3B8' : '#3B82F6',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: backupSending ? 'not-allowed' : 'pointer',
+              boxShadow: '0 2px 4px rgba(59, 130, 246, 0.25)',
+              transition: 'background-color 0.2s ease',
+            }}
+          >
+            <RefreshCw size={18} color="#FFFFFF" style={backupSending ? { animation: 'spin 1s linear infinite' } : undefined} />
+          </button>
+
+          <button
+            type="button"
+            onClick={handleDownloadDailyBackup}
+            title={currentLanguageCode === 'mr' ? 'बॅकअप डाउनलोड करा (.json)' : 'Download Backup (.json)'}
+            aria-label="Download Backup (.json)"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '40px',
+              height: '40px',
+              backgroundColor: '#FFFFFF',
+              color: '#0F172A',
+              border: '1px solid #CBD5E1',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#D97706';
+              e.currentTarget.style.color = '#D97706';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = '#CBD5E1';
+              e.currentTarget.style.color = '#0F172A';
+            }}
+          >
+            <Download size={18} color="currentColor" />
+          </button>
+
+          <button
+            type="button"
+            onClick={handleDownloadDailyBackupPdf}
+            title={currentLanguageCode === 'mr' ? 'PDF अहवाल डाउनलोड करा (.pdf)' : 'Download PDF Report (.pdf)'}
+            aria-label="Download PDF Report (.pdf)"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '40px',
+              height: '40px',
+              backgroundColor: '#FFFFFF',
+              color: '#0F172A',
+              border: '1px solid #CBD5E1',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#D97706';
+              e.currentTarget.style.color = '#D97706';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = '#CBD5E1';
+              e.currentTarget.style.color = '#0F172A';
+            }}
+          >
+            <FileText size={18} color="currentColor" />
+          </button>
+        </div>
       </div>
 
       <div className="system-health">
@@ -4066,317 +4204,6 @@ const renderSystem = () => {
   );
 };
 
-const renderLicence = () => {
-  const formatDate = (d) => {
-    if (!d) return t('notSet', "Not Set");
-    try {
-      return formatContextDate(d, { showDayOfWeek: false });
-    } catch {
-      return d;
-    }
-  };
-
-  return (
-    <div className="settings-card licence-details-card">
-      <div className="card-heading">
-        <div>
-          <h2>{t('licenceAndSubscription', 'Licence & Subscription Information')}</h2>
-        </div>
-        <div className="card-badge" style={{ backgroundColor: "#15803D", color: "#FFFFFF" }}>
-          {licenceInfo.licenceVersion.toUpperCase()}
-        </div>
-      </div>
-
-      {/* Section A: Licence Details Grid */}
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-        gap: "14px",
-        marginBottom: "20px",
-        marginTop: "12px",
-      }}>
-        {/* CARD 1: LICENCE VERSION & SUBSCRIPTION PLAN (Combined in 1 Card) */}
-        <div className="licence-field-box" style={{
-          background: "#FFFFFF",
-          border: "1px solid #E2E8F0",
-          borderRadius: "12px",
-          padding: "16px 18px",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.04)"
-        }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", paddingBottom: "10px", borderBottom: "1px solid #F1F5F9" }}>
-            <div>
-              <span style={{ fontSize: "11px", fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: "0.5px" }}>{t('licenceVersion', 'Licence Version')}</span>
-              <div style={{ fontSize: "17px", fontWeight: 800, color: "#0F172A", marginTop: "3px" }}>{licenceInfo.licenceVersion}</div>
-            </div>
-            <span style={{
-              background: "#EFF6FF",
-              color: "#2563EB",
-              border: "1px solid #BFDBFE",
-              padding: "3px 10px",
-              borderRadius: "9999px",
-              fontSize: "11px",
-              fontWeight: 700
-            }}>v{licenceInfo.licenceVersion || "2.4.0"}</span>
-          </div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <div>
-              <span style={{ fontSize: "11px", fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: "0.5px" }}>{t('subscriptionPlan', 'Subscription Plan')}</span>
-              <div style={{ fontSize: "16px", fontWeight: 800, color: "#0F172A", marginTop: "3px" }}>{t(licenceInfo.subscriptionPlan, licenceInfo.subscriptionPlan)}</div>
-            </div>
-            <span style={{
-              background: "#F0FDF4",
-              color: "#16A34A",
-              border: "1px solid #BBF7D0",
-              padding: "3px 10px",
-              borderRadius: "9999px",
-              fontSize: "11px",
-              fontWeight: 700
-            }}>{t(licenceInfo.subscriptionStatus, licenceInfo.subscriptionStatus || "Active")}</span>
-          </div>
-        </div>
-
-        {/* CARD 2: TRIAL START DATE & TRIAL END DATE (Combined in 1 Card) */}
-        <div className="licence-field-box" style={{
-          background: "#FFFFFF",
-          border: "1px solid #E2E8F0",
-          borderRadius: "12px",
-          padding: "16px 18px",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.04)"
-        }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", paddingBottom: "10px", borderBottom: "1px solid #F1F5F9" }}>
-            <div>
-              <span style={{ fontSize: "11px", fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: "0.5px" }}>{t('trialStartDate', 'Trial Start Date')}</span>
-              <div style={{ fontSize: "15px", fontWeight: 700, color: "#1E293B", marginTop: "3px" }}>{formatDate(licenceInfo.trialStartDate)}</div>
-            </div>
-            <span style={{
-              background: "#FEF3C7",
-              color: "#D97706",
-              border: "1px solid #FDE68A",
-              padding: "3px 10px",
-              borderRadius: "9999px",
-              fontSize: "11px",
-              fontWeight: 700
-            }}>{t('daysTrial', '28 Days Free Trial')}</span>
-          </div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <div>
-              <span style={{ fontSize: "11px", fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: "0.5px" }}>{t('trialEndDate', 'Trial End Date')}</span>
-              <div style={{ fontSize: "15px", fontWeight: 700, color: "#1E293B", marginTop: "3px" }}>{formatDate(licenceInfo.trialEndDate)}</div>
-            </div>
-            <span style={{
-              background: licenceInfo.trialStatus === "Active" ? "#F0FDF4" : "#FEF2F2",
-              color: licenceInfo.trialStatus === "Active" ? "#16A34A" : "#DC2626",
-              border: `1px solid ${licenceInfo.trialStatus === "Active" ? "#BBF7D0" : "#FECACA"}`,
-              padding: "3px 10px",
-              borderRadius: "9999px",
-              fontSize: "11px",
-              fontWeight: 700
-            }}>
-              {licenceInfo.trialStatus === "Active" ? `${toDevanagari(Math.min(28, Math.max(0, licenceInfo.daysRemaining)))} ${t('daysRemaining', 'Days Left')}` : t(licenceInfo.trialStatus, licenceInfo.trialStatus)}
-            </span>
-          </div>
-        </div>
-
-        {/* CARD 3: RENEWAL & TRIAL STATUS */}
-        <div className="licence-field-box" style={{
-          background: "#FFFFFF",
-          border: "1px solid #E2E8F0",
-          borderRadius: "12px",
-          padding: "16px 18px",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.04)"
-        }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", paddingBottom: "10px", borderBottom: "1px solid #F1F5F9" }}>
-            <div>
-              <span style={{ fontSize: "11px", fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: "0.5px" }}>{t('renewalDate', 'Renewal Date')}</span>
-              <div style={{ fontSize: "15px", fontWeight: 700, color: "#1E293B", marginTop: "3px" }}>{formatDate(licenceInfo.renewalDate)}</div>
-            </div>
-            <span style={{
-              background: "#F8FAFC",
-              color: "#475569",
-              border: "1px solid #E2E8F0",
-              padding: "3px 10px",
-              borderRadius: "9999px",
-              fontSize: "11px",
-              fontWeight: 700
-            }}>{t('autoRenewal', 'Auto-Renew')}</span>
-          </div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <div>
-              <span style={{ fontSize: "11px", fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: "0.5px" }}>{t('trialStatus', 'Trial Status')}</span>
-              <div style={{ fontSize: "15px", fontWeight: 800, color: licenceInfo.trialStatus === "Active" ? "#16A34A" : "#DC2626", marginTop: "3px" }}>
-                {t(licenceInfo.trialStatus, licenceInfo.trialStatus || "Active")}
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => handleRenewLicense(28)}
-              style={{
-                background: "#16A34A",
-                color: "#FFFFFF",
-                border: "none",
-                padding: "6px 14px",
-                borderRadius: "8px",
-                fontSize: "12px",
-                fontWeight: 700,
-                cursor: "pointer"
-              }}
-            >
-              {t('renewNow', 'Renew Now')}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Section B: 28 Days Free Trial Section */}
-      <div style={{
-        background: "linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%)",
-        border: "1.5px solid #86EFAC",
-        borderRadius: "14px",
-        padding: "24px",
-        marginBottom: "24px",
-      }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px" }}>
-          <div style={{ maxWidth: "600px" }}>
-            <span style={{
-              background: "#16A34A",
-              color: "#FFFFFF",
-              fontSize: "11px",
-              fontWeight: 800,
-              padding: "3px 10px",
-              borderRadius: "9999px",
-              textTransform: "uppercase",
-              letterSpacing: "0.5px",
-              display: "inline-block",
-              marginBottom: "8px",
-            }}>
-              {t('specialOffer', 'Special Offer')}
-            </span>
-            <h3 style={{ margin: "0 0 8px 0", fontSize: "1.35rem", fontWeight: 800, color: "#14532D" }}>
-              {t('startYour28DaysTrial', 'Start Your 28 Days Free Trial')}
-            </h3>
-            <p style={{ margin: 0, fontSize: "0.95rem", color: "#166534", lineHeight: 1.5 }}>
-              {t('trialPromoDesc', 'Experience the Enterprise features of Ajalkar POS Billing with a 28-day free trial. Explore the available features before choosing your subscription plan.')}
-            </p>
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px", alignItems: "flex-end" }}>
-            {licenceInfo.trialStatus === "Not Started" ? (
-              <button
-                type="button"
-                disabled={licenceLoading}
-                onClick={handleStartTrial}
-                style={{
-                  background: "#16A34A",
-                  color: "#FFFFFF",
-                  border: "none",
-                  padding: "12px 24px",
-                  borderRadius: "10px",
-                  fontSize: "0.95rem",
-                  fontWeight: 800,
-                  cursor: "pointer",
-                  boxShadow: "0 4px 14px rgba(22, 163, 74, 0.35)",
-                  transition: "all 0.15s ease",
-                }}
-              >
-                {licenceLoading ? t('activatingTrial', 'Activating Trial...') : t('startFreeTrial', 'Start Free Trial')}
-              </button>
-            ) : licenceInfo.trialStatus === "Active" ? (
-              <div style={{
-                background: "#FFFFFF",
-                border: "1.5px solid #22C55E",
-                color: "#15803D",
-                padding: "10px 18px",
-                borderRadius: "10px",
-                fontWeight: 800,
-                fontSize: "0.92rem",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-              }}>
-                <span>✓</span> {t('trialActive', 'Trial Active')} · {toDevanagari(Math.min(28, Math.max(0, licenceInfo.daysRemaining)))} {t('days', 'Days')}
-              </div>
-            ) : (
-              <div style={{
-                background: "#FEE2E2",
-                border: "1.5px solid #F87171",
-                color: "#B91C1C",
-                padding: "10px 18px",
-                borderRadius: "10px",
-                fontWeight: 800,
-                fontSize: "0.92rem",
-              }}>
-                ⚠ {t('trialExpired', 'Trial Expired')}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Section C & D: Renew and Upgrade Options */}
-      <div style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        flexWrap: "wrap",
-        gap: "16px",
-        paddingTop: "16px",
-        borderTop: "1px solid #E2E8F0",
-      }}>
-        <div>
-          <h4 style={{ margin: "0 0 4px 0", fontSize: "1.05rem", fontWeight: 800, color: "#1E293B" }}>
-            {t('subscriptionActions', 'Subscription Actions')}
-          </h4>
-        </div>
-
-        <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-          <button
-            type="button"
-            disabled={licenceLoading}
-            onClick={handleRenewSubscription}
-            style={{
-              background: "#0F766E",
-              color: "#FFFFFF",
-              border: "none",
-              padding: "10px 20px",
-              borderRadius: "10px",
-              fontSize: "0.9rem",
-              fontWeight: 700,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              boxShadow: "0 2px 8px rgba(15, 118, 100, 0.25)",
-            }}
-          >
-            🔄 {t('renewSubscription', 'Renew Subscription')}
-          </button>
-
-          <button
-            type="button"
-            onClick={handleUpgradePlan}
-            style={{
-              background: "#4338CA",
-              color: "#FFFFFF",
-              border: "none",
-              padding: "10px 20px",
-              borderRadius: "10px",
-              fontSize: "0.9rem",
-              fontWeight: 700,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              boxShadow: "0 2px 8px rgba(67, 56, 202, 0.25)",
-            }}
-          >
-            ⬆️ {t('upgradePlan', 'Upgrade Plan')}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const renderContent = () => {
   if (activeSection === "profile") {
     return renderProfile();
@@ -4396,10 +4223,6 @@ const renderContent = () => {
 
   if (activeSection === "system") {
     return renderSystem();
-  }
-
-  if (activeSection === "licence") {
-    return renderLicence();
   }
 
   if (activeSection === "reports") {
@@ -5415,159 +5238,11 @@ return (
       {lastSaved && <div className="toolbar-chip">{t('saved', 'Saved')} {lastSaved}</div>}
     </div>
 
-    {/* Prominent Licence & Subscription Hero Card matching user screenshot */}
-    {!isBranchUser && (
-      <div
-        className="licence-hero-card"
-      style={{
-        background: "#FFFFFF",
-        borderRadius: "16px",
-        border: "1.5px solid #BBF7D0",
-        boxShadow: "0 4px 16px rgba(22, 101, 52, 0.06)",
-        padding: "20px 24px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        flexWrap: "wrap",
-        gap: "18px",
-        marginBottom: "4px",
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "center", gap: "16px", minWidth: "280px" }}>
-        <div
-          style={{
-            width: "52px",
-            height: "52px",
-            borderRadius: "14px",
-            background: "#DCFCE7",
-            border: "2px solid #86EFAC",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "26px",
-            color: "#16A34A",
-            flexShrink: 0,
-          }}
-        >
-          🛡️
-        </div>
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-            <h3 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 800, color: "#166534" }}>
-              {t('licensedEnterpriseVersion', 'Licensed Enterprise Version')}
-            </h3>
-            <span
-              style={{
-                background: "#DCFCE7",
-                color: "#15803D",
-                border: "1px solid #86EFAC",
-                borderRadius: "9999px",
-                padding: "2px 10px",
-                fontSize: "0.75rem",
-                fontWeight: 800,
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "4px",
-              }}
-            >
-              ⚡ {t(licenceInfo.subscriptionStatus || "Active", licenceInfo.subscriptionStatus || "Active")}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div style={{ display: "flex", alignItems: "center", gap: "24px", flexWrap: "wrap" }}>
-        <div>
-          <div style={{ fontSize: "0.7rem", fontWeight: 800, color: "#6B7280", letterSpacing: "0.05em", textTransform: "uppercase" }}>
-            {t('planName', 'PLAN NAME')}
-          </div>
-          <div style={{ fontSize: "0.95rem", fontWeight: 800, color: "#16A34A" }}>
-            {licenceInfo.trialStatus === "Active" ? t('trial', 'TRIAL') : licenceInfo.subscriptionPlan}
-          </div>
-        </div>
-        <div>
-          <div style={{ fontSize: "0.7rem", fontWeight: 800, color: "#6B7280", letterSpacing: "0.05em", textTransform: "uppercase" }}>
-            {t('validity', 'VALIDITY')}
-          </div>
-          <div style={{ fontSize: "0.95rem", fontWeight: 800, color: "#111827" }}>
-            {licenceInfo.trialStatus === "Active"
-              ? `${Math.min(28, Math.max(0, licenceInfo.daysRemaining))} ${t('days', 'Days')}`
-              : licenceInfo.trialStatus === "Expired"
-                ? t('expired', 'Expired')
-                : t('daysTrial', '28 Days Free Trial')}
-          </div>
-        </div>
-        <div>
-          <div style={{ fontSize: "0.7rem", fontWeight: 800, color: "#6B7280", letterSpacing: "0.05em", textTransform: "uppercase" }}>
-            {t('licenseStatus', 'LICENSE STATUS')}
-          </div>
-          <div
-            style={{
-              fontSize: "0.95rem",
-              fontWeight: 800,
-              color: licenceInfo.trialStatus === "Expired" ? "#DC2626" : "#16A34A",
-            }}
-          >
-            {t(licenceInfo.subscriptionStatus, licenceInfo.subscriptionStatus)}
-          </div>
-        </div>
-        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-          <button
-            type="button"
-            disabled={licenceLoading}
-            onClick={() => {
-              if (licenceInfo.trialStatus === "Not Started") {
-                handleStartTrial();
-              } else {
-                handleRenewSubscription();
-              }
-            }}
-            style={{
-              background: "#059669",
-              color: "#FFFFFF",
-              border: "none",
-              padding: "9px 16px",
-              borderRadius: "9px",
-              fontSize: "0.85rem",
-              fontWeight: 700,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              boxShadow: "0 2px 6px rgba(5, 150, 105, 0.25)",
-            }}
-          >
-            🔄 {licenceInfo.trialStatus === "Not Started" ? t('startFreeTrial', 'Start Free Trial') : t('renewLicense', 'Renew License')}
-          </button>
-          <button
-            type="button"
-            onClick={handleUpgradePlan}
-            style={{
-              background: "#1E293B",
-              color: "#FFFFFF",
-              border: "none",
-              padding: "9px 16px",
-              borderRadius: "9px",
-              fontSize: "0.85rem",
-              fontWeight: 700,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-            }}
-          >
-            ⬆️ {t('upgradePlan', 'Upgrade Plan')}
-          </button>
-        </div>
-      </div>
-    </div>
-    )}
-
     <div className="settings-layout">
       <aside
         className="settings-sidebar"
       >
-        {SETTINGS_SECTIONS.filter((s) => !isBranchUser || s.id !== "licence").filter(sectionMatchesSearch).map(
+        {SETTINGS_SECTIONS.filter(sectionMatchesSearch).map(
           (section) => (
             <button
               type="button"
@@ -5597,13 +5272,11 @@ return (
                           ? "notifications"
                           : section.id === "system"
                             ? "systemPreferences"
-                              : section.id === "licence"
-                                ? "licenceAndSubscription"
-                                : section.id === "reports"
-                                  ? "reportAndKpi"
-                                  : section.id === "gst-reports"
-                                    ? "gstSettingsAndReports"
-                                    : section.title,
+                            : section.id === "reports"
+                              ? "reportAndKpi"
+                              : section.id === "gst-reports"
+                                ? "gstSettingsAndReports"
+                                : section.title,
                   section.title
                 )}
               </span>

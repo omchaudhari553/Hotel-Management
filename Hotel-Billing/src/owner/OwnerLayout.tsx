@@ -11,7 +11,6 @@ import {
   Menu,
   Sun,
   Moon,
-  RefreshCw,
   Globe,
 } from 'lucide-react';
 
@@ -159,27 +158,11 @@ export const OwnerLayout: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Controls: refresh, language, theme, and account */}
+          {/* Right Controls: language, theme, and account */}
           <div
             className="owner-header-right"
             style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
           >
-            {/* Quick Refresh Button (preserved from HEAD) */}
-            <button
-              type="button"
-              onClick={() => window.location.reload()}
-              className="owner-theme-toggle-btn"
-              title="Refresh Admin Panel"
-              aria-label="Refresh Admin Panel"
-              style={{
-                ...controlButtonStyle,
-                width: '34px',
-                color: 'var(--text-body, #64748B)',
-              }}
-            >
-              <RefreshCw size={15} />
-            </button>
-
             {/* Quick Language Toggle Button (preserved from origin/poonam) */}
             <button
               type="button"

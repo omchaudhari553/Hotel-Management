@@ -242,6 +242,13 @@ export const OwnerReports: React.FC = () => {
     fetchReport();
   }, [reportType, selectedBranchId, period, startDate, endDate]);
 
+  const handleResetFilters = () => {
+    setSelectedBranchId('');
+    setPeriod('this-month');
+    setStartDate('');
+    setEndDate('');
+  };
+
   const formatCurrency = (amt: number | undefined) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -1035,7 +1042,7 @@ export const OwnerReports: React.FC = () => {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <button
-            onClick={handleRefresh}
+            onClick={() => window.location.reload()}
             disabled={loading || refreshing}
             className="owner-btn-secondary"
             title="Refresh current report"
@@ -1250,9 +1257,30 @@ export const OwnerReports: React.FC = () => {
           </>
         )}
 
+        {(selectedBranchId || period !== 'this-month' || startDate || endDate) && (
+          <button
+            type="button"
+            onClick={handleResetFilters}
+            className="owner-btn-secondary"
+            style={{
+              padding: '6px 14px',
+              backgroundColor: 'var(--bg-subtle, #F1F5F9)',
+              border: '1px solid var(--border-slate, #CBD5E1)',
+              borderRadius: '6px',
+              fontSize: '0.82rem',
+              color: 'var(--text-heading, #475569)',
+              cursor: 'pointer',
+              fontWeight: 600,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Clear Filters
+          </button>
+        )}
+
         <button
           type="button"
-          onClick={handleRefresh}
+          onClick={() => window.location.reload()}
           disabled={loading || refreshing}
           className="owner-btn-secondary"
           title="Refresh report data"

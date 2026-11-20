@@ -103,7 +103,6 @@ export type SettingsTabKey =
   | 'billing'
   | 'notifications'
   | 'system'
-  | 'licence'
   | 'reports'
   | 'gst-reports'
   | 'printer'
@@ -1997,7 +1996,6 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
       case 'billing': return t('billing', 'Billing');
       case 'notifications': return t('notifications', 'Notifications');
       case 'system': return t('systemPreferences', 'System Preferences');
-      case 'licence': return t('licenceAndSubscription', 'Licence & Subscription');
       case 'reports': return t('reportAndKpi', 'Report & KPI');
       case 'gst-reports': return t('gstSettingsAndReports', 'GST Settings & Reports');
       case 'printer': return language === 'mr' ? 'प्रिंटर व्यवस्थापन' : language === 'hi' ? 'प्रिंटर सेटिंग्स' : 'Printer Settings';
@@ -2011,7 +2009,6 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
       case 'billing': return t('invoicePreferences', 'Invoice preferences');
       case 'notifications': return t('alertsAndNotifications', 'Alerts & notifications');
       case 'system': return t('systemAndBackup', 'System & backup');
-      case 'licence': return t('enterpriseLicenceTrial', 'Enterprise licence & 28-day trial');
       case 'reports': return t('businessAnalyticsReports', 'Business analytics & reports');
       case 'gst-reports': return t('gstConfigTaxReturnReports', 'GST configuration & tax return reports');
       case 'printer': return language === 'mr' ? 'ब्लूटूथ, वाय-फाय, USB थर्मल आणि Android सिस्टीम प्रिंटर' : language === 'hi' ? 'ब्लूटूथ, वाई-फाई, USB और एंड्रॉइड प्रिंटर' : 'Bluetooth, Wi-Fi, USB & Android Print Service';
@@ -2112,15 +2109,6 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
       icon: Bell,
     },
     {
-      id: 'licence_details',
-      tabKey: 'licence' as SettingsTabKey,
-      title: language === 'mr' ? 'सॉफ्टवेअर लायसन्स व सबस्क्रिप्शन' : language === 'hi' ? 'सॉफ्टवेयर लाइसेंस और सदस्यता' : 'Software Licence & Subscription',
-      desc: language === 'mr' ? 'एंटरप्राइझ लायसन्स की, मुदत आणि डिव्हाइस कोटा माहिती' : language === 'hi' ? 'लाइसेंस की, वैधता और डिवाइस कोटा' : 'Enterprise license key, validity and device quota',
-      category: language === 'mr' ? 'लायसन्स' : 'Licence',
-      keywords: ['licence', 'license', 'subscription', 'enterprise', 'plan', 'validity', 'परवाना', 'लायसन्स', 'सबस्क्रिप्शन'],
-      icon: Shield,
-    },
-    {
       id: 'gst_reports_filing',
       tabKey: 'gst-reports' as SettingsTabKey,
       title: language === 'mr' ? 'जीएसटी रिटर्न्स (GSTR-1, GSTR-3B)' : language === 'hi' ? 'जीएसटी रिटर्न (GSTR-1, GSTR-3B)' : 'GST Returns & Tax Filing',
@@ -2164,13 +2152,12 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
         { key: 'printer', label: getNavItemLabel('printer'), desc: getNavItemDesc('printer'), icon: Printer },
         { key: 'notifications', label: getNavItemLabel('notifications'), desc: getNavItemDesc('notifications'), icon: Bell },
         { key: 'system', label: getNavItemLabel('system'), desc: getNavItemDesc('system'), icon: SlidersHorizontal },
-        ...(!isBranchUser ? [{ key: 'licence' as SettingsTabKey, label: getNavItemLabel('licence'), desc: getNavItemDesc('licence'), icon: Shield }] : []),
         { key: 'reports', label: getNavItemLabel('reports'), desc: getNavItemDesc('reports'), icon: BarChart3 },
         { key: 'gst-reports', label: getNavItemLabel('gst-reports'), desc: getNavItemDesc('gst-reports'), icon: FileText },
       ];
     if (!searchQuery.trim()) return rawItems;
     const q = searchQuery.toLowerCase().trim();
-    const matchingTabs = new Set(matchingSettings.filter((m) => !isBranchUser || m.tabKey !== 'licence').map((m) => m.tabKey));
+    const matchingTabs = new Set(matchingSettings.map((m) => m.tabKey));
     return rawItems.filter(
       (item) =>
         matchingTabs.has(item.key) ||
@@ -5510,162 +5497,7 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
               </View>
             )}
 
-            {/* ----------------------------------------------------
-                3. LICENCE & SUBSCRIPTION TAB (Fully Working)
-            ---------------------------------------------------- */}
-            {/* ----------------------------------------------------
-                3. LICENCE & SUBSCRIPTION TAB (Fully Working)
-            ---------------------------------------------------- */}
-            {!isBranchUser && activeTab === 'licence' && (
-              <View style={styles.settingsCard}>
-                <View style={styles.cardHeader}>
-                  <View>
-                    <Text style={styles.cardTitle}>{t('licenceAndSubscription', 'Licence & Subscription')}</Text>
-                  </View>
-                </View>
 
-                {/* Current Active Plan Status Card */}
-                <View style={styles.activePlanCard}>
-                  <View style={styles.activePlanHeader}>
-                    <View style={styles.activePlanIconBox}>
-                      <Shield size={22} color="#16A34A" />
-                    </View>
-                    <View style={{ flex: 1, minWidth: 0 }}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 6 }}>
-                        <Text style={[styles.activePlanName, { flexShrink: 1 }]}>{activePlanName} Enterprise License</Text>
-                        <View style={styles.heroActiveBadge}>
-                          <Text style={styles.heroActiveBadgeText}>{t('active', 'Active')}</Text>
-                        </View>
-                      </View>
-                      <Text style={styles.activePlanSub}>
-                        {toDevanagari(daysRemaining)} {t('days', 'Days')}. Thermal printing & GST reports active.
-                      </Text>
-                    </View>
-                  </View>
-
-                  <View style={styles.activePlanActions}>
-                    <TouchableOpacity
-                      style={styles.renewBtn}
-                      onPress={handleRenewLicense}
-                    >
-                      <RotateCcw size={14} color="#FFFFFF" />
-                      <Text style={styles.renewBtnText}>{t('renewLicense28Days', 'Renew 28-Day License')}</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      style={styles.upgradeBtn}
-                      onPress={() => setShowUpgradeModal(true)}
-                    >
-                      <Sparkles size={14} color="#FFFFFF" />
-                      <Text style={styles.upgradeBtnText}>{t('upgradePlan', 'Upgrade Plan')}</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-
-                {/* Combined Licence & Subscription Details Cards */}
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 14, marginBottom: 8 }}>
-                  {/* Card 1: Licence Version & Subscription Plan (Combined) */}
-                  <View style={{ flex: 1, minWidth: 260, backgroundColor: isDark ? '#1F2937' : '#FFFFFF', borderWidth: 1, borderColor: isDark ? '#374151' : '#E5E7EB', borderRadius: 12, padding: 14 }}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 8, borderBottomWidth: 1, borderBottomColor: isDark ? '#374151' : '#F3F4F6', marginBottom: 8 }}>
-                      <View>
-                        <Text style={{ fontSize: 10.5, fontWeight: '700', color: '#6B7280', textTransform: 'uppercase' }}>{t('licenceVersion', 'Licence Version')}</Text>
-                        <Text style={{ fontSize: 15, fontWeight: '800', color: isDark ? '#F9FAFB' : '#111827', marginTop: 2 }}>v2.4.0</Text>
-                      </View>
-                      <View style={{ backgroundColor: '#EFF6FF', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 12 }}>
-                        <Text style={{ fontSize: 10.5, fontWeight: '700', color: '#2563EB' }}>Enterprise</Text>
-                      </View>
-                    </View>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <View>
-                        <Text style={{ fontSize: 10.5, fontWeight: '700', color: '#6B7280', textTransform: 'uppercase' }}>{t('subscriptionPlan', 'Subscription Plan')}</Text>
-                        <Text style={{ fontSize: 14.5, fontWeight: '800', color: isDark ? '#F9FAFB' : '#111827', marginTop: 2 }}>{activePlanName} Plan</Text>
-                      </View>
-                      <View style={{ backgroundColor: '#F0FDF4', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 12 }}>
-                        <Text style={{ fontSize: 10.5, fontWeight: '700', color: '#16A34A' }}>{t('active', 'Active')}</Text>
-                      </View>
-                    </View>
-                  </View>
-
-                  {/* Card 2: Trial Start Date & Trial End Date (Combined) */}
-                  <View style={{ flex: 1, minWidth: 260, backgroundColor: isDark ? '#1F2937' : '#FFFFFF', borderWidth: 1, borderColor: isDark ? '#374151' : '#E5E7EB', borderRadius: 12, padding: 14 }}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 8, borderBottomWidth: 1, borderBottomColor: isDark ? '#374151' : '#F3F4F6', marginBottom: 8 }}>
-                      <View>
-                        <Text style={{ fontSize: 10.5, fontWeight: '700', color: '#6B7280', textTransform: 'uppercase' }}>{t('trialStartDate', 'Trial Start Date')}</Text>
-                        <Text style={{ fontSize: 13.5, fontWeight: '700', color: isDark ? '#F9FAFB' : '#1F2937', marginTop: 2 }}>01 Nov 2026</Text>
-                      </View>
-                      <View style={{ backgroundColor: '#FEF3C7', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 12 }}>
-                        <Text style={{ fontSize: 10.5, fontWeight: '700', color: '#D97706' }}>28 Days</Text>
-                      </View>
-                    </View>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <View>
-                        <Text style={{ fontSize: 10.5, fontWeight: '700', color: '#6B7280', textTransform: 'uppercase' }}>{t('trialEndDate', 'Trial End Date')}</Text>
-                        <Text style={{ fontSize: 13.5, fontWeight: '700', color: isDark ? '#F9FAFB' : '#1F2937', marginTop: 2 }}>29 Nov 2026</Text>
-                      </View>
-                      <View style={{ backgroundColor: '#F0FDF4', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 12 }}>
-                        <Text style={{ fontSize: 10.5, fontWeight: '700', color: '#16A34A' }}>{toDevanagari(daysRemaining)} {t('daysRemaining', 'Days Left')}</Text>
-                      </View>
-                    </View>
-                  </View>
-                </View>
-
-                {/* 3 Tier Plan Comparison Cards */}
-                <Text style={[styles.sectionSubHeading, { marginTop: 20 }]}>{t('availableSubscriptionPlans', 'Available Subscription Plans')}</Text>
-                <View style={styles.plansGrid}>
-                  {/* Plan 1: Free Trial */}
-                  <View style={styles.planCard}>
-                    <Text style={styles.planBadgeText}>STARTER</Text>
-                    <Text style={styles.planCardTitle}>{t('starterFreeTrialTitle', '28-Day Free Trial')}</Text>
-                    <Text style={styles.planPriceText}>₹ {toDevanagari(0)} <Text style={styles.planPeriodText}>/ {toDevanagari(28)} {t('daysLower', 'days')}</Text></Text>
-                    <Text style={styles.planDescText}>Basic hotel billing, KOT printing, and single counter support.</Text>
-
-                    <TouchableOpacity
-                      style={[styles.planBtn, activePlanName === 'Trial' && styles.planBtnCurrent]}
-                      onPress={() => handleActivatePlan('Trial')}
-                      disabled={activePlanName === 'Trial'}
-                    >
-                      <Text style={[styles.planBtnText, activePlanName === 'Trial' && styles.planBtnTextCurrent]}>
-                        {activePlanName === 'Trial' ? t('currentPlan', 'Current Plan') : 'Select Starter'}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-
-                  {/* Plan 2: Pro Annual */}
-                  <View style={styles.planCard}>
-                    <Text style={[styles.planBadgeText, { color: '#0284C7' }]}>POPULAR</Text>
-                    <Text style={styles.planCardTitle}>{t('proEdition', 'Pro Edition')}</Text>
-                    <Text style={styles.planPriceText}>₹ {toDevanagari('7,999')} <Text style={styles.planPeriodText}>/ year</Text></Text>
-                    <Text style={styles.planDescText}>Multi-counter billing, 80mm thermal receipt printing, and WhatsApp receipts.</Text>
-
-                    <TouchableOpacity
-                      style={[styles.planBtn, activePlanName === 'Pro' ? styles.planBtnCurrent : { backgroundColor: '#0284C7' }]}
-                      onPress={() => handleActivatePlan('Pro')}
-                    >
-                      <Text style={[styles.planBtnText, activePlanName === 'Pro' && styles.planBtnTextCurrent]}>
-                        {activePlanName === 'Pro' ? t('currentPlan', 'Current Plan') : t('upgradeToPro', 'Upgrade to Pro')}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-
-                  {/* Plan 3: Enterprise Suite */}
-                  <View style={[styles.planCard, { borderColor: '#FED7AA', backgroundColor: '#FFFDF9' }]}>
-                    <Text style={[styles.planBadgeText, { color: '#EA580C' }]}>RECOMMENDED</Text>
-                    <Text style={styles.planCardTitle}>{t('enterpriseSuite', 'Enterprise Suite')}</Text>
-                    <Text style={styles.planPriceText}>₹ {toDevanagari('14,999')} <Text style={styles.planPeriodText}>/ year</Text></Text>
-                    <Text style={styles.planDescText}>GSTR-1/2/3B compliance, multi-user role security & cloud sync.</Text>
-
-                    <TouchableOpacity
-                      style={[styles.planBtn, activePlanName === 'Enterprise' ? styles.planBtnCurrent : { backgroundColor: '#EA580C' }]}
-                      onPress={() => handleActivatePlan('Enterprise')}
-                    >
-                      <Text style={[styles.planBtnText, activePlanName === 'Enterprise' && styles.planBtnTextCurrent]}>
-                        {activePlanName === 'Enterprise' ? t('currentPlan', 'Current Plan') : t('activateEnterprise', 'Activate Enterprise')}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </View>
-            )}
 
             {/* ----------------------------------------------------
                 4. NOTIFICATIONS TAB (Screenshot 1 Match)
@@ -5846,13 +5678,17 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                 {enableBluetoothPrinter && (
                   <View style={styles.btSettingsCard}>
                     <View style={styles.btHeaderRow}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1, minWidth: 0, marginRight: 8 }}>
                         <View style={styles.btIconCircle}>
                           <Bluetooth size={18} color="#FFFFFF" />
                         </View>
-                        <View>
-                          <Text style={styles.btCardTitle}>Direct Bluetooth Thermal (ESC/POS)</Text>
-                          <Text style={styles.btCardSub}>Pair with 58mm/80mm BLE thermal printers</Text>
+                        <View style={{ flex: 1, minWidth: 0 }}>
+                          <Text style={styles.btCardTitle} numberOfLines={1} ellipsizeMode="tail">
+                            Direct Bluetooth Thermal
+                          </Text>
+                          <Text style={styles.btCardSub} numberOfLines={1} ellipsizeMode="tail">
+                            Pair 58mm/80mm BLE thermal printers
+                          </Text>
                         </View>
                       </View>
                       <View style={styles.btStatusBadge}>
@@ -5896,14 +5732,14 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                     </View>
 
                     {/* Test Print Action */}
-                    <View style={{ marginTop: 12, flexDirection: 'row', justifyContent: 'flex-end' }}>
+                    <View style={{ marginTop: 10 }}>
                       <TouchableOpacity
                         style={styles.btTestPrintBtn}
                         onPress={handleTestPrint}
                         disabled={testPrintLoading}
                         activeOpacity={0.8}
                       >
-                        <Printer size={15} color="#090040" />
+                        <Printer size={15} color="#8F351D" />
                         <Text style={styles.btTestPrintText}>
                           {testPrintLoading ? 'Dispatching...' : `Test Print (${bluetoothRollSize})`}
                         </Text>
@@ -6092,7 +5928,7 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                         onPress={() => setPickerModalType('dateFormat')}
                         activeOpacity={0.7}
                       >
-                        <Text style={styles.selectInputText}>{dateFormat}</Text>
+                        <Text style={styles.selectInputText} numberOfLines={1} ellipsizeMode="tail">{dateFormat}</Text>
                         <ChevronDown size={16} color="#6B7280" />
                       </TouchableOpacity>
                     </View>
@@ -6104,7 +5940,7 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                         onPress={() => setPickerModalType('timeFormat')}
                         activeOpacity={0.7}
                       >
-                        <Text style={styles.selectInputText}>{timeFormat}</Text>
+                        <Text style={styles.selectInputText} numberOfLines={1} ellipsizeMode="tail">{timeFormat}</Text>
                         <ChevronDown size={16} color="#6B7280" />
                       </TouchableOpacity>
                     </View>
@@ -6118,7 +5954,7 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                         onPress={() => setPickerModalType('language')}
                         activeOpacity={0.7}
                       >
-                        <Text style={styles.selectInputText}>
+                        <Text style={styles.selectInputText} numberOfLines={1} ellipsizeMode="tail">
                           {language === 'mr' ? 'मराठी' : language === 'hi' ? 'हिंदी' : 'English'}
                         </Text>
                         <ChevronDown size={16} color="#6B7280" />
@@ -6132,7 +5968,7 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                         onPress={() => setPickerModalType('backupFrequency')}
                         activeOpacity={0.7}
                       >
-                        <Text style={styles.selectInputText}>{backupFrequency}</Text>
+                        <Text style={styles.selectInputText} numberOfLines={1} ellipsizeMode="tail">{backupFrequency}</Text>
                         <ChevronDown size={16} color="#6B7280" />
                       </TouchableOpacity>
                     </View>
@@ -6169,28 +6005,45 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                     elevation: 1,
                   }}>
                     {/* Header: Icon, Titles & Scheduled badge */}
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                        <View style={{ width: 38, height: 38, borderRadius: 10, backgroundColor: '#3B82F6', alignItems: 'center', justifyContent: 'center' }}>
-                          <Mail size={20} color="#FFFFFF" />
-                        </View>
-                        <View>
-                          <Text style={{ fontSize: 14, fontWeight: '800', color: isDark ? '#F9FAFB' : '#0F172A' }}>
-                            Daily Automated Hotel Backup (11:00 PM)
-                          </Text>
-                          <Text style={{ fontSize: 11, color: isDark ? '#94A3B8' : '#64748B', marginTop: 2 }}>
-                            दैनिक हॉटेल डेटा बॅकअप • रोज रात्री ११:०० वाजता ऑटोमॅटिक मेल
-                          </Text>
-                        </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 12 }}>
+                      <View style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: 10,
+                        backgroundColor: '#2563EB',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                      }}>
+                        <Mail size={20} color="#FFFFFF" />
                       </View>
-                      <View style={{ backgroundColor: '#10B98120', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6, borderWidth: 1, borderColor: '#10B98140' }}>
-                        <Text style={{ fontSize: 10, fontWeight: '800', color: '#10B981' }}>SCHEDULED EVERY NIGHT (23:00)</Text>
+                      <View style={{ flex: 1, minWidth: 0 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 6, marginBottom: 2 }}>
+                          <Text style={{ fontSize: 14, fontWeight: '800', color: isDark ? '#F9FAFB' : '#0F172A', flexShrink: 1 }} numberOfLines={1}>
+                            Daily Automated Hotel Backup
+                          </Text>
+                          <View style={{
+                            backgroundColor: isDark ? '#064E3B' : '#DCFCE7',
+                            paddingHorizontal: 8,
+                            paddingVertical: 3,
+                            borderRadius: 6,
+                            borderWidth: 1,
+                            borderColor: isDark ? '#059669' : '#86EFAC',
+                          }}>
+                            <Text style={{ fontSize: 9.5, fontWeight: '800', color: isDark ? '#34D399' : '#15803D' }}>
+                              23:00 NIGHTLY
+                            </Text>
+                          </View>
+                        </View>
+                        <Text style={{ fontSize: 11, color: isDark ? '#94A3B8' : '#64748B', lineHeight: 15 }} numberOfLines={1}>
+                          {language === 'mr' ? 'दैनिक हॉटेल डेटा बॅकअप • रोज रात्री ११:०० वाजता मेल' : 'Daily hotel data backup • Automated dispatch at 11:00 PM'}
+                        </Text>
                       </View>
                     </View>
 
                     {/* Explanatory description */}
                     <Text style={{ fontSize: 12, color: isDark ? '#CBD5E1' : '#475569', lineHeight: 18 }}>
-                      Every night at <Text style={{ fontWeight: '700' }}>11:00 PM</Text>, all daily sales, orders, invoices, payments, tables, and expenses are compiled and automatically sent to your Hotel Profile email (<Text style={{ fontWeight: '700', color: '#3B82F6' }}>{email || 'admin@royalpalace.com'}</Text>) with JSON data and PDF summary attachments.
+                      Every night at <Text style={{ fontWeight: '700' }}>11:00 PM</Text>, all daily sales, orders, invoices, payments, tables, and expenses are compiled and automatically sent to your Hotel Profile email (<Text style={{ fontWeight: '700', color: '#2563EB' }}>{email || 'admin@royalpalace.com'}</Text>) with JSON data and PDF summary attachments.
                     </Text>
 
                     {/* SMTP Status Notice */}
@@ -6199,16 +6052,16 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                       alignItems: 'center',
                       gap: 8,
                       paddingHorizontal: 12,
-                      paddingVertical: 10,
+                      paddingVertical: 9,
                       borderRadius: 8,
-                      backgroundColor: isDark ? '#064E3B25' : '#F0FDF4',
+                      backgroundColor: isDark ? '#064E3B20' : '#F0FDF4',
                       borderWidth: 1,
-                      borderColor: isDark ? '#05966950' : '#BBF7D0',
+                      borderColor: isDark ? '#05966940' : '#BBF7D0',
                       marginTop: 2,
                     }}>
-                      <CheckCircle size={16} color="#10B981" />
-                      <Text style={{ fontSize: 11.5, fontWeight: '700', color: isDark ? '#34D399' : '#166534' }}>
-                        Gmail SMTP Connected via application.yml ({smtpSenderEmail || 'omchaudhari553@gmail.com'})
+                      <CheckCircle size={15} color="#16A34A" style={{ flexShrink: 0 }} />
+                      <Text style={{ flex: 1, fontSize: 11.5, fontWeight: '700', color: isDark ? '#34D399' : '#15803D', lineHeight: 16 }}>
+                        Gmail SMTP Connected ({smtpSenderEmail || 'omchaudhari553@gmail.com'})
                       </Text>
                     </View>
 
@@ -6232,35 +6085,37 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                     ) : null}
 
                     {/* Action Buttons Row */}
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginTop: 4 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: 4 }}>
+                      {/* Send Backup Email Now (Blue Square Icon Button) */}
                       <TouchableOpacity
                         onPress={handleSendDailyBackupNow}
                         disabled={backupSending}
                         activeOpacity={0.8}
-                        accessibilityLabel={backupSending ? 'Sending Backup...' : 'Send Daily Backup to Email Now'}
+                        accessibilityLabel={language === 'mr' ? 'बॅकअप मेल आता पाठवा' : 'Send Daily Backup to Email Now'}
                         style={{
                           width: 40,
                           height: 40,
                           borderRadius: 8,
                           alignItems: 'center',
                           justifyContent: 'center',
-                          backgroundColor: backupSending ? '#94A3B8' : '#3B82F6',
+                          backgroundColor: backupSending ? '#94A3B8' : '#2563EB',
                         }}
                       >
                         <RefreshCw size={18} color="#FFFFFF" />
                       </TouchableOpacity>
 
+                      {/* Download JSON Backup (White/Border Square Icon Button) */}
                       <TouchableOpacity
                         onPress={handleDownloadDailyBackup}
                         activeOpacity={0.8}
-                        accessibilityLabel="Download Backup (.json)"
+                        accessibilityLabel={language === 'mr' ? 'बॅकअप (.json) डाउनलोड करा' : 'Download Backup (.json)'}
                         style={{
                           width: 40,
                           height: 40,
                           borderRadius: 8,
                           alignItems: 'center',
                           justifyContent: 'center',
-                          backgroundColor: isDark ? '#334155' : '#E2E8F0',
+                          backgroundColor: isDark ? '#334155' : '#FFFFFF',
                           borderWidth: 1,
                           borderColor: isDark ? '#475569' : '#CBD5E1',
                         }}
@@ -6268,17 +6123,18 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                         <Download size={18} color={isDark ? '#F8FAFC' : '#1E293B'} />
                       </TouchableOpacity>
 
+                      {/* Download PDF Backup (White/Border Square Icon Button) */}
                       <TouchableOpacity
                         onPress={handleDownloadDailyBackupPdf}
                         activeOpacity={0.8}
-                        accessibilityLabel="Download PDF Report (.pdf)"
+                        accessibilityLabel={language === 'mr' ? 'बॅकअप (.pdf) डाउनलोड करा' : 'Download PDF Report (.pdf)'}
                         style={{
                           width: 40,
                           height: 40,
                           borderRadius: 8,
                           alignItems: 'center',
                           justifyContent: 'center',
-                          backgroundColor: isDark ? '#334155' : '#E2E8F0',
+                          backgroundColor: isDark ? '#334155' : '#FFFFFF',
                           borderWidth: 1,
                           borderColor: isDark ? '#475569' : '#CBD5E1',
                         }}
@@ -6291,41 +6147,47 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                   <View style={styles.systemStatusGrid}>
                     <View style={styles.statusMiniCard}>
                       <Text style={styles.statusLabel}>{t('systemStatus', 'System Status')}</Text>
-                      <View style={styles.statusValRow}>
+                      <View style={[styles.statusValRow, { marginTop: 4 }]}>
                         <View style={styles.greenDot} />
-                        <Text style={styles.statusVal}>{t('operational', 'Operational')}</Text>
+                        <Text style={[styles.statusVal, { marginTop: 0 }]} numberOfLines={1}>{t('operational', 'Operational')}</Text>
                       </View>
                     </View>
 
                     <View style={styles.statusMiniCard}>
                       <Text style={styles.statusLabel}>{t('backup', 'BACKUP')}</Text>
-                      <Text style={styles.statusVal}>{backupFrequency}</Text>
+                      <Text style={[styles.statusVal, { marginTop: 4 }]} numberOfLines={1} ellipsizeMode="tail">
+                        {backupFrequency.includes('11:00') ? 'Daily (11 PM)' : backupFrequency}
+                      </Text>
                     </View>
 
                     <View style={styles.statusMiniCard}>
                       <Text style={styles.statusLabel}>{t('timeFormat', 'Time Format')}</Text>
-                      <Text style={styles.statusVal}>{timeFormat}</Text>
+                      <Text style={[styles.statusVal, { marginTop: 4 }]} numberOfLines={1}>
+                        {timeFormat}
+                      </Text>
                     </View>
                   </View>
 
                   <View style={styles.visibilityCard}>
-                    <View style={styles.visibilityHeader}>
-                      <Text style={styles.visibilityTitle}>{t('dashboardSectionVisibility', 'Dashboard Section Visibility')}</Text>
+                    <View style={[styles.visibilityHeader, { flexWrap: 'wrap', gap: 6 }]}>
+                      <Text style={[styles.visibilityTitle, { flex: 1, minWidth: 160 }]}>
+                        {t('dashboardSectionVisibility', 'Dashboard Section Visibility')}
+                      </Text>
                       <View style={styles.liveSyncBadge}>
                         <View style={styles.greenDot} />
                         <Text style={styles.liveSyncText}>{t('syncActive', 'Sync Active')}</Text>
                       </View>
                     </View>
-                    <Text style={styles.visibilityDesc}>
+                    <Text style={[styles.visibilityDesc, { marginTop: 4, lineHeight: 16 }]}>
                       Configure which overview panels are displayed on the main Hotel Overview Dashboard. Changes sync across the application and persist in SQL Server.
                     </Text>
 
-                    <View style={[styles.toggleRow, { borderBottomWidth: 0, marginTop: 8 }]}>
-                      <View style={{ flex: 1, paddingRight: 16 }}>
-                        <Text style={styles.toggleLabel}>
+                    <View style={[styles.toggleRow, { borderBottomWidth: 0, marginTop: 10, paddingVertical: 4 }]}>
+                      <View style={{ flex: 1, paddingRight: 14 }}>
+                        <Text style={[styles.toggleLabel, { fontSize: 13, lineHeight: 18 }]}>
                           Sales & Payment Overview Sections (Today's Sales, Sales Overview, Payment Summary)
                         </Text>
-                        <Text style={styles.toggleSub}>
+                        <Text style={[styles.toggleSub, { marginTop: 3, lineHeight: 16 }]}>
                           Controls the visibility of Today's Sales top card, Sales Overview chart, and Payment Summary donut chart together. Synchronized with Dashboard Customize View.
                         </Text>
                       </View>
@@ -6338,16 +6200,16 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                     </View>
                   </View>
 
-                  <View style={styles.cardActionsRow}>
+                  <View style={[styles.cardActionsRow, { marginTop: 18 }]}>
                     <TouchableOpacity
-                      style={styles.resetButton}
+                      style={[styles.resetButton, { height: 42, justifyContent: 'center', alignItems: 'center' }]}
                       onPress={handleResetSystem}
                     >
                       <Text style={styles.resetButtonText}>{t('resetSection', 'Reset Section')}</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                      style={styles.saveButton}
+                      style={[styles.saveButton, { height: 42, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 22 }]}
                       onPress={handleSaveSystem}
                     >
                       <Text style={styles.saveButtonText}>{t('saveChanges', 'Save Changes')}</Text>
@@ -6519,126 +6381,6 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                     />
                   </View>
                 </View>
-
-                {/* Bank Details (Optional) */}
-                {!isBranchUser && (
-                  <>
-                    <View style={{ width: '100%', marginTop: 14, paddingTop: 14, borderTopWidth: 1, borderTopColor: isDark ? '#334155' : '#E5E7EB', marginBottom: 10 }}>
-                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Text style={{ fontSize: 13, fontWeight: '800', color: isDark ? '#F9FAFB' : '#111827' }}>
-                          {t('bankDetailsOptional', 'Bank Details (Optional)')}
-                        </Text>
-                      </View>
-                    </View>
-                <View style={{ width: '100%', marginTop: 14, paddingTop: 14, borderTopWidth: 1, borderTopColor: isDark ? '#334155' : '#E5E7EB', marginBottom: 10 }}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Text style={{ fontSize: 13, fontWeight: '800', color: isDark ? '#F9FAFB' : '#111827' }}>
-                      {t('bankDetailsOptional', 'Bank Details (Optional)')}
-                    </Text>
-                  </View>
-                </View>
-                    {/* Row 5: Bank Name & Account Holder Name */}
-                    <View style={styles.formRow}>
-                      <View style={styles.formCol}>
-                        <Text style={styles.fieldLabel}>{t('bankName', 'Bank Name')}</Text>
-                        <TextInput
-                          style={styles.textInput}
-                          value={bankName}
-                          onChangeText={setBankName}
-                          placeholder="e.g. State Bank of India"
-                          placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
-                        />
-                      </View>
-
-                      <View style={styles.formCol}>
-                        <Text style={styles.fieldLabel}>{t('accountHolderName', 'Account Holder Name')}</Text>
-                        <TextInput
-                          style={styles.textInput}
-                          value={accountHolderName}
-                          onChangeText={setAccountHolderName}
-                          placeholder="e.g. Royal Palace Hotel"
-                          placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
-                        />
-                      </View>
-                    </View>
-
-                    {/* Row 6: Account Number & IFSC Code */}
-                    <View style={styles.formRow}>
-                      <View style={styles.formCol}>
-                        <Text style={styles.fieldLabel}>{t('accountNumber', 'Account Number')}</Text>
-                        <TextInput
-                          style={styles.textInput}
-                          value={accountNumber}
-                          onChangeText={setAccountNumber}
-                          placeholder="e.g. 123456789012"
-                          keyboardType="numeric"
-                          placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
-                        />
-                      </View>
-
-                      <View style={styles.formCol}>
-                        <Text style={styles.fieldLabel}>{t('ifscCode', 'IFSC Code')}</Text>
-                        <TextInput
-                          style={styles.textInput}
-                          value={ifscCode}
-                          onChangeText={(v) => setIfscCode(v.toUpperCase())}
-                          placeholder="e.g. SBIN0001234"
-                          autoCapitalize="characters"
-                          maxLength={11}
-                          placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
-                        />
-                      </View>
-                    </View>
-
-                    {/* Row 7: UPI ID & Bank Registered Phone */}
-                    <View style={styles.formRow}>
-                      <View style={styles.formCol}>
-                        <Text style={styles.fieldLabel}>{t('upiId', 'UPI ID / VPA')}</Text>
-                        <TextInput
-                          style={styles.textInput}
-                          value={upiId}
-                          onChangeText={setUpiId}
-                          placeholder="e.g. royalpalace@upi"
-                          placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
-                        />
-                      </View>
-
-                      <View style={styles.formCol}>
-                        <Text style={styles.fieldLabel}>{t('bankPhone', 'Bank Registered Phone Number')}</Text>
-                        <TextInput
-                          style={[
-                            styles.textInput,
-                            bankPhone && !/^[6-9]\d{9}$/.test(bankPhone) && { borderColor: '#EF4444' },
-                          ]}
-                          value={bankPhone}
-                          onChangeText={(val) => {
-                            const digits = val.replace(/\D/g, '').slice(0, 10);
-                            setBankPhone(digits);
-                          }}
-                          placeholder="10-digit mobile number"
-                          keyboardType="phone-pad"
-                          maxLength={10}
-                          placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
-                        />
-                        {bankPhone && !/^[6-9]/.test(bankPhone) && (
-                          <Text style={{ fontSize: 10.5, color: '#EF4444', marginTop: 2 }}>
-                            Must start with 6, 7, 8, or 9
-                          </Text>
-                        )}
-                        {bankPhone && /^[6-9]/.test(bankPhone) && bankPhone.length < 10 && (
-                          <Text style={{ fontSize: 10.5, color: '#EF4444', marginTop: 2 }}>
-                            Must be 10 digits ({bankPhone.length}/10 entered)
-                          </Text>
-                        )}
-                        {bankPhone && /^[6-9]\d{9}$/.test(bankPhone) && (
-                          <Text style={{ fontSize: 10.5, color: '#10B981', marginTop: 2 }}>
-                            ✓ Valid 10-digit mobile number
-                          </Text>
-                        )}
-                      </View>
-                    </View>
-                  </>
-                )}
 
                 <View style={[styles.cardActionsRow, { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 10 }]}>
                   {profileSavedNotice && (
@@ -7282,20 +7024,6 @@ Commercial Gas Cylinder,Fuel & Gas,2400,17 Nov 2026,MB-1,UPI,Gas refill`}
 
             <View style={styles.invModalActions}>
               <TouchableOpacity
-                style={styles.invPrintBtn}
-                onPress={() => {
-                  if (Platform.OS === 'web' && typeof window !== 'undefined') {
-                    window.print();
-                  } else {
-                    Alert.alert(t('printReceipt', 'Print Purchase Invoice'), `${t('invoiceNumber', 'Invoice')} #${viewingPurchaseInvoice?.inv}`);
-                  }
-                }}
-              >
-                <Printer size={14} color="#FFFFFF" />
-                <Text style={styles.invPrintBtnText}>{t('printExportPdf', 'Print / Export PDF')}</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
                 style={styles.invCloseBtn}
                 onPress={() => setViewingPurchaseInvoice(null)}
               >
@@ -7327,7 +7055,7 @@ const getStyles = (isDark: boolean, screenWidth: number = 400) => {
     },
     scrollContent: {
       padding: 16,
-      paddingBottom: 40,
+      paddingBottom: 95,
     },
     headerRow: {
       flexDirection: 'row',
@@ -7880,18 +7608,20 @@ const getStyles = (isDark: boolean, screenWidth: number = 400) => {
       borderWidth: 1,
       borderColor: isDark ? '#334155' : '#E5E7EB',
       borderRadius: 8,
-      paddingHorizontal: 10,
-      paddingVertical: 8,
-      minHeight: 40,
+      paddingHorizontal: 12,
+      height: 44,
+      minHeight: 44,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
       backgroundColor: cardBg,
     },
     selectInputText: {
+      flex: 1,
       fontSize: 12.5,
       color: isDark ? '#F9FAFB' : '#1F2937',
       fontWeight: '600',
+      marginRight: 6,
     },
     backupPanel: {
       marginTop: 14,
@@ -7937,12 +7667,14 @@ const getStyles = (isDark: boolean, screenWidth: number = 400) => {
     },
     statusMiniCard: {
       flex: 1,
-      minWidth: 120,
+      minWidth: 95,
       padding: 10,
       borderRadius: 8,
       borderWidth: 1,
-      borderColor: '#EEE5DF',
+      borderColor: isDark ? '#334155' : '#EEE5DF',
       backgroundColor: cardBg,
+      minHeight: 62,
+      justifyContent: 'center',
     },
     statusLabel: {
       fontSize: 9.5,
@@ -8535,75 +8267,85 @@ const getStyles = (isDark: boolean, screenWidth: number = 400) => {
       borderRadius: 3,
     },
     topExpenseBox: {
-      height: 140,
+      minHeight: 70,
       justifyContent: 'center',
+      paddingVertical: 6,
     },
     topExpenseRow: {
       flexDirection: 'row',
       alignItems: 'center',
       backgroundColor: isDark ? '#1E293B' : '#F9FAFB',
-      padding: 10,
-      borderRadius: 8,
-      gap: 8,
+      borderWidth: 1,
+      borderColor: isDark ? '#334155' : '#E5E7EB',
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      borderRadius: 10,
+      gap: 10,
     },
     topExpenseIconBox: {
-      width: 14,
-      height: 14,
-      borderRadius: 3,
-      backgroundColor: '#3B1A12',
+      width: 30,
+      height: 30,
+      borderRadius: 8,
+      backgroundColor: '#8F351D',
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     topExpenseName: {
       flex: 1,
-      fontSize: 12,
-      fontWeight: '600',
+      fontSize: 13,
+      fontWeight: '700',
       color: textPrimary,
+      textTransform: 'capitalize',
     },
     topExpenseAmount: {
-      fontSize: 12,
+      fontSize: 13.5,
       fontWeight: '800',
       color: textPrimary,
     },
     daysBadgePill: {
-      backgroundColor: '#F3F4F6',
-      paddingHorizontal: 8,
-      paddingVertical: 2,
-      borderRadius: 6,
+      backgroundColor: isDark ? '#1E293B' : '#F3F4F6',
+      borderWidth: 1,
+      borderColor: isDark ? '#334155' : '#E5E7EB',
+      paddingHorizontal: 10,
+      paddingVertical: 3,
+      borderRadius: 12,
     },
     daysBadgeText: {
-      fontSize: 10,
+      fontSize: 10.5,
       fontWeight: '700',
-      color: '#4B5563',
+      color: textSecondary,
     },
     snapshotList: {
-      height: 140,
-      justifyContent: 'space-around',
+      paddingVertical: 6,
+      gap: 12,
     },
     snapshotRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 8,
+      gap: 10,
     },
     snapshotDate: {
-      width: 75,
-      fontSize: 9.5,
+      width: 82,
+      fontSize: 10.5,
       fontWeight: '600',
       color: textSecondary,
     },
     snapshotTrack: {
       flex: 1,
-      height: 6,
-      backgroundColor: isDark ? '#1E293B' : '#F3F4F6',
-      borderRadius: 3,
+      height: 8,
+      backgroundColor: isDark ? '#1E293B' : '#F1F5F9',
+      borderRadius: 4,
       overflow: 'hidden',
     },
     snapshotFill: {
       height: '100%',
-      borderRadius: 3,
+      backgroundColor: '#8F351D',
+      borderRadius: 4,
     },
     snapshotAmount: {
-      width: 70,
-      fontSize: 10,
-      fontWeight: '700',
+      width: 82,
+      fontSize: 11,
+      fontWeight: '800',
       color: textPrimary,
       textAlign: 'right',
     },
@@ -10268,35 +10010,37 @@ const getStyles = (isDark: boolean, screenWidth: number = 400) => {
 
     // Bluetooth Thermal Settings Styles
     btSettingsCard: {
-      marginTop: 16,
+      marginTop: 14,
       backgroundColor: subBg,
       borderRadius: 12,
-      borderWidth: 1.5,
-      borderColor: cardBorder,
-      padding: 16,
+      borderWidth: 1,
+      borderColor: isDark ? '#334155' : '#E2E8F0',
+      padding: 14,
+      overflow: 'hidden',
     },
     btHeaderRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: 14,
+      marginBottom: 12,
     },
     btIconCircle: {
       width: 36,
       height: 36,
       borderRadius: 8,
-      backgroundColor: '#090040',
+      backgroundColor: '#8F351D',
       alignItems: 'center',
       justifyContent: 'center',
+      flexShrink: 0,
     },
     btCardTitle: {
-      fontSize: 14,
+      fontSize: 13.5,
       fontWeight: '700',
-      color: '#090040',
+      color: isDark ? '#F9FAFB' : '#111827',
     },
     btCardSub: {
-      fontSize: 11,
-      color: '#64748B',
+      fontSize: 10.5,
+      color: textSecondary,
       marginTop: 2,
     },
     btStatusBadge: {
@@ -10305,8 +10049,11 @@ const getStyles = (isDark: boolean, screenWidth: number = 400) => {
       gap: 5,
       backgroundColor: '#DCFCE7',
       paddingHorizontal: 8,
-      paddingVertical: 4,
+      paddingVertical: 3.5,
       borderRadius: 12,
+      borderWidth: 1,
+      borderColor: '#BBF7D0',
+      flexShrink: 0,
     },
     btStatusDot: {
       width: 6,
@@ -10315,7 +10062,7 @@ const getStyles = (isDark: boolean, screenWidth: number = 400) => {
       backgroundColor: '#16A34A',
     },
     btStatusBadgeText: {
-      fontSize: 11,
+      fontSize: 10.5,
       fontWeight: '700',
       color: '#166534',
     },
@@ -10334,28 +10081,30 @@ const getStyles = (isDark: boolean, screenWidth: number = 400) => {
     btRollBtn: {
       flex: 1,
       paddingVertical: 10,
-      paddingHorizontal: 12,
+      paddingHorizontal: 8,
       borderRadius: 8,
       borderWidth: 1.5,
-      borderColor: '#CBD5E1',
+      borderColor: isDark ? '#334155' : '#CBD5E1',
       backgroundColor: cardBg,
       alignItems: 'center',
+      justifyContent: 'center',
     },
     btRollBtnActive: {
       borderColor: '#8F351D',
-      backgroundColor: '#FEF2F2',
+      backgroundColor: isDark ? '#2D1B18' : '#FEF2F2',
     },
     btRollText: {
       fontSize: 12,
       fontWeight: '600',
       color: textSecondary,
+      textAlign: 'center',
     },
     btRollTextActive: {
       color: '#8F351D',
       fontWeight: '800',
     },
     btGuidanceBox: {
-      backgroundColor: '#EFF6FF',
+      backgroundColor: isDark ? '#1E293B' : '#EFF6FF',
       borderRadius: 8,
       borderLeftWidth: 3,
       borderLeftColor: '#3B82F6',
@@ -10365,29 +10114,31 @@ const getStyles = (isDark: boolean, screenWidth: number = 400) => {
     btGuidanceHeading: {
       fontSize: 11,
       fontWeight: '700',
-      color: '#1E40AF',
+      color: isDark ? '#93C5FD' : '#1E40AF',
       marginBottom: 4,
     },
     btGuidanceText: {
       fontSize: 11,
-      color: '#334155',
+      color: isDark ? '#CBD5E1' : '#334155',
       lineHeight: 16,
     },
     btTestPrintBtn: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 6,
-      paddingHorizontal: 14,
-      paddingVertical: 8,
-      borderRadius: 6,
-      borderWidth: 1,
-      borderColor: '#090040',
+      justifyContent: 'center',
+      gap: 8,
+      width: '100%',
+      paddingVertical: 10,
+      paddingHorizontal: 16,
+      borderRadius: 8,
+      borderWidth: 1.5,
+      borderColor: '#8F351D',
       backgroundColor: cardBg,
     },
     btTestPrintText: {
-      fontSize: 12,
+      fontSize: 12.5,
       fontWeight: '700',
-      color: '#090040',
+      color: '#8F351D',
     },
     serverStatusBox: {
       borderWidth: 1.5,

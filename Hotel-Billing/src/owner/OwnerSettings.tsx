@@ -14,7 +14,6 @@ import {
   Moon,
   Palette,
   Check,
-  Laptop,
   Download,
   Eye,
   EyeOff,
@@ -46,13 +45,11 @@ export const OwnerSettings: React.FC = () => {
   const [licenceInfo, setLicenceInfo] = useState<LicenceInfo | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
-  const [backupSending, setBackupSending] = useState<boolean>(false);
   const [savingSmtp, setSavingSmtp] = useState<boolean>(false);
   const [smtpSenderEmail, setSmtpSenderEmail] = useState<string>('omchaudhari553@gmail.com');
   const [smtpAppPassword, setSmtpAppPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [hasCustomPassword, setHasCustomPassword] = useState<boolean>(false);
-  const [lastBackupStatus, setLastBackupStatus] = useState<{ status: 'idle' | 'success' | 'warning' | 'error'; message: string; ref?: string }>({ status: 'idle', message: '' });
   const [showUpgradeModal, setShowUpgradeModal] = useState<boolean>(false);
 
   const { showToast } = useToast();
@@ -181,87 +178,6 @@ export const OwnerSettings: React.FC = () => {
     }
   };
 
-  const handleSendDailyBackupNow = async () => {
-    setBackupSending(true);
-    try {
-      if (settings.contactEmail) {
-        await ownerService.updateSettings({ ...settings, theme }).catch(() => {});
-      }
-      const res = await apiClient.post('/hotel/backup/send-email', null, {
-        params: {
-          customEmail: settings.contactEmail || undefined,
-        }
-      });
-      const data = res.data?.data;
-      const ref = data?.reference || 'HTL-SUCCESS';
-      const target = data?.recipientEmail || settings.contactEmail || 'Profile Email';
-      if (data?.success) {
-        setLastBackupStatus({
-          status: 'success',
-          message: `Daily hotel data backup email dispatched to ${target}! Reference: ${ref}`,
-          ref,
-        });
-        showToast('success', `Daily hotel data backup email dispatched to ${target}! Reference: ${ref}`);
-      } else {
-        const errDetail = data?.error || 'Authentication failed';
-        setLastBackupStatus({
-          status: 'warning',
-          message: `Daily backup generated and saved securely on server (${ref})! ${errDetail}`,
-          ref,
-        });
-        showToast('warning', `Daily backup generated and saved securely on server (${ref})!`);
-      }
-    } catch (err: any) {
-      const msg = err?.response?.data?.message || 'Failed to trigger backup';
-      setLastBackupStatus({
-        status: 'error',
-        message: msg,
-      });
-      showToast('error', msg);
-    } finally {
-      setBackupSending(false);
-    }
-  };
-
-  const handleDownloadDailyBackup = async () => {
-    try {
-      const res = await apiClient.get('/hotel/backup/download');
-      const jsonContent = JSON.stringify(res.data, null, 2);
-      const blob = new Blob([jsonContent], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `hotel_daily_backup_${Date.now()}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      showToast('success', 'Daily backup JSON downloaded successfully!');
-    } catch {
-      showToast('error', 'Failed to download backup JSON');
-    }
-  };
-
-  const handleDownloadDailyBackupPdf = async () => {
-    try {
-      const res = await apiClient.get('/hotel/backup/download-pdf', {
-        responseType: 'blob',
-      });
-      const blob = new Blob([res.data], { type: 'application/pdf' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `hotel_daily_backup_summary_${Date.now()}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      showToast('success', 'Daily backup PDF summary downloaded successfully!');
-    } catch {
-      showToast('error', 'Failed to download backup PDF');
-    }
-  };
-
   const handleOpenUpgrade = () => {
     setShowUpgradeModal(true);
     window.dispatchEvent(
@@ -279,14 +195,6 @@ export const OwnerSettings: React.FC = () => {
     colors: string[];
     icon: any;
   }> = [
-    {
-      id: 'system',
-      name: language === 'mr' ? 'सिस्टीम डिफॉल्ट' : 'System Default',
-      badge: language === 'mr' ? 'स्वयंचलित' : 'Automatic',
-      desc: language === 'mr' ? 'तुमच्या डिव्हाइसच्या ऑपरेटिंग सिस्टीम थीमशी जुळते' : 'Automatically matches your device operating system theme (Light or Dark)',
-      colors: ['#FFFFFF', '#0B0F19', '#F59E0B', '#38BDF8'],
-      icon: Laptop,
-    },
     {
       id: 'light',
       name: language === 'mr' ? 'क्लासिक लाईट' : 'Daylight / Classic Light',
@@ -322,93 +230,187 @@ export const OwnerSettings: React.FC = () => {
         </h1>
       </div>
 
-      {/* Subscription & 28-Day Trial Status Banner */}
+      {/* ========================================================
+          LICENCE & SUBSCRIPTION SECTION (Full Enterprise Module)
+      ======================================================== */}
       <div
-        className="owner-trial-banner"
+        className="owner-card"
         style={{
+          backgroundColor: 'var(--card-white, #FFFFFF)',
           borderRadius: '12px',
-          padding: '20px 24px',
-          boxShadow: '0 2px 6px rgba(0,0,0,0.06)',
+          border: '1px solid var(--border-slate, #E2E8F0)',
+          padding: '22px 24px',
+          boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <div
-              style={{
-                width: '46px',
-                height: '46px',
-                borderRadius: '12px',
-                backgroundColor: '#F59E0B',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 3px 8px rgba(245, 158, 11, 0.45)',
-                flexShrink: 0,
-              }}
-            >
-              <Crown size={24} color="#FFFFFF" />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', paddingBottom: '14px', borderBottom: '1px solid var(--border-slate, #E2E8F0)', flexWrap: 'wrap', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#DCFCE7', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #86EFAC' }}>
+              <Shield size={22} color="#16A34A" />
             </div>
             <div>
-              <h3
-                className="owner-trial-heading"
-                style={{
-                  margin: 0,
-                  fontSize: '1.1rem',
-                  fontWeight: 800,
-                  letterSpacing: '-0.01em',
-                }}
-              >
-                {licenceInfo?.subscriptionPlan || '28-Day Free Trial Tier'}
-              </h3>
-              <p
-                className="owner-trial-subtext"
-                style={{
-                  margin: '3px 0 0',
-                  fontSize: '0.84rem',
-                  fontWeight: 600,
-                }}
-              >
-                {language === 'mr' ? 'स्थिती: ' : 'Status: '}
-                <strong className="owner-trial-status-badge">
-                  {licenceInfo?.trialStatus === 'Active'
-                    ? (language === 'mr' ? 'सक्रिय' : 'Active')
-                    : (licenceInfo?.trialStatus || (language === 'mr' ? 'सक्रिय' : 'Active'))}
-                </strong>{' '}
-                •{' '}
-                <span className="owner-trial-days">
-                  {licenceInfo?.daysRemaining != null
-                    ? (language === 'mr' ? `${licenceInfo.daysRemaining} दिवस शिल्लक` : `${licenceInfo.daysRemaining} Days Remaining`)
-                    : (language === 'mr' ? 'पूर्ण प्रवेश' : 'Full Access')}
+              <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-heading, #0F172A)' }}>
+                {language === 'mr' ? 'लायसन्स आणि सबस्क्रिप्शन' : 'Licence & Subscription'}
+              </h2>
+              <span style={{ fontSize: '0.8rem', color: '#64748B', fontWeight: 600 }}>
+                {language === 'mr' ? 'एंटरप्राइझ सॉफ्टवेअर परवाना, २८-दिवस ट्रायल व सबस्क्रिप्शन तपशील' : 'Enterprise software licence verification, 28-day trial status and plan details'}
+              </span>
+            </div>
+          </div>
+          <span style={{ background: '#DCFCE7', color: '#15803D', border: '1px solid #86EFAC', padding: '4px 12px', borderRadius: '9999px', fontSize: '0.78rem', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+            ⚡ {licenceInfo?.subscriptionStatus || (language === 'mr' ? 'सक्रिय व प्रमाणित' : 'Active & Verified')}
+          </span>
+        </div>
+
+        {/* 3 Detail Cards Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px', marginBottom: '18px' }}>
+          {/* Card 1: Licence Version & Subscription Plan */}
+          <div style={{ background: 'var(--bg-main, #F8FAFC)', border: '1px solid var(--border-slate, #E2E8F0)', borderRadius: '10px', padding: '14px 16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '8px', borderBottom: '1px solid #E2E8F0', marginBottom: '8px' }}>
+              <div>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  {language === 'mr' ? 'परवाना आवृत्ती' : 'Licence Version'}
                 </span>
-              </p>
+                <div style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-heading, #0F172A)', marginTop: '2px' }}>
+                  v{licenceInfo?.licenceVersion || '2.4.0'}
+                </div>
+              </div>
+              <span style={{ background: '#EFF6FF', color: '#2563EB', border: '1px solid #BFDBFE', padding: '2px 8px', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 700 }}>
+                Enterprise
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  {language === 'mr' ? 'सबस्क्रिप्शन प्लॅन' : 'Subscription Plan'}
+                </span>
+                <div style={{ fontSize: '0.98rem', fontWeight: 800, color: 'var(--text-heading, #0F172A)', marginTop: '2px' }}>
+                  {licenceInfo?.subscriptionPlan || 'Hotel Enterprise Suite'}
+                </div>
+              </div>
+              <span style={{ background: '#F0FDF4', color: '#16A34A', border: '1px solid #BBF7D0', padding: '2px 8px', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 700 }}>
+                {language === 'mr' ? 'सक्रिय' : 'Active'}
+              </span>
             </div>
           </div>
 
+          {/* Card 2: Trial Start & End Date */}
+          <div style={{ background: 'var(--bg-main, #F8FAFC)', border: '1px solid var(--border-slate, #E2E8F0)', borderRadius: '10px', padding: '14px 16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '8px', borderBottom: '1px solid #E2E8F0', marginBottom: '8px' }}>
+              <div>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  {language === 'mr' ? 'ट्रायल कालावधी' : 'Trial Duration'}
+                </span>
+                <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-heading, #0F172A)', marginTop: '2px' }}>
+                  28 {language === 'mr' ? 'दिवस मोफत ट्रायल' : 'Days Free Trial'}
+                </div>
+              </div>
+              <span style={{ background: '#FEF3C7', color: '#D97706', border: '1px solid #FDE68A', padding: '2px 8px', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 700 }}>
+                28-Day Tier
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  {language === 'mr' ? 'शिल्लक कालावधी' : 'Validity'}
+                </span>
+                <div style={{ fontSize: '0.98rem', fontWeight: 800, color: '#16A34A', marginTop: '2px' }}>
+                  {licenceInfo?.daysRemaining != null ? licenceInfo.daysRemaining : 28} {language === 'mr' ? 'दिवस शिल्लक' : 'Days Left'}
+                </div>
+              </div>
+              <span style={{ background: '#F0FDF4', color: '#16A34A', border: '1px solid #BBF7D0', padding: '2px 8px', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 700 }}>
+                ✓ {language === 'mr' ? 'सक्रिय प्रवेश' : 'Full Access'}
+              </span>
+            </div>
+          </div>
+
+          {/* Card 3: Renewal & Status */}
+          <div style={{ background: 'var(--bg-main, #F8FAFC)', border: '1px solid var(--border-slate, #E2E8F0)', borderRadius: '10px', padding: '14px 16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '8px', borderBottom: '1px solid #E2E8F0', marginBottom: '8px' }}>
+              <div>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  {language === 'mr' ? 'नूतनीकरण स्थिती' : 'Renewal Status'}
+                </span>
+                <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-heading, #0F172A)', marginTop: '2px' }}>
+                  {language === 'mr' ? 'स्वयं-नूतनीकरण सक्रिय' : 'Auto-Renew Ready'}
+                </div>
+              </div>
+              <span style={{ background: '#F1F5F9', color: '#475569', border: '1px solid #E2E8F0', padding: '2px 8px', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 700 }}>
+                {language === 'mr' ? 'सुरक्षित' : 'Secured'}
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  {language === 'mr' ? 'परवाना स्थिती' : 'License Status'}
+                </span>
+                <div style={{ fontSize: '0.98rem', fontWeight: 800, color: '#16A34A', marginTop: '2px' }}>
+                  {licenceInfo?.trialStatus === 'Active' ? (language === 'mr' ? 'सक्रिय' : 'Active') : (licenceInfo?.trialStatus || 'Active')}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleOpenUpgrade}
+                style={{
+                  background: '#16A34A',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  padding: '5px 12px',
+                  borderRadius: '7px',
+                  fontSize: '0.76rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
+              >
+                {language === 'mr' ? 'नूतनीकरण करा' : 'Renew'}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Action Banner */}
+        <div
+          style={{
+            background: 'linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%)',
+            border: '1.5px solid #86EFAC',
+            borderRadius: '10px',
+            padding: '16px 20px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '12px',
+          }}
+        >
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+              <Crown size={18} color="#D97706" />
+              <strong style={{ fontSize: '0.96rem', color: '#14532D' }}>
+                {language === 'mr' ? '२८-दिवस मोफत एंटरप्राइझ ट्रायल व प्लॅन व्यवस्थापन' : '28-Day Free Enterprise Trial & Subscription'}
+              </strong>
+            </div>
+            <p style={{ margin: 0, fontSize: '0.82rem', color: '#166534' }}>
+              {language === 'mr'
+                ? 'तुमच्या हॉटेलसाठी सर्व प्रीमियम वैशिष्ट्ये, मल्टी-ब्रांच आणि बिलिंग सध्या सक्रिय आहेत.'
+                : 'All premium multi-branch management and high-volume billing capabilities are currently active.'}
+            </p>
+          </div>
           <button
             onClick={handleOpenUpgrade}
             className="owner-btn-upgrade"
             style={{
               padding: '9px 20px',
-              backgroundColor: '#B45309',
+              backgroundColor: '#15803D',
               color: '#FFFFFF',
               border: 'none',
               borderRadius: '8px',
               fontSize: '0.86rem',
               fontWeight: 700,
               cursor: 'pointer',
-              boxShadow: '0 2px 6px rgba(180, 83, 9, 0.35)',
+              boxShadow: '0 2px 6px rgba(21, 128, 61, 0.35)',
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              transition: 'transform 0.15s ease, background-color 0.15s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#92400E';
-              e.currentTarget.style.transform = 'translateY(-1px)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#B45309';
-              e.currentTarget.style.transform = 'none';
             }}
           >
             {language === 'mr' ? 'प्लॅन अपग्रेड / नूतनीकरण करा' : 'Upgrade / Renew Plan'}
@@ -848,222 +850,6 @@ export const OwnerSettings: React.FC = () => {
             </button>
           </div>
         </form>
-      </div>
-
-      {/* Daily Automated Backup (11:00 PM) Card */}
-      <div
-        className="owner-card"
-        style={{
-          backgroundColor: 'var(--card-white, #FFFFFF)',
-          borderRadius: '12px',
-          border: '1px solid var(--border-slate, #E2E8F0)',
-          padding: '24px 28px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-          marginBottom: '28px',
-        }}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#3B82F6', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFFFFF', flexShrink: 0 }}>
-              <Mail size={20} />
-            </div>
-            <div>
-              <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-heading, #0F172A)' }}>
-                {language === 'mr' ? 'दैनिक स्वयंचलित हॉटेल बॅकअप (रात्री ११:००)' : 'Daily Automated Hotel Backup (11:00 PM)'}
-              </h3>
-              <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: 'var(--text-muted, #64748B)' }}>
-                {language === 'mr'
-                  ? 'दैनिक हॉटेल डेटा बॅकअप • रोज रात्री ११:०० वाजता ऑटोमॅटिक ईमेल'
-                  : 'Daily hotel data backup • Automatic email every night at 11:00 PM'}
-              </p>
-            </div>
-          </div>
-          <span
-            style={{
-              backgroundColor: 'rgba(16, 185, 129, 0.15)',
-              color: '#10B981',
-              border: '1px solid rgba(16, 185, 129, 0.35)',
-              padding: '4px 10px',
-              borderRadius: '6px',
-              fontSize: '0.75rem',
-              fontWeight: 800,
-              letterSpacing: '0.02em',
-            }}
-          >
-            {language === 'mr' ? 'दररोज रात्री नियोजित (२३:००)' : 'SCHEDULED EVERY NIGHT (23:00)'}
-          </span>
-        </div>
-
-        <p style={{ fontSize: '0.86rem', color: 'var(--text-body, #475569)', lineHeight: 1.6, margin: '0 0 16px 0' }}>
-          {language === 'mr' ? (
-            <>
-              दररोज रात्री <strong>११:०० वाजता</strong>, सर्व दैनंदिन विक्री, ऑर्डर्स, इनव्हॉइसेस, पेमेंट्स, टेबल्स आणि खर्च संकलित केले जातात आणि JSON डेटा व PDF अहवाल स्वरूपात तुमच्या हॉटेल प्रोफाइल ईमेलवर (<strong>{settings.contactEmail || 'admin@royalpalace.com'}</strong>) आपोआप पाठवले जातात.
-            </>
-          ) : (
-            <>
-              Every night at <strong>11:00 PM</strong>, all daily sales, orders, invoices, payments, tables, and expenses are compiled and automatically sent to your Hotel Profile email (<strong>{settings.contactEmail || 'admin@royalpalace.com'}</strong>) with JSON data and PDF summary attachments.
-            </>
-          )}
-        </p>
-
-        {/* SMTP Status Notice */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            marginBottom: '18px',
-            padding: '11px 16px',
-            backgroundColor: 'rgba(16, 185, 129, 0.10)',
-            borderRadius: '10px',
-            border: '1px solid rgba(16, 185, 129, 0.28)',
-          }}
-        >
-          <CheckCircle2 size={18} color="#10B981" style={{ flexShrink: 0 }} />
-          <div>
-            <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#10B981' }}>
-              {language === 'mr' ? 'Gmail SMTP कनेक्टेड (application.yml द्वारे)' : 'Gmail SMTP Connected via application.yml'}
-            </span>
-            <span style={{ fontSize: '0.78rem', color: 'var(--text-muted, #64748B)', marginLeft: '6px' }}>
-              ({smtpSenderEmail || 'omchaudhari553@gmail.com'}) — {language === 'mr' ? 'क्रेडेन्शियल्स आधीच application.yml मध्ये कॉन्फिगर केलेले आहेत.' : 'Credentials already configured in application.yml.'}
-            </span>
-          </div>
-        </div>
-
-        {lastBackupStatus.status !== 'idle' && (
-          <div
-            style={{
-              padding: '12px 16px',
-              borderRadius: '8px',
-              marginBottom: '16px',
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: '10px',
-              fontSize: '0.84rem',
-              backgroundColor:
-                lastBackupStatus.status === 'success'
-                  ? 'rgba(16, 185, 129, 0.12)'
-                  : lastBackupStatus.status === 'warning'
-                  ? 'rgba(245, 158, 11, 0.12)'
-                  : 'rgba(239, 68, 68, 0.12)',
-              border: `1px solid ${
-                lastBackupStatus.status === 'success'
-                  ? 'rgba(16, 185, 129, 0.35)'
-                  : lastBackupStatus.status === 'warning'
-                  ? 'rgba(245, 158, 11, 0.35)'
-                  : 'rgba(239, 68, 68, 0.35)'
-              }`,
-              color:
-                lastBackupStatus.status === 'success'
-                  ? '#10B981'
-                  : lastBackupStatus.status === 'warning'
-                  ? '#F59E0B'
-                  : '#EF4444',
-            }}
-          >
-            {lastBackupStatus.status === 'success' ? (
-              <CheckCircle2 size={18} color="#10B981" style={{ flexShrink: 0, marginTop: '2px' }} />
-            ) : (
-              <AlertCircle size={18} color="#F59E0B" style={{ flexShrink: 0, marginTop: '2px' }} />
-            )}
-            <div>
-              <div style={{ fontWeight: 700 }}>
-                {lastBackupStatus.status === 'success'
-                  ? (language === 'mr' ? 'बॅकअप ईमेल यशस्वीरीत्या पाठवला!' : 'Backup Email Dispatched Successfully!')
-                  : (language === 'mr' ? 'बॅकअप फाइल सर्व्हरवर सेव्ह केली!' : 'Backup File Saved Locally on Server!')}
-              </div>
-              <div style={{ marginTop: '2px', lineHeight: 1.4 }}>
-                {lastBackupStatus.message}
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-          <button
-            type="button"
-            disabled={backupSending}
-            onClick={handleSendDailyBackupNow}
-            title={language === 'mr' ? 'बॅकअप ईमेल आता पाठवा' : (backupSending ? 'Sending Backup Email...' : 'Send Daily Backup to Email Now')}
-            aria-label="Send Daily Backup to Email Now"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '40px',
-              height: '40px',
-              backgroundColor: backupSending ? '#94A3B8' : '#3B82F6',
-              color: '#FFFFFF',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: backupSending ? 'not-allowed' : 'pointer',
-              boxShadow: '0 2px 4px rgba(59, 130, 246, 0.25)',
-              transition: 'background-color 0.2s ease',
-            }}
-          >
-            <RefreshCw size={18} color="#FFFFFF" style={backupSending ? { animation: 'spin 1s linear infinite' } : undefined} />
-          </button>
-
-          <button
-            type="button"
-            onClick={handleDownloadDailyBackup}
-            title={language === 'mr' ? 'बॅकअप डाउनलोड करा (.json)' : 'Download Backup (.json)'}
-            aria-label="Download Backup (.json)"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '40px',
-              height: '40px',
-              backgroundColor: 'var(--card-white, #FFFFFF)',
-              color: 'var(--text-heading, #0F172A)',
-              border: '1px solid var(--border-slate, #CBD5E1)',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = '#D97706';
-              e.currentTarget.style.color = '#D97706';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = 'var(--border-slate, #CBD5E1)';
-              e.currentTarget.style.color = 'var(--text-heading, #0F172A)';
-            }}
-          >
-            <Download size={18} color="currentColor" />
-          </button>
-
-          <button
-            type="button"
-            onClick={handleDownloadDailyBackupPdf}
-            title={language === 'mr' ? 'PDF अहवाल डाउनलोड करा (.pdf)' : 'Download PDF Report (.pdf)'}
-            aria-label="Download PDF Report (.pdf)"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '40px',
-              height: '40px',
-              backgroundColor: 'var(--card-white, #FFFFFF)',
-              color: 'var(--text-heading, #0F172A)',
-              border: '1px solid var(--border-slate, #CBD5E1)',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = '#D97706';
-              e.currentTarget.style.color = '#D97706';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = 'var(--border-slate, #CBD5E1)';
-              e.currentTarget.style.color = 'var(--text-heading, #0F172A)';
-            }}
-          >
-            <FileText size={18} color="currentColor" />
-          </button>
-        </div>
       </div>
 
       {/* Standalone / Direct Subscription Modal for 100% Reliable Triggering */}

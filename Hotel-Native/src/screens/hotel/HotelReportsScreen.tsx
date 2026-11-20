@@ -150,12 +150,12 @@ export const HotelReportsScreen: React.FC<{ navigation?: any; hideHeader?: boole
             subtitle={t('salesExpensesGstStaffSubtitle', 'Sales, Expenses, GST & Staff Monthly Reports')}
             rightAction={
               <View style={{ flexDirection: 'row', gap: 6 }}>
-                <TouchableOpacity style={styles.exportBtn} onPress={handleExportCsv} activeOpacity={0.8}>
+                <TouchableOpacity style={[styles.exportBtn, { backgroundColor: '#15803D' }]} onPress={handleExportCsv} activeOpacity={0.8}>
                   <FileSpreadsheet size={14} color="#FFFFFF" />
-                  <Text style={styles.exportBtnText}>CSV</Text>
+                  <Text style={styles.exportBtnText}>Excel</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.exportBtn, { backgroundColor: '#1E40AF' }]} onPress={handleExportPdf} activeOpacity={0.8}>
-                  <Download size={14} color="#FFFFFF" />
+                <TouchableOpacity style={[styles.exportBtn, { backgroundColor: '#B91C1C' }]} onPress={handleExportPdf} activeOpacity={0.8}>
+                  <FileText size={14} color="#FFFFFF" />
                   <Text style={styles.exportBtnText}>PDF</Text>
                 </TouchableOpacity>
               </View>

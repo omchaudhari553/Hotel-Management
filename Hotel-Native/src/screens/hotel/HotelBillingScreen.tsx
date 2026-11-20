@@ -249,7 +249,7 @@ export const HotelBillingScreen: React.FC<{ route?: any; navigation?: any }> = (
           0;
         const cleanPrice = Math.round(unitPrice * 100) / 100;
         return {
-          name: String(item?.name || item?.itemName || item?.description || 'Order Item'),
+          name: String(item?.name || item?.itemName || item?.description || 'Order Item').trim(),
           quantity: qty,
           price: cleanPrice,
           ...(item?.notes ? { notes: String(item.notes) } : {}),
@@ -257,12 +257,28 @@ export const HotelBillingScreen: React.FC<{ route?: any; navigation?: any }> = (
       })
       .filter((it) => it.quantity > 0);
 
+    // Deduplicate and merge items with identical dish name
+    const mergedMap = new Map<string, KOTOrderItem>();
+    for (const it of normalized) {
+      const key = it.name.toLowerCase();
+      if (mergedMap.has(key)) {
+        const existing = mergedMap.get(key)!;
+        existing.quantity += it.quantity;
+        if (existing.price <= 0 && it.price > 0) {
+          existing.price = it.price;
+        }
+      } else {
+        mergedMap.set(key, { ...it });
+      }
+    }
+    const mergedItems = Array.from(mergedMap.values());
+
     const targetSub = Number(order.subtotal) > 0
       ? Number(order.subtotal)
       : (Number(order.total) > 0 ? Math.round(Number(order.total) / 1.05) : 0);
-    const sumPrice = normalized.reduce((sum, it) => sum + it.price * it.quantity, 0);
+    const sumPrice = mergedItems.reduce((sum, it) => sum + it.price * it.quantity, 0);
 
-    if (normalized.length === 0 || (sumPrice === 0 && targetSub > 0)) {
+    if (mergedItems.length === 0 || (sumPrice === 0 && targetSub > 0)) {
       const baseAmt = targetSub > 0 ? targetSub : Math.round((Number(order.total) / 1.05) * 100) / 100;
       return [
         {
@@ -272,7 +288,7 @@ export const HotelBillingScreen: React.FC<{ route?: any; navigation?: any }> = (
         },
       ];
     }
-    return normalized;
+    return mergedItems;
   }, []);
 
   // Synchronous order selection helper (zero click latency)
@@ -505,14 +521,40 @@ export const HotelBillingScreen: React.FC<{ route?: any; navigation?: any }> = (
 
   // Add extra item to current bill
   const handleAddDishToBill = (menuItem: MenuItemData) => {
-    const existingIndex = orderItemsList.findIndex((i) => i.name.toLowerCase() === menuItem.name.toLowerCase());
+    const cleanTarget = menuItem.name.trim().toLowerCase();
+    const existingIndex = orderItemsList.findIndex((i) => i.name.trim().toLowerCase() === cleanTarget);
     let updated: KOTOrderItem[];
 
     if (existingIndex >= 0) {
       updated = [...orderItemsList];
-      updated[existingIndex].quantity += 1;
+      updated[existingIndex] = {
+        ...updated[existingIndex],
+        quantity: updated[existingIndex].quantity + 1,
+      };
     } else {
-      updated = [...orderItemsList, { name: menuItem.name, quantity: 1, price: menuItem.price }];
+      updated = [...orderItemsList, { name: menuItem.name.trim(), quantity: 1, price: menuItem.price }];
+    }
+
+    setOrderItemsList(updated);
+    if (selectedOrder) {
+      restaurantStore.updateOrderItems(selectedOrder.id, updated).catch(console.warn);
+    }
+  };
+
+  // Decrement or remove item from current bill (used by Add Dish modal stepper)
+  const handleDecrementDishInBill = (menuItem: MenuItemData) => {
+    const cleanTarget = menuItem.name.trim().toLowerCase();
+    const existingIndex = orderItemsList.findIndex((i) => i.name.trim().toLowerCase() === cleanTarget);
+    if (existingIndex < 0) return;
+
+    const updated = [...orderItemsList];
+    const current = updated[existingIndex];
+    const nextQty = current.quantity - 1;
+
+    if (nextQty <= 0) {
+      updated.splice(existingIndex, 1);
+    } else {
+      updated[existingIndex] = { ...current, quantity: nextQty };
     }
 
     setOrderItemsList(updated);
@@ -1808,9 +1850,21 @@ export const HotelBillingScreen: React.FC<{ route?: any; navigation?: any }> = (
             </View>
 
             <ScrollView style={{ maxHeight: 320, paddingHorizontal: 16 }}>
-              {menuItems
-                .filter((item) => {
-                  const q = menuSearch.trim().toLowerCase();
+              {(() => {
+                const q = menuSearch.trim().toLowerCase();
+                const seenNames = new Set<string>();
+                const seenIds = new Set<string>();
+                const uniqueMenu: MenuItemData[] = [];
+                for (const it of (menuItems || [])) {
+                  if (!it || !it.name) continue;
+                  const cleanName = it.name.trim().toLowerCase();
+                  const cleanId = String(it.id || '').trim();
+                  if (seenNames.has(cleanName) || (cleanId && seenIds.has(cleanId))) continue;
+                  seenNames.add(cleanName);
+                  if (cleanId) seenIds.add(cleanId);
+                  uniqueMenu.push(it);
+                }
+                return uniqueMenu.filter((item) => {
                   if (!q) return true;
                   const localized = getLocalizedMenuItemName(item.name).toLowerCase();
                   return (
@@ -1818,23 +1872,50 @@ export const HotelBillingScreen: React.FC<{ route?: any; navigation?: any }> = (
                     (item.category || '').toLowerCase().includes(q) ||
                     localized.includes(q)
                   );
-                })
-                .map((item, mIdx) => (
-                  <View key={`menu-item-${item.id || mIdx}-${item.name}`} style={styles.menuItemPickerRow}>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.menuPickerName}>{getLocalizedMenuItemName(item.name)}</Text>
-                      <Text style={styles.menuPickerSub}>₹{toDevanagari(item.price)} • {t(item.category.toLowerCase(), item.category)}</Text>
+                });
+              })()
+                .map((item, mIdx) => {
+                  const inBill = orderItemsList.find(
+                    (it) => it.name.trim().toLowerCase() === item.name.trim().toLowerCase()
+                  );
+                  const curQty = inBill ? inBill.quantity : 0;
+                  return (
+                    <View key={`menu-item-${item.id || mIdx}-${item.name}`} style={styles.menuItemPickerRow}>
+                      <View style={{ flex: 1, paddingRight: 8 }}>
+                        <Text style={styles.menuPickerName}>{getLocalizedMenuItemName(item.name)}</Text>
+                        <Text style={styles.menuPickerSub}>₹{toDevanagari(item.price)} • {t(item.category.toLowerCase(), item.category)}</Text>
+                      </View>
+                      {curQty === 0 ? (
+                        <TouchableOpacity
+                          style={styles.addPickerBtn}
+                          onPress={() => handleAddDishToBill(item)}
+                          activeOpacity={0.8}
+                        >
+                          <Plus size={14} color="#FFFFFF" />
+                          <Text style={styles.addPickerText}>{t('add', 'Add')}</Text>
+                        </TouchableOpacity>
+                      ) : (
+                        <View style={styles.pickerQtyControlRow}>
+                          <TouchableOpacity
+                            style={styles.pickerQtyBtn}
+                            onPress={() => handleDecrementDishInBill(item)}
+                            activeOpacity={0.8}
+                          >
+                            <Minus size={13} color="#9A3412" strokeWidth={2.8} />
+                          </TouchableOpacity>
+                          <Text style={styles.pickerQtyNum}>{toDevanagari(curQty)}</Text>
+                          <TouchableOpacity
+                            style={styles.pickerQtyBtn}
+                            onPress={() => handleAddDishToBill(item)}
+                            activeOpacity={0.8}
+                          >
+                            <Plus size={13} color="#9A3412" strokeWidth={2.8} />
+                          </TouchableOpacity>
+                        </View>
+                      )}
                     </View>
-                    <TouchableOpacity
-                      style={styles.addPickerBtn}
-                      onPress={() => handleAddDishToBill(item)}
-                      activeOpacity={0.8}
-                    >
-                      <Plus size={14} color="#FFFFFF" />
-                      <Text style={styles.addPickerText}>{t('add', 'Add')}</Text>
-                    </TouchableOpacity>
-                  </View>
-                ))}
+                  );
+                })}
             </ScrollView>
           </View>
         </View>
@@ -3643,6 +3724,32 @@ const getStyles = (isDark: boolean) => {
     fontWeight: '800',
     color: '#FFFFFF',
     marginLeft: 4,
+  },
+  pickerQtyControlRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: isDark ? '#1E293B' : '#FFEDD5',
+    borderRadius: 7,
+    borderWidth: 1.5,
+    borderColor: '#9A3412',
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+    gap: 6,
+  },
+  pickerQtyBtn: {
+    width: 26,
+    height: 26,
+    borderRadius: 5,
+    backgroundColor: isDark ? '#334155' : '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pickerQtyNum: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: isDark ? '#FED7AA' : '#9A3412',
+    minWidth: 18,
+    textAlign: 'center',
   },
   inputLabel: {
     fontSize: 11,

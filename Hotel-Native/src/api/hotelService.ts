@@ -63,7 +63,18 @@ export const hotelService = {
   async getMenuItems(): Promise<MenuItem[]> {
     try {
       const res = await apiClient.get('/hotel/menu-items');
-      return res.data?.data || res.data || INITIAL_MENU;
+      const list = res.data?.data || res.data || INITIAL_MENU;
+      if (Array.isArray(list)) {
+        const seen = new Set<string>();
+        return list.filter((m: MenuItem) => {
+          if (!m || !m.name) return false;
+          const k = m.name.trim().toLowerCase();
+          if (seen.has(k)) return false;
+          seen.add(k);
+          return true;
+        });
+      }
+      return INITIAL_MENU;
     } catch {
       return INITIAL_MENU;
     }
