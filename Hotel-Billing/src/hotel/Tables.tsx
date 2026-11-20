@@ -8878,7 +8878,7 @@ const Tables: React.FC = () => {
             ===================================================== */}
         {modal === "add-menu-item" && (
           <div className="overlay">
-            <div className="modal">
+            <div className="modal" style={{ maxWidth: "440px", borderRadius: "16px", padding: "24px", boxShadow: "0 10px 25px rgba(0,0,0,0.15)" }}>
               <button
                 className="close"
                 onClick={closeModal}
@@ -8886,7 +8886,7 @@ const Tables: React.FC = () => {
                 ×
               </button>
 
-              <div className="modal-head">
+              <div className="modal-head" style={{ marginBottom: "16px" }}>
                 <div>
                   <div className="modal-kicker">
                     {t("menuUpper", "MENU")}
@@ -8902,8 +8902,8 @@ const Tables: React.FC = () => {
                 </div>
               </div>
 
-              <div className="form">
-                <label>
+              <div className="form" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                <label style={{ display: "flex", flexDirection: "column", gap: "6px", fontWeight: 700, fontSize: "0.85rem", color: "#334155" }}>
                   {t("itemName", "Item Name")}
                   <input
                     type="text"
@@ -8913,10 +8913,41 @@ const Tables: React.FC = () => {
                     }
                     placeholder={t("enterItemName", "Enter item name")}
                     autoFocus
+                    style={{
+                      height: "42px",
+                      padding: "0 12px",
+                      borderRadius: "8px",
+                      border: "1.5px solid #CBD5E1",
+                      fontSize: "0.9rem",
+                      outline: "none",
+                    }}
                   />
                 </label>
 
-                <label>
+                <label style={{ display: "flex", flexDirection: "column", gap: "6px", fontWeight: 700, fontSize: "0.85rem", color: "#334155" }}>
+                  {t("category", "Category")}
+                  <select
+                    value={newMenuItemCategory}
+                    onChange={(event) => setNewMenuItemCategory(event.target.value)}
+                    style={{
+                      height: "42px",
+                      padding: "0 12px",
+                      borderRadius: "8px",
+                      border: "1.5px solid #CBD5E1",
+                      fontSize: "0.9rem",
+                      backgroundColor: "#FFFFFF",
+                      outline: "none",
+                    }}
+                  >
+                    {["Main Course", "Starters", "Breads", "Rice", "Dessert", "Beverages", "Chinese", "Snacks", "Soups"].map((cat) => (
+                      <option key={cat} value={cat}>
+                        {t(cat.toLowerCase(), cat)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label style={{ display: "flex", flexDirection: "column", gap: "6px", fontWeight: 700, fontSize: "0.85rem", color: "#334155" }}>
                   {t("price", "Price")}
                   <input
                     type="number"
@@ -8927,17 +8958,55 @@ const Tables: React.FC = () => {
                       setNewMenuItemPrice(event.target.value)
                     }
                     placeholder={t("enterPrice", "Enter price")}
+                    style={{
+                      height: "42px",
+                      padding: "0 12px",
+                      borderRadius: "8px",
+                      border: "1.5px solid #CBD5E1",
+                      fontSize: "0.9rem",
+                      outline: "none",
+                    }}
                   />
                 </label>
 
-                <button
-                  className="submit"
-                  onClick={addMenuItemManually}
-                  type="button"
-                  disabled={!newMenuItemName.trim() || Number(newMenuItemPrice) <= 0}
-                >
-                  {t("saveMenuItem", "Save Menu Item")}
-                </button>
+                <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
+                  <button
+                    type="button"
+                    onClick={() => setModal("add-item")}
+                    style={{
+                      flex: 1,
+                      height: "42px",
+                      border: "1.5px solid #CBD5E1",
+                      borderRadius: "8px",
+                      background: "#F8FAFC",
+                      color: "#475569",
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      fontSize: "0.88rem",
+                    }}
+                  >
+                    {t("cancel", "Cancel")}
+                  </button>
+                  <button
+                    className="submit"
+                    onClick={addMenuItemManually}
+                    type="button"
+                    disabled={!newMenuItemName.trim() || Number(newMenuItemPrice) <= 0}
+                    style={{
+                      flex: 2,
+                      height: "42px",
+                      border: "none",
+                      borderRadius: "8px",
+                      background: (!newMenuItemName.trim() || Number(newMenuItemPrice) <= 0) ? "#CBD5E1" : "#9A3412",
+                      color: "#FFFFFF",
+                      fontWeight: 700,
+                      cursor: (!newMenuItemName.trim() || Number(newMenuItemPrice) <= 0) ? "not-allowed" : "pointer",
+                      fontSize: "0.88rem",
+                    }}
+                  >
+                    {t("saveMenuItem", "Save Menu Item")}
+                  </button>
+                </div>
               </div>
             </div>
           </div>

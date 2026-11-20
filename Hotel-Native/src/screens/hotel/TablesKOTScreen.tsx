@@ -83,6 +83,12 @@ export const TablesKOTScreen: React.FC<{ navigation: any; route?: any }> = ({ na
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [menuSearch, setMenuSearch] = useState<string>('');
 
+  // Add Menu Item Modal State
+  const [showAddMenuItemModal, setShowAddMenuItemModal] = useState<boolean>(false);
+  const [newDishName, setNewDishName] = useState<string>('');
+  const [newDishCategory, setNewDishCategory] = useState<string>('Main Course');
+  const [newDishPrice, setNewDishPrice] = useState<string>('');
+
   // Details Modal
   const [viewDetailsModal, setViewDetailsModal] = useState<boolean>(false);
   const [viewingTable, setViewingTable] = useState<TableItem | null>(null);
@@ -423,11 +429,54 @@ export const TablesKOTScreen: React.FC<{ navigation: any; route?: any }> = ({ na
     }
   };
 
-  // Categories list for menu
+  // Categories list for menu (dynamically includes all existing menu categories)
   const categories = useMemo(
-    () => ['All', 'Starters', 'Main Course', 'Breads', 'Rice', 'Dessert', 'Beverages'],
-    []
+    () => {
+      const defaultCats = ['All', 'Starters', 'Main Course', 'Breads', 'Rice', 'Dessert', 'Beverages'];
+      const dynamicCats = (menuItems || []).map((m) => m?.category).filter(Boolean);
+      return Array.from(new Set([...defaultCats, ...dynamicCats]));
+    },
+    [menuItems]
   );
+
+  // Create new menu item manually with category & price
+  const handleAddNewMenuItem = async () => {
+    if (!newDishName.trim()) {
+      Alert.alert(t('missingName', 'Missing Name'), t('enterItemName', 'Please enter item name.'));
+      return;
+    }
+    const priceNum = parseFloat(newDishPrice);
+    if (isNaN(priceNum) || priceNum <= 0) {
+      Alert.alert(t('invalidPrice', 'Invalid Price'), t('enterValidPrice', 'Please enter a valid price.'));
+      return;
+    }
+
+    try {
+      const created = await restaurantStore.addMenuItem({
+        name: newDishName.trim(),
+        category: newDishCategory || 'Main Course',
+        price: priceNum,
+      });
+
+      const updatedMenu = restaurantStore.getMenuItems();
+      setMenuItems(updatedMenu);
+
+      if (created?.id) {
+        setSelectedItems((prev) => ({
+          ...prev,
+          [created.id]: (prev[created.id] || 0) + 1,
+        }));
+      }
+
+      setShowAddMenuItemModal(false);
+      setNewDishName('');
+      setNewDishPrice('');
+      setNewDishCategory('Main Course');
+      Alert.alert(t('dishAdded', 'Dish Added'), `${created.name} added to menu!`);
+    } catch {
+      Alert.alert(t('error', 'Error'), 'Failed to add menu item.');
+    }
+  };
 
   const filteredMenuItems = useMemo(() => {
     const q = menuSearch.trim().toLowerCase();
@@ -999,15 +1048,32 @@ export const TablesKOTScreen: React.FC<{ navigation: any; route?: any }> = ({ na
               </View>
             </View>
 
-            {/* Menu Search */}
-            <View style={styles.menuSearchBox}>
-              <Search size={15} color="#78716C" />
-              <TextInput
-                style={styles.menuSearchInput}
-                placeholder={t('searchFoodItem', 'Search food item (e.g. Paneer, Roti)...')}
-                value={menuSearch}
-                onChangeText={setMenuSearch}
-              />
+            {/* Menu Search Bar & Add Menu Item Button */}
+            <View style={styles.menuSearchAndAddRow}>
+              <View style={styles.menuSearchBoxInner}>
+                <Search size={15} color="#78716C" />
+                <TextInput
+                  style={styles.menuSearchInput}
+                  placeholder={t('searchFoodItem', 'Search food item (e.g. Paneer, Roti)...')}
+                  placeholderTextColor="#94A3B8"
+                  value={menuSearch}
+                  onChangeText={setMenuSearch}
+                />
+                {menuSearch.length > 0 && (
+                  <TouchableOpacity onPress={() => setMenuSearch('')}>
+                    <X size={14} color="#78716C" />
+                  </TouchableOpacity>
+                )}
+              </View>
+
+              <TouchableOpacity
+                style={styles.addMenuItemBtn}
+                onPress={() => setShowAddMenuItemModal(true)}
+                activeOpacity={0.8}
+              >
+                <Plus size={14} color="#FFFFFF" />
+                <Text style={styles.addMenuItemBtnText}>{t('addMenuItem', '+ Add Item')}</Text>
+              </TouchableOpacity>
             </View>
 
             {/* Category Pills */}
@@ -1090,6 +1156,98 @@ export const TablesKOTScreen: React.FC<{ navigation: any; route?: any }> = ({ na
                 <UtensilsCrossed size={16} color="#FFFFFF" />
                 <Text style={styles.punchKotText}>{t('punchKotKitchen', 'Punch KOT & Seat Table')}</Text>
               </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* ===================================================
+          ADD MENU ITEM MODAL (Direct Table Menu Punching)
+      =================================================== */}
+      <Modal visible={showAddMenuItemModal} animationType="fade" transparent={true}>
+        <View style={styles.viewModalOverlay}>
+          <View style={styles.addMenuModalCard}>
+            {/* Header */}
+            <View style={styles.modalHeader}>
+              <View>
+                <Text style={styles.modalKicker}>{t('menuUpper', 'MENU')}</Text>
+                <Text style={styles.modalTitle}>{t('addMenuItem', 'Add Menu Item')}</Text>
+                <Text style={styles.modalSub}>{t('addMenuItemDesc', 'Add a new item and its price manually.')}</Text>
+              </View>
+              <TouchableOpacity
+                style={styles.modalCloseBtn}
+                onPress={() => setShowAddMenuItemModal(false)}
+              >
+                <X size={20} color="#78716C" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={{ padding: 18 }}>
+              {/* Item Name */}
+              <Text style={styles.inputLabel}>{t('itemName', 'Item Name')} *</Text>
+              <TextInput
+                style={styles.modalInput}
+                placeholder={t('enterItemName', 'Enter item name')}
+                placeholderTextColor="#94A3B8"
+                value={newDishName}
+                onChangeText={setNewDishName}
+              />
+
+              {/* Category */}
+              <Text style={[styles.inputLabel, { marginTop: 14 }]}>{t('category', 'Category')} *</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
+                {['Main Course', 'Starters', 'Breads', 'Rice', 'Dessert', 'Beverages', 'Chinese', 'Snacks', 'Soups'].map((cat) => (
+                  <TouchableOpacity
+                    key={`new-dish-cat-${cat}`}
+                    style={[
+                      styles.categoryOptionPill,
+                      newDishCategory === cat && styles.categoryOptionPillActive,
+                    ]}
+                    onPress={() => setNewDishCategory(cat)}
+                  >
+                    <Text
+                      style={[
+                        styles.categoryOptionText,
+                        newDishCategory === cat && styles.categoryOptionTextActive,
+                      ]}
+                    >
+                      {t(cat.toLowerCase(), cat)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+
+              {/* Price */}
+              <Text style={styles.inputLabel}>{t('price', 'Price')} (₹) *</Text>
+              <TextInput
+                style={styles.modalInput}
+                placeholder={t('enterPrice', 'Enter price')}
+                placeholderTextColor="#94A3B8"
+                keyboardType="numeric"
+                value={newDishPrice}
+                onChangeText={setNewDishPrice}
+              />
+
+              {/* Action Buttons: Cancel and Save */}
+              <View style={styles.modalButtonRow}>
+                <TouchableOpacity
+                  style={styles.modalCancelBtn}
+                  onPress={() => setShowAddMenuItemModal(false)}
+                >
+                  <Text style={styles.modalCancelBtnText}>{t('cancel', 'Cancel')}</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.modalSaveBtn,
+                    (!newDishName.trim() || !newDishPrice || Number(newDishPrice) <= 0) && { opacity: 0.6 }
+                  ]}
+                  onPress={handleAddNewMenuItem}
+                  disabled={!newDishName.trim() || !newDishPrice || Number(newDishPrice) <= 0}
+                >
+                  <Text style={styles.modalSaveBtnText}>{t('saveMenuItem', 'Save Menu Item')}</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </View>
@@ -2122,6 +2280,130 @@ const getStyles = (isDark: boolean) => {
     height: 38,
     borderWidth: 1,
     borderColor: cardBorder,
+  },
+  menuSearchAndAddRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 16,
+    marginTop: 12,
+    gap: 8,
+  },
+  menuSearchBoxInner: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: inputBg,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    height: 38,
+    borderWidth: 1,
+    borderColor: cardBorder,
+  },
+  addMenuItemBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#9A3412',
+    height: 38,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    gap: 4,
+  },
+  addMenuItemBtnText: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  addMenuModalCard: {
+    width: '100%',
+    maxWidth: 440,
+    backgroundColor: cardBg,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: cardBorder,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 8,
+    overflow: 'hidden',
+  },
+  modalKicker: {
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1.2,
+    color: '#EA580C',
+    textTransform: 'uppercase',
+    marginBottom: 2,
+  },
+  inputLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: textPrimary,
+    marginBottom: 6,
+  },
+  modalInput: {
+    backgroundColor: inputBg,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: cardBorder,
+    height: 42,
+    paddingHorizontal: 12,
+    fontSize: 13,
+    color: textPrimary,
+  },
+  categoryOptionPill: {
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 8,
+    backgroundColor: inputBg,
+    borderWidth: 1,
+    borderColor: cardBorder,
+    marginRight: 8,
+  },
+  categoryOptionPillActive: {
+    backgroundColor: '#9A3412',
+    borderColor: '#9A3412',
+  },
+  categoryOptionText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: textSecondary,
+  },
+  categoryOptionTextActive: {
+    color: '#FFFFFF',
+  },
+  modalButtonRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 18,
+  },
+  modalCancelBtn: {
+    flex: 1,
+    height: 42,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: cardBorder,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: inputBg,
+  },
+  modalCancelBtnText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: textSecondary,
+  },
+  modalSaveBtn: {
+    flex: 2,
+    height: 42,
+    borderRadius: 8,
+    backgroundColor: '#9A3412',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalSaveBtnText: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#FFFFFF',
   },
   menuSearchInput: {
     flex: 1,
