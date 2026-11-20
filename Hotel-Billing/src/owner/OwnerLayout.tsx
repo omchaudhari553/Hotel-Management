@@ -18,7 +18,7 @@ import {
 export const OwnerLayout: React.FC = () => {
   const { user, logout } = useAuth();
   const { theme, resolvedTheme, setTheme } = useTheme();
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, localizeName } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -243,51 +243,54 @@ export const OwnerLayout: React.FC = () => {
                     }}
                   >
                     {user?.fullName || user?.username || 'Hotel Owner'}
-                  </span>
-                  <span style={{ fontSize: '0.70rem', color: 'var(--text-muted, #64748B)' }}>
-                    {language === 'mr' ? 'व्यवसाय मालक' : 'Business Owner'}
-                  </span>
+                    <div className="owner-profile-meta" style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-heading, #1E293B)', lineHeight: 1.2 }}>
+                        {language === 'mr' ? localizeName(user?.fullName || user?.username || 'Hotel Owner') : (user?.fullName || user?.username || 'Hotel Owner')}
+                      </span>
+                      <span style={{ fontSize: '0.70rem', color: 'var(--text-muted, #64748B)' }}>
+                        {language === 'mr' ? 'व्यवसाय मालक' : 'Business Owner'}
+                      </span>
+                    </div>
                 </div>
-              </div>
 
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="owner-logout-btn"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  backgroundColor: 'var(--card-white, #FFFFFF)',
-                  border: '1px solid var(--border-slate, #CBD5E1)',
-                  borderRadius: '6px',
-                  padding: '6px 10px',
-                  fontSize: '0.78rem',
-                  fontWeight: 600,
-                  color: 'var(--text-heading, #475569)',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                  flexShrink: 0,
-                }}
-                onMouseEnter={(event) => {
-                  event.currentTarget.style.borderColor = '#EF4444';
-                  event.currentTarget.style.color = '#EF4444';
-                  event.currentTarget.style.backgroundColor = '#FEF2F2';
-                }}
-                onMouseLeave={(event) => {
-                  event.currentTarget.style.borderColor = 'var(--border-slate, #CBD5E1)';
-                  event.currentTarget.style.color = 'var(--text-heading, #475569)';
-                  event.currentTarget.style.backgroundColor = 'var(--card-white, #FFFFFF)';
-                }}
-                title="Logout from session"
-              >
-                <LogOut size={15} />
-                <span className="owner-logout-text">
-                  {language === 'mr' ? 'लॉगआउट' : 'Logout'}
-                </span>
-              </button>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="owner-logout-btn"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    backgroundColor: 'var(--card-white, #FFFFFF)',
+                    border: '1px solid var(--border-slate, #CBD5E1)',
+                    borderRadius: '6px',
+                    padding: '6px 10px',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    color: 'var(--text-heading, #475569)',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                    flexShrink: 0,
+                  }}
+                  onMouseEnter={(event) => {
+                    event.currentTarget.style.borderColor = '#EF4444';
+                    event.currentTarget.style.color = '#EF4444';
+                    event.currentTarget.style.backgroundColor = '#FEF2F2';
+                  }}
+                  onMouseLeave={(event) => {
+                    event.currentTarget.style.borderColor = 'var(--border-slate, #CBD5E1)';
+                    event.currentTarget.style.color = 'var(--text-heading, #475569)';
+                    event.currentTarget.style.backgroundColor = 'var(--card-white, #FFFFFF)';
+                  }}
+                  title="Logout from session"
+                >
+                  <LogOut size={15} />
+                  <span className="owner-logout-text">
+                    {language === 'mr' ? 'लॉगआउट' : 'Logout'}
+                  </span>
+                </button>
+              </div>
             </div>
-          </div>
         </header>
 
         {/* Content View */}

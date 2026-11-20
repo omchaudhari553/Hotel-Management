@@ -13,8 +13,10 @@ import {
 } from 'lucide-react';
 import { ownerService, OwnerStaffItem, BranchRecord } from './ownerService';
 import { useToast } from '../context/ToastContext';
+import { useLanguage } from '../context/LanguageContext';
 
 export const OwnerStaff: React.FC = () => {
+  const { language, toDevanagari, localizeName } = useLanguage();
   const [staffList, setStaffList] = useState<OwnerStaffItem[]>([]);
   const [branches, setBranches] = useState<BranchRecord[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -74,20 +76,48 @@ export const OwnerStaff: React.FC = () => {
     );
   });
 
+  const localizeDesignation = (d?: string) => {
+    if (!d) return '—';
+    if (language !== 'mr') return d;
+    const map: Record<string, string> = {
+      Manager: 'व्यवस्थापक',
+      Receptionist: 'रिसेप्शनिस्ट',
+      Helper: 'मदतनीस',
+      Chef: 'शेफ',
+      Waiter: 'वेटर',
+      Cashier: 'कॅशियर',
+      Cook: 'आचारी',
+      Cleaner: 'स्वच्छता कर्मचारी',
+      Supervisor: 'पर्यवेक्षक',
+    };
+    return map[d] || d;
+  };
+
+  const localizeFrequency = (f?: string) => {
+    if (!f) return '';
+    if (language !== 'mr') return f;
+    const lower = f.toLowerCase();
+    if (lower.includes('month')) return 'मासिक';
+    if (lower.includes('day') || lower.includes('daily')) return 'दैनिक';
+    if (lower.includes('week')) return 'साप्ताहिक';
+    if (lower.includes('year')) return 'वार्षिक';
+    return f;
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px' }}>
         <div>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-heading, #0F172A)', margin: 0 }}>
-            Branch Staff Directory
+            {language === 'mr' ? 'शाखा कर्मचारी डिरेक्टरी' : 'Branch Staff Directory'}
           </h1>
         </div>
 
         <button
           onClick={fetchStaffData}
           className="owner-btn-secondary"
-          title="Refresh"
+          title={language === 'mr' ? 'रीफ्रेश करा' : 'Refresh'}
           aria-label="Refresh"
           style={{
             display: 'flex',
@@ -124,7 +154,7 @@ export const OwnerStaff: React.FC = () => {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#B45309', fontWeight: 800, fontSize: '0.88rem' }}>
           <Filter size={18} />
-          <span>Branch Filter:</span>
+          <span>{language === 'mr' ? 'शाखा फिल्टर:' : 'Branch Filter:'}</span>
         </div>
 
         <div style={{ minWidth: '240px' }}>
@@ -136,10 +166,10 @@ export const OwnerStaff: React.FC = () => {
               width: '100%',
             }}
           >
-            <option value="">All Active Branches</option>
+            <option value="">{language === 'mr' ? 'सर्व सक्रिय शाखा' : 'All Active Branches'}</option>
             {branches.filter(b => b.status === 'ACTIVE').map((b) => (
               <option key={b.id} value={b.id}>
-                {b.name} ({b.city || b.code})
+                {language === 'mr' ? localizeName(b.name) : b.name} ({b.city ? (language === 'mr' ? localizeName(b.city) : b.city) : (language === 'mr' ? toDevanagari(b.code) : b.code)})
               </option>
             ))}
           </select>
@@ -157,7 +187,11 @@ export const OwnerStaff: React.FC = () => {
           <input
             type="text"
             className="owner-search-input"
-            placeholder="Search staff by name, employee code, designation or phone..."
+            placeholder={
+              language === 'mr'
+                ? 'कर्मचाऱ्याचे नाव, कर्मचारी कोड, पद किंवा फोनद्वारे शोधा...'
+                : 'Search staff by name, employee code, designation or phone...'
+            }
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             autoComplete="off"
@@ -189,6 +223,13 @@ export const OwnerStaff: React.FC = () => {
                 <th style={thStyle}>Status</th>
                 <th style={{ ...thStyle, textAlign: 'right' }}>Basic Salary</th>
                 <th style={{ ...thStyle, textAlign: 'center', width: '70px' }}>Action</th>
+                <th style={thStyle}>{language === 'mr' ? 'कर्मचारी सदस्य' : 'Staff Member'}</th>
+                <th style={thStyle}>{language === 'mr' ? 'संपर्क क्रमांक' : 'Contact Number'}</th>
+                <th style={thStyle}>{language === 'mr' ? 'नियुक्त शाखा' : 'Assigned Branch'}</th>
+                <th style={thStyle}>{language === 'mr' ? 'शाखा व्यवस्थापक माहिती' : 'Branch Manager Info'}</th>
+                <th style={thStyle}>{language === 'mr' ? 'पद / हुद्दा' : 'Designation'}</th>
+                <th style={thStyle}>{language === 'mr' ? 'स्थिती' : 'Status'}</th>
+                <th style={{ ...thStyle, textAlign: 'right' }}>{language === 'mr' ? 'मूळ वेतन' : 'Basic Salary'}</th>
               </tr>
             </thead>
             <tbody>
@@ -196,7 +237,9 @@ export const OwnerStaff: React.FC = () => {
                 <tr>
                   <td colSpan={8} style={{ textAlign: 'center', padding: '36px', color: 'var(--text-muted, #64748B)' }}>
                     Loading staff records...
-                  </td>
+                    <td colSpan={7} style={{ textAlign: 'center', padding: '36px', color: 'var(--text-muted, #64748B)' }}>
+                      {language === 'mr' ? 'कर्मचारी नोंदी लोड होत आहेत...' : 'Loading staff records...'}
+                    </td>
                 </tr>
               ) : filteredStaff.length > 0 ? (
                 filteredStaff.map((s) => (
@@ -206,20 +249,26 @@ export const OwnerStaff: React.FC = () => {
                   >
                     <td style={tdStyle}>
                       <div>
-                        <strong style={{ color: 'var(--text-heading, #0F172A)' }}>{s.name}</strong>
-                        <div style={{ fontSize: '0.74rem', color: 'var(--text-muted, #64748B)' }}>Code: {s.staffCode}</div>
+                        <strong style={{ color: 'var(--text-heading, #0F172A)' }}>
+                          {language === 'mr' ? localizeName(s.name) : s.name}
+                        </strong>
+                        <div style={{ fontSize: '0.74rem', color: 'var(--text-muted, #64748B)' }}>
+                          {language === 'mr' ? 'कोड: ' : 'Code: '}{language === 'mr' ? toDevanagari(s.staffCode) : s.staffCode}
+                        </div>
                       </div>
                     </td>
                     <td style={tdStyle}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-body, #334155)' }}>
                         <Phone size={13} color="var(--text-muted, #64748B)" />
-                        <span>{s.phone}</span>
+                        <span>{s.phone ? (language === 'mr' ? toDevanagari(s.phone) : s.phone) : '—'}</span>
                       </div>
                     </td>
                     <td style={tdStyle}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <Building2 size={15} color="#F59E0B" />
-                        <strong style={{ color: 'var(--text-heading, #0F172A)' }}>{s.branchName}</strong>
+                        <strong style={{ color: 'var(--text-heading, #0F172A)' }}>
+                          {language === 'mr' ? localizeName(s.branchName) : s.branchName}
+                        </strong>
                       </div>
                     </td>
                     <td style={tdStyle}>
@@ -227,7 +276,9 @@ export const OwnerStaff: React.FC = () => {
                         {s.managerName ? (
                           <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                             <Shield size={13} color="#38BDF8" />
-                            <span style={{ color: 'var(--text-heading, #1E293B)', fontWeight: 600 }}>{s.managerName}</span>
+                            <span style={{ color: 'var(--text-heading, #1E293B)', fontWeight: 600 }}>
+                              {language === 'mr' ? localizeName(s.managerName) : s.managerName}
+                            </span>
                           </div>
                         ) : (
                           '—'
@@ -248,7 +299,7 @@ export const OwnerStaff: React.FC = () => {
                           color: 'var(--text-heading, #334155)',
                         }}
                       >
-                        {s.designation}
+                        {localizeDesignation(s.designation)}
                       </span>
                     </td>
                     <td style={tdStyle}>
@@ -266,12 +317,20 @@ export const OwnerStaff: React.FC = () => {
                         }}
                       >
                         {s.active ? <UserCheck size={12} /> : <UserX size={12} />}
-                        {s.active ? 'ACTIVE' : 'INACTIVE'}
+                        {s.active ? (language === 'mr' ? 'सक्रिय' : 'ACTIVE') : (language === 'mr' ? 'निष्क्रिय' : 'INACTIVE')}
                       </span>
                     </td>
                     <td style={{ ...tdStyle, textAlign: 'right', fontWeight: 600, color: 'var(--text-heading, #0F172A)' }}>
-                      ₹{s.basicSalary ? Number(s.basicSalary).toLocaleString('en-IN') : '—'}
-                      {s.salaryFrequency && <span style={{ fontSize: '0.72rem', color: 'var(--text-muted, #64748B)' }}>/{s.salaryFrequency}</span>}
+                      ₹{s.basicSalary
+                        ? (language === 'mr'
+                          ? toDevanagari(Number(s.basicSalary).toLocaleString('en-IN'))
+                          : Number(s.basicSalary).toLocaleString('en-IN'))
+                        : '—'}
+                      {s.salaryFrequency && (
+                        <span style={{ fontSize: '0.72rem', color: 'var(--text-muted, #64748B)', marginLeft: '4px' }}>
+                          /{localizeFrequency(s.salaryFrequency)}
+                        </span>
+                      )}
                     </td>
                     <td style={{ ...tdStyle, textAlign: 'center' }}>
                       <button
@@ -312,7 +371,9 @@ export const OwnerStaff: React.FC = () => {
                 <tr>
                   <td colSpan={8} style={{ textAlign: 'center', padding: '36px', color: '#94A3B8' }}>
                     No staff members found matching criteria.
-                  </td>
+                    <td colSpan={7} style={{ textAlign: 'center', padding: '36px', color: '#94A3B8' }}>
+                      {language === 'mr' ? 'शोध निकषांशी जुळणारे कोणतेही कर्मचारी आढळले नाहीत.' : 'No staff members found matching criteria.'}
+                    </td>
                 </tr>
               )}
             </tbody>

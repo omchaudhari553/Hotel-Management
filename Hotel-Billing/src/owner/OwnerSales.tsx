@@ -25,8 +25,10 @@ import {
 } from 'recharts';
 import { ownerService, OwnerSalesData, BranchRecord } from './ownerService';
 import { useToast } from '../context/ToastContext';
+import { useLanguage } from '../context/LanguageContext';
 
 export const OwnerSales: React.FC = () => {
+  const { language, toDevanagari, localizeName } = useLanguage();
   const [salesData, setSalesData] = useState<OwnerSalesData | null>(null);
   const [branches, setBranches] = useState<BranchRecord[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -116,11 +118,12 @@ export const OwnerSales: React.FC = () => {
   };
 
   const formatCurrency = (amt: number | undefined) => {
-    return new Intl.NumberFormat('en-IN', {
+    const formatted = new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
       maximumFractionDigits: 2,
     }).format(Number(amt || 0));
+    return language === 'mr' ? toDevanagari(formatted) : formatted;
   };
 
   const handleExportCSV = () => {
@@ -158,7 +161,7 @@ export const OwnerSales: React.FC = () => {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px' }}>
         <div>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-heading, #0F172A)', margin: 0 }}>
-            Branch-wise Sales Performance
+            {language === 'mr' ? 'शाखानिहाय विक्री कामगिरी' : 'Branch-wise Sales Performance'}
           </h1>
         </div>
 
@@ -166,7 +169,7 @@ export const OwnerSales: React.FC = () => {
           <button
             onClick={fetchSales}
             className="owner-btn-secondary"
-            title="Refresh"
+            title={language === 'mr' ? 'रीफ्रेश करा' : 'Refresh'}
             aria-label="Refresh"
             style={{
               display: 'flex',
@@ -199,7 +202,7 @@ export const OwnerSales: React.FC = () => {
             }}
           >
             <Download size={15} />
-            <span>Export CSV</span>
+            <span>{language === 'mr' ? 'CSV एक्सपोर्ट करा' : 'Export CSV'}</span>
           </button>
         </div>
       </div>
@@ -221,7 +224,7 @@ export const OwnerSales: React.FC = () => {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#B45309', fontWeight: 700, fontSize: '0.86rem' }}>
           <Filter size={16} />
-          <span>Report Scope & Dates:</span>
+          <span>{language === 'mr' ? 'अहवाल व्याप्ती आणि तारखा:' : 'Report Scope & Dates:'}</span>
         </div>
 
         {/* Branch selector */}
@@ -231,10 +234,12 @@ export const OwnerSales: React.FC = () => {
             onChange={(e) => setSelectedBranchId(e.target.value)}
             style={selectStyle}
           >
-            <option value="">All Active Branches Consolidated</option>
+            <option value="">{language === 'mr' ? 'सर्व सक्रिय शाखा एकत्रित' : 'All Active Branches Consolidated'}</option>
             {branches.filter(b => b.status === 'ACTIVE').map((b) => (
               <option key={b.id} value={b.id}>
-                Individual Branch: {b.name} ({b.city || b.code})
+                {language === 'mr'
+                  ? `शाखा: ${localizeName(b.name)} (${b.city ? localizeName(b.city) : toDevanagari(b.code)})`
+                  : `Individual Branch: ${b.name} (${b.city || b.code})`}
               </option>
             ))}
           </select>
@@ -251,12 +256,12 @@ export const OwnerSales: React.FC = () => {
             }}
             style={selectStyle}
           >
-            <option value="this-month">This Month</option>
-            <option value="today">Today</option>
-            <option value="this-week">This Week</option>
-            <option value="this-year">This Year</option>
-            <option value="all-time">All Time (All Records)</option>
-            <option value="custom">Custom Date Range</option>
+            <option value="this-month">{language === 'mr' ? 'हा महिना' : 'This Month'}</option>
+            <option value="today">{language === 'mr' ? 'आज' : 'Today'}</option>
+            <option value="this-week">{language === 'mr' ? 'हा आठवडा' : 'This Week'}</option>
+            <option value="this-year">{language === 'mr' ? 'हे वर्ष' : 'This Year'}</option>
+            <option value="all-time">{language === 'mr' ? 'सर्व काळ (All Time)' : 'All Time (All Records)'}</option>
+            <option value="custom">{language === 'mr' ? 'सानुकूल तारीख श्रेणी' : 'Custom Date Range'}</option>
           </select>
         </div>
 
@@ -294,7 +299,7 @@ export const OwnerSales: React.FC = () => {
         <div className="owner-card" style={cardStyle}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
             <div style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
-              <span style={statLabelStyle} title="Today's Sales">Today's Sales</span>
+              <span style={statLabelStyle} title="Today's Sales">{language === 'mr' ? 'आजची विक्री' : "Today's Sales"}</span>
               <div style={{ ...statValueStyle, color: '#16A34A' }} title={formatCurrency(salesData?.consolidated?.todaySales)}>
                 {formatCurrency(salesData?.consolidated?.todaySales)}
               </div>
@@ -308,7 +313,7 @@ export const OwnerSales: React.FC = () => {
         <div className="owner-card" style={cardStyle}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
             <div style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
-              <span style={statLabelStyle} title="Weekly Sales">Weekly Sales</span>
+              <span style={statLabelStyle} title="Weekly Sales">{language === 'mr' ? 'साप्ताहिक विक्री' : 'Weekly Sales'}</span>
               <div style={{ ...statValueStyle, color: '#2563EB' }} title={formatCurrency(salesData?.consolidated?.weeklySales)}>
                 {formatCurrency(salesData?.consolidated?.weeklySales)}
               </div>
@@ -322,7 +327,7 @@ export const OwnerSales: React.FC = () => {
         <div className="owner-card" style={cardStyle}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
             <div style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
-              <span style={statLabelStyle} title="Monthly Sales">Monthly Sales</span>
+              <span style={statLabelStyle} title="Monthly Sales">{language === 'mr' ? 'मासिक विक्री' : 'Monthly Sales'}</span>
               <div style={{ ...statValueStyle, color: '#0284C7' }} title={formatCurrency(salesData?.consolidated?.monthlySales)}>
                 {formatCurrency(salesData?.consolidated?.monthlySales)}
               </div>
@@ -336,7 +341,7 @@ export const OwnerSales: React.FC = () => {
         <div className="owner-card" style={cardStyle}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
             <div style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
-              <span style={statLabelStyle} title="Yearly Sales">Yearly Sales</span>
+              <span style={statLabelStyle} title="Yearly Sales">{language === 'mr' ? 'वार्षिक विक्री' : 'Yearly Sales'}</span>
               <div style={{ ...statValueStyle, color: '#7C3AED' }} title={formatCurrency(salesData?.consolidated?.yearlySales)}>
                 {formatCurrency(salesData?.consolidated?.yearlySales)}
               </div>
@@ -350,7 +355,7 @@ export const OwnerSales: React.FC = () => {
         <div className="owner-card" style={cardStyle}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
             <div style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
-              <span style={statLabelStyle} title="Total Realized Sales">Total Realized Sales</span>
+              <span style={statLabelStyle} title="Total Realized Sales">{language === 'mr' ? 'एकूण प्रत्यक्ष विक्री' : 'Total Realized Sales'}</span>
               <div style={{ ...statValueStyle, color: 'var(--text-heading, #0F172A)' }} title={formatCurrency(salesData?.consolidated?.totalSales)}>
                 {formatCurrency(salesData?.consolidated?.totalSales)}
               </div>
@@ -375,7 +380,7 @@ export const OwnerSales: React.FC = () => {
       >
         <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-slate, #E2E8F0)' }}>
           <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-heading, #0F172A)', margin: 0 }}>
-            Branch Breakdown Table
+            {language === 'mr' ? 'शाखा तपशील तक्ता' : 'Branch Breakdown Table'}
           </h2>
         </div>
 
@@ -383,14 +388,14 @@ export const OwnerSales: React.FC = () => {
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.86rem' }}>
             <thead>
               <tr style={{ backgroundColor: 'var(--bg-subtle, #F8FAFC)', borderBottom: '1px solid var(--border-slate, #E2E8F0)', color: '#475569' }}>
-                <th style={thStyle}>Branch Name</th>
-                <th style={thStyle}>City</th>
-                <th style={{ ...thStyle, textAlign: 'right' }}>Today's Sales</th>
-                <th style={{ ...thStyle, textAlign: 'right' }}>Weekly Sales</th>
-                <th style={{ ...thStyle, textAlign: 'right' }}>Monthly Sales</th>
-                <th style={{ ...thStyle, textAlign: 'right' }}>Yearly Sales</th>
-                <th style={{ ...thStyle, textAlign: 'right' }}>Total Sales</th>
-                <th style={{ ...thStyle, textAlign: 'center' }}>Invoices</th>
+                <th style={thStyle}>{language === 'mr' ? 'शाखेचे नाव' : 'Branch Name'}</th>
+                <th style={thStyle}>{language === 'mr' ? 'शहर' : 'City'}</th>
+                <th style={{ ...thStyle, textAlign: 'right' }}>{language === 'mr' ? 'आजची विक्री' : "Today's Sales"}</th>
+                <th style={{ ...thStyle, textAlign: 'right' }}>{language === 'mr' ? 'साप्ताहिक विक्री' : 'Weekly Sales'}</th>
+                <th style={{ ...thStyle, textAlign: 'right' }}>{language === 'mr' ? 'मासिक विक्री' : 'Monthly Sales'}</th>
+                <th style={{ ...thStyle, textAlign: 'right' }}>{language === 'mr' ? 'वार्षिक विक्री' : 'Yearly Sales'}</th>
+                <th style={{ ...thStyle, textAlign: 'right' }}>{language === 'mr' ? 'एकूण विक्री' : 'Total Sales'}</th>
+                <th style={{ ...thStyle, textAlign: 'center' }}>{language === 'mr' ? 'इनव्हॉइसेस' : 'Invoices'}</th>
               </tr>
             </thead>
             <tbody>
@@ -410,12 +415,16 @@ export const OwnerSales: React.FC = () => {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <Building2 size={16} color="#B45309" />
                         <div>
-                          <strong style={{ color: 'var(--text-heading, #0F172A)' }}>{b.branchName}</strong>
-                          <div style={{ fontSize: '0.74rem', color: 'var(--text-muted, #64748B)' }}>{b.code}</div>
+                          <strong style={{ color: 'var(--text-heading, #0F172A)' }}>
+                            {language === 'mr' ? localizeName(b.branchName) : b.branchName}
+                          </strong>
+                          <div style={{ fontSize: '0.74rem', color: 'var(--text-muted, #64748B)' }}>
+                            {language === 'mr' ? toDevanagari(b.code) : b.code}
+                          </div>
                         </div>
                       </div>
                     </td>
-                    <td style={tdStyle}>{b.city || '—'}</td>
+                    <td style={tdStyle}>{b.city ? (language === 'mr' ? localizeName(b.city) : b.city) : '—'}</td>
                     <td style={{ ...tdStyle, textAlign: 'right', fontWeight: 600, color: '#16A34A' }}>
                       {formatCurrency(b.todaySales)}
                     </td>
@@ -432,14 +441,14 @@ export const OwnerSales: React.FC = () => {
                       {formatCurrency(b.totalSales)}
                     </td>
                     <td style={{ ...tdStyle, textAlign: 'center', fontWeight: 600, color: '#475569' }}>
-                      {b.invoiceCount}
+                      {language === 'mr' ? toDevanagari(b.invoiceCount) : b.invoiceCount}
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
                   <td colSpan={8} style={{ textAlign: 'center', padding: '36px', color: '#94A3B8' }}>
-                    No sales recorded for the selected filter period.
+                    {language === 'mr' ? 'निवडलेल्या कालावधीसाठी कोणतीही विक्री नोंदवलेली नाही.' : 'No sales recorded for the selected filter period.'}
                   </td>
                 </tr>
               )}
@@ -461,22 +470,37 @@ export const OwnerSales: React.FC = () => {
           }}
         >
           <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-heading, #0F172A)', margin: '0 0 14px' }}>
-            Daily Sales Timeline
+            {language === 'mr' ? 'दैनंदिन विक्री कालमर्यादा' : 'Daily Sales Timeline'}
           </h2>
           <div style={{ width: '100%', height: 260 }}>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={salesData.dailyBreakdown} margin={{ top: 10, right: 30, left: 20, bottom: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
-                <XAxis dataKey="date" tick={{ fill: '#475569', fontSize: 11 }} />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fill: '#475569', fontSize: 11 }}
+                  tickFormatter={(d) => (language === 'mr' ? toDevanagari(d) : d)}
+                />
                 <YAxis
                   tick={{ fill: '#475569', fontSize: 11 }}
-                  tickFormatter={(val) => `₹${val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val}`}
+                  tickFormatter={(val) => {
+                    const s = `₹${val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val}`;
+                    return language === 'mr' ? toDevanagari(s) : s;
+                  }}
                 />
                 <Tooltip
                   formatter={(val: any) => formatCurrency(Number(val))}
                   contentStyle={{ backgroundColor: '#1E293B', color: '#FFFFFF', borderRadius: '8px' }}
                 />
-                <Line type="monotone" dataKey="sales" name="Daily Sales" stroke="#B45309" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                <Line
+                  type="monotone"
+                  dataKey="sales"
+                  name={language === 'mr' ? 'दैनंदिन विक्री' : 'Daily Sales'}
+                  stroke="#B45309"
+                  strokeWidth={3}
+                  dot={{ r: 4 }}
+                  activeDot={{ r: 6 }}
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>

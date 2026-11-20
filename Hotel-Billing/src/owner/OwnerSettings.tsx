@@ -57,7 +57,7 @@ export const OwnerSettings: React.FC = () => {
 
   const { showToast } = useToast();
   const { theme, setTheme } = useTheme();
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, toDevanagari, localizeName } = useLanguage();
 
   const loadData = async () => {
     try {
@@ -377,7 +377,7 @@ export const OwnerSettings: React.FC = () => {
                 •{' '}
                 <span className="owner-trial-days">
                   {licenceInfo?.daysRemaining != null
-                    ? (language === 'mr' ? `${licenceInfo.daysRemaining} दिवस शिल्लक` : `${licenceInfo.daysRemaining} Days Remaining`)
+                    ? (language === 'mr' ? `${toDevanagari(licenceInfo.daysRemaining)} दिवस शिल्लक` : `${licenceInfo.daysRemaining} Days Remaining`)
                     : (language === 'mr' ? 'पूर्ण प्रवेश' : 'Full Access')}
                 </span>
               </p>
@@ -459,8 +459,8 @@ export const OwnerSettings: React.FC = () => {
                     padding: '6px 12px',
                     borderRadius: '6px',
                     border: isSelected ? '1px solid #D97706' : '1px solid var(--border-slate, #CBD5E1)',
-                    backgroundColor: isSelected ? 'rgba(245, 158, 11, 0.12)' : 'var(--card-white, #FFFFFF)',
-                    color: isSelected ? '#B45309' : 'var(--text-body, #475569)',
+                    backgroundColor: isSelected ? 'rgba(245, 158, 11, 0.18)' : 'transparent',
+                    color: isSelected ? '#D97706' : 'var(--text-body, #475569)',
                     fontSize: '0.82rem',
                     fontWeight: isSelected ? 700 : 500,
                     cursor: 'pointer',
@@ -502,8 +502,8 @@ export const OwnerSettings: React.FC = () => {
                     padding: '6px 14px',
                     borderRadius: '6px',
                     border: isSelected ? '1px solid #D97706' : '1px solid var(--border-slate, #CBD5E1)',
-                    backgroundColor: isSelected ? 'rgba(245, 158, 11, 0.12)' : 'var(--card-white, #FFFFFF)',
-                    color: isSelected ? '#B45309' : 'var(--text-body, #475569)',
+                    backgroundColor: isSelected ? 'rgba(245, 158, 11, 0.18)' : 'transparent',
+                    color: isSelected ? '#D97706' : 'var(--text-body, #475569)',
                     fontSize: '0.82rem',
                     fontWeight: isSelected ? 700 : 500,
                     cursor: 'pointer',
@@ -854,9 +854,9 @@ export const OwnerSettings: React.FC = () => {
       <div
         className="owner-card"
         style={{
-          backgroundColor: 'var(--card-white, #FFFFFF)',
+          backgroundColor: 'var(--card-white)',
           borderRadius: '12px',
-          border: '1px solid var(--border-slate, #E2E8F0)',
+          border: '1px solid var(--border-slate)',
           padding: '24px 28px',
           boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
           marginBottom: '28px',
@@ -979,7 +979,7 @@ export const OwnerSettings: React.FC = () => {
           </div>
         )}
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
           <button
             type="button"
             disabled={backupSending}
@@ -989,19 +989,25 @@ export const OwnerSettings: React.FC = () => {
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              width: '40px',
-              height: '40px',
+              gap: '8px',
+              padding: '9px 18px',
               backgroundColor: backupSending ? '#94A3B8' : '#3B82F6',
               color: '#FFFFFF',
               border: 'none',
               borderRadius: '8px',
+              fontSize: '0.84rem',
+              fontWeight: 700,
               cursor: backupSending ? 'not-allowed' : 'pointer',
               boxShadow: '0 2px 4px rgba(59, 130, 246, 0.25)',
               transition: 'background-color 0.2s ease',
             }}
           >
-            <RefreshCw size={18} color="#FFFFFF" style={backupSending ? { animation: 'spin 1s linear infinite' } : undefined} />
+            <RefreshCw size={16} color="#FFFFFF" style={backupSending ? { animation: 'spin 1s linear infinite' } : undefined} />
+            <span>
+              {language === 'mr'
+                ? (backupSending ? 'ईमेल पाठवत आहे...' : 'बॅकअप ईमेल आता पाठवा')
+                : (backupSending ? 'Sending Backup Email...' : 'Send Daily Backup to Email Now')}
+            </span>
           </button>
 
           <button
@@ -1012,13 +1018,14 @@ export const OwnerSettings: React.FC = () => {
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              width: '40px',
-              height: '40px',
-              backgroundColor: 'var(--card-white, #FFFFFF)',
+              gap: '8px',
+              padding: '9px 16px',
+              backgroundColor: 'var(--bg-subtle, #F1F5F9)',
               color: 'var(--text-heading, #0F172A)',
               border: '1px solid var(--border-slate, #CBD5E1)',
               borderRadius: '8px',
+              fontSize: '0.84rem',
+              fontWeight: 700,
               cursor: 'pointer',
               transition: 'all 0.2s ease',
             }}
@@ -1031,7 +1038,8 @@ export const OwnerSettings: React.FC = () => {
               e.currentTarget.style.color = 'var(--text-heading, #0F172A)';
             }}
           >
-            <Download size={18} color="currentColor" />
+            <Download size={16} color="currentColor" />
+            <span>{language === 'mr' ? 'बॅकअप डाउनलोड (.json)' : 'Download Backup (.json)'}</span>
           </button>
 
           <button
@@ -1042,13 +1050,14 @@ export const OwnerSettings: React.FC = () => {
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              width: '40px',
-              height: '40px',
-              backgroundColor: 'var(--card-white, #FFFFFF)',
+              gap: '8px',
+              padding: '9px 16px',
+              backgroundColor: 'var(--bg-subtle, #F1F5F9)',
               color: 'var(--text-heading, #0F172A)',
               border: '1px solid var(--border-slate, #CBD5E1)',
               borderRadius: '8px',
+              fontSize: '0.84rem',
+              fontWeight: 700,
               cursor: 'pointer',
               transition: 'all 0.2s ease',
             }}
@@ -1061,7 +1070,8 @@ export const OwnerSettings: React.FC = () => {
               e.currentTarget.style.color = 'var(--text-heading, #0F172A)';
             }}
           >
-            <FileText size={18} color="currentColor" />
+            <FileText size={16} color="currentColor" />
+            <span>{language === 'mr' ? 'PDF अहवाल डाउनलोड (.pdf)' : 'Download PDF Report (.pdf)'}</span>
           </button>
         </div>
       </div>
