@@ -215,14 +215,6 @@ export const OwnerStaff: React.FC = () => {
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.86rem' }}>
             <thead>
               <tr style={{ backgroundColor: 'var(--bg-subtle, #F8FAFC)', borderBottom: '1px solid var(--border-slate, #E2E8F0)', color: '#475569' }}>
-                <th style={thStyle}>Staff Member</th>
-                <th style={thStyle}>Contact Number</th>
-                <th style={thStyle}>Assigned Branch</th>
-                <th style={thStyle}>Branch Manager Info</th>
-                <th style={thStyle}>Designation</th>
-                <th style={thStyle}>Status</th>
-                <th style={{ ...thStyle, textAlign: 'right' }}>Basic Salary</th>
-                <th style={{ ...thStyle, textAlign: 'center', width: '70px' }}>Action</th>
                 <th style={thStyle}>{language === 'mr' ? 'कर्मचारी सदस्य' : 'Staff Member'}</th>
                 <th style={thStyle}>{language === 'mr' ? 'संपर्क क्रमांक' : 'Contact Number'}</th>
                 <th style={thStyle}>{language === 'mr' ? 'नियुक्त शाखा' : 'Assigned Branch'}</th>
@@ -230,16 +222,15 @@ export const OwnerStaff: React.FC = () => {
                 <th style={thStyle}>{language === 'mr' ? 'पद / हुद्दा' : 'Designation'}</th>
                 <th style={thStyle}>{language === 'mr' ? 'स्थिती' : 'Status'}</th>
                 <th style={{ ...thStyle, textAlign: 'right' }}>{language === 'mr' ? 'मूळ वेतन' : 'Basic Salary'}</th>
+                <th style={{ ...thStyle, textAlign: 'center', width: '70px' }}>{language === 'mr' ? 'कृती' : 'Action'}</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
                   <td colSpan={8} style={{ textAlign: 'center', padding: '36px', color: 'var(--text-muted, #64748B)' }}>
-                    Loading staff records...
-                    <td colSpan={7} style={{ textAlign: 'center', padding: '36px', color: 'var(--text-muted, #64748B)' }}>
-                      {language === 'mr' ? 'कर्मचारी नोंदी लोड होत आहेत...' : 'Loading staff records...'}
-                    </td>
+                    {language === 'mr' ? 'कर्मचारी नोंदी लोड होत आहेत...' : 'Loading staff records...'}
+                  </td>
                 </tr>
               ) : filteredStaff.length > 0 ? (
                 filteredStaff.map((s) => (
@@ -370,10 +361,8 @@ export const OwnerStaff: React.FC = () => {
               ) : (
                 <tr>
                   <td colSpan={8} style={{ textAlign: 'center', padding: '36px', color: '#94A3B8' }}>
-                    No staff members found matching criteria.
-                    <td colSpan={7} style={{ textAlign: 'center', padding: '36px', color: '#94A3B8' }}>
-                      {language === 'mr' ? 'शोध निकषांशी जुळणारे कोणतेही कर्मचारी आढळले नाहीत.' : 'No staff members found matching criteria.'}
-                    </td>
+                    {language === 'mr' ? 'शोध निकषांशी जुळणारे कोणतेही कर्मचारी आढळले नाहीत.' : 'No staff members found matching criteria.'}
+                  </td>
                 </tr>
               )}
             </tbody>

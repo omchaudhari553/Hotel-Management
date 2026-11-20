@@ -242,15 +242,11 @@ export const OwnerLayout: React.FC = () => {
                       lineHeight: 1.2,
                     }}
                   >
-                    {user?.fullName || user?.username || 'Hotel Owner'}
-                    <div className="owner-profile-meta" style={{ display: 'flex', flexDirection: 'column' }}>
-                      <span style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-heading, #1E293B)', lineHeight: 1.2 }}>
-                        {language === 'mr' ? localizeName(user?.fullName || user?.username || 'Hotel Owner') : (user?.fullName || user?.username || 'Hotel Owner')}
-                      </span>
-                      <span style={{ fontSize: '0.70rem', color: 'var(--text-muted, #64748B)' }}>
-                        {language === 'mr' ? 'व्यवसाय मालक' : 'Business Owner'}
-                      </span>
-                    </div>
+                    {language === 'mr' ? localizeName(user?.fullName || user?.username || 'Hotel Owner') : (user?.fullName || user?.username || 'Hotel Owner')}
+                  </span>
+                  <span style={{ fontSize: '0.70rem', color: 'var(--text-muted, #64748B)' }}>
+                    {language === 'mr' ? 'व्यवसाय मालक' : 'Business Owner'}
+                  </span>
                 </div>
 
                 <button
@@ -291,6 +287,7 @@ export const OwnerLayout: React.FC = () => {
                 </button>
               </div>
             </div>
+          </div>
         </header>
 
         {/* Content View */}
