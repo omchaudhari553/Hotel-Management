@@ -16,8 +16,10 @@ import { ownerService, BranchRecord } from './ownerService';
 import { expenseService } from '../services/expenseService';
 import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 export const OwnerReports: React.FC = () => {
+  const { language, toDevanagari, localizeName } = useLanguage();
   const [reportType, setReportType] = useState<'HOTEL' | 'GST' | 'EXPENSES'>('HOTEL');
   const [selectedBranchId, setSelectedBranchId] = useState<string>('');
   const [period, setPeriod] = useState<string>('this-month');
@@ -250,11 +252,12 @@ export const OwnerReports: React.FC = () => {
   };
 
   const formatCurrency = (amt: number | undefined) => {
-    return new Intl.NumberFormat('en-IN', {
+    const formatted = new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
       maximumFractionDigits: 2,
     }).format(Number(amt || 0));
+    return language === 'mr' ? toDevanagari(formatted) : formatted;
   };
 
   const handlePrint = () => {
@@ -1036,7 +1039,7 @@ export const OwnerReports: React.FC = () => {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px' }}>
         <div>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-heading, #0F172A)', margin: 0 }}>
-            Executive Reports & Financial Statements
+            {language === 'mr' ? 'कार्यकारी अहवाल आणि आर्थिक विवरणपत्रे' : 'Executive Reports & Financial Statements'}
           </h1>
         </div>
 
@@ -1045,7 +1048,7 @@ export const OwnerReports: React.FC = () => {
             onClick={() => window.location.reload()}
             disabled={loading || refreshing}
             className="owner-btn-secondary"
-            title="Refresh current report"
+            title={language === 'mr' ? 'अहवाल रीफ्रेश करा' : 'Refresh current report'}
             aria-label="Refresh"
             style={{
               display: 'flex',
@@ -1086,7 +1089,7 @@ export const OwnerReports: React.FC = () => {
             }}
           >
             <Printer size={15} />
-            <span>Print Report</span>
+            <span>{language === 'mr' ? 'अहवाल प्रिंट करा' : 'Print Report'}</span>
           </button>
           <button
             onClick={handleExportCSV}
@@ -1108,7 +1111,7 @@ export const OwnerReports: React.FC = () => {
             }}
           >
             <Download size={15} />
-            <span>Export CSV</span>
+            <span>{language === 'mr' ? 'CSV एक्सपोर्ट करा' : 'Export CSV'}</span>
           </button>
         </div>
       </div>
@@ -1133,7 +1136,7 @@ export const OwnerReports: React.FC = () => {
           }}
         >
           <FileSpreadsheet size={18} />
-          <span>Hotel Operational Report</span>
+          <span>{language === 'mr' ? 'हॉटेल कामकाज अहवाल' : 'Hotel Operational Report'}</span>
         </button>
 
         <button
@@ -1154,7 +1157,7 @@ export const OwnerReports: React.FC = () => {
           }}
         >
           <Percent size={18} />
-          <span>GST Tax Breakdown Report</span>
+          <span>{language === 'mr' ? 'जीएसटी कर तपशील अहवाल' : 'GST Tax Breakdown Report'}</span>
         </button>
 
         <button
@@ -1175,7 +1178,7 @@ export const OwnerReports: React.FC = () => {
           }}
         >
           <ReceiptIndianRupee size={18} />
-          <span>Branch Expenses Report</span>
+          <span>{language === 'mr' ? 'शाखा खर्च अहवाल' : 'Branch Expenses Report'}</span>
         </button>
       </div>
 
@@ -1195,7 +1198,7 @@ export const OwnerReports: React.FC = () => {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#B45309', fontWeight: 700, fontSize: '0.86rem' }}>
           <Filter size={16} />
-          <span>Report Scope & Dates:</span>
+          <span>{language === 'mr' ? 'अहवाल व्याप्ती आणि तारखा:' : 'Report Scope & Dates:'}</span>
         </div>
 
         <div>
@@ -1204,10 +1207,10 @@ export const OwnerReports: React.FC = () => {
             onChange={(e) => setSelectedBranchId(e.target.value)}
             style={selectStyle}
           >
-            <option value="">All Active Branches Consolidated</option>
+            <option value="">{language === 'mr' ? 'सर्व सक्रिय शाखा एकत्रित' : 'All Active Branches Consolidated'}</option>
             {branches.filter(b => b.status === 'ACTIVE').map((b) => (
               <option key={b.id} value={b.id}>
-                Individual Branch: {b.name} ({b.city || b.code})
+                {language === 'mr' ? 'वैयक्तिक शाखा: ' : 'Individual Branch: '}{b.name} ({b.city || b.code})
               </option>
             ))}
           </select>
@@ -1223,12 +1226,12 @@ export const OwnerReports: React.FC = () => {
             }}
             style={selectStyle}
           >
-            <option value="this-month">This Month</option>
-            <option value="today">Today</option>
-            <option value="this-week">This Week</option>
-            <option value="this-year">This Year</option>
-            <option value="all-time">All Time (All Records)</option>
-            <option value="custom">Custom Date Range</option>
+            <option value="this-month">{language === 'mr' ? 'हा महिना' : 'This Month'}</option>
+            <option value="today">{language === 'mr' ? 'आज' : 'Today'}</option>
+            <option value="this-week">{language === 'mr' ? 'हा आठवडा' : 'This Week'}</option>
+            <option value="this-year">{language === 'mr' ? 'हे वर्ष' : 'This Year'}</option>
+            <option value="all-time">{language === 'mr' ? 'सर्व काळ (सर्व रेकॉर्ड्स)' : 'All Time (All Records)'}</option>
+            <option value="custom">{language === 'mr' ? 'सानुकूल तारीख श्रेणी' : 'Custom Date Range'}</option>
           </select>
         </div>
 
@@ -1241,7 +1244,8 @@ export const OwnerReports: React.FC = () => {
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
                 style={selectStyle}
-                placeholder="Start Date"
+                placeholder={language === 'mr' ? 'प्रारंभ तारीख' : 'Start Date'}
+                title={language === 'mr' ? 'प्रारंभ तारीख' : 'Start Date'}
               />
             </div>
             <div>
@@ -1251,7 +1255,8 @@ export const OwnerReports: React.FC = () => {
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 style={selectStyle}
-                placeholder="End Date"
+                placeholder={language === 'mr' ? 'शेवट तारीख' : 'End Date'}
+                title={language === 'mr' ? 'शेवट तारीख' : 'End Date'}
               />
             </div>
           </>
@@ -1283,7 +1288,7 @@ export const OwnerReports: React.FC = () => {
           onClick={() => window.location.reload()}
           disabled={loading || refreshing}
           className="owner-btn-secondary"
-          title="Refresh report data"
+          title={language === 'mr' ? 'अहवाल डेटा रीफ्रेश करा' : 'Refresh report data'}
           aria-label="Refresh"
           style={{
             marginLeft: 'auto',
@@ -1314,35 +1319,35 @@ export const OwnerReports: React.FC = () => {
       {reportType === 'HOTEL' && (
         <div className="owner-reports-kpi-grid-5">
           <div className="owner-card" style={kpiBoxStyle}>
-            <span style={kpiLabelStyle}>Total Gross Revenue</span>
+            <span style={kpiLabelStyle}>{language === 'mr' ? 'एकूण एकूण महसूल (Gross)' : 'Total Gross Revenue'}</span>
             <div style={{ ...kpiValStyle, color: 'var(--text-heading, #0F172A)' }}>
               {formatCurrency(reportData?.totalSales)}
             </div>
           </div>
 
           <div className="owner-card" style={kpiBoxStyle}>
-            <span style={kpiLabelStyle}>Payments Settled</span>
+            <span style={kpiLabelStyle}>{language === 'mr' ? 'प्राप्त पेमेंट्स' : 'Payments Settled'}</span>
             <div style={{ ...kpiValStyle, color: '#16A34A' }}>
               {formatCurrency(reportData?.collectedPayments)}
             </div>
           </div>
 
           <div className="owner-card" style={kpiBoxStyle}>
-            <span style={kpiLabelStyle}>Operational Expenses</span>
+            <span style={kpiLabelStyle}>{language === 'mr' ? 'कामकाज खर्च' : 'Operational Expenses'}</span>
             <div style={{ ...kpiValStyle, color: '#DC2626' }}>
               {formatCurrency(reportData?.totalExpenses)}
             </div>
           </div>
 
           <div className="owner-card" style={kpiBoxStyle}>
-            <span style={kpiLabelStyle}>Stock Purchases</span>
+            <span style={kpiLabelStyle}>{language === 'mr' ? 'साठा खरेदी' : 'Stock Purchases'}</span>
             <div style={{ ...kpiValStyle, color: '#DC2626' }}>
               {formatCurrency(reportData?.netPurchases)}
             </div>
           </div>
 
           <div className="owner-card" style={kpiBoxStyle}>
-            <span style={kpiLabelStyle}>Estimated Net Profit</span>
+            <span style={kpiLabelStyle}>{language === 'mr' ? 'अंदाजे निव्वळ नफा (Net)' : 'Estimated Net Profit'}</span>
             <div style={{ ...kpiValStyle, color: (reportData?.netProfit || 0) >= 0 ? '#15803D' : '#B91C1C' }}>
               {formatCurrency(reportData?.netProfit)}
             </div>
@@ -1353,28 +1358,28 @@ export const OwnerReports: React.FC = () => {
       {reportType === 'GST' && (
         <div className="owner-reports-kpi-grid-4">
           <div className="owner-card" style={kpiBoxStyle}>
-            <span style={kpiLabelStyle}>Taxable Turnover</span>
+            <span style={kpiLabelStyle}>{language === 'mr' ? 'करपात्र उलाढाल' : 'Taxable Turnover'}</span>
             <div style={{ ...kpiValStyle, color: '#0F766E' }}>
               {formatCurrency(reportData?.taxableSales)}
             </div>
           </div>
 
           <div className="owner-card" style={kpiBoxStyle}>
-            <span style={kpiLabelStyle}>Central GST (CGST @ 2.5%)</span>
+            <span style={kpiLabelStyle}>{language === 'mr' ? 'केंद्रीय जीएसटी (CGST @ २.५%)' : 'Central GST (CGST @ 2.5%)'}</span>
             <div style={{ ...kpiValStyle, color: '#2563EB' }}>
               {formatCurrency(reportData?.salesCgst)}
             </div>
           </div>
 
           <div className="owner-card" style={kpiBoxStyle}>
-            <span style={kpiLabelStyle}>State GST (SGST @ 2.5%)</span>
+            <span style={kpiLabelStyle}>{language === 'mr' ? 'राज्य जीएसटी (SGST @ २.५%)' : 'State GST (SGST @ 2.5%)'}</span>
             <div style={{ ...kpiValStyle, color: '#15803D' }}>
               {formatCurrency(reportData?.salesSgst)}
             </div>
           </div>
 
           <div className="owner-card" style={kpiBoxStyle}>
-            <span style={kpiLabelStyle}>Total GST Payable</span>
+            <span style={kpiLabelStyle}>{language === 'mr' ? 'एकूण देय जीएसटी' : 'Total GST Payable'}</span>
             <div style={{ ...kpiValStyle, color: '#B45309' }}>
               {formatCurrency((reportData?.salesCgst || 0) + (reportData?.salesSgst || 0) + (reportData?.salesIgst || 0))}
             </div>
@@ -1385,21 +1390,27 @@ export const OwnerReports: React.FC = () => {
       {reportType === 'EXPENSES' && (
         <div className="owner-reports-kpi-grid-4">
           <div className="owner-card" style={kpiBoxStyle}>
-            <span style={kpiLabelStyle} title="Total Consolidated Expenses">Total Consolidated Expenses</span>
+            <span style={kpiLabelStyle} title={language === 'mr' ? 'एकूण एकत्रित खर्च' : 'Total Consolidated Expenses'}>
+              {language === 'mr' ? 'एकूण एकत्रित खर्च' : 'Total Consolidated Expenses'}
+            </span>
             <div style={{ ...kpiValStyle, color: '#DC2626' }} title={formatCurrency(totalExp)}>
               {formatCurrency(totalExp)}
             </div>
           </div>
 
           <div className="owner-card" style={kpiBoxStyle}>
-            <span style={kpiLabelStyle} title="Expense Records Count">Expense Records Count</span>
+            <span style={kpiLabelStyle} title={language === 'mr' ? 'खर्च नोंदी संख्या' : 'Expense Records Count'}>
+              {language === 'mr' ? 'खर्च नोंदी संख्या' : 'Expense Records Count'}
+            </span>
             <div style={{ ...kpiValStyle, color: '#2563EB' }} title={`${expensesList.length} Entries`}>
-              {expensesList.length} Entries
+              {expensesList.length} {language === 'mr' ? 'नोंदी' : 'Entries'}
             </div>
           </div>
 
           <div className="owner-card" style={kpiBoxStyle}>
-            <span style={kpiLabelStyle} title="Top Spending Branch">Top Spending Branch</span>
+            <span style={kpiLabelStyle} title={language === 'mr' ? 'सर्वाधिक खर्च करणारी शाखा' : 'Top Spending Branch'}>
+              {language === 'mr' ? 'सर्वाधिक खर्च करणारी शाखा' : 'Top Spending Branch'}
+            </span>
             <div
               style={{ ...kpiValStyle, color: '#7C3AED' }}
               title={
@@ -1415,7 +1426,9 @@ export const OwnerReports: React.FC = () => {
           </div>
 
           <div className="owner-card" style={kpiBoxStyle}>
-            <span style={kpiLabelStyle} title="Top Expense Category">Top Expense Category</span>
+            <span style={kpiLabelStyle} title={language === 'mr' ? 'प्रमुख खर्च वर्ग' : 'Top Expense Category'}>
+              {language === 'mr' ? 'प्रमुख खर्च वर्ग' : 'Top Expense Category'}
+            </span>
             <div
               style={{ ...kpiValStyle, color: '#D97706' }}
               title={reportData?.categoryExpensesBreakdown?.[0]?.category || 'General'}
@@ -1444,10 +1457,10 @@ export const OwnerReports: React.FC = () => {
               <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-slate, #E2E8F0)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-heading, #0F172A)', margin: 0 }}>
-                    Branch-Wise Expenses Distribution Summary
+                    {language === 'mr' ? 'शाखानिहाय खर्च वाटप सारांश' : 'Branch-Wise Expenses Distribution Summary'}
                   </h2>
                   <div style={{ fontSize: '0.78rem', color: 'var(--text-muted, #64748B)', marginTop: '2px' }}>
-                    Multi-branch expenditure totals and proportional breakdown
+                    {language === 'mr' ? 'मल्टी-ब्राँच खर्च एकूण आणि प्रमाणबद्ध विभाजन' : 'Multi-branch expenditure totals and proportional breakdown'}
                   </div>
                 </div>
               </div>
@@ -1456,12 +1469,12 @@ export const OwnerReports: React.FC = () => {
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.88rem' }}>
                   <thead>
                     <tr style={{ backgroundColor: 'var(--bg-subtle, #F8FAFC)', borderBottom: '1px solid var(--border-slate, #E2E8F0)' }}>
-                      <th style={{ padding: '10px 16px', textAlign: 'left', fontWeight: 700, color: 'var(--text-heading, #1E293B)' }}>Branch</th>
-                      <th style={{ padding: '10px 16px', textAlign: 'left', fontWeight: 700, color: 'var(--text-heading, #1E293B)' }}>Code</th>
-                      <th style={{ padding: '10px 16px', textAlign: 'left', fontWeight: 700, color: 'var(--text-heading, #1E293B)' }}>City</th>
-                      <th style={{ padding: '10px 16px', textAlign: 'center', fontWeight: 700, color: 'var(--text-heading, #1E293B)' }}>Transactions</th>
-                      <th style={{ padding: '10px 16px', textAlign: 'right', fontWeight: 700, color: 'var(--text-heading, #1E293B)' }}>Total Expenses (₹)</th>
-                      <th style={{ padding: '10px 16px', textAlign: 'right', fontWeight: 700, color: 'var(--text-heading, #1E293B)' }}>Share (%)</th>
+                      <th style={{ padding: '10px 16px', textAlign: 'left', fontWeight: 700, color: 'var(--text-heading, #1E293B)' }}>{language === 'mr' ? 'शाखा' : 'Branch'}</th>
+                      <th style={{ padding: '10px 16px', textAlign: 'left', fontWeight: 700, color: 'var(--text-heading, #1E293B)' }}>{language === 'mr' ? 'कोड' : 'Code'}</th>
+                      <th style={{ padding: '10px 16px', textAlign: 'left', fontWeight: 700, color: 'var(--text-heading, #1E293B)' }}>{language === 'mr' ? 'शहर' : 'City'}</th>
+                      <th style={{ padding: '10px 16px', textAlign: 'center', fontWeight: 700, color: 'var(--text-heading, #1E293B)' }}>{language === 'mr' ? 'व्यवहार' : 'Transactions'}</th>
+                      <th style={{ padding: '10px 16px', textAlign: 'right', fontWeight: 700, color: 'var(--text-heading, #1E293B)' }}>{language === 'mr' ? 'एकूण खर्च (₹)' : 'Total Expenses (₹)'}</th>
+                      <th style={{ padding: '10px 16px', textAlign: 'right', fontWeight: 700, color: 'var(--text-heading, #1E293B)' }}>{language === 'mr' ? 'वाटा (%)' : 'Share (%)'}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1473,17 +1486,21 @@ export const OwnerReports: React.FC = () => {
                           <td style={{ padding: '12px 16px', fontWeight: 700, color: 'var(--text-heading, #0F172A)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                               <Building2 size={16} color="#B45309" />
-                              <span>{b.branchName}</span>
+                              <span>{language === 'mr' ? localizeName(b.branchName) : b.branchName}</span>
                             </div>
                           </td>
                           <td style={{ padding: '12px 16px', color: 'var(--text-muted, #64748B)' }}>{b.branchCode || '—'}</td>
-                          <td style={{ padding: '12px 16px', color: 'var(--text-muted, #64748B)' }}>{b.branchCity || '—'}</td>
-                          <td style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600 }}>{b.expenseCount || 0}</td>
+                          <td style={{ padding: '12px 16px', color: 'var(--text-muted, #64748B)' }}>
+                            {language === 'mr' ? localizeName(b.branchCity || '—') : (b.branchCity || '—')}
+                          </td>
+                          <td style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600 }}>
+                            {language === 'mr' ? toDevanagari(b.expenseCount || 0) : (b.expenseCount || 0)}
+                          </td>
                           <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 800, color: '#DC2626' }}>
                             {formatCurrency(bAmt)}
                           </td>
                           <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 700, color: 'var(--text-heading, #0F172A)' }}>
-                            {pct}%
+                            {language === 'mr' ? toDevanagari(pct) : pct}%
                           </td>
                         </tr>
                       );
@@ -1492,7 +1509,7 @@ export const OwnerReports: React.FC = () => {
                   <tfoot>
                     <tr style={{ backgroundColor: 'var(--bg-subtle, #F8FAFC)', borderTop: '2px solid var(--border-slate, #CBD5E1)', fontWeight: 800 }}>
                       <td colSpan={4} style={{ padding: '14px 16px', textAlign: 'right', color: 'var(--text-heading, #0F172A)' }}>
-                        All Branches Consolidated Total:
+                        {language === 'mr' ? 'सर्व शाखा एकत्रित एकूण:' : 'All Branches Consolidated Total:'}
                       </td>
                       <td style={{ padding: '14px 16px', textAlign: 'right', color: '#DC2626', fontSize: '1.05rem' }}>
                         {formatCurrency(totalExp)}
@@ -1519,10 +1536,10 @@ export const OwnerReports: React.FC = () => {
             <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-slate, #E2E8F0)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
               <div>
                 <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-heading, #0F172A)', margin: 0 }}>
-                  Itemized All Branches Expenses Ledger
+                  {language === 'mr' ? 'सर्व शाखांचा तपशीलवार खर्च लेजर' : 'Itemized All Branches Expenses Ledger'}
                 </h2>
                 <div style={{ fontSize: '0.78rem', color: 'var(--text-muted, #64748B)', marginTop: '2px' }}>
-                  Scope: <strong>{reportData?.filterBranchName || 'All Branches Consolidated'}</strong> • Total: <strong>{expensesList.length} Entries</strong>
+                  {language === 'mr' ? 'व्याप्ती: ' : 'Scope: '}<strong>{reportData?.filterBranchName ? (reportData.filterBranchName.includes('All') ? (language === 'mr' ? 'सर्व शाखा एकत्रित' : reportData.filterBranchName) : (language === 'mr' ? localizeName(reportData.filterBranchName) : reportData.filterBranchName)) : (language === 'mr' ? 'सर्व शाखा एकत्रित' : 'All Branches Consolidated')}</strong> • {language === 'mr' ? 'एकूण: ' : 'Total: '}<strong>{language === 'mr' ? toDevanagari(expensesList.length) : expensesList.length} {language === 'mr' ? 'नोंदी' : 'Entries'}</strong>
                 </div>
               </div>
             </div>
@@ -1532,33 +1549,39 @@ export const OwnerReports: React.FC = () => {
                 <thead>
                   <tr style={{ backgroundColor: 'var(--bg-subtle, #F8FAFC)', borderBottom: '1px solid var(--border-slate, #E2E8F0)' }}>
                     <th style={{ padding: '10px 14px', textAlign: 'center', width: '50px', fontWeight: 700 }}>#</th>
-                    <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700 }}>Date</th>
-                    <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700 }}>Branch</th>
-                    <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700 }}>Expense Title / Payee</th>
-                    <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700 }}>Category</th>
-                    <th style={{ padding: '10px 14px', textAlign: 'center', fontWeight: 700 }}>Mode</th>
-                    <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700 }}>Notes / Description</th>
-                    <th style={{ padding: '10px 14px', textAlign: 'right', fontWeight: 700 }}>Amount (₹)</th>
+                    <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700 }}>{language === 'mr' ? 'तारीख' : 'Date'}</th>
+                    <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700 }}>{language === 'mr' ? 'शाखा' : 'Branch'}</th>
+                    <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700 }}>{language === 'mr' ? 'खर्च शीर्षक / प्राप्तकर्ता' : 'Expense Title / Payee'}</th>
+                    <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700 }}>{language === 'mr' ? 'वर्ग' : 'Category'}</th>
+                    <th style={{ padding: '10px 14px', textAlign: 'center', fontWeight: 700 }}>{language === 'mr' ? 'पद्धत' : 'Mode'}</th>
+                    <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700 }}>{language === 'mr' ? 'तपशील / वर्णन' : 'Notes / Description'}</th>
+                    <th style={{ padding: '10px 14px', textAlign: 'right', fontWeight: 700 }}>{language === 'mr' ? 'रक्कम (₹)' : 'Amount (₹)'}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {expensesList.length === 0 ? (
                     <tr>
                       <td colSpan={8} style={{ padding: '36px 16px', textAlign: 'center', color: 'var(--text-muted, #64748B)' }}>
-                        No expense records found for the selected branch and date range.
+                        {language === 'mr'
+                          ? 'निवडलेल्या शाखेसाठी आणि तारीख श्रेणीसाठी कोणत्याही खर्चाच्या नोंदी आढळल्या नाहीत.'
+                          : 'No expense records found for the selected branch and date range.'}
                       </td>
                     </tr>
                   ) : (
                     expensesList.map((exp: any, idx: number) => (
                       <tr key={exp.id || idx} style={{ borderBottom: '1px solid var(--border-slate, #F1F5F9)' }}>
                         <td style={{ padding: '10px 14px', textAlign: 'center', fontWeight: 600, color: 'var(--text-muted, #94A3B8)' }}>
-                          {idx + 1}
+                          {language === 'mr' ? toDevanagari(idx + 1) : (idx + 1)}
                         </td>
-                        <td style={{ padding: '10px 14px', whiteSpace: 'nowrap' }}>{exp.date || '—'}</td>
+                        <td style={{ padding: '10px 14px', whiteSpace: 'nowrap' }}>
+                          {language === 'mr' && exp.date ? toDevanagari(exp.date) : (exp.date || '—')}
+                        </td>
                         <td style={{ padding: '10px 14px', fontWeight: 700, color: 'var(--text-heading, #0F172A)' }}>
-                          {exp.branchName || 'Main Branch'}
+                          {language === 'mr' ? localizeName(exp.branchName || 'Main Branch') : (exp.branchName || 'Main Branch')}
                         </td>
-                        <td style={{ padding: '10px 14px', fontWeight: 600 }}>{exp.name}</td>
+                        <td style={{ padding: '10px 14px', fontWeight: 600 }}>
+                          {language === 'mr' ? localizeName(exp.name) : exp.name}
+                        </td>
                         <td style={{ padding: '10px 14px' }}>
                           <span
                             style={{
@@ -1600,7 +1623,7 @@ export const OwnerReports: React.FC = () => {
                 <tfoot>
                   <tr style={{ backgroundColor: '#FEF2F2', borderTop: '2px solid #DC2626', fontWeight: 800 }}>
                     <td colSpan={7} style={{ padding: '14px 16px', textAlign: 'right', color: '#991B1B', textTransform: 'uppercase' }}>
-                      Total Expenses:
+                      {language === 'mr' ? 'एकूण खर्च:' : 'Total Expenses:'}
                     </td>
                     <td style={{ padding: '14px 16px', textAlign: 'right', color: '#DC2626', fontSize: '1.1rem', fontWeight: 900 }}>
                       {formatCurrency(totalExp)}
@@ -1626,10 +1649,19 @@ export const OwnerReports: React.FC = () => {
           <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-slate, #E2E8F0)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-heading, #0F172A)', margin: 0 }}>
-                {reportType === 'GST' ? 'GST Tax Reconciliation Statement' : 'Consolidated Operational Ledger'}
+                {reportType === 'GST'
+                  ? (language === 'mr' ? 'जीएसटी कर समाधान विवरण' : 'GST Tax Reconciliation Statement')
+                  : (language === 'mr' ? 'एकत्रित कामकाज लेजर' : 'Consolidated Operational Ledger')}
               </h2>
               <div style={{ fontSize: '0.78rem', color: 'var(--text-muted, #64748B)', marginTop: '2px' }}>
-                Target Scope: <strong>{reportData?.filterBranchName || 'All Branches'}</strong>
+                {language === 'mr' ? 'लक्षित व्याप्ती: ' : 'Target Scope: '}
+                <strong>
+                  {reportData?.filterBranchName
+                    ? (reportData.filterBranchName.includes('All')
+                        ? (language === 'mr' ? 'सर्व शाखा एकत्रित' : reportData.filterBranchName)
+                        : (language === 'mr' ? localizeName(reportData.filterBranchName) : reportData.filterBranchName))
+                    : (language === 'mr' ? 'सर्व शाखा एकत्रित' : 'All Branches Consolidated')}
+                </strong>
               </div>
             </div>
           </div>
@@ -1638,68 +1670,88 @@ export const OwnerReports: React.FC = () => {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.88rem' }}>
               <tbody>
                 <tr style={{ borderBottom: '1px solid var(--border-slate, #F1F5F9)' }}>
-                  <td style={{ padding: '12px 8px', color: '#475569', fontWeight: 600 }}>Total Invoices Count</td>
+                  <td style={{ padding: '12px 8px', color: '#475569', fontWeight: 600 }}>
+                    {language === 'mr' ? 'एकूण इनव्हॉइस संख्या' : 'Total Invoices Count'}
+                  </td>
                   <td style={{ padding: '12px 8px', textAlign: 'right', fontWeight: 700, color: 'var(--text-heading, #0F172A)' }}>
-                    {reportData?.totalInvoices || 0} bills
+                    {language === 'mr' ? toDevanagari(reportData?.totalInvoices || 0) : (reportData?.totalInvoices || 0)} {language === 'mr' ? 'बिले' : 'bills'}
                   </td>
                 </tr>
                 <tr style={{ borderBottom: '1px solid var(--border-slate, #F1F5F9)' }}>
-                  <td style={{ padding: '12px 8px', color: '#475569', fontWeight: 600 }}>Total Kitchen Orders (KOT)</td>
+                  <td style={{ padding: '12px 8px', color: '#475569', fontWeight: 600 }}>
+                    {language === 'mr' ? 'एकूण किचन ऑर्डर्स (KOT)' : 'Total Kitchen Orders (KOT)'}
+                  </td>
                   <td style={{ padding: '12px 8px', textAlign: 'right', fontWeight: 700, color: 'var(--text-heading, #0F172A)' }}>
-                    {reportData?.totalKots || 0} tickets
+                    {language === 'mr' ? toDevanagari(reportData?.totalKots || 0) : (reportData?.totalKots || 0)} {language === 'mr' ? 'तिकिटे' : 'tickets'}
                   </td>
                 </tr>
                 <tr style={{ borderBottom: '1px solid var(--border-slate, #F1F5F9)' }}>
-                  <td style={{ padding: '12px 8px', color: '#475569', fontWeight: 600 }}>Taxable Turnover (Food & Hospitality)</td>
+                  <td style={{ padding: '12px 8px', color: '#475569', fontWeight: 600 }}>
+                    {language === 'mr' ? 'करपात्र उलाढाल (अन्न आणि आतिथ्य)' : 'Taxable Turnover (Food & Hospitality)'}
+                  </td>
                   <td style={{ padding: '12px 8px', textAlign: 'right', fontWeight: 700, color: 'var(--text-heading, #0F172A)' }}>
                     {formatCurrency(reportData?.taxableSales)}
                   </td>
                 </tr>
                 <tr style={{ borderBottom: '1px solid var(--border-slate, #F1F5F9)' }}>
-                  <td style={{ padding: '12px 8px', color: '#475569', fontWeight: 600 }}>Central GST (CGST)</td>
+                  <td style={{ padding: '12px 8px', color: '#475569', fontWeight: 600 }}>
+                    {language === 'mr' ? 'केंद्रीय जीएसटी (CGST)' : 'Central GST (CGST)'}
+                  </td>
                   <td style={{ padding: '12px 8px', textAlign: 'right', fontWeight: 700, color: '#2563EB' }}>
                     {formatCurrency(reportData?.salesCgst)}
                   </td>
                 </tr>
                 <tr style={{ borderBottom: '1px solid var(--border-slate, #F1F5F9)' }}>
-                  <td style={{ padding: '12px 8px', color: '#475569', fontWeight: 600 }}>State GST (SGST)</td>
+                  <td style={{ padding: '12px 8px', color: '#475569', fontWeight: 600 }}>
+                    {language === 'mr' ? 'राज्य जीएसटी (SGST)' : 'State GST (SGST)'}
+                  </td>
                   <td style={{ padding: '12px 8px', textAlign: 'right', fontWeight: 700, color: '#0284C7' }}>
                     {formatCurrency(reportData?.salesSgst)}
                   </td>
                 </tr>
                 <tr style={{ borderBottom: '1px solid var(--border-slate, #F1F5F9)' }}>
-                  <td style={{ padding: '12px 8px', color: '#475569', fontWeight: 600 }}>Integrated GST (IGST)</td>
+                  <td style={{ padding: '12px 8px', color: '#475569', fontWeight: 600 }}>
+                    {language === 'mr' ? 'एकात्मिक जीएसटी (IGST)' : 'Integrated GST (IGST)'}
+                  </td>
                   <td style={{ padding: '12px 8px', textAlign: 'right', fontWeight: 700, color: '#7C3AED' }}>
                     {formatCurrency(reportData?.salesIgst)}
                   </td>
                 </tr>
                 <tr style={{ borderBottom: '1px solid var(--border-slate, #F1F5F9)', backgroundColor: 'var(--bg-subtle, #F8FAFC)' }}>
-                  <td style={{ padding: '14px 8px', color: 'var(--text-heading, #0F172A)', fontWeight: 800 }}>Total Gross Billing</td>
+                  <td style={{ padding: '14px 8px', color: 'var(--text-heading, #0F172A)', fontWeight: 800 }}>
+                    {language === 'mr' ? 'एकूण बिलिंग रक्कम (Gross)' : 'Total Gross Billing'}
+                  </td>
                   <td style={{ padding: '14px 8px', textAlign: 'right', fontWeight: 800, fontSize: '1.05rem', color: 'var(--text-heading, #0F172A)' }}>
                     {formatCurrency(reportData?.totalSales)}
                   </td>
                 </tr>
                 <tr style={{ borderBottom: '1px solid var(--border-slate, #F1F5F9)' }}>
-                  <td style={{ padding: '12px 8px', color: '#475569', fontWeight: 600 }}>Actual Payments Collected</td>
+                  <td style={{ padding: '12px 8px', color: '#475569', fontWeight: 600 }}>
+                    {language === 'mr' ? 'प्रत्यक्ष संकलित पेमेंट्स' : 'Actual Payments Collected'}
+                  </td>
                   <td style={{ padding: '12px 8px', textAlign: 'right', fontWeight: 700, color: '#16A34A' }}>
                     {formatCurrency(reportData?.collectedPayments)}
                   </td>
                 </tr>
                 <tr style={{ borderBottom: '1px solid var(--border-slate, #F1F5F9)' }}>
-                  <td style={{ padding: '12px 8px', color: '#475569', fontWeight: 600 }}>Total Expenses</td>
+                  <td style={{ padding: '12px 8px', color: '#475569', fontWeight: 600 }}>
+                    {language === 'mr' ? 'एकूण कामकाज खर्च' : 'Total Expenses'}
+                  </td>
                   <td style={{ padding: '12px 8px', textAlign: 'right', fontWeight: 700, color: '#DC2626' }}>
                     {formatCurrency(reportData?.totalExpenses)}
                   </td>
                 </tr>
                 <tr style={{ borderBottom: '1px solid var(--border-slate, #F1F5F9)' }}>
-                  <td style={{ padding: '12px 8px', color: '#475569', fontWeight: 600 }}>Total Purchase Outflow</td>
+                  <td style={{ padding: '12px 8px', color: '#475569', fontWeight: 600 }}>
+                    {language === 'mr' ? 'एकूण खरेदी खर्च' : 'Total Purchase Outflow'}
+                  </td>
                   <td style={{ padding: '12px 8px', textAlign: 'right', fontWeight: 700, color: '#DC2626' }}>
                     {formatCurrency(reportData?.netPurchases)}
                   </td>
                 </tr>
                 <tr style={{ backgroundColor: '#FEF3C7' }}>
                   <td style={{ padding: '14px 8px', color: '#92400E', fontWeight: 800, fontSize: '1rem' }}>
-                    Estimated Business Net Profit
+                    {language === 'mr' ? 'अंदाजे व्यवसाय निव्वळ नफा (Net)' : 'Estimated Business Net Profit'}
                   </td>
                   <td style={{ padding: '14px 8px', textAlign: 'right', fontWeight: 900, fontSize: '1.15rem', color: '#92400E' }}>
                     {formatCurrency(reportData?.netProfit)}

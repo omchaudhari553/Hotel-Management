@@ -23,8 +23,10 @@ import {
 } from 'recharts';
 import { ownerService, OwnerProfitAnalysisData, BranchRecord } from './ownerService';
 import { useToast } from '../context/ToastContext';
+import { useLanguage } from '../context/LanguageContext';
 
 export const OwnerProfitAnalysis: React.FC = () => {
+  const { language, toDevanagari, localizeName } = useLanguage();
   const [data, setData] = useState<OwnerProfitAnalysisData | null>(null);
   const [branches, setBranches] = useState<BranchRecord[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -114,11 +116,12 @@ export const OwnerProfitAnalysis: React.FC = () => {
   };
 
   const formatCurrency = (amt: number | undefined) => {
-    return new Intl.NumberFormat('en-IN', {
+    const formatted = new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
       maximumFractionDigits: 2,
     }).format(Number(amt || 0));
+    return language === 'mr' ? toDevanagari(formatted) : formatted;
   };
 
   return (
@@ -127,14 +130,14 @@ export const OwnerProfitAnalysis: React.FC = () => {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px' }}>
         <div>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-heading, #0F172A)', margin: 0 }}>
-            Profit Analysis & Financial Performance
+            {language === 'mr' ? 'नफा विश्लेषण आणि आर्थिक कामगिरी' : 'Profit Analysis & Financial Performance'}
           </h1>
         </div>
 
         <button
           onClick={() => window.location.reload()}
           className="owner-btn-secondary"
-          title="Refresh Data"
+          title={language === 'mr' ? 'रीफ्रेश करा' : 'Refresh Data'}
           aria-label="Refresh Data"
           style={{
             display: 'flex',
@@ -168,7 +171,7 @@ export const OwnerProfitAnalysis: React.FC = () => {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#B45309', fontWeight: 700, fontSize: '0.86rem' }}>
           <Filter size={16} />
-          <span>Report Scope & Dates:</span>
+          <span>{language === 'mr' ? 'अहवाल व्याप्ती आणि तारखा:' : 'Report Scope & Dates:'}</span>
         </div>
 
         <div>
@@ -177,10 +180,10 @@ export const OwnerProfitAnalysis: React.FC = () => {
             onChange={(e) => setSelectedBranchId(e.target.value)}
             style={selectStyle}
           >
-            <option value="">All Active Branches Consolidated</option>
+            <option value="">{language === 'mr' ? 'सर्व सक्रिय शाखा एकत्रित' : 'All Active Branches Consolidated'}</option>
             {branches.filter(b => b.status === 'ACTIVE').map((b) => (
               <option key={b.id} value={b.id}>
-                Individual Branch: {b.name} ({b.city || b.code})
+                {language === 'mr' ? `शाखा: ${b.name} (${b.city || b.code})` : `Individual Branch: ${b.name} (${b.city || b.code})`}
               </option>
             ))}
           </select>
@@ -196,12 +199,12 @@ export const OwnerProfitAnalysis: React.FC = () => {
             }}
             style={selectStyle}
           >
-            <option value="this-month">This Month</option>
-            <option value="today">Today</option>
-            <option value="this-week">This Week</option>
-            <option value="this-year">This Year</option>
-            <option value="all-time">All Time (All Records)</option>
-            <option value="custom">Custom Date Range</option>
+            <option value="this-month">{language === 'mr' ? 'हा महिना' : 'This Month'}</option>
+            <option value="today">{language === 'mr' ? 'आज' : 'Today'}</option>
+            <option value="this-week">{language === 'mr' ? 'हा आठवडा' : 'This Week'}</option>
+            <option value="this-year">{language === 'mr' ? 'हे वर्ष' : 'This Year'}</option>
+            <option value="all-time">{language === 'mr' ? 'सर्व काळ (All Time)' : 'All Time (All Records)'}</option>
+            <option value="custom">{language === 'mr' ? 'सानुकूल तारीख श्रेणी' : 'Custom Date Range'}</option>
           </select>
         </div>
 
@@ -259,7 +262,7 @@ export const OwnerProfitAnalysis: React.FC = () => {
         <div className="owner-card" style={cardStyle}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
             <div style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
-              <span style={statLabelStyle} title="Total Billing Amount">Total Billing Amount</span>
+              <span style={statLabelStyle} title="Total Billing Amount">{language === 'mr' ? 'एकूण बिलिंग रक्कम' : 'Total Billing Amount'}</span>
               <div style={statValueStyle} title={formatCurrency(data?.totalBillingAmount)}>{formatCurrency(data?.totalBillingAmount)}</div>
             </div>
             <div style={{ ...iconBoxStyle, backgroundColor: '#EFF6FF', color: '#2563EB', flexShrink: 0 }}>
@@ -271,7 +274,7 @@ export const OwnerProfitAnalysis: React.FC = () => {
         <div className="owner-card" style={cardStyle}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
             <div style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
-              <span style={statLabelStyle} title="Total Payments Received">Total Payments Received</span>
+              <span style={statLabelStyle} title="Total Payments Received">{language === 'mr' ? 'एकूण प्राप्त पेमेंट्स' : 'Total Payments Received'}</span>
               <div style={{ ...statValueStyle, color: '#16A34A' }} title={formatCurrency(data?.totalPaymentsReceived)}>
                 {formatCurrency(data?.totalPaymentsReceived)}
               </div>
@@ -285,7 +288,7 @@ export const OwnerProfitAnalysis: React.FC = () => {
         <div className="owner-card" style={cardStyle}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
             <div style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
-              <span style={statLabelStyle} title="Total Purchase Amount">Total Purchase Amount</span>
+              <span style={statLabelStyle} title="Total Purchase Amount">{language === 'mr' ? 'एकूण खरेदी रक्कम' : 'Total Purchase Amount'}</span>
               <div style={{ ...statValueStyle, color: '#DC2626' }} title={formatCurrency(data?.totalPurchaseAmount)}>
                 {formatCurrency(data?.totalPurchaseAmount)}
               </div>
@@ -299,7 +302,7 @@ export const OwnerProfitAnalysis: React.FC = () => {
         <div className="owner-card" style={cardStyle}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
             <div style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
-              <span style={statLabelStyle} title="Estimated Business Profit">Estimated Business Profit</span>
+              <span style={statLabelStyle} title="Estimated Business Profit">{language === 'mr' ? 'अंदाजे व्यवसाय नफा' : 'Estimated Business Profit'}</span>
               <div
                 style={{
                   ...statValueStyle,
@@ -319,7 +322,7 @@ export const OwnerProfitAnalysis: React.FC = () => {
         <div className="owner-card" style={cardStyle}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
             <div style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
-              <span style={statLabelStyle} title="Overall Profit Margin">Overall Profit Margin</span>
+              <span style={statLabelStyle} title="Overall Profit Margin">{language === 'mr' ? 'एकूण नफा प्रमाण (मार्जिन)' : 'Overall Profit Margin'}</span>
               <div
                 style={{
                   ...statValueStyle,
@@ -327,7 +330,9 @@ export const OwnerProfitAnalysis: React.FC = () => {
                 }}
                 title={`${((data?.profitMarginPercent !== undefined && !isNaN(data.profitMarginPercent)) ? data.profitMarginPercent : ((data?.estimatedBusinessProfit || 0) / (data?.totalBillingAmount || 1) * 100)).toFixed(1)}%`}
               >
-                {((data?.profitMarginPercent !== undefined && !isNaN(data.profitMarginPercent)) ? data.profitMarginPercent : ((data?.estimatedBusinessProfit || 0) / (data?.totalBillingAmount || 1) * 100)).toFixed(1)}%
+                {language === 'mr'
+                  ? toDevanagari(`${((data?.profitMarginPercent !== undefined && !isNaN(data.profitMarginPercent)) ? data.profitMarginPercent : ((data?.estimatedBusinessProfit || 0) / (data?.totalBillingAmount || 1) * 100)).toFixed(1)}%`)
+                  : `${((data?.profitMarginPercent !== undefined && !isNaN(data.profitMarginPercent)) ? data.profitMarginPercent : ((data?.estimatedBusinessProfit || 0) / (data?.totalBillingAmount || 1) * 100)).toFixed(1)}%`}
               </div>
             </div>
             <div style={{ ...iconBoxStyle, backgroundColor: 'rgba(124, 58, 237, 0.12)', color: '#7C3AED', flexShrink: 0 }}>
@@ -350,25 +355,34 @@ export const OwnerProfitAnalysis: React.FC = () => {
           }}
         >
           <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-heading, #0F172A)', margin: '0 0 16px' }}>
-            Profit Comparison by Branch
+            {language === 'mr' ? 'शाखानिहाय नफा तुलना' : 'Profit Comparison by Branch'}
           </h2>
           <div style={{ width: '100%', height: 300 }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data.branchBreakdown} margin={{ top: 10, right: 30, left: 20, bottom: 10 }}>
+              <BarChart
+                data={data.branchBreakdown.map((b: any) => ({
+                  ...b,
+                  branchName: language === 'mr' ? localizeName(b.branchName) : b.branchName,
+                }))}
+                margin={{ top: 10, right: 30, left: 20, bottom: 10 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
                 <XAxis dataKey="branchName" tick={{ fill: '#475569', fontSize: 12 }} />
                 <YAxis
                   tick={{ fill: '#475569', fontSize: 12 }}
-                  tickFormatter={(val) => `₹${val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val}`}
+                  tickFormatter={(val) => {
+                    const s = `₹${val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val}`;
+                    return language === 'mr' ? toDevanagari(s) : s;
+                  }}
                 />
                 <Tooltip
                   formatter={(val: any) => formatCurrency(Number(val))}
                   contentStyle={{ backgroundColor: '#1E293B', color: '#FFFFFF', borderRadius: '8px' }}
                 />
                 <Legend />
-                <Bar dataKey="totalPaymentsReceived" name="Payments Collected" fill="#10B981" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="totalPurchaseAmount" name="Purchases" fill="#EF4444" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="estimatedBusinessProfit" name="Estimated Profit" fill="#F59E0B" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="totalPaymentsReceived" name={language === 'mr' ? 'जमा पेमेंट्स' : 'Payments Collected'} fill="#10B981" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="totalPurchaseAmount" name={language === 'mr' ? 'खरेदी' : 'Purchases'} fill="#EF4444" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="estimatedBusinessProfit" name={language === 'mr' ? 'अंदाजे नफा' : 'Estimated Profit'} fill="#F59E0B" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -388,7 +402,7 @@ export const OwnerProfitAnalysis: React.FC = () => {
       >
         <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-slate, #E2E8F0)' }}>
           <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-heading, #0F172A)', margin: 0 }}>
-            Branch Profit Breakdown Ledger
+            {language === 'mr' ? 'शाखा नफा तपशील लेजर' : 'Branch Profit Breakdown Ledger'}
           </h2>
         </div>
 
@@ -396,13 +410,13 @@ export const OwnerProfitAnalysis: React.FC = () => {
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.86rem' }}>
             <thead>
               <tr style={{ backgroundColor: 'var(--bg-subtle, #F8FAFC)', borderBottom: '1px solid var(--border-slate, #E2E8F0)', color: '#475569' }}>
-                <th style={thStyle}>Branch</th>
-                <th style={thStyle}>Location</th>
-                <th style={{ ...thStyle, textAlign: 'right' }}>Total Billed</th>
-                <th style={{ ...thStyle, textAlign: 'right' }}>Payments Collected</th>
-                <th style={{ ...thStyle, textAlign: 'right' }}>Purchase Cost</th>
-                <th style={{ ...thStyle, textAlign: 'right' }}>Estimated Profit</th>
-                <th style={{ ...thStyle, textAlign: 'right' }}>Margin %</th>
+                <th style={thStyle}>{language === 'mr' ? 'शाखा' : 'Branch'}</th>
+                <th style={thStyle}>{language === 'mr' ? 'ठिकाण' : 'Location'}</th>
+                <th style={{ ...thStyle, textAlign: 'right' }}>{language === 'mr' ? 'एकूण बिल' : 'Total Billed'}</th>
+                <th style={{ ...thStyle, textAlign: 'right' }}>{language === 'mr' ? 'जमा पेमेंट्स' : 'Payments Collected'}</th>
+                <th style={{ ...thStyle, textAlign: 'right' }}>{language === 'mr' ? 'खरेदी खर्च' : 'Purchase Cost'}</th>
+                <th style={{ ...thStyle, textAlign: 'right' }}>{language === 'mr' ? 'अंदाजे नफा' : 'Estimated Profit'}</th>
+                <th style={{ ...thStyle, textAlign: 'right' }}>{language === 'mr' ? 'मार्जिन %' : 'Margin %'}</th>
               </tr>
             </thead>
             <tbody>
@@ -421,10 +435,12 @@ export const OwnerProfitAnalysis: React.FC = () => {
                     <td style={tdStyle}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <Building2 size={16} color="#B45309" />
-                        <strong style={{ color: 'var(--text-heading, #0F172A)' }}>{b.branchName}</strong>
+                        <strong style={{ color: 'var(--text-heading, #0F172A)' }}>
+                          {language === 'mr' ? localizeName(b.branchName) : b.branchName}
+                        </strong>
                       </div>
                     </td>
-                    <td style={tdStyle}>{b.city || '—'}</td>
+                    <td style={tdStyle}>{b.city ? (language === 'mr' ? localizeName(b.city) : b.city) : '—'}</td>
                     <td style={{ ...tdStyle, textAlign: 'right', color: '#334155' }}>
                       {formatCurrency(b.totalBillingAmount)}
                     </td>
@@ -445,7 +461,7 @@ export const OwnerProfitAnalysis: React.FC = () => {
                       {formatCurrency(b.estimatedBusinessProfit)}
                     </td>
                     <td style={{ ...tdStyle, textAlign: 'right', fontWeight: 700, color: 'var(--text-heading, #0F172A)' }}>
-                      {b.profitMarginPercent}%
+                      {language === 'mr' ? toDevanagari(b.profitMarginPercent) : b.profitMarginPercent}%
                     </td>
                   </tr>
                 ))
