@@ -15,6 +15,7 @@ export interface LanguageContextType {
   toDevanagari: (input: string | number) => string;
   translateStatus: (status: string) => string;
   localizeGuestName: (name?: string) => string;
+  localizeName: (name?: string) => string;
   formatTableName: (name?: string, lang?: LanguageCode) => string;
   getLocalizedMenuItemName: (name?: string, lang?: LanguageCode) => string;
   getLocalizedMenuDescription: (desc?: string, lang?: LanguageCode) => string;
@@ -80,6 +81,7 @@ const LanguageContext = createContext<LanguageContextType>({
   toDevanagari: (v) => String(v),
   translateStatus: (s) => s,
   localizeGuestName: (n) => n || 'Guest',
+  localizeName: (n) => n || '',
   formatTableName: (name) => name || '',
   getLocalizedMenuItemName: (name) => name || '',
   getLocalizedMenuDescription: (desc) => desc || '',
@@ -345,6 +347,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         toDevanagari,
         translateStatus,
         localizeGuestName: localizeGuest,
+        localizeName: localizeGuest,
         formatTableName: formatTable,
         getLocalizedMenuItemName: getLocalizedMenuItem,
         getLocalizedMenuDescription: getLocalizedDesc,

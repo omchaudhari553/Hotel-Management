@@ -15,8 +15,10 @@ import {
 } from 'lucide-react';
 import { ownerService, OwnerBillingPerformanceData, BranchRecord } from './ownerService';
 import { useToast } from '../context/ToastContext';
+import { useLanguage } from '../context/LanguageContext';
 
 export const OwnerBillingPerformance: React.FC = () => {
+  const { language, toDevanagari, localizeName } = useLanguage();
   const [data, setData] = useState<OwnerBillingPerformanceData | null>(null);
   const [branches, setBranches] = useState<BranchRecord[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -54,11 +56,12 @@ export const OwnerBillingPerformance: React.FC = () => {
   }, [selectedBranchId, startDate, endDate]);
 
   const formatCurrency = (amt: number | undefined) => {
-    return new Intl.NumberFormat('en-IN', {
+    const formatted = new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
       maximumFractionDigits: 2,
     }).format(Number(amt || 0));
+    return language === 'mr' ? toDevanagari(formatted) : formatted;
   };
 
   return (
@@ -67,14 +70,14 @@ export const OwnerBillingPerformance: React.FC = () => {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px' }}>
         <div>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-heading, #0F172A)', margin: 0 }}>
-            Billing & Operational Performance
+            {language === 'mr' ? 'बिलिंग आणि कामकाज कार्यक्षमता' : 'Billing & Operational Performance'}
           </h1>
         </div>
 
         <button
           onClick={() => window.location.reload()}
           className="owner-btn-secondary"
-          title="Refresh"
+          title={language === 'mr' ? 'रीफ्रेश करा' : 'Refresh'}
           aria-label="Refresh"
           style={{
             display: 'flex',
@@ -108,7 +111,7 @@ export const OwnerBillingPerformance: React.FC = () => {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#B45309', fontWeight: 700, fontSize: '0.86rem' }}>
           <Filter size={16} />
-          <span>Filters:</span>
+          <span>{language === 'mr' ? 'फिल्टर्स:' : 'Filters:'}</span>
         </div>
 
         <div>
@@ -117,10 +120,10 @@ export const OwnerBillingPerformance: React.FC = () => {
             onChange={(e) => setSelectedBranchId(e.target.value)}
             style={selectStyle}
           >
-            <option value="">All Active Branches</option>
+            <option value="">{language === 'mr' ? 'सर्व सक्रिय शाखा' : 'All Active Branches'}</option>
             {branches.filter(b => b.status === 'ACTIVE').map((b) => (
               <option key={b.id} value={b.id}>
-                {b.name} ({b.city || b.code})
+                {language === 'mr' ? localizeName(b.name) : b.name} ({b.city ? (language === 'mr' ? localizeName(b.city) : b.city) : (language === 'mr' ? toDevanagari(b.code) : b.code)})
               </option>
             ))}
           </select>
@@ -132,7 +135,7 @@ export const OwnerBillingPerformance: React.FC = () => {
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
             style={selectStyle}
-            title="Start Date"
+            title={language === 'mr' ? 'प्रारंभ तारीख' : 'Start Date'}
           />
         </div>
 
@@ -142,7 +145,7 @@ export const OwnerBillingPerformance: React.FC = () => {
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
             style={selectStyle}
-            title="End Date"
+            title={language === 'mr' ? 'शेवट तारीख' : 'End Date'}
           />
         </div>
 
@@ -165,7 +168,7 @@ export const OwnerBillingPerformance: React.FC = () => {
               fontWeight: 600,
             }}
           >
-            Clear Filters
+            {language === 'mr' ? 'फिल्टर्स साफ करा' : 'Clear Filters'}
           </button>
         )}
       </div>
@@ -176,9 +179,11 @@ export const OwnerBillingPerformance: React.FC = () => {
         <div className="owner-card" style={cardStyle}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
             <div style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
-              <span style={statLabelStyle} title="Total Invoices Generated">Total Invoices</span>
+              <span style={statLabelStyle} title={language === 'mr' ? 'एकूण निर्माण केलेली बिले' : 'Total Invoices Generated'}>
+                {language === 'mr' ? 'एकूण बिले / इनव्हॉइसेस' : 'Total Invoices'}
+              </span>
               <div style={{ ...statValueStyle, color: '#2563EB' }} title={`${data?.totalInvoices || 0} Invoices`}>
-                {data?.totalInvoices || 0} Bills
+                {language === 'mr' ? toDevanagari(data?.totalInvoices || 0) : (data?.totalInvoices || 0)} {language === 'mr' ? 'बिले' : 'Bills'}
               </div>
             </div>
             <div style={{ ...iconBoxStyle, backgroundColor: '#EFF6FF', color: '#2563EB', flexShrink: 0 }}>
@@ -191,9 +196,11 @@ export const OwnerBillingPerformance: React.FC = () => {
         <div className="owner-card" style={cardStyle}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
             <div style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
-              <span style={statLabelStyle} title="Payment Collection Rate">Payment Collection Rate</span>
+              <span style={statLabelStyle} title={language === 'mr' ? 'पेमेंट संकलन दर' : 'Payment Collection Rate'}>
+                {language === 'mr' ? 'पेमेंट संकलन दर' : 'Payment Collection Rate'}
+              </span>
               <div style={{ ...statValueStyle, color: '#16A34A' }} title={`${data?.collectionEfficiencyPercent || 0}%`}>
-                {data?.collectionEfficiencyPercent || 0}%
+                {language === 'mr' ? toDevanagari(data?.collectionEfficiencyPercent || 0) : (data?.collectionEfficiencyPercent || 0)}%
               </div>
             </div>
             <div style={{ ...iconBoxStyle, backgroundColor: '#DCFCE7', color: '#15803D', flexShrink: 0 }}>
@@ -206,7 +213,9 @@ export const OwnerBillingPerformance: React.FC = () => {
         <div className="owner-card" style={cardStyle}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
             <div style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
-              <span style={statLabelStyle} title="Average Ticket Value">Average Ticket Value</span>
+              <span style={statLabelStyle} title={language === 'mr' ? 'सरासरी बिल मूल्य' : 'Average Ticket Value'}>
+                {language === 'mr' ? 'सरासरी बिल मूल्य' : 'Average Ticket Value'}
+              </span>
               <div style={statValueStyle} title={formatCurrency(data?.averageTicketSize)}>{formatCurrency(data?.averageTicketSize)}</div>
             </div>
             <div style={{ ...iconBoxStyle, backgroundColor: '#F0F9FF', color: '#0284C7', flexShrink: 0 }}>
@@ -219,8 +228,12 @@ export const OwnerBillingPerformance: React.FC = () => {
         <div className="owner-card" style={cardStyle}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
             <div style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
-              <span style={statLabelStyle} title="Kitchen Orders (KOT)">Kitchen Orders (KOT)</span>
-              <div style={statValueStyle} title={`${data?.totalKots || 0} Total KOTs`}>{data?.totalKots || 0}</div>
+              <span style={statLabelStyle} title={language === 'mr' ? 'किचन ऑर्डर्स (KOT)' : 'Kitchen Orders (KOT)'}>
+                {language === 'mr' ? 'किचन ऑर्डर्स (KOT)' : 'Kitchen Orders (KOT)'}
+              </span>
+              <div style={statValueStyle} title={`${data?.totalKots || 0} Total KOTs`}>
+                {language === 'mr' ? toDevanagari(data?.totalKots || 0) : (data?.totalKots || 0)}
+              </div>
             </div>
             <div style={{ ...iconBoxStyle, backgroundColor: '#FEF3C7', color: '#B45309', flexShrink: 0 }}>
               <ChefHat size={16} />
@@ -232,7 +245,9 @@ export const OwnerBillingPerformance: React.FC = () => {
         <div className="owner-card" style={cardStyle}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
             <div style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
-              <span style={statLabelStyle} title="Supplier Purchases">Supplier Purchases</span>
+              <span style={statLabelStyle} title={language === 'mr' ? 'पुरवठादार खरेदी' : 'Supplier Purchases'}>
+                {language === 'mr' ? 'पुरवठादार खरेदी' : 'Supplier Purchases'}
+              </span>
               <div style={{ ...statValueStyle, color: '#DC2626' }} title={formatCurrency(data?.totalPurchaseAmount)}>
                 {formatCurrency(data?.totalPurchaseAmount)}
               </div>
@@ -257,7 +272,7 @@ export const OwnerBillingPerformance: React.FC = () => {
       >
         <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-slate, #E2E8F0)' }}>
           <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-heading, #0F172A)', margin: 0 }}>
-            Branch Comparison: Billing & Kitchen Performance
+            {language === 'mr' ? 'शाखा तुलना: बिलिंग आणि किचन कार्यक्षमता' : 'Branch Comparison: Billing & Kitchen Performance'}
           </h2>
         </div>
 
@@ -265,22 +280,22 @@ export const OwnerBillingPerformance: React.FC = () => {
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.86rem' }}>
             <thead>
               <tr style={{ backgroundColor: 'var(--bg-subtle, #F8FAFC)', borderBottom: '1px solid var(--border-slate, #E2E8F0)', color: '#475569' }}>
-                <th style={thStyle}>Branch</th>
-                <th style={{ ...thStyle, textAlign: 'center' }}>Total Bills</th>
-                <th style={{ ...thStyle, textAlign: 'center' }}>Paid Bills</th>
-                <th style={{ ...thStyle, textAlign: 'right' }}>Total Billed</th>
-                <th style={{ ...thStyle, textAlign: 'right' }}>Collected</th>
-                <th style={{ ...thStyle, textAlign: 'right' }}>Collection %</th>
-                <th style={{ ...thStyle, textAlign: 'right' }}>Avg Ticket</th>
-                <th style={{ ...thStyle, textAlign: 'center' }}>KOTs</th>
-                <th style={{ ...thStyle, textAlign: 'right' }}>Purchases</th>
+                <th style={thStyle}>{language === 'mr' ? 'शाखा' : 'Branch'}</th>
+                <th style={{ ...thStyle, textAlign: 'center' }}>{language === 'mr' ? 'एकूण बिले' : 'Total Bills'}</th>
+                <th style={{ ...thStyle, textAlign: 'center' }}>{language === 'mr' ? 'भरलेली बिले' : 'Paid Bills'}</th>
+                <th style={{ ...thStyle, textAlign: 'right' }}>{language === 'mr' ? 'एकूण बिल रक्कम' : 'Total Billed'}</th>
+                <th style={{ ...thStyle, textAlign: 'right' }}>{language === 'mr' ? 'संकलित रक्कम' : 'Collected'}</th>
+                <th style={{ ...thStyle, textAlign: 'right' }}>{language === 'mr' ? 'संकलन %' : 'Collection %'}</th>
+                <th style={{ ...thStyle, textAlign: 'right' }}>{language === 'mr' ? 'सरासरी बिल' : 'Avg Ticket'}</th>
+                <th style={{ ...thStyle, textAlign: 'center' }}>{language === 'mr' ? 'KOTs' : 'KOTs'}</th>
+                <th style={{ ...thStyle, textAlign: 'right' }}>{language === 'mr' ? 'खरेदी' : 'Purchases'}</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
                   <td colSpan={9} style={{ textAlign: 'center', padding: '36px', color: 'var(--text-muted, #64748B)' }}>
-                    Computing performance metrics...
+                    {language === 'mr' ? 'कार्यक्षमता मेट्रिक्स मोजले जात आहेत...' : 'Computing performance metrics...'}
                   </td>
                 </tr>
               ) : data?.branchComparison && data.branchComparison.length > 0 ? (
@@ -292,12 +307,16 @@ export const OwnerBillingPerformance: React.FC = () => {
                     <td style={tdStyle}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <Building2 size={16} color="#B45309" />
-                        <strong style={{ color: 'var(--text-heading, #0F172A)' }}>{b.branchName}</strong>
+                        <strong style={{ color: 'var(--text-heading, #0F172A)' }}>
+                          {language === 'mr' ? localizeName(b.branchName) : b.branchName}
+                        </strong>
                       </div>
                     </td>
-                    <td style={{ ...tdStyle, textAlign: 'center', fontWeight: 600 }}>{b.totalInvoices}</td>
+                    <td style={{ ...tdStyle, textAlign: 'center', fontWeight: 600 }}>
+                      {language === 'mr' ? toDevanagari(b.totalInvoices) : b.totalInvoices}
+                    </td>
                     <td style={{ ...tdStyle, textAlign: 'center', fontWeight: 600, color: '#16A34A' }}>
-                      {b.paidInvoices}
+                      {language === 'mr' ? toDevanagari(b.paidInvoices) : b.paidInvoices}
                     </td>
                     <td style={{ ...tdStyle, textAlign: 'right', fontWeight: 600, color: 'var(--text-heading, #0F172A)' }}>
                       {formatCurrency(b.totalBilled)}
@@ -306,13 +325,13 @@ export const OwnerBillingPerformance: React.FC = () => {
                       {formatCurrency(b.totalCollected)}
                     </td>
                     <td style={{ ...tdStyle, textAlign: 'right', fontWeight: 700, color: '#B45309' }}>
-                      {b.collectionEfficiencyPercent}%
+                      {language === 'mr' ? toDevanagari(b.collectionEfficiencyPercent) : b.collectionEfficiencyPercent}%
                     </td>
                     <td style={{ ...tdStyle, textAlign: 'right', fontWeight: 600, color: '#2563EB' }}>
                       {formatCurrency(b.averageTicketSize)}
                     </td>
                     <td style={{ ...tdStyle, textAlign: 'center', fontWeight: 600 }}>
-                      {b.completedKots}/{b.totalKots}
+                      {language === 'mr' ? `${toDevanagari(b.completedKots)}/${toDevanagari(b.totalKots)}` : `${b.completedKots}/${b.totalKots}`}
                     </td>
                     <td style={{ ...tdStyle, textAlign: 'right', fontWeight: 600, color: '#DC2626' }}>
                       {formatCurrency(b.totalPurchaseAmount)}
@@ -322,7 +341,7 @@ export const OwnerBillingPerformance: React.FC = () => {
               ) : (
                 <tr>
                   <td colSpan={9} style={{ textAlign: 'center', padding: '36px', color: '#94A3B8' }}>
-                    No billing data found.
+                    {language === 'mr' ? 'कोणताही बिलिंग डेटा आढळला नाही.' : 'No billing data found.'}
                   </td>
                 </tr>
               )}
