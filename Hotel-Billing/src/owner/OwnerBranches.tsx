@@ -21,8 +21,10 @@ import {
 } from 'lucide-react';
 import { ownerService, BranchRecord, UpdateBranchPayload } from './ownerService';
 import { useToast } from '../context/ToastContext';
+import { useLanguage } from '../context/LanguageContext';
 
 export const OwnerBranches: React.FC = () => {
+  const { language, toDevanagari, localizeName } = useLanguage();
   const [branches, setBranches] = useState<BranchRecord[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [search, setSearch] = useState<string>('');
@@ -149,11 +151,12 @@ export const OwnerBranches: React.FC = () => {
   });
 
   const formatCurrency = (amt: number | undefined) => {
-    return new Intl.NumberFormat('en-IN', {
+    const formatted = new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
       maximumFractionDigits: 2,
     }).format(Number(amt || 0));
+    return language === 'mr' ? toDevanagari(formatted) : formatted;
   };
 
   return (
@@ -162,7 +165,7 @@ export const OwnerBranches: React.FC = () => {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px' }}>
         <div>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-heading, #0F172A)', margin: 0 }}>
-            Branch Management
+            {language === 'mr' ? 'शाखा व्यवस्थापन' : 'Branch Management'}
           </h1>
         </div>
 
@@ -170,7 +173,7 @@ export const OwnerBranches: React.FC = () => {
           <button
             onClick={() => window.location.reload()}
             className="owner-btn-secondary"
-            title="Refresh"
+            title={language === 'mr' ? 'रीफ्रेश करा' : 'Refresh'}
             aria-label="Refresh"
             style={{
               display: 'flex',
@@ -207,7 +210,7 @@ export const OwnerBranches: React.FC = () => {
             }}
           >
             <PlusCircle size={16} />
-            <span>Add New Branch</span>
+            <span>{language === 'mr' ? 'नवीन शाखा जोडा' : 'Add New Branch'}</span>
           </button>
         </div>
       </div>
@@ -229,7 +232,11 @@ export const OwnerBranches: React.FC = () => {
         <input
           type="text"
           className="owner-search-input"
-          placeholder="Search by branch name, code, city, manager name or login username..."
+          placeholder={
+            language === 'mr'
+              ? 'शाखेचे नाव, कोड, शहर, व्यवस्थापक किंवा युझरनेमद्वारे शोधा...'
+              : 'Search by branch name, code, city, manager name or login username...'
+          }
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           style={{
@@ -251,7 +258,7 @@ export const OwnerBranches: React.FC = () => {
               fontSize: '0.8rem',
             }}
           >
-            Clear
+            {language === 'mr' ? 'साफ करा' : 'Clear'}
           </button>
         )}
       </div>
@@ -271,14 +278,14 @@ export const OwnerBranches: React.FC = () => {
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.86rem' }}>
             <thead>
               <tr style={{ backgroundColor: 'var(--bg-subtle, #F8FAFC)', borderBottom: '1px solid var(--border-slate, #E2E8F0)', color: '#475569' }}>
-                <th style={thStyle}>Branch Info</th>
-                <th style={thStyle}>Location</th>
-                <th style={thStyle}>Manager & Phone</th>
-                <th style={thStyle}>Login Username</th>
-                <th style={thStyle}>Status</th>
-                <th style={{ ...thStyle, textAlign: 'right' }}>Total Sales</th>
-                <th style={{ ...thStyle, textAlign: 'center' }}>Staff</th>
-                <th style={{ ...thStyle, textAlign: 'center' }}>Actions</th>
+                <th style={thStyle}>{language === 'mr' ? 'शाखा माहिती' : 'Branch Info'}</th>
+                <th style={thStyle}>{language === 'mr' ? 'ठिकाण' : 'Location'}</th>
+                <th style={thStyle}>{language === 'mr' ? 'व्यवस्थापक आणि फोन' : 'Manager & Phone'}</th>
+                <th style={thStyle}>{language === 'mr' ? 'लॉगिन युझरनेम' : 'Login Username'}</th>
+                <th style={thStyle}>{language === 'mr' ? 'स्थिती' : 'Status'}</th>
+                <th style={{ ...thStyle, textAlign: 'right' }}>{language === 'mr' ? 'एकूण विक्री' : 'Total Sales'}</th>
+                <th style={{ ...thStyle, textAlign: 'center' }}>{language === 'mr' ? 'कर्मचारी' : 'Staff'}</th>
+                <th style={{ ...thStyle, textAlign: 'center' }}>{language === 'mr' ? 'कृती' : 'Actions'}</th>
               </tr>
             </thead>
             <tbody>
@@ -311,22 +318,34 @@ export const OwnerBranches: React.FC = () => {
                           <Building2 size={18} color="#B45309" />
                         </div>
                         <div>
-                          <strong style={{ color: 'var(--text-heading, #0F172A)', fontSize: '0.92rem' }}>{b.name}</strong>
-                          <div style={{ fontSize: '0.74rem', color: 'var(--text-muted, #64748B)' }}>Code: {b.code}</div>
+                          <strong style={{ color: 'var(--text-heading, #0F172A)', fontSize: '0.92rem' }}>
+                            {language === 'mr' ? localizeName(b.name) : b.name}
+                          </strong>
+                          <div style={{ fontSize: '0.74rem', color: 'var(--text-muted, #64748B)' }}>
+                            {language === 'mr' ? 'कोड: ' : 'Code: '}{language === 'mr' ? toDevanagari(b.code) : b.code}
+                          </div>
                         </div>
                       </div>
                     </td>
                     <td style={tdStyle}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-body, #334155)' }}>
                         <MapPin size={14} color="var(--text-muted, #94A3B8)" />
-                        <span>{b.city ? `${b.city}${b.state ? `, ${b.state}` : ''}` : 'Not Specified'}</span>
+                        <span>
+                          {b.city
+                            ? `${language === 'mr' ? localizeName(b.city) : b.city}${b.state ? `, ${language === 'mr' ? localizeName(b.state) : b.state}` : ''}`
+                            : (language === 'mr' ? 'निर्दिष्ट नाही' : 'Not Specified')}
+                        </span>
                       </div>
                     </td>
                     <td style={tdStyle}>
-                      <div style={{ color: 'var(--text-heading, #0F172A)', fontWeight: 600 }}>{b.managerName || 'General Manager'}</div>
+                      <div style={{ color: 'var(--text-heading, #0F172A)', fontWeight: 600 }}>
+                        {b.managerName
+                          ? (language === 'mr' ? localizeName(b.managerName) : b.managerName)
+                          : (language === 'mr' ? 'जनरल मॅनेजर' : 'General Manager')}
+                      </div>
                       <div style={{ fontSize: '0.74rem', color: 'var(--text-muted, #64748B)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                         <Phone size={12} color="var(--text-muted, #94A3B8)" />
-                        <span>{b.contactPhone || '—'}</span>
+                        <span>{b.contactPhone ? (language === 'mr' ? toDevanagari(b.contactPhone) : b.contactPhone) : '—'}</span>
                       </div>
                     </td>
                     <td style={tdStyle}>
@@ -345,7 +364,9 @@ export const OwnerBranches: React.FC = () => {
                           <code style={{ fontSize: '0.8rem', fontWeight: 700 }}>{b.username}</code>
                         </div>
                       ) : (
-                        <span style={{ color: 'var(--text-muted, #94A3B8)', fontSize: '0.78rem' }}>None</span>
+                        <span style={{ color: 'var(--text-muted, #94A3B8)', fontSize: '0.78rem' }}>
+                          {language === 'mr' ? 'काही नाही' : 'None'}
+                        </span>
                       )}
                     </td>
                     <td style={tdStyle}>
@@ -363,34 +384,38 @@ export const OwnerBranches: React.FC = () => {
                         }}
                       >
                         {b.status === 'ACTIVE' ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
-                        {b.status}
+                        {b.status === 'ACTIVE' ? (language === 'mr' ? 'सक्रिय' : 'ACTIVE') : (language === 'mr' ? 'निष्क्रिय' : 'INACTIVE')}
                       </span>
                     </td>
                     <td style={{ ...tdStyle, textAlign: 'right', fontWeight: 700, color: 'var(--text-heading, #0F172A)' }}>
                       {formatCurrency(b.totalSales)}
                     </td>
                     <td style={{ ...tdStyle, textAlign: 'center', fontWeight: 600, color: 'var(--text-muted, #475569)' }}>
-                      {b.staffCount}
+                      {language === 'mr' ? toDevanagari(b.staffCount) : b.staffCount}
                     </td>
                     <td style={{ ...tdStyle, textAlign: 'center' }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
                         <button
                           onClick={() => handleOpenDetail(b)}
-                          title="View Details"
+                          title={language === 'mr' ? 'तपशील पहा' : 'View Details'}
                           className="owner-action-btn owner-action-btn-view"
                         >
                           <Eye size={15} />
                         </button>
                         <button
                           onClick={() => handleOpenEdit(b)}
-                          title="Edit Branch"
+                          title={language === 'mr' ? 'शाखा संपादित करा' : 'Edit Branch'}
                           className="owner-action-btn owner-action-btn-edit"
                         >
                           <Edit2 size={15} />
                         </button>
                         <button
                           onClick={() => handleToggleStatus(b)}
-                          title={b.status === 'ACTIVE' ? 'Deactivate Branch' : 'Activate Branch'}
+                          title={
+                            b.status === 'ACTIVE'
+                              ? (language === 'mr' ? 'शाखा निष्क्रिय करा' : 'Deactivate Branch')
+                              : (language === 'mr' ? 'शाखा सक्रिय करा' : 'Activate Branch')
+                          }
                           className={`owner-action-btn owner-action-btn-power ${b.status === 'ACTIVE' ? 'active' : 'inactive'}`}
                         >
                           <Power size={15} />
@@ -398,7 +423,7 @@ export const OwnerBranches: React.FC = () => {
                         <button
                           onClick={() => handleDeleteClick(b)}
                           disabled={deletingBranchId === b.id}
-                          title="Delete Branch"
+                          title={language === 'mr' ? 'शाखा हटवा' : 'Delete Branch'}
                           className="owner-action-btn"
                           style={{
                             color: '#DC2626',
@@ -417,7 +442,9 @@ export const OwnerBranches: React.FC = () => {
               ) : (
                 <tr>
                   <td colSpan={8} style={{ textAlign: 'center', padding: '40px', color: '#94A3B8' }}>
-                    No branches matched your filter. Click "Add New Branch" to create a new branch.
+                    {language === 'mr'
+                      ? 'कोणतीही शाखा आढळली नाही. नवीन शाखा जोडण्यासाठी "नवीन शाखा जोडा" वर क्लिक करा.'
+                      : 'No branches matched your filter. Click "Add New Branch" to create a new branch.'}
                   </td>
                 </tr>
               )}
@@ -580,33 +607,51 @@ export const OwnerBranches: React.FC = () => {
               </div>
               <div>
                 <span style={{ color: 'var(--text-muted, #64748B)', display: 'block', fontSize: '0.78rem' }}>Branch Manager</span>
-                <strong style={{ color: 'var(--text-heading, #0F172A)' }}>{selectedBranch.managerName || 'General Manager'}</strong>
+                <strong style={{ color: 'var(--text-heading, #0F172A)' }}>
+                  {selectedBranch.managerName ? (language === 'mr' ? localizeName(selectedBranch.managerName) : selectedBranch.managerName) : (language === 'mr' ? 'जनरल मॅनेजर' : 'General Manager')}
+                </strong>
               </div>
               <div>
-                <span style={{ color: 'var(--text-muted, #64748B)', display: 'block', fontSize: '0.78rem' }}>Contact Phone</span>
-                <strong style={{ color: 'var(--text-heading, #0F172A)' }}>{selectedBranch.contactPhone || '—'}</strong>
+                <span style={{ color: 'var(--text-muted, #64748B)', display: 'block', fontSize: '0.78rem' }}>
+                  {language === 'mr' ? 'संपर्क फोन' : 'Contact Phone'}
+                </span>
+                <strong style={{ color: 'var(--text-heading, #0F172A)' }}>
+                  {selectedBranch.contactPhone ? (language === 'mr' ? toDevanagari(selectedBranch.contactPhone) : selectedBranch.contactPhone) : '—'}
+                </strong>
               </div>
               <div>
-                <span style={{ color: 'var(--text-muted, #64748B)', display: 'block', fontSize: '0.78rem' }}>Login Account Username</span>
-                <strong style={{ color: '#2563EB' }}>{selectedBranch.username || 'Not configured'}</strong>
+                <span style={{ color: 'var(--text-muted, #64748B)', display: 'block', fontSize: '0.78rem' }}>
+                  {language === 'mr' ? 'लॉगिन वापरकर्ता नाव' : 'Login Account Username'}
+                </span>
+                <strong style={{ color: '#2563EB' }}>
+                  {selectedBranch.username || (language === 'mr' ? 'कॉन्फिगर केलेले नाही' : 'Not configured')}
+                </strong>
               </div>
               <div>
-                <span style={{ color: 'var(--text-muted, #64748B)', display: 'block', fontSize: '0.78rem' }}>Staff Count</span>
-                <strong style={{ color: 'var(--text-heading, #0F172A)' }}>{selectedBranch.staffCount} Members</strong>
+                <span style={{ color: 'var(--text-muted, #64748B)', display: 'block', fontSize: '0.78rem' }}>
+                  {language === 'mr' ? 'कर्मचारी संख्या' : 'Staff Count'}
+                </span>
+                <strong style={{ color: 'var(--text-heading, #0F172A)' }}>
+                  {language === 'mr' ? toDevanagari(selectedBranch.staffCount) : selectedBranch.staffCount} {language === 'mr' ? 'कर्मचारी' : 'Members'}
+                </strong>
               </div>
               <div style={{ gridColumn: '1 / -1' }}>
-                <span style={{ color: 'var(--text-muted, #64748B)', display: 'block', fontSize: '0.78rem' }}>Physical Address</span>
+                <span style={{ color: 'var(--text-muted, #64748B)', display: 'block', fontSize: '0.78rem' }}>
+                  {language === 'mr' ? 'भौतिक पत्ता' : 'Physical Address'}
+                </span>
                 <span style={{ color: 'var(--text-heading, #0F172A)' }}>
-                  {selectedBranch.address || 'Hotel Premises'}, {selectedBranch.city || ''} {selectedBranch.state || ''}
+                  {selectedBranch.address || (language === 'mr' ? 'हॉटेल परिसर' : 'Hotel Premises')}, {selectedBranch.city ? (language === 'mr' ? localizeName(selectedBranch.city) : selectedBranch.city) : ''} {selectedBranch.state ? (language === 'mr' ? localizeName(selectedBranch.state) : selectedBranch.state) : ''}
                 </span>
               </div>
               <div style={{ gridColumn: '1 / -1', backgroundColor: 'var(--bg-subtle, #F8FAFC)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-slate, #E2E8F0)' }}>
-                <span style={{ color: 'var(--text-muted, #64748B)', display: 'block', fontSize: '0.78rem' }}>Cumulative Realized Sales</span>
+                <span style={{ color: 'var(--text-muted, #64748B)', display: 'block', fontSize: '0.78rem' }}>
+                  {language === 'mr' ? 'संचयी एकूण विक्री' : 'Cumulative Realized Sales'}
+                </span>
                 <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#15803D' }}>
                   {formatCurrency(selectedBranch.totalSales)}
                 </span>
                 <span style={{ fontSize: '0.78rem', color: 'var(--text-muted, #64748B)', marginLeft: '10px' }}>
-                  ({selectedBranch.invoiceCount} invoices generated)
+                  ({language === 'mr' ? toDevanagari(selectedBranch.invoiceCount) : selectedBranch.invoiceCount} {language === 'mr' ? 'इनव्हॉइसेस तयार केली' : 'invoices generated'})
                 </span>
               </div>
             </div>

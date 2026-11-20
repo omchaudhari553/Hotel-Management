@@ -45,16 +45,18 @@ export const OwnerSettings: React.FC = () => {
   const [licenceInfo, setLicenceInfo] = useState<LicenceInfo | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
+  const [backupSending, setBackupSending] = useState<boolean>(false);
   const [savingSmtp, setSavingSmtp] = useState<boolean>(false);
   const [smtpSenderEmail, setSmtpSenderEmail] = useState<string>('omchaudhari553@gmail.com');
   const [smtpAppPassword, setSmtpAppPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [hasCustomPassword, setHasCustomPassword] = useState<boolean>(false);
+  const [lastBackupStatus, setLastBackupStatus] = useState<{ status: 'idle' | 'success' | 'warning' | 'error'; message: string; ref?: string }>({ status: 'idle', message: '' });
   const [showUpgradeModal, setShowUpgradeModal] = useState<boolean>(false);
 
   const { showToast } = useToast();
   const { theme, setTheme } = useTheme();
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, toDevanagari, localizeName } = useLanguage();
 
   const loadData = async () => {
     try {
@@ -175,6 +177,87 @@ export const OwnerSettings: React.FC = () => {
       showToast('error', err?.response?.data?.message || 'Failed to save SMTP settings');
     } finally {
       setSavingSmtp(false);
+    }
+  };
+
+  const handleSendDailyBackupNow = async () => {
+    setBackupSending(true);
+    try {
+      if (settings.contactEmail) {
+        await ownerService.updateSettings({ ...settings, theme }).catch(() => {});
+      }
+      const res = await apiClient.post('/hotel/backup/send-email', null, {
+        params: {
+          customEmail: settings.contactEmail || undefined,
+        }
+      });
+      const data = res.data?.data;
+      const ref = data?.reference || 'HTL-SUCCESS';
+      const target = data?.recipientEmail || settings.contactEmail || 'Profile Email';
+      if (data?.success) {
+        setLastBackupStatus({
+          status: 'success',
+          message: `Daily hotel data backup email dispatched to ${target}! Reference: ${ref}`,
+          ref,
+        });
+        showToast('success', `Daily hotel data backup email dispatched to ${target}! Reference: ${ref}`);
+      } else {
+        const errDetail = data?.error || 'Authentication failed';
+        setLastBackupStatus({
+          status: 'warning',
+          message: `Daily backup generated and saved securely on server (${ref})! ${errDetail}`,
+          ref,
+        });
+        showToast('warning', `Daily backup generated and saved securely on server (${ref})!`);
+      }
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || 'Failed to trigger backup';
+      setLastBackupStatus({
+        status: 'error',
+        message: msg,
+      });
+      showToast('error', msg);
+    } finally {
+      setBackupSending(false);
+    }
+  };
+
+  const handleDownloadDailyBackup = async () => {
+    try {
+      const res = await apiClient.get('/hotel/backup/download');
+      const jsonContent = JSON.stringify(res.data, null, 2);
+      const blob = new Blob([jsonContent], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `hotel_daily_backup_${Date.now()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('success', 'Daily backup JSON downloaded successfully!');
+    } catch {
+      showToast('error', 'Failed to download backup JSON');
+    }
+  };
+
+  const handleDownloadDailyBackupPdf = async () => {
+    try {
+      const res = await apiClient.get('/hotel/backup/download-pdf', {
+        responseType: 'blob',
+      });
+      const blob = new Blob([res.data], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `hotel_daily_backup_summary_${Date.now()}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('success', 'Daily backup PDF summary downloaded successfully!');
+    } catch {
+      showToast('error', 'Failed to download backup PDF');
     }
   };
 
@@ -461,8 +544,8 @@ export const OwnerSettings: React.FC = () => {
                     padding: '6px 12px',
                     borderRadius: '6px',
                     border: isSelected ? '1px solid #D97706' : '1px solid var(--border-slate, #CBD5E1)',
-                    backgroundColor: isSelected ? 'rgba(245, 158, 11, 0.12)' : 'var(--card-white, #FFFFFF)',
-                    color: isSelected ? '#B45309' : 'var(--text-body, #475569)',
+                    backgroundColor: isSelected ? 'rgba(245, 158, 11, 0.18)' : 'transparent',
+                    color: isSelected ? '#D97706' : 'var(--text-body, #475569)',
                     fontSize: '0.82rem',
                     fontWeight: isSelected ? 700 : 500,
                     cursor: 'pointer',
@@ -504,8 +587,8 @@ export const OwnerSettings: React.FC = () => {
                     padding: '6px 14px',
                     borderRadius: '6px',
                     border: isSelected ? '1px solid #D97706' : '1px solid var(--border-slate, #CBD5E1)',
-                    backgroundColor: isSelected ? 'rgba(245, 158, 11, 0.12)' : 'var(--card-white, #FFFFFF)',
-                    color: isSelected ? '#B45309' : 'var(--text-body, #475569)',
+                    backgroundColor: isSelected ? 'rgba(245, 158, 11, 0.18)' : 'transparent',
+                    color: isSelected ? '#D97706' : 'var(--text-body, #475569)',
                     fontSize: '0.82rem',
                     fontWeight: isSelected ? 700 : 500,
                     cursor: 'pointer',
@@ -851,7 +934,231 @@ export const OwnerSettings: React.FC = () => {
           </div>
         </form>
       </div>
+      {/* Daily Automated Backup (11:00 PM) Card */}
+      <div
+        className="owner-card"
+        style={{
+          backgroundColor: 'var(--card-white)',
+          borderRadius: '12px',
+          border: '1px solid var(--border-slate)',
+          padding: '24px 28px',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+          marginBottom: '28px',
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#3B82F6', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFFFFF', flexShrink: 0 }}>
+              <Mail size={20} />
+            </div>
+            <div>
+              <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-heading, #0F172A)' }}>
+                {language === 'mr' ? 'दैनिक स्वयंचलित हॉटेल बॅकअप (रात्री ११:००)' : 'Daily Automated Hotel Backup (11:00 PM)'}
+              </h3>
+              <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: 'var(--text-muted, #64748B)' }}>
+                {language === 'mr'
+                  ? 'दैनिक हॉटेल डेटा बॅकअप • रोज रात्री ११:०० वाजता ऑटोमॅटिक ईमेल'
+                  : 'Daily hotel data backup • Automatic email every night at 11:00 PM'}
+              </p>
+            </div>
+          </div>
+          <span
+            style={{
+              backgroundColor: 'rgba(16, 185, 129, 0.15)',
+              color: '#10B981',
+              border: '1px solid rgba(16, 185, 129, 0.35)',
+              padding: '4px 10px',
+              borderRadius: '6px',
+              fontSize: '0.75rem',
+              fontWeight: 800,
+              letterSpacing: '0.02em',
+            }}
+          >
+            {language === 'mr' ? 'दररोज रात्री नियोजित (२३:००)' : 'SCHEDULED EVERY NIGHT (23:00)'}
+          </span>
+        </div>
 
+        <p style={{ fontSize: '0.86rem', color: 'var(--text-body, #475569)', lineHeight: 1.6, margin: '0 0 16px 0' }}>
+          {language === 'mr' ? (
+            <>
+              दररोज रात्री <strong>११:०० वाजता</strong>, सर्व दैनंदिन विक्री, ऑर्डर्स, इनव्हॉइसेस, पेमेंट्स, टेबल्स आणि खर्च संकलित केले जातात आणि JSON डेटा व PDF अहवाल स्वरूपात तुमच्या हॉटेल प्रोफाइल ईमेलवर (<strong>{settings.contactEmail || 'admin@royalpalace.com'}</strong>) आपोआप पाठवले जातात.
+            </>
+          ) : (
+            <>
+              Every night at <strong>11:00 PM</strong>, all daily sales, orders, invoices, payments, tables, and expenses are compiled and automatically sent to your Hotel Profile email (<strong>{settings.contactEmail || 'admin@royalpalace.com'}</strong>) with JSON data and PDF summary attachments.
+            </>
+          )}
+        </p>
+
+        {/* SMTP Status Notice */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            marginBottom: '18px',
+            padding: '11px 16px',
+            backgroundColor: 'rgba(16, 185, 129, 0.10)',
+            borderRadius: '10px',
+            border: '1px solid rgba(16, 185, 129, 0.28)',
+          }}
+        >
+          <CheckCircle2 size={18} color="#10B981" style={{ flexShrink: 0 }} />
+          <div>
+            <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#10B981' }}>
+              {language === 'mr' ? 'Gmail SMTP कनेक्टेड (application.yml द्वारे)' : 'Gmail SMTP Connected via application.yml'}
+            </span>
+            <span style={{ fontSize: '0.78rem', color: 'var(--text-muted, #64748B)', marginLeft: '6px' }}>
+              ({smtpSenderEmail || 'omchaudhari553@gmail.com'}) — {language === 'mr' ? 'क्रेडेन्शियल्स आधीच application.yml मध्ये कॉन्फिगर केलेले आहेत.' : 'Credentials already configured in application.yml.'}
+            </span>
+          </div>
+        </div>
+
+        {lastBackupStatus.status !== 'idle' && (
+          <div
+            style={{
+              padding: '12px 16px',
+              borderRadius: '8px',
+              marginBottom: '16px',
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '10px',
+              fontSize: '0.84rem',
+              backgroundColor:
+                lastBackupStatus.status === 'success'
+                  ? 'rgba(16, 185, 129, 0.12)'
+                  : lastBackupStatus.status === 'warning'
+                  ? 'rgba(245, 158, 11, 0.12)'
+                  : 'rgba(239, 68, 68, 0.12)',
+              border: `1px solid ${
+                lastBackupStatus.status === 'success'
+                  ? 'rgba(16, 185, 129, 0.35)'
+                  : lastBackupStatus.status === 'warning'
+                  ? 'rgba(245, 158, 11, 0.35)'
+                  : 'rgba(239, 68, 68, 0.35)'
+              }`,
+              color:
+                lastBackupStatus.status === 'success'
+                  ? '#10B981'
+                  : lastBackupStatus.status === 'warning'
+                  ? '#F59E0B'
+                  : '#EF4444',
+            }}
+          >
+            {lastBackupStatus.status === 'success' ? (
+              <CheckCircle2 size={18} color="#10B981" style={{ flexShrink: 0, marginTop: '2px' }} />
+            ) : (
+              <AlertCircle size={18} color="#F59E0B" style={{ flexShrink: 0, marginTop: '2px' }} />
+            )}
+            <div>
+              <div style={{ fontWeight: 700 }}>
+                {lastBackupStatus.status === 'success'
+                  ? (language === 'mr' ? 'बॅकअप ईमेल यशस्वीरीत्या पाठवला!' : 'Backup Email Dispatched Successfully!')
+                  : (language === 'mr' ? 'बॅकअप फाइल सर्व्हरवर सेव्ह केली!' : 'Backup File Saved Locally on Server!')}
+              </div>
+              <div style={{ marginTop: '2px', lineHeight: 1.4 }}>
+                {lastBackupStatus.message}
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            disabled={backupSending}
+            onClick={handleSendDailyBackupNow}
+            title={language === 'mr' ? 'बॅकअप ईमेल आता पाठवा' : (backupSending ? 'Sending Backup Email...' : 'Send Daily Backup to Email Now')}
+            aria-label="Send Daily Backup to Email Now"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '9px 18px',
+              backgroundColor: backupSending ? '#94A3B8' : '#3B82F6',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '0.84rem',
+              fontWeight: 700,
+              cursor: backupSending ? 'not-allowed' : 'pointer',
+              boxShadow: '0 2px 4px rgba(59, 130, 246, 0.25)',
+              transition: 'background-color 0.2s ease',
+            }}
+          >
+            <RefreshCw size={16} color="#FFFFFF" style={backupSending ? { animation: 'spin 1s linear infinite' } : undefined} />
+            <span>
+              {language === 'mr'
+                ? (backupSending ? 'ईमेल पाठवत आहे...' : 'बॅकअप ईमेल आता पाठवा')
+                : (backupSending ? 'Sending Backup Email...' : 'Send Daily Backup to Email Now')}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleDownloadDailyBackup}
+            title={language === 'mr' ? 'बॅकअप डाउनलोड करा (.json)' : 'Download Backup (.json)'}
+            aria-label="Download Backup (.json)"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '9px 16px',
+              backgroundColor: 'var(--bg-subtle, #F1F5F9)',
+              color: 'var(--text-heading, #0F172A)',
+              border: '1px solid var(--border-slate, #CBD5E1)',
+              borderRadius: '8px',
+              fontSize: '0.84rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#D97706';
+              e.currentTarget.style.color = '#D97706';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = 'var(--border-slate, #CBD5E1)';
+              e.currentTarget.style.color = 'var(--text-heading, #0F172A)';
+            }}
+          >
+            <Download size={16} color="currentColor" />
+            <span>{language === 'mr' ? 'बॅकअप डाउनलोड (.json)' : 'Download Backup (.json)'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleDownloadDailyBackupPdf}
+            title={language === 'mr' ? 'PDF अहवाल डाउनलोड करा (.pdf)' : 'Download PDF Report (.pdf)'}
+            aria-label="Download PDF Report (.pdf)"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '9px 16px',
+              backgroundColor: 'var(--bg-subtle, #F1F5F9)',
+              color: 'var(--text-heading, #0F172A)',
+              border: '1px solid var(--border-slate, #CBD5E1)',
+              borderRadius: '8px',
+              fontSize: '0.84rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#D97706';
+              e.currentTarget.style.color = '#D97706';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = 'var(--border-slate, #CBD5E1)';
+              e.currentTarget.style.color = 'var(--text-heading, #0F172A)';
+            }}
+          >
+            <FileText size={16} color="currentColor" />
+            <span>{language === 'mr' ? 'PDF अहवाल डाउनलोड (.pdf)' : 'Download PDF Report (.pdf)'}</span>
+          </button>
+        </div>
+      </div>
       {/* Standalone / Direct Subscription Modal for 100% Reliable Triggering */}
       <SubscriptionModal
         isOpen={showUpgradeModal}

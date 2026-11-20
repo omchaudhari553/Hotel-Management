@@ -15,10 +15,12 @@ import {
 } from 'lucide-react';
 import { ownerService, CreateBranchPayload } from './ownerService';
 import { useToast } from '../context/ToastContext';
+import { useLanguage } from '../context/LanguageContext';
 
 export const OwnerBranchCreate: React.FC = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { language } = useLanguage();
 
   const [form, setForm] = useState<CreateBranchPayload>({
     branchName: '',
@@ -124,7 +126,7 @@ export const OwnerBranchCreate: React.FC = () => {
         }}
       >
         <ArrowLeft size={16} />
-        <span>Back to Branch Management</span>
+        <span>{language === 'mr' ? 'शाखा व्यवस्थापनाकडे परत जा' : 'Back to Branch Management'}</span>
       </button>
 
       {/* Card Header */}
@@ -140,10 +142,12 @@ export const OwnerBranchCreate: React.FC = () => {
       >
         <div style={{ borderBottom: '1px solid var(--border-slate, #F1F5F9)', paddingBottom: '16px', marginBottom: '22px' }}>
           <h1 style={{ fontSize: '1.45rem', fontWeight: 800, color: 'var(--text-heading, #0F172A)', margin: 0 }}>
-            Create New Hotel Branch
+            {language === 'mr' ? 'नवीन हॉटेल शाखा तयार करा' : 'Create New Hotel Branch'}
           </h1>
           <p style={{ margin: '4px 0 0', color: 'var(--text-muted, #64748B)', fontSize: '0.86rem' }}>
-            Configure branch location details and automatically provision separate branch login credentials
+            {language === 'mr'
+              ? 'शाखेच्या ठिकाणाचा तपशील कॉन्फिगर करा आणि स्वतंत्र शाखा लॉगिन क्रेडेन्शियल तयार करा'
+              : 'Configure branch location details and automatically provision separate branch login credentials'}
           </p>
         </div>
 
@@ -184,18 +188,18 @@ export const OwnerBranchCreate: React.FC = () => {
               }}
             >
               <Building2 size={16} />
-              <span>1. Branch Profile & Location</span>
+              <span>{language === 'mr' ? '१. शाखा प्रोफाइल आणि स्थान' : '1. Branch Profile & Location'}</span>
             </h3>
 
             <div className="owner-form-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
                 <label style={labelStyle}>
-                  Branch Name <span style={{ color: '#DC2626' }}>*</span>
+                  {language === 'mr' ? 'शाखेचे नाव' : 'Branch Name'} <span style={{ color: '#DC2626' }}>*</span>
                 </label>
                 <input
                   type="text"
                   name="branchName"
-                  placeholder="e.g. Main Branch, City Center Branch"
+                  placeholder={language === 'mr' ? 'उदा. मुख्य शाखा, मुंबई शाखा' : 'e.g. Main Branch, City Center Branch'}
                   value={form.branchName}
                   onChange={handleChange}
                   required
@@ -205,12 +209,12 @@ export const OwnerBranchCreate: React.FC = () => {
 
               <div>
                 <label style={labelStyle}>
-                  Contact Number <span style={{ color: '#DC2626' }}>*</span>
+                  {language === 'mr' ? 'संपर्क क्रमांक' : 'Contact Number'} <span style={{ color: '#DC2626' }}>*</span>
                 </label>
                 <input
                   type="tel"
                   name="contactNumber"
-                  placeholder="10-digit mobile number (e.g. 9876543210)"
+                  placeholder={language === 'mr' ? '१०-अंकी मोबाईल नंबर (उदा. ९८७६५४३२१०)' : '10-digit mobile number (e.g. 9876543210)'}
                   value={form.contactNumber}
                   onChange={handleChange}
                   maxLength={10}
@@ -220,11 +224,11 @@ export const OwnerBranchCreate: React.FC = () => {
               </div>
 
               <div>
-                <label style={labelStyle}>City</label>
+                <label style={labelStyle}>{language === 'mr' ? 'शहर' : 'City'}</label>
                 <input
                   type="text"
                   name="city"
-                  placeholder="e.g. Mumbai, Pune"
+                  placeholder={language === 'mr' ? 'उदा. मुंबई, पुणे' : 'e.g. Mumbai, Pune'}
                   value={form.city}
                   onChange={handleChange}
                   style={inputStyle}
@@ -232,11 +236,11 @@ export const OwnerBranchCreate: React.FC = () => {
               </div>
 
               <div>
-                <label style={labelStyle}>State</label>
+                <label style={labelStyle}>{language === 'mr' ? 'राज्य' : 'State'}</label>
                 <input
                   type="text"
                   name="state"
-                  placeholder="e.g. Maharashtra"
+                  placeholder={language === 'mr' ? 'उदा. महाराष्ट्र' : 'e.g. Maharashtra'}
                   value={form.state}
                   onChange={handleChange}
                   style={inputStyle}
@@ -244,11 +248,11 @@ export const OwnerBranchCreate: React.FC = () => {
               </div>
 
               <div style={{ gridColumn: '1 / -1' }}>
-                <label style={labelStyle}>Branch Address</label>
+                <label style={labelStyle}>{language === 'mr' ? 'शाखेचा पत्ता' : 'Branch Address'}</label>
                 <input
                   type="text"
                   name="branchAddress"
-                  placeholder="Full physical address or hotel premises location"
+                  placeholder={language === 'mr' ? 'पूर्ण भौतिक पत्ता किंवा हॉटेल परिसराचे स्थान' : 'Full physical address or hotel premises location'}
                   value={form.branchAddress}
                   onChange={handleChange}
                   style={inputStyle}
@@ -273,18 +277,18 @@ export const OwnerBranchCreate: React.FC = () => {
               }}
             >
               <Shield size={16} />
-              <span>2. Dedicated Branch Login Credentials</span>
+              <span>{language === 'mr' ? '२. स्वतंत्र शाखा लॉगिन क्रेडेन्शियल' : '2. Dedicated Branch Login Credentials'}</span>
             </h3>
 
             <div className="owner-form-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
                 <label style={labelStyle}>
-                  Branch Manager Name <span style={{ color: '#DC2626' }}>*</span>
+                  {language === 'mr' ? 'शाखा व्यवस्थापक नाव' : 'Branch Manager Name'} <span style={{ color: '#DC2626' }}>*</span>
                 </label>
                 <input
                   type="text"
                   name="branchManagerName"
-                  placeholder="e.g. Rahul Sharma"
+                  placeholder={language === 'mr' ? 'उदा. राहुल शर्मा' : 'e.g. Rahul Sharma'}
                   value={form.branchManagerName}
                   onChange={handleChange}
                   required
@@ -294,41 +298,41 @@ export const OwnerBranchCreate: React.FC = () => {
 
               <div>
                 <label style={labelStyle}>
-                  Branch Status <span style={{ color: '#DC2626' }}>*</span>
+                  {language === 'mr' ? 'शाखा स्थिती' : 'Branch Status'} <span style={{ color: '#DC2626' }}>*</span>
                 </label>
                 <select name="status" value={form.status} onChange={handleChange} style={inputStyle}>
-                  <option value="ACTIVE">ACTIVE (Can log in & operate)</option>
-                  <option value="INACTIVE">INACTIVE (Account disabled)</option>
+                  <option value="ACTIVE">{language === 'mr' ? 'सक्रिय (ACTIVE - लॉग इन व कामकाज करू शकतात)' : 'ACTIVE (Can log in & operate)'}</option>
+                  <option value="INACTIVE">{language === 'mr' ? 'निष्क्रिय (INACTIVE - खाते अक्षम)' : 'INACTIVE (Account disabled)'}</option>
                 </select>
               </div>
 
               <div>
                 <label style={labelStyle}>
-                  Username <span style={{ color: '#DC2626' }}>*</span>
+                  {language === 'mr' ? 'वापरकर्ता नाव (Username)' : 'Username'} <span style={{ color: '#DC2626' }}>*</span>
                 </label>
                 <input
                   type="text"
                   name="username"
-                  placeholder="e.g. branch_admin, manager1"
+                  placeholder={language === 'mr' ? 'उदा. branch_admin, manager1' : 'e.g. branch_admin, manager1'}
                   value={form.username}
                   onChange={handleChange}
                   required
                   style={inputStyle}
                 />
                 <span style={{ fontSize: '0.74rem', color: 'var(--text-muted, #64748B)', marginTop: '3px', display: 'block' }}>
-                  Must be unique across the hotel system.
+                  {language === 'mr' ? 'संपूर्ण हॉटेल प्रणालीमध्ये अद्वितीय असणे आवश्यक आहे.' : 'Must be unique across the hotel system.'}
                 </span>
               </div>
 
               <div>
                 <label style={labelStyle}>
-                  Password <span style={{ color: '#DC2626' }}>*</span>
+                  {language === 'mr' ? 'पासवर्ड (Password)' : 'Password'} <span style={{ color: '#DC2626' }}>*</span>
                 </label>
                 <div style={{ position: 'relative' }}>
                   <input
                     type={showPassword ? 'text' : 'password'}
                     name="password"
-                    placeholder="Min 6 characters (stored as BCrypt hash)"
+                    placeholder={language === 'mr' ? 'किमान ६ अक्षरे (सुरक्षित हॅश म्हणून संग्रहित)' : 'Min 6 characters (stored as BCrypt hash)'}
                     value={form.password}
                     onChange={handleChange}
                     required
@@ -353,7 +357,7 @@ export const OwnerBranchCreate: React.FC = () => {
                   </button>
                 </div>
                 <span style={{ fontSize: '0.74rem', color: 'var(--text-muted, #64748B)', marginTop: '3px', display: 'block' }}>
-                  Hashed securely on server with BCrypt.
+                  {language === 'mr' ? 'BCrypt सह सर्व्हरवर सुरक्षितपणे हॅश केले जाते.' : 'Hashed securely on server with BCrypt.'}
                 </span>
               </div>
             </div>
@@ -385,7 +389,7 @@ export const OwnerBranchCreate: React.FC = () => {
                 cursor: 'pointer',
               }}
             >
-              Cancel
+              {language === 'mr' ? 'रद्द करा' : 'Cancel'}
             </button>
 
             <button
@@ -406,7 +410,9 @@ export const OwnerBranchCreate: React.FC = () => {
                 boxShadow: '0 2px 4px rgba(180, 83, 9, 0.25)',
               }}
             >
-              {submitting ? 'Creating Branch & Account...' : 'Create Branch & Account'}
+              {submitting
+                ? (language === 'mr' ? 'शाखा आणि खाते तयार होत आहे...' : 'Creating Branch & Account...')
+                : (language === 'mr' ? 'शाखा आणि खाते तयार करा' : 'Create Branch & Account')}
             </button>
           </div>
         </form>

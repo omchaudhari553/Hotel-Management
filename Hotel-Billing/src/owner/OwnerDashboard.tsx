@@ -29,6 +29,8 @@ import {
 import { ownerService, OwnerDashboardData } from './ownerService';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { useLanguage } from '../context/LanguageContext';
+
 
 export const OwnerDashboard: React.FC = () => {
   const [data, setData] = useState<OwnerDashboardData | null>(null);
@@ -38,6 +40,7 @@ export const OwnerDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { showToast } = useToast();
+  const { language, toDevanagari, localizeName } = useLanguage();
 
   const fetchDashboardData = async (isManual = false) => {
     try {
@@ -60,11 +63,12 @@ export const OwnerDashboard: React.FC = () => {
 
   const formatCurrency = (amount: number | undefined) => {
     const val = Number(amount || 0);
-    return new Intl.NumberFormat('en-IN', {
+    const formatted = new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
       maximumFractionDigits: 2,
     }).format(val);
+    return language === 'mr' ? toDevanagari(formatted) : formatted;
   };
 
   if (loading) {
@@ -72,7 +76,7 @@ export const OwnerDashboard: React.FC = () => {
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
         <RefreshCw size={36} color="#B45309" className="animate-spin" style={{ animation: 'spin 1s linear infinite' }} />
         <p style={{ marginTop: '14px', fontSize: '0.95rem', color: 'var(--text-muted, #64748B)', fontWeight: 600 }}>
-          Loading Consolidated Owner Dashboard...
+          {language === 'mr' ? 'कंसोलिडेटेड मालक डॅशबोर्ड लोड होत आहे...' : 'Loading Consolidated Owner Dashboard...'}
         </p>
       </div>
     );
@@ -108,8 +112,8 @@ export const OwnerDashboard: React.FC = () => {
           }}
         >
           {isForbidden
-            ? 'Sub-Branch Account Detected (Owner Privileges Required)'
-            : 'Unable to load Owner Dashboard'}
+            ? (language === 'mr' ? 'उप-शाखा खाते आढळले (मालक अधिकारांची आवश्यकता)' : 'Sub-Branch Account Detected (Owner Privileges Required)')
+            : (language === 'mr' ? 'मालक डॅशबोर्ड लोड करण्यात अयशस्वी' : 'Unable to load Owner Dashboard')}
         </h3>
         <p
           style={{
@@ -120,7 +124,9 @@ export const OwnerDashboard: React.FC = () => {
           }}
         >
           {isForbidden
-            ? 'You are currently logged in with a sub-branch account. The consolidated Owner Dashboard is reserved exclusively for the Central Business Owner (hoteladmin). To access this dashboard, please log in as Owner, or switch to your branch operational dashboard.'
+            ? (language === 'mr'
+              ? 'तुम्ही सध्या उप-शाखा खात्यासह लॉगिन केलेले आहात. कंसोलिडेटेड मालक डॅशबोर्ड केवळ केंद्रीय व्यवसाय मालकासाठी (hoteladmin) आरक्षित आहे. या डॅशबोर्डमध्ये प्रवेश करण्यासाठी, कृपया मालक म्हणून लॉगिन करा किंवा तुमच्या शाखेच्या कार्यप्रणाली डॅशबोर्डवर जा.'
+              : 'You are currently logged in with a sub-branch account. The consolidated Owner Dashboard is reserved exclusively for the Central Business Owner (hoteladmin). To access this dashboard, please log in as Owner, or switch to your branch operational dashboard.')
             : error}
         </p>
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
@@ -139,7 +145,7 @@ export const OwnerDashboard: React.FC = () => {
                   fontSize: '0.85rem',
                 }}
               >
-                Log In as Owner (hoteladmin)
+                {language === 'mr' ? 'मालक म्हणून लॉगिन करा (hoteladmin)' : 'Log In as Owner (hoteladmin)'}
               </button>
               <button
                 onClick={() => navigate('/hotel/dashboard')}
@@ -154,7 +160,7 @@ export const OwnerDashboard: React.FC = () => {
                   fontSize: '0.85rem',
                 }}
               >
-                Go to Branch Dashboard
+                {language === 'mr' ? 'शाखा डॅशबोर्डवर जा' : 'Go to Branch Dashboard'}
               </button>
             </>
           )}
@@ -171,7 +177,7 @@ export const OwnerDashboard: React.FC = () => {
               fontSize: '0.85rem',
             }}
           >
-            Retry
+            {language === 'mr' ? 'पुन्हा प्रयत्न करा' : 'Retry'}
           </button>
         </div>
       </div>
@@ -192,7 +198,7 @@ export const OwnerDashboard: React.FC = () => {
       >
         <div>
           <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-heading, #0F172A)', margin: 0 }}>
-            Central Executive Dashboard
+            {language === 'mr' ? 'केंद्रीय कार्यकारी डॅशबोर्ड' : 'Central Executive Dashboard'}
           </h1>
         </div>
 
@@ -202,8 +208,8 @@ export const OwnerDashboard: React.FC = () => {
             onClick={() => window.location.reload()}
             disabled={refreshing || loading}
             className="owner-btn-secondary"
-            title="Refresh Dashboard"
-            aria-label="Refresh Dashboard"
+            title={language === 'mr' ? 'रीफ्रेश करा' : 'Refresh Dashboard'}
+            aria-label={language === 'mr' ? 'रीफ्रेश करा' : 'Refresh Dashboard'}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -229,8 +235,10 @@ export const OwnerDashboard: React.FC = () => {
         <div className="owner-card" style={cardStyle}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
             <div style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
-              <span style={statLabelStyle}>Total Branches</span>
-              <div style={statValueStyle} title={`${data?.totalBranches || 0} Total Branches`}>{data?.totalBranches || 0}</div>
+              <span style={statLabelStyle}>{language === 'mr' ? 'एकूण शाखा' : 'Total Branches'}</span>
+              <div style={statValueStyle} title={`${data?.totalBranches || 0} Total Branches`}>
+                {language === 'mr' ? toDevanagari(data?.totalBranches || 0) : (data?.totalBranches || 0)}
+              </div>
             </div>
             <div style={{ ...iconContainerStyle, backgroundColor: 'rgba(37, 99, 235, 0.12)', color: '#2563EB' }}>
               <GitBranch size={16} />
@@ -242,7 +250,7 @@ export const OwnerDashboard: React.FC = () => {
         <div className="owner-card" style={cardStyle}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
             <div style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
-              <span style={statLabelStyle}>Today's Total Sales</span>
+              <span style={statLabelStyle}>{language === 'mr' ? 'आजची एकूण विक्री' : "Today's Total Sales"}</span>
               <div style={{ ...statValueStyle, color: '#15803D' }} title={formatCurrency(data?.todaySales)}>
                 {formatCurrency(data?.todaySales)}
               </div>
@@ -257,7 +265,7 @@ export const OwnerDashboard: React.FC = () => {
         <div className="owner-card" style={cardStyle}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
             <div style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
-              <span style={statLabelStyle}>Monthly Total Sales</span>
+              <span style={statLabelStyle}>{language === 'mr' ? 'मासिक एकूण विक्री' : 'Monthly Total Sales'}</span>
               <div style={{ ...statValueStyle, color: '#0369A1' }} title={formatCurrency(data?.monthlySales)}>
                 {formatCurrency(data?.monthlySales)}
               </div>
@@ -272,7 +280,7 @@ export const OwnerDashboard: React.FC = () => {
         <div className="owner-card" style={cardStyle}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
             <div style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
-              <span style={statLabelStyle}>Total Billing Amount</span>
+              <span style={statLabelStyle}>{language === 'mr' ? 'एकूण बिलिंग रक्कम' : 'Total Billing Amount'}</span>
               <div style={statValueStyle} title={formatCurrency(data?.totalBillingAmount)}>{formatCurrency(data?.totalBillingAmount)}</div>
             </div>
             <div style={{ ...iconContainerStyle, backgroundColor: 'rgba(245, 158, 11, 0.14)', color: '#B45309' }}>
@@ -285,7 +293,7 @@ export const OwnerDashboard: React.FC = () => {
         <div className="owner-card" style={cardStyle}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
             <div style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
-              <span style={statLabelStyle}>Total Payments Received</span>
+              <span style={statLabelStyle}>{language === 'mr' ? 'एकूण प्राप्त पेमेंट्स' : 'Total Payments Received'}</span>
               <div style={{ ...statValueStyle, color: '#16A34A' }} title={formatCurrency(data?.totalPayments)}>
                 {formatCurrency(data?.totalPayments)}
               </div>
@@ -300,7 +308,7 @@ export const OwnerDashboard: React.FC = () => {
         <div className="owner-card" style={cardStyle}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
             <div style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
-              <span style={statLabelStyle}>Total Purchase Amount</span>
+              <span style={statLabelStyle}>{language === 'mr' ? 'एकूण खरेदी रक्कम' : 'Total Purchase Amount'}</span>
               <div style={{ ...statValueStyle, color: '#B91C1C' }} title={formatCurrency(data?.totalPurchaseAmount)}>
                 {formatCurrency(data?.totalPurchaseAmount)}
               </div>
@@ -326,7 +334,7 @@ export const OwnerDashboard: React.FC = () => {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
           <div>
             <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-heading, #0F172A)', margin: 0 }}>
-              Branch Performance Comparison
+              {language === 'mr' ? 'शाखा कामगिरी तुलना' : 'Branch Performance Comparison'}
             </h2>
           </div>
           <button
@@ -343,7 +351,7 @@ export const OwnerDashboard: React.FC = () => {
               cursor: 'pointer',
             }}
           >
-            <span>Full Profit Analysis</span>
+            <span>{language === 'mr' ? 'संपूर्ण नफा विश्लेषण' : 'Full Profit Analysis'}</span>
             <ArrowUpRight size={16} />
           </button>
         </div>
@@ -352,29 +360,39 @@ export const OwnerDashboard: React.FC = () => {
           <div style={{ width: '100%', height: 320 }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
-                data={data.branchPerformanceComparison.filter((b: any) => b.status === undefined || b.status === 'ACTIVE')}
+                data={data.branchPerformanceComparison
+                  .filter((b: any) => b.status === undefined || b.status === 'ACTIVE')
+                  .map((b: any) => ({
+                    ...b,
+                    branchName: language === 'mr' ? localizeName(b.branchName) : b.branchName,
+                  }))}
                 margin={{ top: 10, right: 30, left: 20, bottom: 20 }}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border-slate, #E2E8F0)" />
                 <XAxis dataKey="branchName" tick={{ fill: 'var(--text-muted, #64748B)', fontSize: 12 }} />
                 <YAxis
                   tick={{ fill: 'var(--text-muted, #64748B)', fontSize: 12 }}
-                  tickFormatter={(val) => `₹${val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val}`}
+                  tickFormatter={(val) => {
+                    const str = `₹${val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val}`;
+                    return language === 'mr' ? toDevanagari(str) : str;
+                  }}
                 />
                 <Tooltip
                   formatter={(value: any) => formatCurrency(Number(value))}
                   contentStyle={{ backgroundColor: 'var(--card-white, #1E293B)', color: 'var(--text-heading, #FFFFFF)', borderRadius: '8px', border: '1px solid var(--border-slate, #334155)' }}
                 />
                 <Legend wrapperStyle={{ paddingTop: 10 }} />
-                <Bar dataKey="sales" name="Total Sales" fill="#F59E0B" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="payments" name="Payments Collected" fill="#10B981" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="purchases" name="Purchases" fill="#EF4444" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="sales" name={language === 'mr' ? 'एकूण विक्री' : 'Total Sales'} fill="#F59E0B" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="payments" name={language === 'mr' ? 'जमा पेमेंट्स' : 'Payments Collected'} fill="#10B981" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="purchases" name={language === 'mr' ? 'खरेदी' : 'Purchases'} fill="#EF4444" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         ) : (
           <div style={{ textAlign: 'center', padding: '40px', color: '#94A3B8', fontSize: '0.9rem' }}>
-            No branch comparison data available yet. Create branches to see graphical comparisons.
+            {language === 'mr'
+              ? 'अद्याप कोणताही तुलनात्मक डेटा उपलब्ध नाही. आलेखासाठी नवीन शाखा तयार करा.'
+              : 'No branch comparison data available yet. Create branches to see graphical comparisons.'}
           </div>
         )}
       </div>
@@ -393,7 +411,7 @@ export const OwnerDashboard: React.FC = () => {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
           <div>
             <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-heading, #0F172A)', margin: 0 }}>
-              Branch-wise Operational Overview
+              {language === 'mr' ? 'शाखानिहाय कामकाजाचा आढावा' : 'Branch-wise Operational Overview'}
             </h2>
           </div>
           <button
@@ -410,7 +428,7 @@ export const OwnerDashboard: React.FC = () => {
               cursor: 'pointer',
             }}
           >
-            <span>Manage Branches</span>
+            <span>{language === 'mr' ? 'शाखा व्यवस्थापित करा' : 'Manage Branches'}</span>
             <ArrowUpRight size={16} />
           </button>
         </div>
@@ -419,14 +437,14 @@ export const OwnerDashboard: React.FC = () => {
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.86rem' }}>
             <thead>
               <tr style={{ backgroundColor: 'var(--bg-subtle, #F8FAFC)', borderBottom: '1px solid var(--border-slate, #E2E8F0)', color: 'var(--text-muted, #475569)' }}>
-                <th style={thStyle}>Branch</th>
-                <th style={thStyle}>City / Location</th>
-                <th style={thStyle}>Manager & Contact</th>
-                <th style={thStyle}>Status</th>
-                <th style={{ ...thStyle, textAlign: 'right' }}>Today's Sales</th>
-                <th style={{ ...thStyle, textAlign: 'right' }}>Monthly Sales</th>
-                <th style={{ ...thStyle, textAlign: 'right' }}>Total Sales</th>
-                <th style={{ ...thStyle, textAlign: 'center' }}>Invoices</th>
+                <th style={thStyle}>{language === 'mr' ? 'शाखा' : 'Branch'}</th>
+                <th style={thStyle}>{language === 'mr' ? 'शहर / ठिकाण' : 'City / Location'}</th>
+                <th style={thStyle}>{language === 'mr' ? 'व्यवस्थापक आणि संपर्क' : 'Manager & Contact'}</th>
+                <th style={thStyle}>{language === 'mr' ? 'स्थिती' : 'Status'}</th>
+                <th style={{ ...thStyle, textAlign: 'right' }}>{language === 'mr' ? 'आजची विक्री' : "Today's Sales"}</th>
+                <th style={{ ...thStyle, textAlign: 'right' }}>{language === 'mr' ? 'मासिक विक्री' : 'Monthly Sales'}</th>
+                <th style={{ ...thStyle, textAlign: 'right' }}>{language === 'mr' ? 'एकूण विक्री' : 'Total Sales'}</th>
+                <th style={{ ...thStyle, textAlign: 'center' }}>{language === 'mr' ? 'इनव्हॉइसेस' : 'Invoices'}</th>
               </tr>
             </thead>
             <tbody>
@@ -440,22 +458,34 @@ export const OwnerDashboard: React.FC = () => {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <Building2 size={16} color="#B45309" />
                         <div>
-                          <strong style={{ color: 'var(--text-heading, #0F172A)' }}>{b.branchName}</strong>
-                          <div style={{ fontSize: '0.74rem', color: 'var(--text-muted, #64748B)' }}>Code: {b.code}</div>
+                          <strong style={{ color: 'var(--text-heading, #0F172A)' }}>
+                            {language === 'mr' ? localizeName(b.branchName) : b.branchName}
+                          </strong>
+                          <div style={{ fontSize: '0.74rem', color: 'var(--text-muted, #64748B)' }}>
+                            {language === 'mr' ? 'कोड: ' : 'Code: '}{language === 'mr' ? toDevanagari(b.code) : b.code}
+                          </div>
                         </div>
                       </div>
                     </td>
                     <td style={tdStyle}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#475569' }}>
                         <MapPin size={14} color="#94A3B8" />
-                        <span>{b.city || 'Not Specified'}</span>
+                        <span>
+                          {b.city
+                            ? (language === 'mr' ? localizeName(b.city) : b.city)
+                            : (language === 'mr' ? 'निर्दिष्ट नाही' : 'Not Specified')}
+                        </span>
                       </div>
                     </td>
                     <td style={tdStyle}>
-                      <div style={{ color: 'var(--text-heading, #1E293B)', fontWeight: 600 }}>{b.managerName || 'General Manager'}</div>
+                      <div style={{ color: 'var(--text-heading, #1E293B)', fontWeight: 600 }}>
+                        {b.managerName
+                          ? (language === 'mr' ? localizeName(b.managerName) : b.managerName)
+                          : (language === 'mr' ? 'जनरल मॅनेजर' : 'General Manager')}
+                      </div>
                       <div style={{ fontSize: '0.74rem', color: 'var(--text-muted, #64748B)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                         <Phone size={12} />
-                        <span>{b.contactPhone || '—'}</span>
+                        <span>{b.contactPhone ? (language === 'mr' ? toDevanagari(b.contactPhone) : b.contactPhone) : '—'}</span>
                       </div>
                     </td>
                     <td style={tdStyle}>
@@ -473,7 +503,7 @@ export const OwnerDashboard: React.FC = () => {
                         }}
                       >
                         {b.status === 'ACTIVE' ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
-                        {b.status}
+                        {b.status === 'ACTIVE' ? (language === 'mr' ? 'सक्रिय' : 'ACTIVE') : (language === 'mr' ? 'निष्क्रिय' : 'INACTIVE')}
                       </span>
                     </td>
                     <td style={{ ...tdStyle, textAlign: 'right', fontWeight: 700, color: '#15803D' }}>
@@ -486,14 +516,16 @@ export const OwnerDashboard: React.FC = () => {
                       {formatCurrency(b.totalSales)}
                     </td>
                     <td style={{ ...tdStyle, textAlign: 'center', fontWeight: 600, color: 'var(--text-muted, #475569)' }}>
-                      {b.invoiceCount}
+                      {language === 'mr' ? toDevanagari(b.invoiceCount) : b.invoiceCount}
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
                   <td colSpan={8} style={{ textAlign: 'center', padding: '36px', color: '#94A3B8' }}>
-                    No branches configured. Click "Add New Branch" above to create your first branch.
+                    {language === 'mr'
+                      ? 'कोणतीही शाखा कॉन्फिगर केलेली नाही. आपली पहिली शाखा जोडण्यासाठी वरील "नवीन शाखा जोडा" वर क्लिक करा.'
+                      : 'No branches configured. Click "Add New Branch" above to create your first branch.'}
                   </td>
                 </tr>
               )}
