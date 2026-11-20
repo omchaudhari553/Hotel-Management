@@ -65,13 +65,24 @@ public class BackupController {
                 .body(json);
     }
 
+    @GetMapping("/download-excel")
+    @Operation(summary = "Download current daily Excel (.xlsx) backup with all sheets directly")
+    public ResponseEntity<byte[]> downloadBackupExcel() {
+        Long bizId = currentUser.businessId();
+        byte[] excel = backupService.generateBackupExcel(bizId);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"hotel_daily_backup.xlsx\"")
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(excel);
+    }
+
     @GetMapping("/download-pdf")
-    @Operation(summary = "Download current daily PDF summary report directly")
+    @Operation(summary = "Download current daily comprehensive PDF report directly")
     public ResponseEntity<byte[]> downloadBackupPdf() {
         Long bizId = currentUser.businessId();
         byte[] pdf = backupService.generateBackupPdf(bizId);
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"hotel_daily_backup_summary.pdf\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"hotel_daily_backup_report.pdf\"")
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdf);
     }

@@ -1570,7 +1570,7 @@ export const SettingsScreen: React.FC<{ navigation?: any; route?: any }> = ({ na
         setBackupStatusMsg(`Backup sent to ${target} (${ref})`);
         Alert.alert(
           'Daily Backup Sent Successfully',
-          `Your complete daily business data backup email has been sent to ${target}.\n\nReference: ${ref}\nAttachments: JSON (.json) & PDF summary.\n\nAutomated backup will continue to run every night at 11:00 PM.`
+          `Your complete daily business data backup email has been sent to ${target}.\n\nReference: ${ref}\nAttachments: Excel (.xlsx) & PDF report.\n\nAutomated backup will continue to run every night at 11:00 PM.`
         );
       } else {
         setBackupStatusMsg(`Backup saved on server (${ref})`);
@@ -1586,6 +1586,32 @@ export const SettingsScreen: React.FC<{ navigation?: any; route?: any }> = ({ na
       Alert.alert('Backup Error', errMsg);
     } finally {
       setBackupSending(false);
+    }
+  };
+
+  const handleDownloadDailyBackupExcel = async () => {
+    try {
+      await ensureBackendToken();
+      const res = await apiClient.get('/hotel/backup/download-excel', {
+        responseType: 'blob',
+      });
+      if (Platform.OS === 'web') {
+        const blob = new Blob([res.data], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `hotel_daily_backup_${Date.now()}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } else {
+        Alert.alert('Excel Ready', 'Daily backup Excel (.xlsx) generated successfully with all worksheets.');
+      }
+    } catch (e: any) {
+      Alert.alert('Download Error', e.message || 'Failed to download Excel backup');
     }
   };
 
@@ -6104,23 +6130,23 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                         <RefreshCw size={18} color="#FFFFFF" />
                       </TouchableOpacity>
 
-                      {/* Download JSON Backup (White/Border Square Icon Button) */}
+                      {/* Download Excel (.xlsx) Backup */}
                       <TouchableOpacity
-                        onPress={handleDownloadDailyBackup}
+                        onPress={handleDownloadDailyBackupExcel}
                         activeOpacity={0.8}
-                        accessibilityLabel={language === 'mr' ? 'बॅकअप (.json) डाउनलोड करा' : 'Download Backup (.json)'}
+                        accessibilityLabel={language === 'mr' ? 'Excel बॅकअप (.xlsx) डाउनलोड करा' : 'Download Excel Backup (.xlsx)'}
                         style={{
                           width: 40,
                           height: 40,
                           borderRadius: 8,
                           alignItems: 'center',
                           justifyContent: 'center',
-                          backgroundColor: isDark ? '#334155' : '#FFFFFF',
+                          backgroundColor: '#10B981',
                           borderWidth: 1,
-                          borderColor: isDark ? '#475569' : '#CBD5E1',
+                          borderColor: '#059669',
                         }}
                       >
-                        <Download size={18} color={isDark ? '#F8FAFC' : '#1E293B'} />
+                        <FileSpreadsheet size={18} color="#FFFFFF" />
                       </TouchableOpacity>
 
                       {/* Download PDF Backup (White/Border Square Icon Button) */}
@@ -6140,6 +6166,25 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                         }}
                       >
                         <FileText size={18} color={isDark ? '#F8FAFC' : '#1E293B'} />
+                      </TouchableOpacity>
+
+                      {/* Download JSON Backup (White/Border Square Icon Button) */}
+                      <TouchableOpacity
+                        onPress={handleDownloadDailyBackup}
+                        activeOpacity={0.8}
+                        accessibilityLabel={language === 'mr' ? 'बॅकअप (.json) डाउनलोड करा' : 'Download Backup (.json)'}
+                        style={{
+                          width: 40,
+                          height: 40,
+                          borderRadius: 8,
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          backgroundColor: isDark ? '#334155' : '#FFFFFF',
+                          borderWidth: 1,
+                          borderColor: isDark ? '#475569' : '#CBD5E1',
+                        }}
+                      >
+                        <Download size={18} color={isDark ? '#F8FAFC' : '#1E293B'} />
                       </TouchableOpacity>
                     </View>
                   </View>

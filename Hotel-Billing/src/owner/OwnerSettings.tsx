@@ -18,6 +18,7 @@ import {
   Eye,
   EyeOff,
   FileText,
+  FileSpreadsheet,
   Key,
   Globe,
 } from 'lucide-react';
@@ -197,15 +198,15 @@ export const OwnerSettings: React.FC = () => {
       if (data?.success) {
         setLastBackupStatus({
           status: 'success',
-          message: `Daily hotel data backup email dispatched to ${target}! Reference: ${ref}`,
+          message: `Daily hotel data backup email (Excel .xlsx & PDF) dispatched to ${target}! Reference: ${ref}`,
           ref,
         });
-        showToast('success', `Daily hotel data backup email dispatched to ${target}! Reference: ${ref}`);
+        showToast('success', `Daily hotel data backup email (Excel & PDF) dispatched to ${target}! Reference: ${ref}`);
       } else {
         const errDetail = data?.error || 'Authentication failed';
         setLastBackupStatus({
           status: 'warning',
-          message: `Daily backup generated and saved securely on server (${ref})! ${errDetail}`,
+          message: `Daily backup (Excel & PDF) generated and saved securely on server (${ref})! ${errDetail}`,
           ref,
         });
         showToast('warning', `Daily backup generated and saved securely on server (${ref})!`);
@@ -219,6 +220,28 @@ export const OwnerSettings: React.FC = () => {
       showToast('error', msg);
     } finally {
       setBackupSending(false);
+    }
+  };
+
+  const handleDownloadDailyBackupExcel = async () => {
+    try {
+      const res = await apiClient.get('/hotel/backup/download-excel', {
+        responseType: 'blob',
+      });
+      const blob = new Blob([res.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `hotel_daily_backup_${Date.now()}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('success', language === 'mr' ? 'Excel बॅकअप (.xlsx) यशस्वीरीत्या डाउनलोड झाला!' : 'Daily backup Excel (.xlsx) downloaded successfully!');
+    } catch {
+      showToast('error', language === 'mr' ? 'Excel बॅकअप डाउनलोड करण्यात त्रुटी आली' : 'Failed to download backup Excel');
     }
   };
 
@@ -1097,7 +1120,38 @@ export const OwnerSettings: React.FC = () => {
 
           <button
             type="button"
-            onClick={handleDownloadDailyBackup}
+            onClick={handleDownloadDailyBackupExcel}
+            title={language === 'mr' ? 'Excel बॅकअप डाउनलोड करा (.xlsx)' : 'Download Excel Backup (.xlsx)'}
+            aria-label="Download Excel Backup (.xlsx)"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '9px 16px',
+              backgroundColor: '#10B981',
+              color: '#FFFFFF',
+              border: '1px solid #059669',
+              borderRadius: '8px',
+              fontSize: '0.84rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              boxShadow: '0 2px 4px rgba(16, 185, 129, 0.25)',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#059669';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#10B981';
+            }}
+          >
+            <FileSpreadsheet size={16} color="#FFFFFF" />
+            <span>{language === 'mr' ? 'Excel बॅकअप (.xlsx)' : 'Download Excel (.xlsx)'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleDownloadDailyBackupPdf}
             title={language === 'mr' ? 'बॅकअप डाउनलोड करा (.json)' : 'Download Backup (.json)'}
             aria-label="Download Backup (.json)"
             style={{
