@@ -126,9 +126,10 @@ export const BusinessManagementPage: React.FC = () => {
     setLoading(true);
     try {
       const data = await superAdminApi.getBusinesses(search, selectedStatus);
-      setBusinesses(data);
+      setBusinesses(Array.isArray(data) ? data : []);
     } catch (e) {
       console.error(e);
+      setBusinesses([]);
     } finally {
       setLoading(false);
     }
@@ -304,7 +305,7 @@ export const BusinessManagementPage: React.FC = () => {
                   <td colSpan={8} className="py-8 text-center text-slate-500">No businesses match the search query.</td>
                 </tr>
               ) : (
-                businesses.map((b) => (
+                (businesses || []).map((b) => (
                   <tr key={b.id} className="hover:bg-slate-800/40 transition-colors">
                     <td className="py-3 px-4">
                       <div className="font-bold text-white flex items-center gap-2">
@@ -336,7 +337,7 @@ export const BusinessManagementPage: React.FC = () => {
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-1 flex-wrap">
-                        {b.products.map((p) => {
+                        {(b.products || [b.businessType || 'HOTEL']).map((p) => {
                           const isHotel = p.includes('HOTEL');
                           const isMess = p.includes('MESS');
                           const isCafe = p.includes('CAFE');
@@ -739,9 +740,9 @@ export const BusinessManagementPage: React.FC = () => {
 
               {/* Branches */}
               <div>
-                <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Branches ({selectedDetail.branches.length})</h3>
+                <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Branches ({(selectedDetail.branches || []).length})</h3>
                 <div className="space-y-2">
-                  {selectedDetail.branches.map(br => (
+                  {(selectedDetail.branches || []).map(br => (
                     <div key={br.id} className="p-3 bg-slate-950 border border-slate-800 rounded-xl flex items-center justify-between text-xs">
                       <div>
                         <p className="font-bold text-white">{br.name} ({br.code})</p>
@@ -759,9 +760,9 @@ export const BusinessManagementPage: React.FC = () => {
 
               {/* Subscriptions */}
               <div>
-                <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Active Subscriptions ({selectedDetail.subscriptions.length})</h3>
+                <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Active Subscriptions ({(selectedDetail.subscriptions || []).length})</h3>
                 <div className="space-y-2">
-                  {selectedDetail.subscriptions.map(s => (
+                  {(selectedDetail.subscriptions || []).map(s => (
                     <div key={s.id} className="p-3 bg-slate-950 border border-slate-800 rounded-xl flex items-center justify-between text-xs">
                       <div>
                         <p className="font-bold text-white flex items-center gap-2">

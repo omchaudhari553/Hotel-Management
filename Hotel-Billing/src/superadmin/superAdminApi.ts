@@ -287,13 +287,69 @@ export const superAdminApi = {
 
   // 2. Businesses
   getBusinesses: async (search?: string, status?: string): Promise<BusinessSummary[]> => {
-    const res = await apiClient.get('/superadmin/businesses', { params: { search, status } });
-    return res.data?.data || [];
+    try {
+      const res = await apiClient.get('/superadmin/businesses', { params: { search, status } });
+      const raw = res.data?.data || res.data || [];
+      const list = Array.isArray(raw) ? raw : [];
+      return list.map((b: any) => ({
+        ...b,
+        id: b.id || b.businessId || 1,
+        name: b.name || b.businessName || 'Business',
+        code: b.code || b.businessCode || 'BIZ_001',
+        ownerName: b.ownerName || 'Owner',
+        email: b.email || b.contactEmail || '',
+        phone: b.phone || '',
+        city: b.city || 'Pune',
+        state: b.state || 'Maharashtra',
+        businessType: b.businessType || 'HOTEL',
+        accountType: b.accountType || (b.branchCount > 1 ? 'MULTI_BRANCH' : 'SINGLE'),
+        products: Array.isArray(b.products) && b.products.length > 0
+          ? b.products
+          : (b.businessType ? [b.businessType] : b.businessCode?.startsWith('MESS') ? ['MESS'] : b.businessCode?.startsWith('CAFE') ? ['CAFE'] : ['HOTEL']),
+        branchCount: b.branchCount ?? (Array.isArray(b.branches) ? b.branches.length : 1),
+        status: b.status || (b.active !== false ? 'ACTIVE' : 'INACTIVE'),
+        createdAt: b.createdAt || new Date().toISOString(),
+      }));
+    } catch (e) {
+      console.error('Error fetching businesses:', e);
+      return [];
+    }
   },
 
   getBusinessById: async (id: number): Promise<BusinessDetail> => {
-    const res = await apiClient.get(`/superadmin/businesses/${id}`);
-    return res.data?.data;
+    try {
+      const res = await apiClient.get(`/superadmin/businesses/${id}`);
+      const b = res.data?.data || res.data || {};
+      return {
+        ...b,
+        id: b.id || b.businessId || id,
+        name: b.name || b.businessName || 'Business',
+        code: b.code || b.businessCode || 'BIZ_001',
+        ownerName: b.ownerName || 'Owner',
+        email: b.email || b.contactEmail || '',
+        phone: b.phone || '',
+        city: b.city || 'Pune',
+        state: b.state || 'Maharashtra',
+        businessType: b.businessType || 'HOTEL',
+        accountType: b.accountType || 'SINGLE',
+        products: Array.isArray(b.products) && b.products.length > 0
+          ? b.products
+          : (b.businessType ? [b.businessType] : ['HOTEL']),
+        branchCount: b.branchCount ?? (Array.isArray(b.branches) ? b.branches.length : 1),
+        status: b.status || 'ACTIVE',
+        createdAt: b.createdAt || new Date().toISOString(),
+        address: b.address || '',
+        country: b.country || 'India',
+        pinCode: b.pinCode || '',
+        gstin: b.gstin || '',
+        branches: Array.isArray(b.branches) ? b.branches : [],
+        subscriptions: Array.isArray(b.subscriptions) ? b.subscriptions : [],
+        payments: Array.isArray(b.payments) ? b.payments : [],
+      };
+    } catch (e) {
+      console.error('Error fetching business detail:', e);
+      throw e;
+    }
   },
 
   createBusiness: async (payload: BusinessSavePayload): Promise<BusinessDetail> => {

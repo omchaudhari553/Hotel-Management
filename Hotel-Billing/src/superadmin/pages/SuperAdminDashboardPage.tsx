@@ -680,7 +680,7 @@ export const SuperAdminDashboardPage: React.FC = () => {
                       <td className="py-3 text-slate-400">{b.ownerName || 'N/A'}</td>
                       <td className="py-3">
                         <div className="flex gap-1 flex-wrap">
-                          {b.products.map((p) => (
+                          {(b.products || [b.businessType || 'HOTEL']).map((p) => (
                             <span key={p} className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-indigo-400 border border-slate-700 font-bold">
                               {p}
                             </span>

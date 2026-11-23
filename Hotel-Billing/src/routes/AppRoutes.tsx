@@ -139,7 +139,7 @@ const HotelModuleRoute: React.FC<{ moduleCode: string; children: React.ReactNode
       if (st && Object.keys(st).length > 0) {
         handleSync();
       }
-    }).catch(() => {});
+    }).catch(() => { });
 
     window.addEventListener('platform-modules-updated', handleSync);
     window.addEventListener('storage', handleSync);
@@ -150,7 +150,7 @@ const HotelModuleRoute: React.FC<{ moduleCode: string; children: React.ReactNode
         if (st && Object.keys(st).length > 0) {
           handleSync();
         }
-      }).catch(() => {});
+      }).catch(() => { });
     }, 2000);
 
     let bc: BroadcastChannel | null = null;

@@ -74,7 +74,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onCloseMob
           u?.username?.toLowerCase() === 'superadmin'
         );
       }
-    } catch {}
+    } catch { }
     return Boolean(
       user?.role === 'SUPER_ADMIN' ||
       user?.role === 'PLATFORM_ADMIN' ||
@@ -102,7 +102,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onCloseMob
         }
         const raw = localStorage.getItem('platform_hotel_modules_status');
         setPlatformModulesStatus(raw ? JSON.parse(raw) : {});
-      } catch {}
+      } catch { }
     };
 
     // Initial fetch from backend
@@ -110,7 +110,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onCloseMob
       if (st && Object.keys(st).length > 0) {
         setPlatformModulesStatus(st);
       }
-    }).catch(() => {});
+    }).catch(() => { });
 
     window.addEventListener('platform-modules-updated', handleSync);
     window.addEventListener('storage', handleSync);
@@ -121,7 +121,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onCloseMob
         if (st && Object.keys(st).length > 0) {
           setPlatformModulesStatus(st);
         }
-      }).catch(() => {});
+      }).catch(() => { });
     }, 2000);
 
     let bc: BroadcastChannel | null = null;
@@ -132,14 +132,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onCloseMob
           setPlatformModulesStatus(event.data);
         }
       };
-    } catch {}
+    } catch { }
 
     return () => {
       clearInterval(interval);
       window.removeEventListener('platform-modules-updated', handleSync);
       window.removeEventListener('storage', handleSync);
       if (bc) {
-        try { bc.close(); } catch {}
+        try { bc.close(); } catch { }
       }
     };
   }, []);
@@ -149,7 +149,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onCloseMob
     try {
       const raw = localStorage.getItem('platform_hotel_modules_status');
       if (raw) status = JSON.parse(raw);
-    } catch {}
+    } catch { }
 
     if (!status || Object.keys(status).length === 0) return true;
     if (code === 'HOTEL_OVERVIEW') {
@@ -261,7 +261,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onCloseMob
       try {
         const raw = localStorage.getItem('platform_hotel_modules_status');
         if (raw) setModuleStatus(JSON.parse(raw));
-      } catch {}
+      } catch { }
     };
 
     window.addEventListener('platform-modules-updated', handleModuleSync);
@@ -278,7 +278,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onCloseMob
           localStorage.setItem('platform_hotel_modules_status', JSON.stringify(map));
         }
       })
-      .catch(() => {});
+      .catch(() => { });
 
     return () => {
       window.removeEventListener('platform-modules-updated', handleModuleSync);
@@ -348,117 +348,117 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onCloseMob
       {/* Platform Title */}
       <div className="sidebar-header" style={{ padding: '16px 16px', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ minWidth: 0, flex: 1 }}>
-        {activeIndustryCode === 'MESS' ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div
-              style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-              }}
-            >
-              {/* Floral Logo Icon matching Mess theme */}
-              <svg width="30" height="30" viewBox="0 0 24 24" fill="#09331D">
-                <circle cx="12" cy="7" r="3.5" />
-                <circle cx="17" cy="12" r="3.5" />
-                <circle cx="12" cy="17" r="3.5" />
-                <circle cx="7" cy="12" r="3.5" />
-                <circle cx="12" cy="12" r="2.5" fill="#A7F3D0" />
-              </svg>
+          {activeIndustryCode === 'MESS' ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                {/* Floral Logo Icon matching Mess theme */}
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="#09331D">
+                  <circle cx="12" cy="7" r="3.5" />
+                  <circle cx="17" cy="12" r="3.5" />
+                  <circle cx="12" cy="17" r="3.5" />
+                  <circle cx="7" cy="12" r="3.5" />
+                  <circle cx="12" cy="12" r="2.5" fill="#A7F3D0" />
+                </svg>
+              </div>
+              <div>
+                <h2 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#FFFFFF', letterSpacing: '0.04em', margin: 0, lineHeight: 1.1 }}>
+                  {t('brandName', 'AJALKAR')}
+                </h2>
+                <span style={{ fontSize: '0.68rem', color: '#A7F3D0', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                  {t('messManagement', 'MESS MANAGEMENT')}
+                </span>
+              </div>
             </div>
-            <div>
-              <h2 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#FFFFFF', letterSpacing: '0.04em', margin: 0, lineHeight: 1.1 }}>
-                {t('brandName', 'AJALKAR')}
-              </h2>
-              <span style={{ fontSize: '0.68rem', color: '#A7F3D0', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                {t('messManagement', 'MESS MANAGEMENT')}
-              </span>
+          ) : activeIndustryCode === 'HOTEL' ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div
+                style={{
+                  width: '34px',
+                  height: '34px',
+                  borderRadius: '8px',
+                  background: businessLogo ? '#FFFFFF' : 'linear-gradient(135deg, #7C2D12 0%, #B45309 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  border: '1px solid #FED7AA',
+                  boxShadow: '0 2px 8px rgba(124, 45, 18, 0.4)',
+                  overflow: 'hidden',
+                  padding: businessLogo ? '2px' : 0,
+                }}
+              >
+                {businessLogo ? (
+                  <img
+                    src={businessLogo}
+                    alt="Hotel Logo"
+                    style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                  />
+                ) : (
+                  <Building2 size={18} color="#FFFFFF" />
+                )}
+              </div>
+              <div>
+                <h2 style={{ fontSize: '1.15rem', fontWeight: 900, color: '#FFFFFF', letterSpacing: '0.04em', margin: 0, lineHeight: 1.1 }}>
+                  {t('brandName', 'AJALKAR')}
+                </h2>
+                <span style={{ fontSize: '0.68rem', color: '#FED7AA', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                  {t('hotelManagement', 'HOTEL MANAGEMENT')}
+                </span>
+              </div>
             </div>
-          </div>
-        ) : activeIndustryCode === 'HOTEL' ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div
-              style={{
-                width: '34px',
-                height: '34px',
-                borderRadius: '8px',
-                background: businessLogo ? '#FFFFFF' : 'linear-gradient(135deg, #7C2D12 0%, #B45309 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-                border: '1px solid #FED7AA',
-                boxShadow: '0 2px 8px rgba(124, 45, 18, 0.4)',
-                overflow: 'hidden',
-                padding: businessLogo ? '2px' : 0,
-              }}
-            >
-              {businessLogo ? (
-                <img
-                  src={businessLogo}
-                  alt="Hotel Logo"
-                  style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                />
-              ) : (
-                <Building2 size={18} color="#FFFFFF" />
-              )}
+          ) : activeIndustryCode === 'CAFE' ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <img
+                src="/logo.jpg"
+                alt="Ajalkar"
+                style={{
+                  width: '34px',
+                  height: '34px',
+                  borderRadius: '50%',
+                  objectFit: 'cover',
+                  border: '1.5px solid rgba(243, 228, 224, 0.4)',
+                  flexShrink: 0,
+                }}
+              />
+              <div>
+                <h2 style={{ fontSize: '1.12rem', fontWeight: 900, color: '#FFFFFF', letterSpacing: '0.04em', margin: 0, lineHeight: 1.1 }}>
+                  {t('brandName', 'AJALKAR')}
+                </h2>
+                <span style={{ fontSize: '0.68rem', color: '#F3E4E0', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                  {t('cafeBistroPos', 'CAFE & BISTRO POS')}
+                </span>
+              </div>
             </div>
-            <div>
-              <h2 style={{ fontSize: '1.15rem', fontWeight: 900, color: '#FFFFFF', letterSpacing: '0.04em', margin: 0, lineHeight: 1.1 }}>
-                {t('brandName', 'AJALKAR')}
-              </h2>
-              <span style={{ fontSize: '0.68rem', color: '#FED7AA', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                {t('hotelManagement', 'HOTEL MANAGEMENT')}
-              </span>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <img
+                src="/logo.jpg"
+                alt="Ajalkar"
+                style={{
+                  width: '34px',
+                  height: '34px',
+                  borderRadius: '50%',
+                  objectFit: 'cover',
+                  border: '1.5px solid rgba(255, 255, 255, 0.2)',
+                  flexShrink: 0,
+                }}
+              />
+              <div>
+                <h2 className="sidebar-title" style={{ fontSize: '1.05rem', whiteSpace: 'nowrap' }}>{t('brandName', 'AJALKAR')}</h2>
+                <span className="sidebar-subtitle">{t('hotelManagement', 'HOTEL MANAGEMENT')}</span>
+              </div>
             </div>
-          </div>
-        ) : activeIndustryCode === 'CAFE' ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <img
-              src="/logo.jpg"
-              alt="Ajalkar"
-              style={{
-                width: '34px',
-                height: '34px',
-                borderRadius: '50%',
-                objectFit: 'cover',
-                border: '1.5px solid rgba(243, 228, 224, 0.4)',
-                flexShrink: 0,
-              }}
-            />
-            <div>
-              <h2 style={{ fontSize: '1.12rem', fontWeight: 900, color: '#FFFFFF', letterSpacing: '0.04em', margin: 0, lineHeight: 1.1 }}>
-                {t('brandName', 'AJALKAR')}
-              </h2>
-              <span style={{ fontSize: '0.68rem', color: '#F3E4E0', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                {t('cafeBistroPos', 'CAFE & BISTRO POS')}
-              </span>
-            </div>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <img
-              src="/logo.jpg"
-              alt="Ajalkar"
-              style={{
-                width: '34px',
-                height: '34px',
-                borderRadius: '50%',
-                objectFit: 'cover',
-                border: '1.5px solid rgba(255, 255, 255, 0.2)',
-                flexShrink: 0,
-              }}
-            />
-            <div>
-              <h2 className="sidebar-title" style={{ fontSize: '1.05rem', whiteSpace: 'nowrap' }}>{t('brandName', 'AJALKAR')}</h2>
-              <span className="sidebar-subtitle">{t('hotelManagement', 'HOTEL MANAGEMENT')}</span>
-            </div>
-          </div>
-        )}
+          )}
         </div>
         <button
           type="button"
@@ -498,7 +498,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onCloseMob
                   <Shield size={18} color="#FFFFFF" />
                   <span>Central Super Admin</span>
                 </NavLink>
-              ) : isOwner && localStorage.getItem('ajalkar_user_mode') !== 'SINGLE' ? (
+              ) : isOwner ? (
                 <NavLink
                   to="/owner/dashboard"
                   className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}

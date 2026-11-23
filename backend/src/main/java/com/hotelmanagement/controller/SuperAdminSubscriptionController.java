@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping({"/api/v1/admin", "/api/v1/superadmin"})
+@RequestMapping("/api/v1/admin")
 @Tag(name = "Super Admin Subscriptions", description = "Central Super Admin & Platform Owner Subscription APIs")
 public class SuperAdminSubscriptionController {
 

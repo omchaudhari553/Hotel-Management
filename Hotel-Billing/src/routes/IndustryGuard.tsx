@@ -18,7 +18,7 @@ export const IndustryGuard: React.FC<IndustryGuardProps> = ({ requiredIndustry, 
     try {
       const saved = localStorage.getItem('ajalkar_user') || localStorage.getItem('superadmin_user') || localStorage.getItem('user');
       if (saved) currentUser = JSON.parse(saved);
-    } catch {}
+    } catch { }
   }
 
   // 1. If user is Super Admin, verify if viewing hotel or should stay on superadmin dashboard
@@ -76,7 +76,7 @@ export const SharedModuleGuard: React.FC<{ children: React.ReactNode }> = ({ chi
     try {
       const saved = localStorage.getItem('ajalkar_user') || localStorage.getItem('superadmin_user') || localStorage.getItem('user');
       if (saved) currentUser = JSON.parse(saved);
-    } catch {}
+    } catch { }
   }
 
   // 1. If user is Super Admin, allow seamless inspection
@@ -127,7 +127,7 @@ export const SharedModuleGuard: React.FC<{ children: React.ReactNode }> = ({ chi
           return true;
         }
       }
-    } catch {}
+    } catch { }
     return Boolean(
       user?.role === 'SUPER_ADMIN' ||
       user?.role === 'PLATFORM_ADMIN' ||

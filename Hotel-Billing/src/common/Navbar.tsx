@@ -66,10 +66,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleMobileMenu }) => {
     try {
       localStorage.clear();
       sessionStorage.clear();
-    } catch (e) {}
+    } catch (e) { }
     try {
-      logout().catch(() => {});
-    } catch (e) {}
+      logout().catch(() => { });
+    } catch (e) { }
     window.location.replace('/login');
   };
 
@@ -111,7 +111,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleMobileMenu }) => {
           u?.username?.toLowerCase() === 'superadmin'
         );
       }
-    } catch {}
+    } catch { }
     return Boolean(
       user?.role === 'SUPER_ADMIN' ||
       user?.role === 'PLATFORM_ADMIN' ||
@@ -124,7 +124,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleMobileMenu }) => {
   const handleReturnToSuperAdmin = () => {
     try {
       sessionStorage.removeItem('superadmin_viewing_hotel');
-    } catch {}
+    } catch { }
     window.location.href = '/superadmin/dashboard';
   };
 

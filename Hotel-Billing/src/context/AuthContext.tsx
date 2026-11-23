@@ -171,7 +171,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (savedModules) {
         localStorage.setItem('platform_hotel_modules_status', savedModules);
       }
-    } catch (e) {}
+    } catch (e) { }
     try {
       await authService.logout();
     } catch {
@@ -205,7 +205,7 @@ export const useAuth = () => {
         business = b ? JSON.parse(b) : null;
         token = localStorage.getItem('token') || localStorage.getItem('ajalkar_token');
       }
-    } catch {}
+    } catch { }
 
     return {
       user,
@@ -218,11 +218,11 @@ export const useAuth = () => {
       register: async (payload: RegisterPayload): Promise<AuthResponse> => {
         return await authService.register(payload);
       },
-      setSession: () => {},
+      setSession: () => { },
       logout: async (): Promise<void> => {
         try {
           await authService.logout();
-        } catch {}
+        } catch { }
       },
     };
   }

@@ -130,50 +130,43 @@ export const LoginPage: React.FC = () => {
         window.location.href = '/superadmin/dashboard';
         return;
       }
+      // 1. Owner Admin Auto-Redirection: If user is Owner, navigate directly to /owner/dashboard
       const isBranchUser = Boolean(loggedInUser?.branchId);
       const isOwner =
         loggedInUser?.isOwner === true ||
         loggedInUser?.role === 'OWNER' ||
-        (!isBranchUser && (loggedInUser?.roles?.includes('ROLE_OWNER') || loggedInUser?.roles?.includes('OWNER')));
-
-      const accountBizType = (loggedInUser as any)?.businessType || ((loggedInUser as any)?.accountRole === 'ADMIN_OWNER' ? 'MULTI_BRANCH' : 'SINGLE');
-      const accountRole = (loggedInUser as any)?.accountRole || (isOwner ? 'ADMIN_OWNER' : 'SINGLE_USER');
-      const isSingleUser = accountBizType === 'SINGLE' || accountRole === 'SINGLE_USER' || (!isOwner && !isBranchUser);
-
-      if (isSingleUser) {
-        localStorage.setItem('ajalkar_user_mode', 'SINGLE');
-        localStorage.setItem('ajalkar_selected_role', 'SINGLE_USER');
-        localStorage.setItem('ajalkar_business_type', 'SINGLE');
-        localStorage.setItem('ajalkar_industry', 'HOTEL');
-        navigate('/hotel/dashboard', { replace: true });
-        return;
-      }
-
-      localStorage.setItem('ajalkar_user_mode', 'MULTI_BRANCH');
-      localStorage.setItem('ajalkar_selected_role', 'ADMIN_OWNER');
-      localStorage.setItem('ajalkar_business_type', 'MULTI_BRANCH');
+        (!isBranchUser && (
+          loggedInUser?.roles?.includes('ROLE_OWNER') ||
+          loggedInUser?.roles?.includes('OWNER') ||
+          loggedInUser?.roles?.includes('ROLE_ADMIN') ||
+          loggedInUser?.role === 'ADMIN'
+        ));
 
       if (isOwner && !isBranchUser) {
-        navigate('/owner/dashboard', { replace: true });
+        localStorage.setItem('ajalkar_user_mode', 'MULTI_BRANCH');
+        localStorage.setItem('ajalkar_selected_role', 'ADMIN_OWNER');
+        localStorage.setItem('ajalkar_business_type', 'MULTI_BRANCH');
+        localStorage.setItem('ajalkar_industry', res?.business?.industryType || 'HOTEL');
+        window.location.href = '/owner/dashboard';
         return;
       }
 
+      // 2. Branch User Redirection
       if (isBranchUser && loggedInUser?.branchId) {
         localStorage.setItem('ajalkar_selected_branch_id', String(loggedInUser.branchId));
         localStorage.setItem('ajalkar_selected_main_branch_id', String(loggedInUser.branchId));
         localStorage.setItem('ajalkar_industry', 'HOTEL');
-        navigate('/hotel/dashboard', { replace: true });
+        window.location.href = '/hotel/dashboard';
         return;
       }
 
-      const industry = res?.business?.industryType || (localStorage.getItem('ajalkar_industry') as string);
-      if (industry && ['HOTEL', 'MESS', 'CAFE'].includes(industry.toUpperCase())) {
-        localStorage.setItem('ajalkar_industry', industry.toUpperCase());
-        navigate(`/${industry.toLowerCase()}/dashboard`, { replace: true });
-      } else {
-        const fallbackInd = (localStorage.getItem('ajalkar_industry') as string) || 'HOTEL';
-        navigate(`/get-started?step=2&industry=${fallbackInd}`, { replace: true });
-      }
+      // 3. General Fallback
+      localStorage.setItem('ajalkar_user_mode', 'SINGLE');
+      localStorage.setItem('ajalkar_selected_role', 'SINGLE_USER');
+      localStorage.setItem('ajalkar_business_type', 'SINGLE');
+      const industry = res?.business?.industryType || (localStorage.getItem('ajalkar_industry') as string) || 'HOTEL';
+      localStorage.setItem('ajalkar_industry', industry.toUpperCase());
+      window.location.href = `/${industry.toLowerCase()}/dashboard`;
     } catch (err: any) {
       const msg = err.response?.data?.message || err.message || t('invalidCredentialsError', 'Invalid credentials. Please check your email/mobile and password.');
       showToast('error', msg);
