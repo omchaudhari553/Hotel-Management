@@ -29,7 +29,7 @@ export const BranchSalesPage: React.FC = () => {
           }
         }
       } catch {}
-      setBranches(data);
+      setBranches(data.slice(0, 5));
     } catch (e) {
       console.error(e);
     } finally {

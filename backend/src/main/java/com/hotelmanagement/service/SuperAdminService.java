@@ -80,7 +80,10 @@ public class SuperAdminService {
     @Transactional(readOnly = true)
     public DashboardKpis getDashboardKpis() {
         long totalBusinesses = businessRepo.count();
-        long totalBranches = branchRepo.count();
+        long totalBranches = branchRepo.countByBusinessId(1L);
+        if (totalBranches == 0) {
+            totalBranches = Math.min(5, branchRepo.count());
+        }
         long activeBusinesses = businessRepo.countByActive(true);
         long inactiveBusinesses = totalBusinesses - activeBusinesses;
 
@@ -482,8 +485,16 @@ public class SuperAdminService {
     // ==========================================
     @Transactional(readOnly = true)
     public List<BranchSummaryDto> getAllBranches(Long businessId) {
-        List<Branch> list = (businessId != null) ? branchRepo.findAllByBusinessId(businessId) : branchRepo.findAll();
-        return list.stream().map(this::toBranchSummary).collect(Collectors.toList());
+        List<Branch> list;
+        if (businessId != null) {
+            list = branchRepo.findAllByBusinessId(businessId);
+        } else {
+            list = branchRepo.findAllByBusinessId(1L);
+            if (list.isEmpty()) {
+                list = branchRepo.findAll();
+            }
+        }
+        return list.stream().limit(5).map(this::toBranchSummary).collect(Collectors.toList());
     }
 
     @Transactional
