@@ -1,0 +1,19 @@
+{
+  "HOTEL_KOT" : true,
+  "HOTEL_STAFF" : true,
+  "HOTEL_DASHBOARD" : true,
+  "HOTEL_OVERVIEW" : true,
+  "TABLE_MGMT" : true,
+  "PURCHASE" : true,
+  "KOT" : true,
+  "POS_BILLING" : true,
+  "HOTEL_BILLING" : true,
+  "HOTEL_PURCHASE" : true,
+  "INVENTORY" : true,
+  "REPORTS" : true,
+  "HOTEL_SETTINGS" : true,
+  "HOTEL_TABLES" : true,
+  "HOTEL_PAYMENTS" : true,
+  "HOTEL_REPORTS" : true,
+  "STAFF_PAYROLL" : true
+}

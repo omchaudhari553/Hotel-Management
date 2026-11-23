@@ -1790,9 +1790,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleMobileMenu }) => {
               <div style={{ height: '1px', backgroundColor: '#F0ECE7', margin: '6px 4px' }} />
 
               <div
-                onClick={() => {
+                onClick={async () => {
                   setIsProfileOpen(false);
-                  logout();
+                  await logout();
+                  window.location.href = '/login';
                 }}
                 style={{
                   padding: '9px 12px',
@@ -1819,7 +1820,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleMobileMenu }) => {
         {/* Standalone Logout Button (Beside User Profile on the right) */}
         <button
           type="button"
-          onClick={logout}
+          onClick={async () => {
+            await logout();
+            window.location.href = '/login';
+          }}
           title={t('signOut', 'Sign Out')}
           className="navbar-logout-btn"
           style={{

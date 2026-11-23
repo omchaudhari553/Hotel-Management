@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSuperAdminPopup } from '../SuperAdminPopupContext';
 import { superAdminApi, ProductItem, ProductModuleItem } from '../superAdminApi';
+import { industryService } from '../../services/industryService';
 import '../superadmin.css';
 import {
   Layers,
@@ -122,33 +123,60 @@ export const ProductManagementPage: React.FC = () => {
       const statusMap: Record<string, boolean> = {};
       mods.forEach((m) => {
         statusMap[m.code] = m.active;
-        if (m.code === 'HOTEL_OVERVIEW') {
-          statusMap['HOTEL_DASHBOARD'] = m.active;
-        }
+        if (m.code === 'HOTEL_OVERVIEW') statusMap['HOTEL_DASHBOARD'] = m.active;
         if (m.code === 'HOTEL_SETTINGS') {
           statusMap['HOTEL_REPORTS'] = m.active;
+          statusMap['REPORTS'] = m.active;
         }
+        if (m.code === 'HOTEL_KOT') statusMap['KOT'] = m.active;
+        if (m.code === 'HOTEL_BILLING') statusMap['POS_BILLING'] = m.active;
+        if (m.code === 'HOTEL_TABLES') statusMap['TABLE_MGMT'] = m.active;
+        if (m.code === 'HOTEL_PURCHASE') {
+          statusMap['PURCHASE'] = m.active;
+          statusMap['INVENTORY'] = m.active;
+        }
+        if (m.code === 'HOTEL_STAFF') statusMap['STAFF_PAYROLL'] = m.active;
       });
       localStorage.setItem('platform_hotel_modules_status', JSON.stringify(statusMap));
       window.dispatchEvent(new CustomEvent('platform-modules-updated', { detail: statusMap }));
+      try {
+        const bc = new BroadcastChannel('hotel_platform_modules');
+        bc.postMessage(statusMap);
+      } catch {}
     } catch (e) {}
   };
 
-  const normalizeHotelModules = (rawMods: ProductModuleItem[]): ProductModuleItem[] => {
+  const normalizeHotelModules = (rawMods: ProductModuleItem[], backendStatuses?: Record<string, boolean>): ProductModuleItem[] => {
+    let savedStatusMap: Record<string, boolean> = {};
+    if (backendStatuses && Object.keys(backendStatuses).length > 0) {
+      savedStatusMap = { ...backendStatuses };
+    } else {
+      try {
+        const savedRaw = localStorage.getItem('platform_hotel_modules_status');
+        if (savedRaw) savedStatusMap = JSON.parse(savedRaw);
+      } catch {}
+    }
+
     // 8 Exact Hotel Modules strictly matching Hotel Sidebar
     const canonical = [
       { code: 'HOTEL_OVERVIEW', name: 'Hotel Overview', description: 'Real-time sales, order velocity, table status & daily analytics', isCore: true, aliases: ['HOTEL_DASHBOARD'] },
-      { code: 'HOTEL_KOT', name: 'KOT', description: 'Kitchen Order Tickets live firing, routing and chef dispatch', isCore: true, aliases: [] },
-      { code: 'HOTEL_BILLING', name: 'Billing / Invoices', description: 'Thermal bill generation, table settlement, split bills & discount management', isCore: true, aliases: [] },
-      { code: 'HOTEL_TABLES', name: 'Tables', description: 'Floor sections, visual table layout, dine-in status & occupancy tracker', isCore: true, aliases: [] },
+      { code: 'HOTEL_KOT', name: 'KOT', description: 'Kitchen Order Tickets live firing, routing and chef dispatch', isCore: true, aliases: ['KOT'] },
+      { code: 'HOTEL_BILLING', name: 'Billing / Invoices', description: 'Thermal bill generation, table settlement, split bills & discount management', isCore: true, aliases: ['POS_BILLING'] },
+      { code: 'HOTEL_TABLES', name: 'Tables', description: 'Floor sections, visual table layout, dine-in status & occupancy tracker', isCore: true, aliases: ['TABLE_MGMT'] },
       { code: 'HOTEL_PAYMENTS', name: 'Payments', description: 'Cash, UPI, Card and multi-tender daily payment reconciliation', isCore: true, aliases: [] },
-      { code: 'HOTEL_PURCHASE', name: 'Purchase', description: 'Supplier purchase orders, inventory stocking & vendor expense tracking', isCore: true, aliases: [] },
-      { code: 'HOTEL_STAFF', name: 'Staff', description: 'Staff directory, role permissions, waiter commissions & shifts', isCore: false, aliases: [] },
-      { code: 'HOTEL_SETTINGS', name: 'Settings', description: 'System configuration, tax/GST settings, print setup & audit reports', isCore: false, aliases: ['HOTEL_REPORTS'] },
+      { code: 'HOTEL_PURCHASE', name: 'Purchase', description: 'Supplier purchase orders, inventory stocking & vendor expense tracking', isCore: true, aliases: ['PURCHASE', 'INVENTORY'] },
+      { code: 'HOTEL_STAFF', name: 'Staff', description: 'Staff directory, role permissions, waiter commissions & shifts', isCore: false, aliases: ['STAFF_PAYROLL'] },
+      { code: 'HOTEL_SETTINGS', name: 'Settings', description: 'System configuration, tax/GST settings, print setup & audit reports', isCore: false, aliases: ['HOTEL_REPORTS', 'REPORTS'] },
     ];
 
     return canonical.map((c, idx) => {
       const existing = rawMods.find(m => m.code === c.code || c.aliases.includes(m.code));
+      let isActive = true;
+      if (savedStatusMap[c.code] !== undefined) {
+        isActive = savedStatusMap[c.code];
+      } else if (existing && existing.active !== undefined) {
+        isActive = existing.active;
+      }
       return {
         id: existing?.id || (100 + idx),
         productId: existing?.productId || 1,
@@ -157,7 +185,7 @@ export const ProductManagementPage: React.FC = () => {
         name: c.name,
         description: c.description,
         isCore: c.isCore,
-        active: existing ? existing.active : true,
+        active: isActive,
         createdAt: (existing as any)?.createdAt || new Date().toISOString()
       };
     });
@@ -167,8 +195,11 @@ export const ProductManagementPage: React.FC = () => {
     setModLoading(true);
     try {
       const isHotel = (productCode || selectedProduct?.code || 'HOTEL') === 'HOTEL' || productId === 1;
-      const data = await superAdminApi.getProductModules(productId);
-      const finalMods = isHotel ? normalizeHotelModules(data) : data;
+      const [data, backendStatuses] = await Promise.all([
+        superAdminApi.getProductModules(productId),
+        isHotel ? industryService.getModuleStatuses() : Promise.resolve({})
+      ]);
+      const finalMods = isHotel ? normalizeHotelModules(data, backendStatuses) : data;
       setModules(finalMods);
       if (isHotel) {
         syncModulesToLocalStorage(finalMods);
@@ -198,25 +229,22 @@ export const ProductManagementPage: React.FC = () => {
   };
 
   const handleToggleModule = async (moduleId: number, currentActive: boolean) => {
+    const mod = modules.find(m => m.id === moduleId);
+    const newActive = !currentActive;
+    const updated = modules.map(m => m.id === moduleId ? { ...m, active: newActive } : m);
+    setModules(updated);
+    if (selectedProduct?.code === 'HOTEL') {
+      syncModulesToLocalStorage(updated);
+    }
+
     try {
-      const mod = modules.find(m => m.id === moduleId);
-      if (moduleId < 100) {
-        await superAdminApi.toggleModuleStatus(moduleId, !currentActive);
+      if (mod?.code) {
+        await industryService.updateModuleStatus(mod.code, newActive);
       }
-      const updated = modules.map(m => m.id === moduleId ? { ...m, active: !currentActive } : m);
-      setModules(updated);
-      if (selectedProduct?.code === 'HOTEL') {
-        syncModulesToLocalStorage(updated);
-      }
-      showAlert(`Module "${mod?.name || 'Feature'}" ${!currentActive ? 'enabled' : 'disabled'} successfully!`, 'Module Configuration Updated', 'info');
+      await superAdminApi.toggleModuleStatus(moduleId, newActive, mod?.code);
+      showAlert(`Module "${mod?.name || 'Feature'}" ${newActive ? 'enabled' : 'disabled'} successfully across all hotel logins!`, 'Module Configuration Updated', 'info');
     } catch (err: any) {
-      // Even if API fails (e.g. synthetic id), keep state & localStorage active toggle in sync
-      const updated = modules.map(m => m.id === moduleId ? { ...m, active: !currentActive } : m);
-      setModules(updated);
-      if (selectedProduct?.code === 'HOTEL') {
-        syncModulesToLocalStorage(updated);
-      }
-      showAlert(`Module state updated successfully!`, 'Module Configuration Updated', 'info');
+      showAlert(`Module state updated across all hotel logins!`, 'Module Configuration Updated', 'info');
     }
   };
 

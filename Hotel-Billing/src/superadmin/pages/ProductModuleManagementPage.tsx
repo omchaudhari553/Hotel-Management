@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSuperAdminPopup } from '../SuperAdminPopupContext';
 import { superAdminApi, ProductItem, ProductModuleItem } from '../superAdminApi';
+import { industryService } from '../../services/industryService';
 import '../superadmin.css';
 import { Grid, Hotel, UtensilsCrossed, Coffee, Check, RefreshCw } from 'lucide-react';
 
@@ -17,21 +18,37 @@ export const ProductModuleManagementPage: React.FC = () => {
   const [modules, setModules] = useState<ProductModuleItem[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const normalizeHotelModules = (rawMods: ProductModuleItem[]): ProductModuleItem[] => {
+  const normalizeHotelModules = (rawMods: ProductModuleItem[], backendStatuses?: Record<string, boolean>): ProductModuleItem[] => {
+    let savedStatusMap: Record<string, boolean> = {};
+    if (backendStatuses && Object.keys(backendStatuses).length > 0) {
+      savedStatusMap = { ...backendStatuses };
+    } else {
+      try {
+        const savedRaw = localStorage.getItem('platform_hotel_modules_status');
+        if (savedRaw) savedStatusMap = JSON.parse(savedRaw);
+      } catch {}
+    }
+
     // 8 Exact Hotel Modules strictly matching Hotel Sidebar
     const canonical = [
       { code: 'HOTEL_OVERVIEW', name: 'Hotel Overview', description: 'Real-time sales, order velocity, table status & daily analytics', isCore: true, aliases: ['HOTEL_DASHBOARD'] },
-      { code: 'HOTEL_KOT', name: 'KOT', description: 'Kitchen Order Tickets live firing, routing and chef dispatch', isCore: true, aliases: [] },
-      { code: 'HOTEL_BILLING', name: 'Billing / Invoices', description: 'Thermal bill generation, table settlement, split bills & discount management', isCore: true, aliases: [] },
-      { code: 'HOTEL_TABLES', name: 'Tables', description: 'Floor sections, visual table layout, dine-in status & occupancy tracker', isCore: true, aliases: [] },
+      { code: 'HOTEL_KOT', name: 'KOT', description: 'Kitchen Order Tickets live firing, routing and chef dispatch', isCore: true, aliases: ['KOT'] },
+      { code: 'HOTEL_BILLING', name: 'Billing / Invoices', description: 'Thermal bill generation, table settlement, split bills & discount management', isCore: true, aliases: ['POS_BILLING'] },
+      { code: 'HOTEL_TABLES', name: 'Tables', description: 'Floor sections, visual table layout, dine-in status & occupancy tracker', isCore: true, aliases: ['TABLE_MGMT'] },
       { code: 'HOTEL_PAYMENTS', name: 'Payments', description: 'Cash, UPI, Card and multi-tender daily payment reconciliation', isCore: true, aliases: [] },
-      { code: 'HOTEL_PURCHASE', name: 'Purchase', description: 'Supplier purchase orders, inventory stocking & vendor expense tracking', isCore: true, aliases: [] },
-      { code: 'HOTEL_STAFF', name: 'Staff', description: 'Staff directory, role permissions, waiter commissions & shifts', isCore: false, aliases: [] },
-      { code: 'HOTEL_SETTINGS', name: 'Settings', description: 'System configuration, tax/GST settings, print setup & audit reports', isCore: false, aliases: ['HOTEL_REPORTS'] },
+      { code: 'HOTEL_PURCHASE', name: 'Purchase', description: 'Supplier purchase orders, inventory stocking & vendor expense tracking', isCore: true, aliases: ['PURCHASE', 'INVENTORY'] },
+      { code: 'HOTEL_STAFF', name: 'Staff', description: 'Staff directory, role permissions, waiter commissions & shifts', isCore: false, aliases: ['STAFF_PAYROLL'] },
+      { code: 'HOTEL_SETTINGS', name: 'Settings', description: 'System configuration, tax/GST settings, print setup & audit reports', isCore: false, aliases: ['HOTEL_REPORTS', 'REPORTS'] },
     ];
 
     return canonical.map((c, idx) => {
       const existing = rawMods.find(m => m.code === c.code || c.aliases.includes(m.code));
+      let isActive = true;
+      if (savedStatusMap[c.code] !== undefined) {
+        isActive = savedStatusMap[c.code];
+      } else if (existing && existing.active !== undefined) {
+        isActive = existing.active;
+      }
       return {
         id: existing?.id || (100 + idx),
         productId: existing?.productId || 1,
@@ -40,7 +57,7 @@ export const ProductModuleManagementPage: React.FC = () => {
         name: c.name,
         description: c.description,
         isCore: c.isCore,
-        active: existing ? existing.active : true,
+        active: isActive,
         createdAt: (existing as any)?.createdAt || new Date().toISOString()
       };
     });
@@ -54,17 +71,36 @@ export const ProductModuleManagementPage: React.FC = () => {
       setProducts(prodList);
       const target = prodList.find(p => p.code === selectedProduct) || prodList[0];
       if (target) {
-        const modData = await superAdminApi.getProductModules(target.id);
-        const finalMods = target.code === 'HOTEL' ? normalizeHotelModules(modData) : modData;
+        const [modData, backendStatuses] = await Promise.all([
+          superAdminApi.getProductModules(target.id),
+          target.code === 'HOTEL' ? industryService.getModuleStatuses() : Promise.resolve({})
+        ]);
+        const finalMods = target.code === 'HOTEL' ? normalizeHotelModules(modData, backendStatuses) : modData;
         setModules(finalMods);
         if (target.code === 'HOTEL') {
           const statusMap: Record<string, boolean> = {};
           finalMods.forEach((m) => {
             statusMap[m.code] = m.active;
             if (m.code === 'HOTEL_OVERVIEW') statusMap['HOTEL_DASHBOARD'] = m.active;
-            if (m.code === 'HOTEL_SETTINGS') statusMap['HOTEL_REPORTS'] = m.active;
+            if (m.code === 'HOTEL_SETTINGS') {
+              statusMap['HOTEL_REPORTS'] = m.active;
+              statusMap['REPORTS'] = m.active;
+            }
+            if (m.code === 'HOTEL_KOT') statusMap['KOT'] = m.active;
+            if (m.code === 'HOTEL_BILLING') statusMap['POS_BILLING'] = m.active;
+            if (m.code === 'HOTEL_TABLES') statusMap['TABLE_MGMT'] = m.active;
+            if (m.code === 'HOTEL_PURCHASE') {
+              statusMap['PURCHASE'] = m.active;
+              statusMap['INVENTORY'] = m.active;
+            }
+            if (m.code === 'HOTEL_STAFF') statusMap['STAFF_PAYROLL'] = m.active;
           });
           localStorage.setItem('platform_hotel_modules_status', JSON.stringify(statusMap));
+          window.dispatchEvent(new CustomEvent('platform-modules-updated', { detail: statusMap }));
+          try {
+            const bc = new BroadcastChannel('hotel_platform_modules');
+            bc.postMessage(statusMap);
+          } catch {}
         }
       }
     } catch (e) {
@@ -83,26 +119,45 @@ export const ProductModuleManagementPage: React.FC = () => {
   }, [selectedProduct]);
 
   const handleToggle = async (modId: number, current: boolean) => {
+    const mod = modules.find(m => m.id === modId);
+    const newActive = !current;
+    const updated = modules.map(m => m.id === modId ? { ...m, active: newActive } : m);
+    setModules(updated);
+
+    if (selectedProduct === 'HOTEL') {
+      const statusMap: Record<string, boolean> = {};
+      updated.forEach((m) => {
+        statusMap[m.code] = m.active;
+        if (m.code === 'HOTEL_OVERVIEW') statusMap['HOTEL_DASHBOARD'] = m.active;
+        if (m.code === 'HOTEL_SETTINGS') {
+          statusMap['HOTEL_REPORTS'] = m.active;
+          statusMap['REPORTS'] = m.active;
+        }
+        if (m.code === 'HOTEL_KOT') statusMap['KOT'] = m.active;
+        if (m.code === 'HOTEL_BILLING') statusMap['POS_BILLING'] = m.active;
+        if (m.code === 'HOTEL_TABLES') statusMap['TABLE_MGMT'] = m.active;
+        if (m.code === 'HOTEL_PURCHASE') {
+          statusMap['PURCHASE'] = m.active;
+          statusMap['INVENTORY'] = m.active;
+        }
+        if (m.code === 'HOTEL_STAFF') statusMap['STAFF_PAYROLL'] = m.active;
+      });
+      localStorage.setItem('platform_hotel_modules_status', JSON.stringify(statusMap));
+      window.dispatchEvent(new CustomEvent('platform-modules-updated', { detail: statusMap }));
+      try {
+        const bc = new BroadcastChannel('hotel_platform_modules');
+        bc.postMessage(statusMap);
+      } catch {}
+
+      if (mod?.code) {
+        await industryService.updateModuleStatus(mod.code, newActive);
+      }
+    }
+
     try {
-      if (modId < 100) {
-        await superAdminApi.toggleModuleStatus(modId, !current);
-      }
-      const updated = modules.map(m => m.id === modId ? { ...m, active: !current } : m);
-      setModules(updated);
-      if (selectedProduct === 'HOTEL') {
-        const statusMap: Record<string, boolean> = {};
-        updated.forEach((m) => {
-          statusMap[m.code] = m.active;
-          if (m.code === 'HOTEL_OVERVIEW') statusMap['HOTEL_DASHBOARD'] = m.active;
-          if (m.code === 'HOTEL_SETTINGS') statusMap['HOTEL_REPORTS'] = m.active;
-        });
-        localStorage.setItem('platform_hotel_modules_status', JSON.stringify(statusMap));
-        window.dispatchEvent(new CustomEvent('platform-modules-updated', { detail: statusMap }));
-      }
-      showAlert(`Module ${!current ? 'enabled' : 'disabled'} successfully across all hotel logins!`, 'Module Updated', 'info');
+      await superAdminApi.toggleModuleStatus(modId, newActive, mod?.code);
+      showAlert(`Module ${newActive ? 'enabled' : 'disabled'} successfully across all hotel logins!`, 'Module Updated', 'info');
     } catch (e) {
-      const updated = modules.map(m => m.id === modId ? { ...m, active: !current } : m);
-      setModules(updated);
       showAlert(`Module state updated across all hotel logins!`, 'Module Updated', 'info');
     }
   };

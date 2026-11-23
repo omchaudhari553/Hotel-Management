@@ -96,7 +96,7 @@ export const LoginPage: React.FC = () => {
           window.location.href = '/superadmin/dashboard';
         }
       }
-    } catch {}
+    } catch { }
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -207,8 +207,8 @@ export const LoginPage: React.FC = () => {
         language === 'mr'
           ? `तुमच्या ईमेलवर (${res.maskedEmail || forgotEmail}) ६-अंकी OTP पाठवला आहे!`
           : language === 'hi'
-          ? `आपके ईमेल (${res.maskedEmail || forgotEmail}) पर ६-अंकीय OTP भेजा गया है!`
-          : `6-digit OTP sent to ${res.maskedEmail || forgotEmail}!`
+            ? `आपके ईमेल (${res.maskedEmail || forgotEmail}) पर ६-अंकीय OTP भेजा गया है!`
+            : `6-digit OTP sent to ${res.maskedEmail || forgotEmail}!`
       );
     } catch (err: any) {
       showToast('error', err.message || 'Failed to send OTP. Please check your email.');
@@ -747,8 +747,8 @@ export const LoginPage: React.FC = () => {
                     {forgotStep === 'request'
                       ? (language === 'mr' ? 'ईमेलवर OTP मिळवा' : language === 'hi' ? 'ईमेल पर OTP प्राप्त करें' : 'Get OTP on Email')
                       : forgotStep === 'verify'
-                      ? (language === 'mr' ? 'OTP पडताळा व नवीन पासवर्ड सेट करा' : language === 'hi' ? 'OTP सत्यापित करें और नया पासवर्ड सेट करें' : 'Verify OTP & set new password')
-                      : (language === 'mr' ? 'पासवर्ड यशस्वीरीत्या अपडेट झाला' : language === 'hi' ? 'पासवर्ड सफलतापूर्वक अपडेट हुआ' : 'Password updated')}
+                        ? (language === 'mr' ? 'OTP पडताळा व नवीन पासवर्ड सेट करा' : language === 'hi' ? 'OTP सत्यापित करें और नया पासवर्ड सेट करें' : 'Verify OTP & set new password')
+                        : (language === 'mr' ? 'पासवर्ड यशस्वीरीत्या अपडेट झाला' : language === 'hi' ? 'पासवर्ड सफलतापूर्वक अपडेट हुआ' : 'Password updated')}
                   </div>
                 </div>
               </div>
@@ -780,8 +780,8 @@ export const LoginPage: React.FC = () => {
                   {language === 'mr'
                     ? 'तुमचा नोंदणीकृत ईमेल किंवा युझरनेम प्रविष्ट करा. आम्ही तुमच्या ईमेलवर ६-अंकी OTP पाठवू.'
                     : language === 'hi'
-                    ? 'अपना पंजीकृत ईमेल या यूज़रनेम दर्ज करें। हम आपके ईमेल पर ६-अंकीय OTP भेजेंगे।'
-                    : 'Enter your registered email address or username. We will send a 6-digit OTP verification code to your mail.'}
+                      ? 'अपना पंजीकृत ईमेल या यूज़रनेम दर्ज करें। हम आपके ईमेल पर ६-अंकीय OTP भेजेंगे।'
+                      : 'Enter your registered email address or username. We will send a 6-digit OTP verification code to your mail.'}
                 </p>
 
                 <div>
@@ -878,8 +878,8 @@ export const LoginPage: React.FC = () => {
                       {language === 'mr'
                         ? `OTP ${maskedEmail || forgotEmail} वर पाठवला आहे.`
                         : language === 'hi'
-                        ? `OTP ${maskedEmail || forgotEmail} पर भेजा गया है।`
-                        : `OTP sent to ${maskedEmail || forgotEmail}.`}
+                          ? `OTP ${maskedEmail || forgotEmail} पर भेजा गया है।`
+                          : `OTP sent to ${maskedEmail || forgotEmail}.`}
                     </span>
                   </div>
                 </div>
@@ -1072,8 +1072,8 @@ export const LoginPage: React.FC = () => {
                   {language === 'mr'
                     ? 'तुमचा पासवर्ड अपडेट झाला आहे. आता तुम्ही नवीन पासवर्डने थेट लॉगिन करू शकता.'
                     : language === 'hi'
-                    ? 'आपका पासवर्ड अपडेट हो गया है। अब आप नए पासवर्ड से लॉगिन कर सकते हैं।'
-                    : 'Your password has been updated. You can now log in using your new credentials.'}
+                      ? 'आपका पासवर्ड अपडेट हो गया है। अब आप नए पासवर्ड से लॉगिन कर सकते हैं।'
+                      : 'Your password has been updated. You can now log in using your new credentials.'}
                 </p>
                 <button
                   type="button"

@@ -611,15 +611,21 @@ export const superAdminApi = {
   },
 
   getProductModules: async (productId: number): Promise<ProductModuleItem[]> => {
+    try {
+      const res = await apiClient.get(`/industries/modules?productId=${productId}`);
+      if (res.data?.data && Array.isArray(res.data.data) && res.data.data.length > 0) {
+        return res.data.data;
+      }
+    } catch {}
     return [
-      { id: 1, productId: 1, productCode: 'HOTEL', code: 'POS_BILLING', name: 'Table POS & Billing', description: 'Real-time table orders and fast billing checkout', isCore: true, active: true },
-      { id: 2, productId: 1, productCode: 'HOTEL', code: 'KOT', name: 'Kitchen Order Tickets (KOT)', description: 'Direct kitchen token dispatching and status updates', isCore: true, active: true },
-      { id: 3, productId: 1, productCode: 'HOTEL', code: 'TABLE_MGMT', name: 'Table Management', description: 'Live floor plan, dine-in status and occupancy', isCore: true, active: true },
-      { id: 4, productId: 1, productCode: 'HOTEL', code: 'INVENTORY', name: 'Inventory & Stock Control', description: 'Item-wise tracking, low stock warnings, reorder alerts', isCore: false, active: true },
-      { id: 5, productId: 1, productCode: 'HOTEL', code: 'PURCHASE', name: 'Supplier Purchases & Invoices', description: 'Purchase orders, GRN, and supplier balance', isCore: false, active: true },
-      { id: 6, productId: 1, productCode: 'HOTEL', code: 'STAFF_PAYROLL', name: 'Staff & Attendance Management', description: 'Employee biometric, daily punch, salary calculation', isCore: false, active: true },
-      { id: 7, productId: 1, productCode: 'HOTEL', code: 'REPORTS', name: 'Operational & GST Reports', description: 'Sales, KOT analysis, item profit, and GST GSTR-1 data', isCore: true, active: true },
-      { id: 8, productId: 1, productCode: 'HOTEL', code: 'MULTI_BRANCH', name: 'Multi-Branch Synchronization', description: 'Central owner access and branch consolidation', isCore: false, active: true },
+      { id: 100, productId: 1, productCode: 'HOTEL', code: 'HOTEL_OVERVIEW', name: 'Hotel Overview', description: 'Real-time sales, order velocity, table status & daily analytics', isCore: true, active: true },
+      { id: 101, productId: 1, productCode: 'HOTEL', code: 'HOTEL_KOT', name: 'KOT', description: 'Kitchen Order Tickets live firing, routing and chef dispatch', isCore: true, active: true },
+      { id: 102, productId: 1, productCode: 'HOTEL', code: 'HOTEL_BILLING', name: 'Billing / Invoices', description: 'Thermal bill generation, table settlement, split bills & discount management', isCore: true, active: true },
+      { id: 103, productId: 1, productCode: 'HOTEL', code: 'HOTEL_TABLES', name: 'Tables', description: 'Floor sections, visual table layout, dine-in status & occupancy tracker', isCore: true, active: true },
+      { id: 104, productId: 1, productCode: 'HOTEL', code: 'HOTEL_PAYMENTS', name: 'Payments', description: 'Cash, UPI, Card and multi-tender daily payment reconciliation', isCore: true, active: true },
+      { id: 105, productId: 1, productCode: 'HOTEL', code: 'HOTEL_PURCHASE', name: 'Purchase', description: 'Supplier purchase orders, inventory stocking & vendor expense tracking', isCore: true, active: true },
+      { id: 106, productId: 1, productCode: 'HOTEL', code: 'HOTEL_STAFF', name: 'Staff', description: 'Staff directory, role permissions, waiter commissions & shifts', isCore: false, active: true },
+      { id: 107, productId: 1, productCode: 'HOTEL', code: 'HOTEL_SETTINGS', name: 'Settings', description: 'System configuration, tax/GST settings, print setup & audit reports', isCore: false, active: true },
     ];
   },
 
@@ -637,7 +643,17 @@ export const superAdminApi = {
     };
   },
 
-  toggleModuleStatus: async (moduleId: number, active: boolean): Promise<void> => {},
+  toggleModuleStatus: async (moduleId: number, active: boolean, moduleCode?: string): Promise<void> => {
+    try {
+      await apiClient.post('/industries/modules/status', {
+        moduleId,
+        moduleCode,
+        active,
+      });
+    } catch (e) {
+      console.warn('Backend toggle status fallback to local state:', e);
+    }
+  },
 
   // 5. Subscription Plans
   getPlans: async (productCode?: string): Promise<SubscriptionPlanItem[]> => {

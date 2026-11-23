@@ -105,8 +105,12 @@ export const BranchProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     const myBranch = branches.find((b: any) => Number(b.id) === branchUserBranchId);
     if (myBranch && myBranch.status && myBranch.status.toUpperCase() !== 'ACTIVE') {
+      const savedModules = localStorage.getItem('platform_hotel_modules_status');
       localStorage.clear();
       sessionStorage.clear();
+      if (savedModules) {
+        localStorage.setItem('platform_hotel_modules_status', savedModules);
+      }
       if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
         window.location.href = '/login';
       }

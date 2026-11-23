@@ -6,6 +6,7 @@ import { LoginPage } from '../auth/LoginPage';
 import { SignupPage } from '../auth/SignupPage';
 import { GetStartedPage } from '../onboarding/GetStartedPage';
 import { IndustryGuard, SharedModuleGuard } from './IndustryGuard';
+import { industryService } from '../services/industryService';
 
 // Hotel Module
 import { HotelDashboard } from '../hotel/HotelDashboard';
@@ -92,69 +93,109 @@ const DynamicRootRedirect: React.FC = () => {
 };
 
 const HotelModuleRoute: React.FC<{ moduleCode: string; children: React.ReactNode }> = ({ moduleCode, children }) => {
-  const [enabled, setEnabled] = React.useState<boolean>(() => {
+  const checkEnabled = (code: string) => {
     try {
       const raw = localStorage.getItem('platform_hotel_modules_status');
       if (!raw) return true;
       const parsed = JSON.parse(raw);
-      if (moduleCode === 'HOTEL_OVERVIEW') {
+      if (code === 'HOTEL_OVERVIEW') {
         return parsed['HOTEL_OVERVIEW'] !== false && parsed['HOTEL_DASHBOARD'] !== false;
       }
-      if (moduleCode === 'HOTEL_SETTINGS') {
-        return parsed['HOTEL_SETTINGS'] !== false && parsed['HOTEL_REPORTS'] !== false;
+      if (code === 'HOTEL_SETTINGS') {
+        return parsed['HOTEL_SETTINGS'] !== false && parsed['HOTEL_REPORTS'] !== false && parsed['REPORTS'] !== false;
       }
-      return parsed[moduleCode] !== false;
+      if (code === 'HOTEL_KOT') {
+        return parsed['HOTEL_KOT'] !== false && parsed['KOT'] !== false;
+      }
+      if (code === 'HOTEL_BILLING') {
+        return parsed['HOTEL_BILLING'] !== false && parsed['POS_BILLING'] !== false;
+      }
+      if (code === 'HOTEL_TABLES') {
+        return parsed['HOTEL_TABLES'] !== false && parsed['TABLE_MGMT'] !== false;
+      }
+      if (code === 'HOTEL_PAYMENTS') {
+        return parsed['HOTEL_PAYMENTS'] !== false;
+      }
+      if (code === 'HOTEL_PURCHASE') {
+        return parsed['HOTEL_PURCHASE'] !== false && parsed['PURCHASE'] !== false && parsed['INVENTORY'] !== false;
+      }
+      if (code === 'HOTEL_STAFF') {
+        return parsed['HOTEL_STAFF'] !== false && parsed['STAFF_PAYROLL'] !== false;
+      }
+      return parsed[code] !== false;
     } catch {
       return true;
     }
-  });
+  };
+
+  const [enabled, setEnabled] = React.useState<boolean>(() => checkEnabled(moduleCode));
 
   React.useEffect(() => {
     const handleSync = () => {
-      try {
-        const raw = localStorage.getItem('platform_hotel_modules_status');
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (moduleCode === 'HOTEL_OVERVIEW') {
-            setEnabled(parsed['HOTEL_OVERVIEW'] !== false && parsed['HOTEL_DASHBOARD'] !== false);
-          } else if (moduleCode === 'HOTEL_SETTINGS') {
-            setEnabled(parsed['HOTEL_SETTINGS'] !== false && parsed['HOTEL_REPORTS'] !== false);
-          } else {
-            setEnabled(parsed[moduleCode] !== false);
-          }
-        }
-      } catch {}
+      setEnabled(checkEnabled(moduleCode));
     };
+
+    industryService.getModuleStatuses().then((st) => {
+      if (st && Object.keys(st).length > 0) {
+        handleSync();
+      }
+    }).catch(() => {});
+
     window.addEventListener('platform-modules-updated', handleSync);
     window.addEventListener('storage', handleSync);
+
+    const interval = setInterval(() => {
+      handleSync();
+      industryService.getModuleStatuses().then((st) => {
+        if (st && Object.keys(st).length > 0) {
+          handleSync();
+        }
+      }).catch(() => {});
+    }, 2000);
+
+    let bc: BroadcastChannel | null = null;
+    try {
+      bc = new BroadcastChannel('hotel_platform_modules');
+      bc.onmessage = () => {
+        handleSync();
+      };
+    } catch { }
+
     return () => {
+      clearInterval(interval);
       window.removeEventListener('platform-modules-updated', handleSync);
       window.removeEventListener('storage', handleSync);
+      if (bc) {
+        try { bc.close(); } catch { }
+      }
     };
   }, [moduleCode]);
 
   if (!enabled) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', textAlign: 'center', padding: '24px' }}>
-        <div style={{ width: '56px', height: '56px', borderRadius: '16px', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#EF4444', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', fontSize: '26px' }}>
-          🔒
-        </div>
-        <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0F172A', marginBottom: '8px' }}>Module Disabled by Platform Admin</h2>
-        <p style={{ fontSize: '0.85rem', color: '#64748B', maxWidth: '420px', lineHeight: 1.5, marginBottom: '20px' }}>
-          This feature module ({moduleCode}) has been disabled from the Central Super Admin Panel. Contact your platform administrator to re-enable access.
-        </p>
-        <button
-          type="button"
-          onClick={() => { window.location.href = '/hotel/dashboard'; }}
-          style={{ padding: '8px 20px', backgroundColor: '#4F46E5', color: '#FFFFFF', borderRadius: '10px', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '0.82rem' }}
-        >
-          Return to Hotel Dashboard
-        </button>
+  const isOverview = moduleCode === 'HOTEL_OVERVIEW';
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '65vh', textAlign: 'center', padding: '32px' }}>
+      <div style={{ width: '64px', height: '64px', borderRadius: '20px', backgroundColor: 'rgba(239, 68, 68, 0.12)', color: '#EF4444', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', fontSize: '28px', border: '1px solid rgba(239, 68, 68, 0.25)' }}>
+        🔒
       </div>
-    );
-  }
+      <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0F172A', marginBottom: '8px' }}>
+        हा विभाग सेंट्रल सुपर ॲडमिन कडून डिसेबल (Disabled) केला आहे
+      </h2>
+      <p style={{ fontSize: '0.85rem', color: '#64748B', maxWidth: '440px', lineHeight: 1.6, marginBottom: '22px' }}>
+        This operational module has been disabled from Product Management in the Central Super Admin Panel. Please contact the platform super administrator to re-enable it.
+      </p>
+      <button
+        type="button"
+        onClick={() => { window.location.href = isOverview ? '/choose-industry' : '/hotel/dashboard'; }}
+        style={{ padding: '10px 24px', backgroundColor: '#4F46E5', color: '#FFFFFF', borderRadius: '10px', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem', boxShadow: '0 4px 12px rgba(79, 70, 229, 0.3)' }}
+      >
+        {isOverview ? 'उद्योग निवडा (Choose Industry)' : 'हॉटेल डॅशबोर्डवर परत जा (Hotel Dashboard)'}
+      </button>
+    </div>
+  );
+}
 
-  return <>{children}</>;
+return <>{children}</>;
 };
 
 export const AppRoutes: React.FC = () => {
@@ -218,9 +259,9 @@ export const AppRoutes: React.FC = () => {
         <Route path="branches/create" element={<OwnerBranchCreate />} />
         <Route path="sales" element={<OwnerSales />} />
         <Route path="profit-analysis" element={<OwnerProfitAnalysis />} />
-        <Route path="staff" element={<OwnerStaff />} />
-        <Route path="reports" element={<OwnerReports />} />
-        <Route path="billing-performance" element={<OwnerBillingPerformance />} />
+        <Route path="staff" element={<HotelModuleRoute moduleCode="HOTEL_STAFF"><OwnerStaff /></HotelModuleRoute>} />
+        <Route path="reports" element={<HotelModuleRoute moduleCode="HOTEL_SETTINGS"><OwnerReports /></HotelModuleRoute>} />
+        <Route path="billing-performance" element={<HotelModuleRoute moduleCode="HOTEL_BILLING"><OwnerBillingPerformance /></HotelModuleRoute>} />
         <Route path="settings" element={<OwnerSettings />} />
         <Route path="*" element={<Navigate to="/owner/dashboard" replace />} />
       </Route>
@@ -243,7 +284,9 @@ export const AppRoutes: React.FC = () => {
           path="/hotel/dashboard"
           element={
             <IndustryGuard requiredIndustry="HOTEL">
-              <HotelDashboard />
+              <HotelModuleRoute moduleCode="HOTEL_OVERVIEW">
+                <HotelDashboard />
+              </HotelModuleRoute>
             </IndustryGuard>
           }
         />
@@ -297,7 +340,9 @@ export const AppRoutes: React.FC = () => {
           path="/hotelreport"
           element={
             <IndustryGuard requiredIndustry="HOTEL">
-              <HotelReport />
+              <HotelModuleRoute moduleCode="HOTEL_SETTINGS">
+                <HotelReport />
+              </HotelModuleRoute>
             </IndustryGuard>
           }
         />
@@ -306,7 +351,9 @@ export const AppRoutes: React.FC = () => {
           path="/hotel/staff"
           element={
             <IndustryGuard requiredIndustry="HOTEL">
-              <StaffManagement />
+              <HotelModuleRoute moduleCode="HOTEL_STAFF">
+                <StaffManagement />
+              </HotelModuleRoute>
             </IndustryGuard>
           }
         />
@@ -315,7 +362,9 @@ export const AppRoutes: React.FC = () => {
           path="/staff"
           element={
             <IndustryGuard requiredIndustry="HOTEL">
-              <StaffManagement />
+              <HotelModuleRoute moduleCode="HOTEL_STAFF">
+                <StaffManagement />
+              </HotelModuleRoute>
             </IndustryGuard>
           }
         />
@@ -323,7 +372,9 @@ export const AppRoutes: React.FC = () => {
           path="/hotel/kot"
           element={
             <IndustryGuard requiredIndustry="HOTEL">
-              <KOTModule />
+              <HotelModuleRoute moduleCode="HOTEL_KOT">
+                <KOTModule />
+              </HotelModuleRoute>
             </IndustryGuard>
           }
         />
@@ -331,7 +382,9 @@ export const AppRoutes: React.FC = () => {
           path="/kot"
           element={
             <IndustryGuard requiredIndustry="HOTEL">
-              <KOTModule />
+              <HotelModuleRoute moduleCode="HOTEL_KOT">
+                <KOTModule />
+              </HotelModuleRoute>
             </IndustryGuard>
           }
         />
@@ -340,7 +393,9 @@ export const AppRoutes: React.FC = () => {
           path="/hotel/purchasedashboard"
           element={
             <IndustryGuard requiredIndustry="HOTEL">
-              <PurchaseDashboard />
+              <HotelModuleRoute moduleCode="HOTEL_PURCHASE">
+                <PurchaseDashboard />
+              </HotelModuleRoute>
             </IndustryGuard>
           }
         />
@@ -349,7 +404,9 @@ export const AppRoutes: React.FC = () => {
           path="/hotel/Tables"
           element={
             <IndustryGuard requiredIndustry="HOTEL">
-              <Tables />
+              <HotelModuleRoute moduleCode="HOTEL_TABLES">
+                <Tables />
+              </HotelModuleRoute>
             </IndustryGuard>
           }
         />
@@ -357,7 +414,9 @@ export const AppRoutes: React.FC = () => {
           path="/hotel/tables"
           element={
             <IndustryGuard requiredIndustry="HOTEL">
-              <Tables />
+              <HotelModuleRoute moduleCode="HOTEL_TABLES">
+                <Tables />
+              </HotelModuleRoute>
             </IndustryGuard>
           }
         />
@@ -374,7 +433,9 @@ export const AppRoutes: React.FC = () => {
           path="/hotel/settings"
           element={
             <IndustryGuard requiredIndustry="HOTEL">
-              <Settings />
+              <HotelModuleRoute moduleCode="HOTEL_SETTINGS">
+                <Settings />
+              </HotelModuleRoute>
             </IndustryGuard>
           }
         />
@@ -382,7 +443,9 @@ export const AppRoutes: React.FC = () => {
           path="/hotel/Settings"
           element={
             <IndustryGuard requiredIndustry="HOTEL">
-              <Settings />
+              <HotelModuleRoute moduleCode="HOTEL_SETTINGS">
+                <Settings />
+              </HotelModuleRoute>
             </IndustryGuard>
           }
         />
@@ -390,7 +453,9 @@ export const AppRoutes: React.FC = () => {
           path="/hotel/settings/gst"
           element={
             <IndustryGuard requiredIndustry="HOTEL">
-              <GstReportComponent />
+              <HotelModuleRoute moduleCode="HOTEL_SETTINGS">
+                <GstReportComponent />
+              </HotelModuleRoute>
             </IndustryGuard>
           }
         />
@@ -401,7 +466,9 @@ export const AppRoutes: React.FC = () => {
           path="/hotelbilling"
           element={
             <IndustryGuard requiredIndustry="HOTEL">
-              <HotelBilling />
+              <HotelModuleRoute moduleCode="HOTEL_BILLING">
+                <HotelBilling />
+              </HotelModuleRoute>
             </IndustryGuard>
           }
         />
@@ -409,7 +476,9 @@ export const AppRoutes: React.FC = () => {
           path="/hotel/billing"
           element={
             <IndustryGuard requiredIndustry="HOTEL">
-              <HotelBilling />
+              <HotelModuleRoute moduleCode="HOTEL_BILLING">
+                <HotelBilling />
+              </HotelModuleRoute>
             </IndustryGuard>
           }
         />
@@ -417,7 +486,9 @@ export const AppRoutes: React.FC = () => {
           path="/hotel/invoices"
           element={
             <IndustryGuard requiredIndustry="HOTEL">
-              <HotelBilling />
+              <HotelModuleRoute moduleCode="HOTEL_BILLING">
+                <HotelBilling />
+              </HotelModuleRoute>
             </IndustryGuard>
           }
         />
@@ -425,7 +496,9 @@ export const AppRoutes: React.FC = () => {
           path="/hotel/billing/invoices"
           element={
             <IndustryGuard requiredIndustry="HOTEL">
-              <HotelBilling />
+              <HotelModuleRoute moduleCode="HOTEL_BILLING">
+                <HotelBilling />
+              </HotelModuleRoute>
             </IndustryGuard>
           }
         />
@@ -436,7 +509,9 @@ export const AppRoutes: React.FC = () => {
           path="/hotelpayment"
           element={
             <IndustryGuard requiredIndustry="HOTEL">
-              <HotelPayment />
+              <HotelModuleRoute moduleCode="HOTEL_PAYMENTS">
+                <HotelPayment />
+              </HotelModuleRoute>
             </IndustryGuard>
           }
         />
@@ -444,7 +519,9 @@ export const AppRoutes: React.FC = () => {
           path="/hotel/payment"
           element={
             <IndustryGuard requiredIndustry="HOTEL">
-              <HotelPayment />
+              <HotelModuleRoute moduleCode="HOTEL_PAYMENTS">
+                <HotelPayment />
+              </HotelModuleRoute>
             </IndustryGuard>
           }
         />
@@ -452,7 +529,9 @@ export const AppRoutes: React.FC = () => {
           path="/hotel/payments"
           element={
             <IndustryGuard requiredIndustry="HOTEL">
-              <HotelPayment />
+              <HotelModuleRoute moduleCode="HOTEL_PAYMENTS">
+                <HotelPayment />
+              </HotelModuleRoute>
             </IndustryGuard>
           }
         />
@@ -609,7 +688,9 @@ export const AppRoutes: React.FC = () => {
           path="/purchase"
           element={
             <SharedModuleGuard>
-              <PurchaseDashboard />
+              <HotelModuleRoute moduleCode="HOTEL_PURCHASE">
+                <PurchaseDashboard />
+              </HotelModuleRoute>
             </SharedModuleGuard>
           }
         />
@@ -618,7 +699,9 @@ export const AppRoutes: React.FC = () => {
           path="/purchases"
           element={
             <SharedModuleGuard>
-              <PurchaseDashboard />
+              <HotelModuleRoute moduleCode="HOTEL_PURCHASE">
+                <PurchaseDashboard />
+              </HotelModuleRoute>
             </SharedModuleGuard>
           }
         />

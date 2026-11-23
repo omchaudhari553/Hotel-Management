@@ -275,10 +275,14 @@ export const SuperAdminSidebar: React.FC<{ isOpen?: boolean; onClose?: () => voi
               onLogout();
             } else {
               try {
+                const savedModules = localStorage.getItem('platform_hotel_modules_status');
                 localStorage.clear();
                 sessionStorage.clear();
+                if (savedModules) {
+                  localStorage.setItem('platform_hotel_modules_status', savedModules);
+                }
               } catch (e) {}
-              window.location.replace('/login');
+              window.location.href = '/login';
             }
           }}
           style={{

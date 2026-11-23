@@ -10,6 +10,7 @@ import { paymentService } from '../services/paymentService';
 import { kotService, KotItem } from '../services/kotService';
 import { licenceService, LicenceInfo } from '../services/licenceService';
 import { settingsService } from '../services/settingsService';
+import { industryService } from '../services/industryService';
 import { notificationService } from '../services/notificationService';
 import { Invoice, Payment } from '../types';
 
@@ -116,6 +117,66 @@ export const HotelDashboard: React.FC = () => {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [kots, setKots] = useState<KotItem[]>([]);
+
+  // Check if Hotel Overview module is disabled by Super Admin
+  const [isOverviewDisabled, setIsOverviewDisabled] = useState<boolean>(() => {
+    try {
+      const raw = localStorage.getItem('platform_hotel_modules_status');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        return parsed['HOTEL_OVERVIEW'] === false || parsed['HOTEL_DASHBOARD'] === false;
+      }
+    } catch {}
+    return false;
+  });
+
+  useEffect(() => {
+    const handleSync = () => {
+      try {
+        const raw = localStorage.getItem('platform_hotel_modules_status');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          setIsOverviewDisabled(parsed['HOTEL_OVERVIEW'] === false || parsed['HOTEL_DASHBOARD'] === false);
+        }
+      } catch {}
+    };
+
+    industryService.getModuleStatuses().then((st) => {
+      if (st && Object.keys(st).length > 0) {
+        setIsOverviewDisabled(st['HOTEL_OVERVIEW'] === false || st['HOTEL_DASHBOARD'] === false);
+      }
+    }).catch(() => {});
+
+    window.addEventListener('platform-modules-updated', handleSync);
+    window.addEventListener('storage', handleSync);
+    const interval = setInterval(() => {
+      handleSync();
+      industryService.getModuleStatuses().then((st) => {
+        if (st && Object.keys(st).length > 0) {
+          setIsOverviewDisabled(st['HOTEL_OVERVIEW'] === false || st['HOTEL_DASHBOARD'] === false);
+        }
+      }).catch(() => {});
+    }, 2000);
+
+    let bc: BroadcastChannel | null = null;
+    try {
+      bc = new BroadcastChannel('hotel_platform_modules');
+      bc.onmessage = (event) => {
+        if (event && event.data) {
+          setIsOverviewDisabled(event.data['HOTEL_OVERVIEW'] === false || event.data['HOTEL_DASHBOARD'] === false);
+        }
+      };
+    } catch {}
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('platform-modules-updated', handleSync);
+      window.removeEventListener('storage', handleSync);
+      if (bc) {
+        try { bc.close(); } catch {}
+      }
+    };
+  }, []);
 
   // Super Admin view mode check
   const isSuperAdminViewing = useMemo(() => {
@@ -1235,6 +1296,29 @@ export const HotelDashboard: React.FC = () => {
     : isExpiringSoon
     ? t('expiringSoon', 'Expiring Soon')
     : t('active', 'Active');
+
+  if (isOverviewDisabled) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '65vh', textAlign: 'center', padding: '32px' }}>
+        <div style={{ width: '64px', height: '64px', borderRadius: '20px', backgroundColor: 'rgba(239, 68, 68, 0.12)', color: '#EF4444', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', fontSize: '28px', border: '1px solid rgba(239, 68, 68, 0.25)' }}>
+          🔒
+        </div>
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0F172A', marginBottom: '8px' }}>
+          हा विभाग सेंट्रल सुपर ॲडमिन कडून डिसेबल (Disabled) केला आहे
+        </h2>
+        <p style={{ fontSize: '0.85rem', color: '#64748B', maxWidth: '440px', lineHeight: 1.6, marginBottom: '22px' }}>
+          Hotel Overview / Dashboard module has been disabled from Product Management in the Central Super Admin Panel. Please contact your platform administrator to re-enable it.
+        </p>
+        <button
+          type="button"
+          onClick={() => { window.location.href = '/choose-industry'; }}
+          style={{ padding: '10px 24px', backgroundColor: '#4F46E5', color: '#FFFFFF', borderRadius: '10px', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem', boxShadow: '0 4px 12px rgba(79, 70, 229, 0.3)' }}
+        >
+          उद्योग निवडा (Choose Industry)
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div

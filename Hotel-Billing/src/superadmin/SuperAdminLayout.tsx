@@ -13,8 +13,12 @@ export const SuperAdminLayout: React.FC = () => {
 
   const handleLogout = () => {
     try {
+      const savedModules = localStorage.getItem('platform_hotel_modules_status');
       localStorage.clear();
       sessionStorage.clear();
+      if (savedModules) {
+        localStorage.setItem('platform_hotel_modules_status', savedModules);
+      }
     } catch (e) {}
     try {
       logout().catch(() => {});

@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { industryService } from '../services/industryService';
 
 interface OwnerSidebarProps {
   mobileOpen?: boolean;
@@ -27,6 +28,85 @@ export const OwnerSidebar: React.FC<OwnerSidebarProps> = ({ mobileOpen = false, 
   const { business, user } = useAuth();
   const { language } = useLanguage();
   const navigate = useNavigate();
+
+  const [platformModulesStatus, setPlatformModulesStatus] = React.useState<Record<string, boolean>>(() => {
+    try {
+      const raw = localStorage.getItem('platform_hotel_modules_status');
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  React.useEffect(() => {
+    const handleSync = (e?: any) => {
+      try {
+        if (e && e.detail) {
+          setPlatformModulesStatus(e.detail);
+          return;
+        }
+        const raw = localStorage.getItem('platform_hotel_modules_status');
+        setPlatformModulesStatus(raw ? JSON.parse(raw) : {});
+      } catch {}
+    };
+
+    industryService.getModuleStatuses().then((st) => {
+      if (st && Object.keys(st).length > 0) {
+        setPlatformModulesStatus(st);
+      }
+    }).catch(() => {});
+
+    window.addEventListener('platform-modules-updated', handleSync);
+    window.addEventListener('storage', handleSync);
+
+    const interval = setInterval(() => {
+      handleSync();
+      industryService.getModuleStatuses().then((st) => {
+        if (st && Object.keys(st).length > 0) {
+          setPlatformModulesStatus(st);
+        }
+      }).catch(() => {});
+    }, 2000);
+
+    let bc: BroadcastChannel | null = null;
+    try {
+      bc = new BroadcastChannel('hotel_platform_modules');
+      bc.onmessage = (event) => {
+        if (event && event.data) {
+          setPlatformModulesStatus(event.data);
+        }
+      };
+    } catch {}
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('platform-modules-updated', handleSync);
+      window.removeEventListener('storage', handleSync);
+      if (bc) {
+        try { bc.close(); } catch {}
+      }
+    };
+  }, []);
+
+  const isModuleEnabled = (moduleCode: string) => {
+    let status: Record<string, boolean> = platformModulesStatus;
+    try {
+      const raw = localStorage.getItem('platform_hotel_modules_status');
+      if (raw) status = JSON.parse(raw);
+    } catch {}
+
+    if (!status || Object.keys(status).length === 0) return true;
+    if (moduleCode === 'HOTEL_STAFF') {
+      return status['HOTEL_STAFF'] !== false && status['STAFF_PAYROLL'] !== false;
+    }
+    if (moduleCode === 'HOTEL_SETTINGS') {
+      return status['HOTEL_SETTINGS'] !== false && status['HOTEL_REPORTS'] !== false && status['REPORTS'] !== false;
+    }
+    if (moduleCode === 'HOTEL_BILLING') {
+      return status['HOTEL_BILLING'] !== false && status['POS_BILLING'] !== false;
+    }
+    return status[moduleCode] !== false;
+  };
 
   const CENTRAL_ITEMS = [
     {
@@ -191,7 +271,12 @@ export const OwnerSidebar: React.FC<OwnerSidebarProps> = ({ mobileOpen = false, 
           </div>
 
           <nav style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-            {CENTRAL_ITEMS.map((item) => {
+            {CENTRAL_ITEMS.filter((item) => {
+              if (item.to === '/owner/staff') return isModuleEnabled('HOTEL_STAFF');
+              if (item.to === '/owner/reports') return isModuleEnabled('HOTEL_SETTINGS');
+              if (item.to === '/owner/billing-performance') return isModuleEnabled('HOTEL_BILLING');
+              return true;
+            }).map((item) => {
               const Icon = item.icon;
               return (
                 <NavLink

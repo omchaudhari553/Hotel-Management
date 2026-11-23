@@ -31,13 +31,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     if (user) {
       localStorage.setItem('ajalkar_user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('ajalkar_user');
+      localStorage.removeItem('user');
+      localStorage.removeItem('superadmin_user');
     }
     if (business) {
       localStorage.setItem('ajalkar_business', JSON.stringify(business));
+    } else {
+      localStorage.removeItem('ajalkar_business');
     }
     if (token) {
       localStorage.setItem('token', token);
       localStorage.setItem('ajalkar_token', token);
+    } else {
+      localStorage.removeItem('token');
+      localStorage.removeItem('ajalkar_token');
+      localStorage.removeItem('superadmin_token');
     }
   }, [user, business, token]);
 
@@ -171,6 +181,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.removeItem('ajalkar_selected_branch_id');
       localStorage.removeItem('ajalkar_selected_main_branch_id');
       localStorage.removeItem('ajalkar_selected_sub_branch_id');
+      localStorage.removeItem('superadmin_token');
+      localStorage.removeItem('superadmin_user');
+      localStorage.removeItem('user');
+      try {
+        sessionStorage.clear();
+      } catch {}
     }
   };
 
