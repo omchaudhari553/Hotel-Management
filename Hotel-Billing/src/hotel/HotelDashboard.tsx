@@ -103,10 +103,42 @@ const DEFAULT_OFFERS: OfferItem[] = [
 
 export const HotelDashboard: React.FC = () => {
   const { user } = useAuth();
+  // Safe resolved active user with multiple storage fallbacks
+  const activeUser = user || (typeof window !== 'undefined' ? (() => {
+    try {
+      const s = localStorage.getItem('ajalkar_user') || localStorage.getItem('superadmin_user') || localStorage.getItem('user');
+      return s ? JSON.parse(s) : null;
+    } catch { return null; }
+  })() : null);
   const { selectedBranchId } = useBranch();
   const navigate = useNavigate();
   const { t, formatNumber, formatDate, toDevanagari, language } = useLanguage();
   const formatMoney = (val: number | string, decimals = 2) => formatNumber(val, { asCurrency: true, decimals });
+
+  // Auto-redirect Super Admin accounts straight to Central Super Admin Panel unless intentionally viewing hotel
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem('superadmin_viewing_hotel') === 'true') {
+        return; // Allow Super Admin to inspect hotel operational workspace
+      }
+    } catch {}
+
+    const token = localStorage.getItem('token') || localStorage.getItem('superadmin_token') || localStorage.getItem('ajalkar_token');
+    if (!token) return;
+
+    const isSuperAdmin =
+      (activeUser as any)?.isSuperAdmin === true ||
+      activeUser?.role === 'SUPER_ADMIN' ||
+      activeUser?.role === 'PLATFORM_ADMIN' ||
+      activeUser?.roles?.includes('ROLE_SUPER_ADMIN') ||
+      activeUser?.roles?.includes('ROLE_PLATFORM_ADMIN') ||
+      activeUser?.username?.toLowerCase() === 'superadmin' ||
+      activeUser?.email?.toLowerCase() === 'superadmin@platform.com';
+
+    if (isSuperAdmin) {
+      navigate('/superadmin/dashboard', { replace: true });
+    }
+  }, [activeUser, navigate]);
 
   const [stats, setStats] = useState<any>(null);
   const [tables, setTables] = useState<TableItem[]>([]);
@@ -417,6 +449,9 @@ export const HotelDashboard: React.FC = () => {
           if (Array.isArray(locals)) {
             locals.forEach((lk) => {
               if (lk.branchId && Number(lk.branchId) !== Number(branchId)) return;
+              if (!lk.items || !Array.isArray(lk.items) || lk.items.length === 0) return;
+              const totalQty = lk.items.reduce((acc: number, it: any) => acc + (Number(it.quantity || it.qty) || 0), 0);
+              if (totalQty <= 0) return;
               const idx = finalKots.findIndex((k) => Number(k.id) === Number(lk.id) || (lk.kotNumber && k.kotNumber === lk.kotNumber));
               if (idx >= 0) {
                 finalKots[idx] = { ...finalKots[idx], ...lk };
@@ -426,6 +461,12 @@ export const HotelDashboard: React.FC = () => {
             });
           }
         }
+        // Filter finalKots to ensure no empty/0-item ghost KOTs are counted in dashboard metrics
+        finalKots = finalKots.filter((k: any) => {
+          if (!k.items || !Array.isArray(k.items) || k.items.length === 0) return false;
+          const totalQty = k.items.reduce((acc: number, it: any) => acc + (Number(it.quantity || it.qty) || 0), 0);
+          return totalQty > 0;
+        });
       } catch {}
 
       // Resolve live tables status matching the exact operational logic of Tables.tsx
@@ -553,7 +594,7 @@ export const HotelDashboard: React.FC = () => {
     };
   }, [fetchDashboardData]);
 
-  const displayName = user?.fullName || 'Admin';
+  const displayName = activeUser?.fullName || activeUser?.username || 'Admin';
 
   const getLocalizedUserName = (name: string) => {
     if (!name || name === 'Admin') return t('admin', 'Admin');
@@ -659,12 +700,12 @@ export const HotelDashboard: React.FC = () => {
     });
   }, [payments, todayStr]);
 
-  // Table statistics
-  const totalTablesCount = tables.length > 0 ? tables.length : Number(stats?.totalCafeTables) || 18;
+  // Table statistics (Defaults strictly to 0 for new users/fresh logins until tables are added)
+  const totalTablesCount = tables.length > 0 ? tables.length : (stats?.totalCafeTables ? Number(stats.totalCafeTables) : 0);
   const occupiedTablesCount =
     tables.length > 0
       ? tables.filter((t) => t.status === 'OCCUPIED' || t.status === 'BILLING').length
-      : Number(stats?.occupiedCafeTables) || 0;
+      : (stats?.occupiedCafeTables ? Number(stats.occupiedCafeTables) : 0);
   const availableTablesCount =
     tables.length > 0
       ? tables.filter((t) => t.status === 'AVAILABLE').length

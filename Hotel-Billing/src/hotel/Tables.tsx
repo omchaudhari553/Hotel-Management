@@ -2527,7 +2527,8 @@ const Tables: React.FC = () => {
 
       await tableService.updateTableStatus(selected.id, "OCCUPIED").catch(() => {});
 
-      if (backendOrderId) {
+      const hasValidItems = selectedOrder.items && selectedOrder.items.length > 0;
+      if (backendOrderId && hasValidItems) {
         try {
           await kotService.createKot({
             branchId: selectedBranchId || 1,
@@ -7771,7 +7772,7 @@ const Tables: React.FC = () => {
                               onClick={() => {
                                 const oId = tableOrder?.id || selected.orderId;
                                 const currentOrder = tableOrder || (oId ? orders.find((o) => o.id === oId) : null);
-                                if (currentOrder) {
+                                if (currentOrder && currentOrder.items && currentOrder.items.length > 0) {
                                   try {
                                     const raw = localStorage.getItem("pending_kots");
                                     const list = raw ? JSON.parse(raw) : [];
@@ -8638,7 +8639,7 @@ const Tables: React.FC = () => {
                               border: "none",
                             }}
                             onClick={() => {
-                              if (selectedOrder) {
+                              if (selectedOrder && selectedOrder.items && selectedOrder.items.length > 0) {
                                 try {
                                   const raw = localStorage.getItem("pending_kots");
                                   const list = raw ? JSON.parse(raw) : [];

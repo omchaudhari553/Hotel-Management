@@ -9,8 +9,28 @@ interface IndustryGuardProps {
 }
 
 export const IndustryGuard: React.FC<IndustryGuardProps> = ({ requiredIndustry, children }) => {
-  const { isAuthenticated, business } = useAuth();
+  const { isAuthenticated, business, user } = useAuth();
   const { activeIndustryCode, setIndustryCode } = useIndustry();
+
+  // Resolve current active user with safe fallbacks
+  let currentUser = user;
+  if (!currentUser && typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem('ajalkar_user') || localStorage.getItem('superadmin_user') || localStorage.getItem('user');
+      if (saved) currentUser = JSON.parse(saved);
+    } catch {}
+  }
+
+  // 1. If user is Super Admin, allow seamless inspection
+  const isSuperAdminUser =
+    currentUser?.role === 'SUPER_ADMIN' ||
+    (currentUser as any)?.isSuperAdmin ||
+    currentUser?.username === 'superadmin' ||
+    (typeof window !== 'undefined' && !!localStorage.getItem('superadmin_token'));
+
+  if (isSuperAdminUser) {
+    return <>{children}</>;
+  }
 
   // Resolve authorized subscribed industry from user's business profile
   const authorizedIndustry = (business?.industryType?.toUpperCase() ||
@@ -28,12 +48,12 @@ export const IndustryGuard: React.FC<IndustryGuardProps> = ({ requiredIndustry, 
     }
   }, [isAuthenticated, activeIndustryCode, authorizedIndustry, setIndustryCode]);
 
-  // 1. If user is not authenticated, redirect to Login
+  // 2. If user is not authenticated, redirect to Login
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  // 2. Strict single-industry restriction: if requested route does not match authorized industry, block and redirect
+  // 3. Strict single-industry restriction: if requested route does not match authorized industry, block and redirect
   if (requiredIndustry !== authorizedIndustry) {
     const authorizedPath = `/${authorizedIndustry.toLowerCase()}/dashboard`;
     return <Navigate to={authorizedPath} replace />;
@@ -43,8 +63,28 @@ export const IndustryGuard: React.FC<IndustryGuardProps> = ({ requiredIndustry, 
 };
 
 export const SharedModuleGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, business } = useAuth();
+  const { isAuthenticated, business, user } = useAuth();
   const { activeIndustryCode, setIndustryCode } = useIndustry();
+
+  // Resolve current active user with safe fallbacks
+  let currentUser = user;
+  if (!currentUser && typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem('ajalkar_user') || localStorage.getItem('superadmin_user') || localStorage.getItem('user');
+      if (saved) currentUser = JSON.parse(saved);
+    } catch {}
+  }
+
+  // 1. If user is Super Admin, allow seamless inspection
+  const isSuperAdminUser =
+    currentUser?.role === 'SUPER_ADMIN' ||
+    (currentUser as any)?.isSuperAdmin ||
+    currentUser?.username === 'superadmin' ||
+    (typeof window !== 'undefined' && !!localStorage.getItem('superadmin_token'));
+
+  if (isSuperAdminUser) {
+    return <>{children}</>;
+  }
 
   // Resolve authorized subscribed industry from user's business profile
   const authorizedIndustry = (business?.industryType?.toUpperCase() ||
@@ -62,7 +102,7 @@ export const SharedModuleGuard: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   }, [isAuthenticated, activeIndustryCode, authorizedIndustry, setIndustryCode]);
 
-  // 1. If user is not authenticated, redirect to Login
+  // 2. If user is not authenticated, redirect to Login
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }

@@ -155,23 +155,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async (): Promise<void> => {
     try {
-      await authService.logout();
-    } catch {
-      // Ignore network errors on logout
-    } finally {
-      setUser(null);
-      setBusiness(null);
-      setToken(null);
-      localStorage.removeItem('token');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('ajalkar_token');
-      localStorage.removeItem('ajalkar_user');
-      localStorage.removeItem('ajalkar_business');
-      localStorage.removeItem('ajalkar_industry');
-      localStorage.removeItem('ajalkar_selected_branch_id');
-      localStorage.removeItem('ajalkar_selected_main_branch_id');
-      localStorage.removeItem('ajalkar_selected_sub_branch_id');
-    }
+      localStorage.clear();
+      sessionStorage.clear();
+    } catch (e) {}
+    try {
+      authService.logout().catch(() => {});
+    } catch (e) {}
+    setUser(null);
+    setBusiness(null);
+    setToken(null);
+    // Unconditionally and immediately replace window location to login
+    window.location.replace('/login');
   };
 
   return (

@@ -1,0 +1,33 @@
+{
+  "system" : "Cafe Coffee & Bakery Hub - Hotel POS & Billing Management",
+  "reference" : "HTL-36653",
+  "backupTimestamp" : "2026-11-22T23:00:31.119951",
+  "backupDateFormatted" : "22-Nov-2026 11:00 pm",
+  "hotel" : {
+    "id" : 6,
+    "hotelName" : "Cafe Coffee & Bakery Hub",
+    "code" : "CAFE_DELIGHT",
+    "ownerName" : "Priya Deshmukh",
+    "contactEmail" : "priya@cafedelight.com",
+    "phone" : "9890123456",
+    "address" : "FC Road, Deccan",
+    "city" : "Pune",
+    "state" : "Maharashtra",
+    "currency" : "INR",
+    "taxNumber" : null
+  },
+  "summary" : {
+    "Total Sales Amount" : "₹ 0",
+    "Total Orders Count" : 0,
+    "Total Invoices Count" : 0,
+    "Total Payments Recorded" : 0,
+    "Total Expenses" : "₹ 0",
+    "Total Tables Registered" : 0,
+    "Total Menu Items Active" : 0
+  },
+  "tables" : [ ],
+  "menuItems" : [ ],
+  "invoices" : [ ],
+  "payments" : [ ],
+  "expenses" : [ ]
+}

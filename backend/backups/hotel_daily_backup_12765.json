@@ -1,0 +1,33 @@
+{
+  "system" : "Hotel Shorya Wada - Hotel POS & Billing Management",
+  "reference" : "HTL-12765",
+  "backupTimestamp" : "2026-11-21T10:11:50.500260200",
+  "backupDateFormatted" : "21-Nov-2026 10:11 am",
+  "hotel" : {
+    "id" : 3,
+    "hotelName" : "Hotel Shorya Wada",
+    "code" : "HOTEL_SHORYAWADA",
+    "ownerName" : "Vikas Hande",
+    "contactEmail" : "shoryawada@gmail.com",
+    "phone" : "9895857465",
+    "address" : null,
+    "city" : null,
+    "state" : null,
+    "currency" : "INR",
+    "taxNumber" : null
+  },
+  "summary" : {
+    "Total Sales Amount" : "₹ 0",
+    "Total Orders Count" : 0,
+    "Total Invoices Count" : 0,
+    "Total Payments Recorded" : 0,
+    "Total Expenses" : "₹ 0",
+    "Total Tables Registered" : 0,
+    "Total Menu Items Active" : 0
+  },
+  "tables" : [ ],
+  "menuItems" : [ ],
+  "invoices" : [ ],
+  "payments" : [ ],
+  "expenses" : [ ]
+}

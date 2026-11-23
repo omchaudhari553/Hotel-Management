@@ -190,7 +190,8 @@ export const OwnerSettings: React.FC = () => {
       const res = await apiClient.post('/hotel/backup/send-email', null, {
         params: {
           customEmail: settings.contactEmail || undefined,
-        }
+        },
+        timeout: 60000,
       });
       const data = res.data?.data;
       const ref = data?.reference || 'HTL-SUCCESS';
@@ -227,6 +228,7 @@ export const OwnerSettings: React.FC = () => {
     try {
       const res = await apiClient.get('/hotel/backup/download-excel', {
         responseType: 'blob',
+        timeout: 60000,
       });
       const blob = new Blob([res.data], {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -247,7 +249,9 @@ export const OwnerSettings: React.FC = () => {
 
   const handleDownloadDailyBackup = async () => {
     try {
-      const res = await apiClient.get('/hotel/backup/download');
+      const res = await apiClient.get('/hotel/backup/download', {
+        timeout: 60000,
+      });
       const jsonContent = JSON.stringify(res.data, null, 2);
       const blob = new Blob([jsonContent], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
@@ -258,9 +262,9 @@ export const OwnerSettings: React.FC = () => {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      showToast('success', 'Daily backup JSON downloaded successfully!');
+      showToast('success', language === 'mr' ? 'JSON बॅकअप (.json) यशस्वीरीत्या डाउनलोड झाला!' : 'Daily backup JSON downloaded successfully!');
     } catch {
-      showToast('error', 'Failed to download backup JSON');
+      showToast('error', language === 'mr' ? 'JSON बॅकअप डाउनलोड करण्यात त्रुटी आली' : 'Failed to download backup JSON');
     }
   };
 
@@ -268,19 +272,20 @@ export const OwnerSettings: React.FC = () => {
     try {
       const res = await apiClient.get('/hotel/backup/download-pdf', {
         responseType: 'blob',
+        timeout: 60000,
       });
       const blob = new Blob([res.data], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `hotel_daily_backup_summary_${Date.now()}.pdf`;
+      a.download = `hotel_daily_backup_report_${Date.now()}.pdf`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      showToast('success', 'Daily backup PDF summary downloaded successfully!');
+      showToast('success', language === 'mr' ? 'PDF अहवाल (.pdf) यशस्वीरीत्या डाउनलोड झाला!' : 'Daily backup PDF report downloaded successfully!');
     } catch {
-      showToast('error', 'Failed to download backup PDF');
+      showToast('error', language === 'mr' ? 'PDF अहवाल डाउनलोड करण्यात त्रुटी आली' : 'Failed to download backup PDF');
     }
   };
 
@@ -1087,7 +1092,8 @@ export const OwnerSettings: React.FC = () => {
           </div>
         )}
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '4px' }}>
+          {/* Send Daily Backup to Email Now (Blue Square Icon Button) */}
           <button
             type="button"
             disabled={backupSending}
@@ -1095,45 +1101,37 @@ export const OwnerSettings: React.FC = () => {
             title={language === 'mr' ? 'बॅकअप ईमेल आता पाठवा' : (backupSending ? 'Sending Backup Email...' : 'Send Daily Backup to Email Now')}
             aria-label="Send Daily Backup to Email Now"
             style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '8px',
+              backgroundColor: backupSending ? '#94A3B8' : '#2563EB',
+              border: 'none',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '8px',
-              padding: '9px 18px',
-              backgroundColor: backupSending ? '#94A3B8' : '#3B82F6',
-              color: '#FFFFFF',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '0.84rem',
-              fontWeight: 700,
+              justifyContent: 'center',
               cursor: backupSending ? 'not-allowed' : 'pointer',
-              boxShadow: '0 2px 4px rgba(59, 130, 246, 0.25)',
+              boxShadow: '0 2px 4px rgba(37, 99, 235, 0.25)',
               transition: 'background-color 0.2s ease',
             }}
           >
-            <RefreshCw size={16} color="#FFFFFF" style={backupSending ? { animation: 'spin 1s linear infinite' } : undefined} />
-            <span>
-              {language === 'mr'
-                ? (backupSending ? 'ईमेल पाठवत आहे...' : 'बॅकअप ईमेल आता पाठवा')
-                : (backupSending ? 'Sending Backup Email...' : 'Send Daily Backup to Email Now')}
-            </span>
+            <RefreshCw size={18} color="#FFFFFF" style={backupSending ? { animation: 'spin 1s linear infinite' } : undefined} />
           </button>
 
+          {/* Download Excel (.xlsx) Backup (Green Square Icon Button) */}
           <button
             type="button"
             onClick={handleDownloadDailyBackupExcel}
-            title={language === 'mr' ? 'Excel बॅकअप डाउनलोड करा (.xlsx)' : 'Download Excel Backup (.xlsx)'}
+            title={language === 'mr' ? 'Excel बॅकअप (.xlsx) डाउनलोड करा' : 'Download Excel Backup (.xlsx)'}
             aria-label="Download Excel Backup (.xlsx)"
             style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '8px',
+              backgroundColor: '#10B981',
+              border: '1px solid #059669',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '8px',
-              padding: '9px 16px',
-              backgroundColor: '#10B981',
-              color: '#FFFFFF',
-              border: '1px solid #059669',
-              borderRadius: '8px',
-              fontSize: '0.84rem',
-              fontWeight: 700,
+              justifyContent: 'center',
               cursor: 'pointer',
               boxShadow: '0 2px 4px rgba(16, 185, 129, 0.25)',
               transition: 'all 0.2s ease',
@@ -1145,72 +1143,69 @@ export const OwnerSettings: React.FC = () => {
               e.currentTarget.style.backgroundColor = '#10B981';
             }}
           >
-            <FileSpreadsheet size={16} color="#FFFFFF" />
-            <span>{language === 'mr' ? 'Excel बॅकअप (.xlsx)' : 'Download Excel (.xlsx)'}</span>
+            <FileSpreadsheet size={18} color="#FFFFFF" />
           </button>
 
+          {/* Download PDF Backup (White/Border Square Icon Button) */}
           <button
             type="button"
             onClick={handleDownloadDailyBackupPdf}
-            title={language === 'mr' ? 'PDF अहवाल डाउनलोड करा (.pdf)' : 'Download PDF Report (.pdf)'}
+            title={language === 'mr' ? 'PDF अहवाल (.pdf) डाउनलोड करा' : 'Download PDF Report (.pdf)'}
             aria-label="Download PDF Report (.pdf)"
             style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '8px',
+              backgroundColor: 'var(--card-white, #FFFFFF)',
+              border: '1px solid var(--border-slate, #CBD5E1)',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '8px',
-              padding: '9px 16px',
-              backgroundColor: 'var(--bg-subtle, #F1F5F9)',
-              color: 'var(--text-heading, #0F172A)',
-              border: '1px solid var(--border-slate, #CBD5E1)',
-              borderRadius: '8px',
-              fontSize: '0.84rem',
-              fontWeight: 700,
+              justifyContent: 'center',
+              color: 'var(--text-heading, #1E293B)',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = '#D97706';
-              e.currentTarget.style.color = '#D97706';
+              e.currentTarget.style.borderColor = '#2563EB';
+              e.currentTarget.style.color = '#2563EB';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.borderColor = 'var(--border-slate, #CBD5E1)';
-              e.currentTarget.style.color = 'var(--text-heading, #0F172A)';
+              e.currentTarget.style.color = 'var(--text-heading, #1E293B)';
             }}
           >
-            <FileText size={16} color="currentColor" />
-            <span>{language === 'mr' ? 'PDF अहवाल (.pdf)' : 'Download PDF (.pdf)'}</span>
+            <FileText size={18} color="currentColor" />
           </button>
 
+          {/* Download JSON Backup (White/Border Square Icon Button) */}
           <button
             type="button"
             onClick={handleDownloadDailyBackup}
-            title={language === 'mr' ? 'बॅकअप डाउनलोड करा (.json)' : 'Download Backup (.json)'}
-            aria-label="Download Backup (.json)"
+            title={language === 'mr' ? 'JSON बॅकअप (.json) डाउनलोड करा' : 'Download JSON Backup (.json)'}
+            aria-label="Download JSON Backup (.json)"
             style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '8px',
+              backgroundColor: 'var(--card-white, #FFFFFF)',
+              border: '1px solid var(--border-slate, #CBD5E1)',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '8px',
-              padding: '9px 16px',
-              backgroundColor: 'var(--bg-subtle, #F1F5F9)',
-              color: 'var(--text-heading, #0F172A)',
-              border: '1px solid var(--border-slate, #CBD5E1)',
-              borderRadius: '8px',
-              fontSize: '0.84rem',
-              fontWeight: 700,
+              justifyContent: 'center',
+              color: 'var(--text-heading, #1E293B)',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = '#D97706';
-              e.currentTarget.style.color = '#D97706';
+              e.currentTarget.style.borderColor = '#2563EB';
+              e.currentTarget.style.color = '#2563EB';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.borderColor = 'var(--border-slate, #CBD5E1)';
-              e.currentTarget.style.color = 'var(--text-heading, #0F172A)';
+              e.currentTarget.style.color = 'var(--text-heading, #1E293B)';
             }}
           >
-            <Download size={16} color="currentColor" />
-            <span>{language === 'mr' ? 'बॅकअप (.json)' : 'Download Backup (.json)'}</span>
+            <Download size={18} color="currentColor" />
           </button>
         </div>
       </div>

@@ -62,6 +62,17 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleMobileMenu }) => {
     setSelectedSubBranchId,
   } = useBranch();
 
+  const handleDirectLogout = () => {
+    try {
+      localStorage.clear();
+      sessionStorage.clear();
+    } catch (e) {}
+    try {
+      logout().catch(() => {});
+    } catch (e) {}
+    window.location.replace('/login');
+  };
+
 
   // Date Filter & Range State
   const [isDateDropdownOpen, setIsDateDropdownOpen] = useState<boolean>(false);
@@ -1475,6 +1486,32 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleMobileMenu }) => {
           )}
         </div>
 
+        {/* Central Super Admin Link for Super Admin users */}
+        {(user?.role === 'SUPER_ADMIN' || (user as any)?.isSuperAdmin || user?.username === 'superadmin') && (
+          <button
+            type="button"
+            onClick={() => navigate('/superadmin/dashboard')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 14px',
+              borderRadius: '10px',
+              backgroundColor: '#4338CA',
+              color: '#FFFFFF',
+              border: '1.5px solid #6366F1',
+              fontWeight: 800,
+              fontSize: '0.8rem',
+              cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(67, 56, 202, 0.4)',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            <Shield size={15} color="#A5B4FC" />
+            <span>Super Admin Panel</span>
+          </button>
+        )}
+
         {/* User / Owner Profile Chip & Dropdown */}
         <div ref={profileDropdownRef} className="navbar-profile-wrapper">
           <div
@@ -1702,7 +1739,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleMobileMenu }) => {
               <div
                 onClick={() => {
                   setIsProfileOpen(false);
-                  logout();
+                  handleDirectLogout();
                 }}
                 style={{
                   padding: '9px 12px',
@@ -1729,7 +1766,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleMobileMenu }) => {
         {/* Standalone Logout Button (Beside User Profile on the right) */}
         <button
           type="button"
-          onClick={logout}
+          onClick={handleDirectLogout}
           title={t('signOut', 'Sign Out')}
           className="navbar-logout-btn"
           style={{

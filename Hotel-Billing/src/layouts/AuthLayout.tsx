@@ -4,10 +4,20 @@ import { useAuth } from '../context/AuthContext';
 import { useIndustry } from '../context/IndustryContext';
 
 export const AuthLayout: React.FC = () => {
-  const { isAuthenticated, business } = useAuth();
+  const { user, isAuthenticated, business } = useAuth();
   const { activeIndustryCode } = useIndustry();
 
   if (isAuthenticated) {
+    const isSuperAdmin =
+      (user as any)?.isSuperAdmin === true ||
+      user?.role === 'SUPER_ADMIN' ||
+      user?.role === 'PLATFORM_ADMIN' ||
+      user?.username === 'superadmin';
+
+    if (isSuperAdmin) {
+      return <Navigate to="/superadmin/dashboard" replace />;
+    }
+
     const ind = activeIndustryCode || business?.industryType;
     if (ind && ['HOTEL', 'MESS', 'CAFE'].includes(ind.toUpperCase())) {
       return <Navigate to={`/${ind.toLowerCase()}/dashboard`} replace />;

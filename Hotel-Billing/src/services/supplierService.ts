@@ -8,13 +8,13 @@ export const supplierService = {
       const response = await api.get<ApiResponse<Supplier[]>>('/hotel/suppliers', {
         params: { businessId },
       });
-      if (response.data && response.data.data && Array.isArray(response.data.data) && response.data.data.length > 0) {
+      if (response.data && response.data.data && Array.isArray(response.data.data)) {
         return response.data.data;
       }
     } catch (err) {
-      console.warn('Backend suppliers fetch failed, using fallback database bundle', err);
+      console.warn('Backend suppliers fetch failed', err);
     }
-    return (purchaseDataBundle.suppliers as unknown as Supplier[]) || [];
+    return [];
   },
 
   getSupplierById: async (id: number): Promise<Supplier> => {

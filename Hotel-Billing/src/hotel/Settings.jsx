@@ -2,13 +2,14 @@ import { webBluetoothPrinter } from "../services/webBluetoothPrinter";
 import { webUsbPrinter } from "../services/webUsbPrinter";
 import { webWifiPrinter } from "../services/webWifiPrinter";
 import { printService } from "../services/printService";
-import { Bluetooth, Printer, Check, Loader2, AlertCircle, CheckCircle2, Wifi, Usb, Save, X, Upload, Building2, Trash2, Mail, RefreshCw, Download, FileText } from "lucide-react";
+import { Bluetooth, Printer, Check, Loader2, AlertCircle, CheckCircle2, Wifi, Usb, Save, X, Upload, Building2, Trash2, Mail, RefreshCw, Download, FileText, FileSpreadsheet, Shield, RotateCcw, Sparkles, Crown } from "lucide-react";
 import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import apiClient from "../services/api";
 import { settingsService } from "../services/settingsService";
 import { branchService } from "../services/branchService";
+import { licenceService } from "../services/licenceService";
 import { useLanguage } from "../context/LanguageContext";
 import { dialogService } from "../context/DialogContext";
 import { useAuth } from "../context/AuthContext";
@@ -181,6 +182,12 @@ const SETTINGS_SECTIONS = [
     icon: "⚙",
     title: "System Preferences",
     description: "System & backup",
+  },
+  {
+    id: "licence",
+    icon: "🛡️",
+    title: "Licence & Subscription",
+    description: "Enterprise license & trial status",
   },
   {
     id: "reports",
@@ -704,6 +711,22 @@ export default function Settings() {
   const [profile, setProfile] =
     useState(INITIAL_PROFILE);
 
+  const [licenceInfo, setLicenceInfo] = useState(null);
+  const [bankDetails, setBankDetails] = useState(() => {
+    try {
+      const saved = localStorage.getItem('ajalkar_owner_bank_details');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return {
+      bankName: "",
+      accountHolderName: "",
+      accountNumber: "",
+      ifscCode: "",
+      upiId: "",
+      bankPhone: "",
+    };
+  });
+
   const [hotelLogo, setHotelLogo] = useState(() => localStorage.getItem("business_logo") || "");
   const [logoError, setLogoError] = useState("");
   const logoInputRef = useRef(null);
@@ -1000,7 +1023,8 @@ export default function Settings() {
       const res = await apiClient.post('/hotel/backup/send-email', null, {
         params: {
           customEmail: profile?.email || undefined,
-        }
+        },
+        timeout: 60000,
       });
       const data = res.data?.data;
       const ref = data?.reference || 'HTL-SUCCESS';
@@ -1045,9 +1069,42 @@ export default function Settings() {
     }
   };
 
+  const handleDownloadDailyBackupExcel = async () => {
+    try {
+      const res = await apiClient.get('/hotel/backup/download-excel', {
+        responseType: 'blob',
+        timeout: 60000,
+      });
+      const blob = new Blob([res.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `hotel_daily_backup_${Date.now()}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      setPopup({
+        type: "success",
+        title: currentLanguageCode === 'mr' ? 'डाउनलोड यशस्वी' : 'Download Complete',
+        message: currentLanguageCode === 'mr' ? 'Excel बॅकअप (.xlsx) यशस्वीरीत्या डाउनलोड झाला!' : 'Daily backup Excel (.xlsx) downloaded successfully!',
+      });
+    } catch {
+      setPopup({
+        type: "error",
+        title: currentLanguageCode === 'mr' ? 'त्रुटी' : 'Error',
+        message: currentLanguageCode === 'mr' ? 'Excel बॅकअप डाउनलोड करण्यात त्रुटी आली' : 'Failed to download backup Excel',
+      });
+    }
+  };
+
   const handleDownloadDailyBackup = async () => {
     try {
-      const res = await apiClient.get('/hotel/backup/download');
+      const res = await apiClient.get('/hotel/backup/download', {
+        timeout: 60000,
+      });
       const jsonContent = JSON.stringify(res.data, null, 2);
       const blob = new Blob([jsonContent], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
@@ -1076,6 +1133,7 @@ export default function Settings() {
     try {
       const res = await apiClient.get('/hotel/backup/download-pdf', {
         responseType: 'blob',
+        timeout: 60000,
       });
       const blob = new Blob([res.data], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
@@ -1168,6 +1226,18 @@ export default function Settings() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // 0. Fetch Licence Information
+    licenceService.getLicenceInfo().then(info => {
+      if (info) setLicenceInfo(info);
+    }).catch(() => {});
+    const handleLicenceUpdated = () => {
+      licenceService.getLicenceInfo().then(info => {
+        if (info) setLicenceInfo(info);
+      }).catch(() => {});
+    };
+    window.addEventListener('licence-updated', handleLicenceUpdated);
+    window.addEventListener('subscription-updated', handleLicenceUpdated);
+
     // 1. Fetch Profile
     settingsService.getProfile().then(p => {
       if (p) {
@@ -1277,6 +1347,16 @@ export default function Settings() {
             console.warn("Failed to parse billing config", e);
           }
         }
+
+        const bBank = gstSettings.find(s => s.category?.toUpperCase() === "BANK" && s.settingKey?.toUpperCase() === "DETAILS");
+        if (bBank && bBank.settingValue) {
+          try {
+            const parsed = JSON.parse(bBank.settingValue);
+            setBankDetails(prev => ({ ...prev, ...parsed }));
+          } catch (e) {
+            console.warn("Failed to parse BANK DETAILS", e);
+          }
+        }
       }
 
       // Merge branches with branch GST configuration
@@ -1327,6 +1407,8 @@ export default function Settings() {
     window.addEventListener("dashboard-display-updated", handleDashboardSync);
     return () => {
       window.removeEventListener("dashboard-display-updated", handleDashboardSync);
+      window.removeEventListener('licence-updated', handleLicenceUpdated);
+      window.removeEventListener('subscription-updated', handleLicenceUpdated);
     };
   }, []);
 
@@ -1721,6 +1803,7 @@ export default function Settings() {
     setSaving(true);
 
     localStorage.setItem("ajalkar_billing_config", JSON.stringify(billing));
+    localStorage.setItem("ajalkar_owner_bank_details", JSON.stringify(bankDetails));
     localStorage.setItem("ajalkar_default_print_method", billing.bluetoothPrinter ? "bluetooth" : "browser");
     localStorage.setItem("ajalkar_printer_type", billing.bluetoothPrinter ? "thermal_bt" : "system");
     localStorage.setItem("ajalkar_default_paper_size", billing.paperSize || "80mm");
@@ -1742,6 +1825,7 @@ export default function Settings() {
       }),
       settingsService.saveSetting("billing", "config", JSON.stringify(billing)),
       settingsService.saveSetting("BUSINESS", "LOGO", hotelLogo || ""),
+      settingsService.saveSetting("BANK", "DETAILS", JSON.stringify(bankDetails)),
     ]).then(() => {
       setLastSaved(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
       setSavedNotice(true);
@@ -1839,376 +1923,443 @@ export default function Settings() {
     return (
       <>
         <div className="settings-card">
-              <div className="card-heading">
-                <div>
-                  <h2>{t('hotelProfile', 'Hotel Profile')}</h2>
-                </div>
-              </div>
+          <div className="card-heading">
+            <div>
+              <h2>{t('hotelProfile', 'Hotel Profile')}</h2>
+            </div>
+          </div>
 
-              {/* Hotel Brand Logo */}
-              <div className="hotel-logo-box">
-                <div className="hotel-media-title">{t('hotelLogo', 'Hotel Brand Logo')}</div>
-                <div className="hotel-media-desc">
-                  {t('hotelLogoDesc', 'Upload logo for receipts, bills & header branding (PNG, JPG, WEBP up to 2MB).')}
-                </div>
-
-                {hotelLogo ? (
-                  <>
-                    <div className="hotel-media-preview-wrap">
-                      <img src={hotelLogo} alt="Hotel Logo Preview" className="hotel-logo-img" />
-                    </div>
-                    <div className="hotel-media-actions">
-                      <button
-                        type="button"
-                        className="hotel-media-btn-secondary"
-                        onClick={() => logoInputRef.current?.click()}
-                      >
-                        <Upload size={13} />
-                        {t('changeLogo', 'Change Logo')}
-                      </button>
-                      <button
-                        type="button"
-                        className="hotel-media-btn-danger"
-                        onClick={handleRemoveLogo}
-                      >
-                        <Trash2 size={13} />
-                        {t('remove', 'Remove')}
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="hotel-media-icon-badge">
-                      <Building2 size={22} />
-                    </div>
-                    <button
-                      type="button"
-                      className="hotel-media-btn-primary"
-                      onClick={() => logoInputRef.current?.click()}
-                    >
-                      <Upload size={13} />
-                      {t('uploadLogo', 'Upload Hotel Logo')}
-                    </button>
-                  </>
-                )}
-
-                {logoError && <div className="hotel-media-error">{logoError}</div>}
-                <input
-                  ref={logoInputRef}
-                  type="file"
-                  accept="image/png,image/jpeg,image/webp"
-                  style={{ display: "none" }}
-                  onChange={handleLogoUpload}
-                />
-              </div>
-
-              <div className="settings-grid">
-                <InputField
-                  label="Hotel Name"
-                  required
-                  value={profile.hotelName}
-                  placeholder="Enter hotel name"
-                  error={errors.hotelName}
-                  onChange={(value) =>
-                    updateProfileWithValidation(
-                      "hotelName",
-                      value.replace(/[^A-Za-z .\'-]/g, "").replace(/\s{2,}/g, " "),
-                      validateName
-                    )
-                  }
-                  onBlur={() => {
-                    markTouched("hotelName");
-                    updateError(
-                      "hotelName",
-                      validateName(
-                        profile.hotelName
-                      )
-                    );
-                  }}
-                />
-
-                <InputField
-                  label="Owner Name"
-                  required
-                  value={profile.ownerName}
-                  placeholder="Enter owner name"
-                  error={errors.ownerName}
-                  onChange={(value) =>
-                    updateProfileWithValidation(
-                      "ownerName",
-                      value.replace(/[^A-Za-z .\'-]/g, "").replace(/\s{2,}/g, " "),
-                      validateName
-                    )
-                  }
-                  onBlur={() => {
-                    markTouched("ownerName");
-                    updateError(
-                      "ownerName",
-                      validateName(
-                        profile.ownerName
-                      )
-                    );
-                  }}
-                />
-
-                <InputField
-                  label="Email Address"
-                  required
-                  type="email"
-                  value={profile.email}
-                  placeholder="example@email.com"
-                  error={errors.email}
-                  onChange={(value) => {
-                    const clean = sanitizeEmailInput(value);
-
-                    updateProfileWithValidation(
-                      "email",
-                      clean,
-                      validateEmail
-                    );
-                  }}
-                  onBlur={() => {
-                    markTouched("email");
-                    updateError(
-                      "email",
-                      validateEmail(profile.email)
-                    );
-                  }}
-                />
-
-                <InputField
-                  label="Mobile Number"
-                  required
-                  value={profile.mobile}
-                  placeholder="10-digit mobile number"
-                  maxLength={10}
-                  error={errors.mobile}
-                  onChange={(value) => {
-                    const digits =
-                      value
-                        .replace(/\D/g, "")
-                        .slice(0, 10);
-
-                    updateProfileWithValidation(
-                      "mobile",
-                      digits,
-                      (v) => validateMobile(v, true)
-                    );
-                  }}
-                  onBlur={() => {
-                    markTouched("mobile");
-                    updateError(
-                      "mobile",
-                      validateMobile(
-                        profile.mobile,
-                        true
-                      )
-                    );
-                  }}
-                />
-
-                <InputField
-                  label="Alternate Mobile"
-                  value={profile.alternateMobile}
-                  placeholder="Optional mobile number"
-                  maxLength={10}
-                  error={errors.alternateMobile}
-                  onChange={(value) => {
-                    const digits =
-                      value
-                        .replace(/\D/g, "")
-                        .slice(0, 10);
-
-                    updateProfileWithValidation(
-                      "alternateMobile",
-                      digits,
-                      (v) =>
-                        validateMobile(v, false)
-                    );
-                  }}
-                  onBlur={() => {
-                    markTouched("alternateMobile");
-                    updateError(
-                      "alternateMobile",
-                      validateMobile(
-                        profile.alternateMobile,
-                        false
-                      )
-                    );
-                  }}
-                />
-
-                <InputField
-                  label="City"
-                  required
-                  value={profile.city}
-                  placeholder="Enter city"
-                  error={errors.city}
-                  onChange={(value) =>
-                    updateProfileWithValidation(
-                      "city",
-                      value.replace(/[^A-Za-z .\'-]/g, "").replace(/\s{2,}/g, " "),
-                      (v) =>
-                        validateCityState(
-                          v,
-                          "City"
-                        )
-                    )
-                  }
-                  onBlur={() => {
-                    markTouched("city");
-                    updateError(
-                      "city",
-                      validateCityState(
-                        profile.city,
-                        "City"
-                      )
-                    );
-                  }}
-                />
-
-                <InputField
-                  label="State"
-                  required
-                  value={profile.state}
-                  placeholder="Enter state"
-                  error={errors.state}
-                  onChange={(value) =>
-                    updateProfileWithValidation(
-                      "state",
-                      value.replace(/[^A-Za-z .\'-]/g, "").replace(/\s{2,}/g, " "),
-                      (v) =>
-                        validateCityState(
-                          v,
-                          "State"
-                        )
-                    )
-                  }
-                  onBlur={() => {
-                    markTouched("state");
-                    updateError(
-                      "state",
-                      validateCityState(
-                        profile.state,
-                        "State"
-                      )
-                    );
-                  }}
-                />
-
-                <InputField
-                  label="Pincode"
-                  required
-                  value={profile.pincode}
-                  placeholder="6-digit pincode"
-                  maxLength={6}
-                  error={errors.pincode}
-                  onChange={(value) => {
-                    const digits =
-                      value
-                        .replace(/\D/g, "")
-                        .slice(0, 6);
-
-                    updateProfileWithValidation(
-                      "pincode",
-                      digits,
-                      validatePincode
-                    );
-                  }}
-                  onBlur={() => {
-                    markTouched("pincode");
-                    updateError(
-                      "pincode",
-                      validatePincode(
-                        profile.pincode
-                      )
-                    );
-                  }}
-                />
-              </div>
-
-              <div className="textarea-field">
-                <label className="settings-label">
-                  {t('businessAddress', 'Business Address')}
-                  <span className="required">*</span>
-                </label>
-
-                <textarea
-                  rows="4"
-                  value={profile.address}
-                  placeholder={t('enterBusinessAddress', 'Enter complete business address')}
-                  className={`settings-input settings-textarea ${errors.address
-                    ? "settings-input-error"
-                    : ""
-                    }`}
-                  onChange={(e) =>
-                    updateProfileWithValidation(
-                      "address",
-                      e.target.value,
-                      validateAddress
-                    )
-                  }
-                  onBlur={() => {
-                    markTouched("address");
-                    updateError(
-                      "address",
-                      validateAddress(
-                        profile.address
-                      )
-                    );
-                  }}
-                />
-
-                <ErrorMessage error={errors.address} />
-              </div>
-
-              <div style={{ marginTop: '16px', maxWidth: '240px' }}>
-                <SelectField
-                  label={t('currency', 'Currency')}
-                  value={profile.currency || 'INR'}
-                  options={[
-                    "INR",
-                    "USD",
-                    "EUR",
-                    "GBP",
-                  ]}
-                  onChange={(value) =>
-                    updateProfile(
-                      "currency",
-                      value
-                    )
-                  }
-                />
-              </div>
+          {/* Hotel Brand Logo */}
+          <div className="hotel-logo-box">
+            <div className="hotel-media-title">{t('hotelLogo', 'Hotel Brand Logo')}</div>
+            <div className="hotel-media-desc">
+              {t('hotelLogoDesc', 'Upload logo for receipts, bills & header branding (PNG, JPG, WEBP up to 2MB).')}
             </div>
 
-            <div className="profile-meter">
-              <div className="profile-meter-top">
-                <span className="profile-meter-title">{t('profileCompletion', 'Profile Completion')}</span>
-                <span className="profile-meter-value">{toDevanagari(profileCompletion())}%</span>
-              </div>
-              <div className="profile-meter-track">
-                <div className="profile-meter-fill" style={{ width: `${profileCompletion()}%` }} />
-              </div>
-            </div>
-          </>
-        );
-      };
+            {hotelLogo ? (
+              <>
+                <div className="hotel-media-preview-wrap">
+                  <img src={hotelLogo} alt="Hotel Logo Preview" className="hotel-logo-img" />
+                </div>
+                <div className="hotel-media-actions">
+                  <button
+                    type="button"
+                    className="hotel-media-btn-secondary"
+                    onClick={() => logoInputRef.current?.click()}
+                  >
+                    <Upload size={13} />
+                    {t('changeLogo', 'Change Logo')}
+                  </button>
+                  <button
+                    type="button"
+                    className="hotel-media-btn-danger"
+                    onClick={handleRemoveLogo}
+                  >
+                    <Trash2 size={13} />
+                    {t('remove', 'Remove')}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="hotel-media-icon-badge">
+                  <Building2 size={22} />
+                </div>
+                <button
+                  type="button"
+                  className="hotel-media-btn-primary"
+                  onClick={() => logoInputRef.current?.click()}
+                >
+                  <Upload size={13} />
+                  {t('uploadLogo', 'Upload Hotel Logo')}
+                </button>
+              </>
+            )}
 
-      const renderGstConfiguration = () => {
-        return (
-          <>
-            {/* ========================================================
+            {logoError && <div className="hotel-media-error">{logoError}</div>}
+            <input
+              ref={logoInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              style={{ display: "none" }}
+              onChange={handleLogoUpload}
+            />
+          </div>
+
+          <div className="settings-grid">
+            <InputField
+              label="Hotel Name"
+              required
+              value={profile.hotelName}
+              placeholder="Enter hotel name"
+              error={errors.hotelName}
+              onChange={(value) =>
+                updateProfileWithValidation(
+                  "hotelName",
+                  value.replace(/[^A-Za-z .\'-]/g, "").replace(/\s{2,}/g, " "),
+                  validateName
+                )
+              }
+              onBlur={() => {
+                markTouched("hotelName");
+                updateError(
+                  "hotelName",
+                  validateName(
+                    profile.hotelName
+                  )
+                );
+              }}
+            />
+
+            <InputField
+              label="Owner Name"
+              required
+              value={profile.ownerName}
+              placeholder="Enter owner name"
+              error={errors.ownerName}
+              onChange={(value) =>
+                updateProfileWithValidation(
+                  "ownerName",
+                  value.replace(/[^A-Za-z .\'-]/g, "").replace(/\s{2,}/g, " "),
+                  validateName
+                )
+              }
+              onBlur={() => {
+                markTouched("ownerName");
+                updateError(
+                  "ownerName",
+                  validateName(
+                    profile.ownerName
+                  )
+                );
+              }}
+            />
+
+            <InputField
+              label="Email Address"
+              required
+              type="email"
+              value={profile.email}
+              placeholder="example@email.com"
+              error={errors.email}
+              onChange={(value) => {
+                const clean = sanitizeEmailInput(value);
+
+                updateProfileWithValidation(
+                  "email",
+                  clean,
+                  validateEmail
+                );
+              }}
+              onBlur={() => {
+                markTouched("email");
+                updateError(
+                  "email",
+                  validateEmail(profile.email)
+                );
+              }}
+            />
+
+            <InputField
+              label="Mobile Number"
+              required
+              value={profile.mobile}
+              placeholder="10-digit mobile number"
+              maxLength={10}
+              error={errors.mobile}
+              onChange={(value) => {
+                const digits =
+                  value
+                    .replace(/\D/g, "")
+                    .slice(0, 10);
+
+                updateProfileWithValidation(
+                  "mobile",
+                  digits,
+                  (v) => validateMobile(v, true)
+                );
+              }}
+              onBlur={() => {
+                markTouched("mobile");
+                updateError(
+                  "mobile",
+                  validateMobile(
+                    profile.mobile,
+                    true
+                  )
+                );
+              }}
+            />
+
+            <InputField
+              label="Alternate Mobile"
+              value={profile.alternateMobile}
+              placeholder="Optional mobile number"
+              maxLength={10}
+              error={errors.alternateMobile}
+              onChange={(value) => {
+                const digits =
+                  value
+                    .replace(/\D/g, "")
+                    .slice(0, 10);
+
+                updateProfileWithValidation(
+                  "alternateMobile",
+                  digits,
+                  (v) =>
+                    validateMobile(v, false)
+                );
+              }}
+              onBlur={() => {
+                markTouched("alternateMobile");
+                updateError(
+                  "alternateMobile",
+                  validateMobile(
+                    profile.alternateMobile,
+                    false
+                  )
+                );
+              }}
+            />
+
+            <InputField
+              label="City"
+              required
+              value={profile.city}
+              placeholder="Enter city"
+              error={errors.city}
+              onChange={(value) =>
+                updateProfileWithValidation(
+                  "city",
+                  value.replace(/[^A-Za-z .\'-]/g, "").replace(/\s{2,}/g, " "),
+                  (v) =>
+                    validateCityState(
+                      v,
+                      "City"
+                    )
+                )
+              }
+              onBlur={() => {
+                markTouched("city");
+                updateError(
+                  "city",
+                  validateCityState(
+                    profile.city,
+                    "City"
+                  )
+                );
+              }}
+            />
+
+            <InputField
+              label="State"
+              required
+              value={profile.state}
+              placeholder="Enter state"
+              error={errors.state}
+              onChange={(value) =>
+                updateProfileWithValidation(
+                  "state",
+                  value.replace(/[^A-Za-z .\'-]/g, "").replace(/\s{2,}/g, " "),
+                  (v) =>
+                    validateCityState(
+                      v,
+                      "State"
+                    )
+                )
+              }
+              onBlur={() => {
+                markTouched("state");
+                updateError(
+                  "state",
+                  validateCityState(
+                    profile.state,
+                    "State"
+                  )
+                );
+              }}
+            />
+
+            <InputField
+              label="Pincode"
+              required
+              value={profile.pincode}
+              placeholder="6-digit pincode"
+              maxLength={6}
+              error={errors.pincode}
+              onChange={(value) => {
+                const digits =
+                  value
+                    .replace(/\D/g, "")
+                    .slice(0, 6);
+
+                updateProfileWithValidation(
+                  "pincode",
+                  digits,
+                  validatePincode
+                );
+              }}
+              onBlur={() => {
+                markTouched("pincode");
+                updateError(
+                  "pincode",
+                  validatePincode(
+                    profile.pincode
+                  )
+                );
+              }}
+            />
+          </div>
+
+          <div className="textarea-field">
+            <label className="settings-label">
+              {t('businessAddress', 'Business Address')}
+              <span className="required">*</span>
+            </label>
+
+            <textarea
+              rows="4"
+              value={profile.address}
+              placeholder={t('enterBusinessAddress', 'Enter complete business address')}
+              className={`settings-input settings-textarea ${errors.address
+                ? "settings-input-error"
+                : ""
+                }`}
+              onChange={(e) =>
+                updateProfileWithValidation(
+                  "address",
+                  e.target.value,
+                  validateAddress
+                )
+              }
+              onBlur={() => {
+                markTouched("address");
+                updateError(
+                  "address",
+                  validateAddress(
+                    profile.address
+                  )
+                );
+              }}
+            />
+
+            <ErrorMessage error={errors.address} />
+          </div>
+
+          <div style={{ marginTop: '16px', maxWidth: '240px' }}>
+            <SelectField
+              label={t('currency', 'Currency')}
+              value={profile.currency || 'INR'}
+              options={[
+                "INR",
+                "USD",
+                "EUR",
+                "GBP",
+              ]}
+              onChange={(value) =>
+                updateProfile(
+                  "currency",
+                  value
+                )
+              }
+            />
+          </div>
+        </div>
+
+        {/* BANK DETAILS SECTION (Directly beneath Hotel Profile) */}
+        <div className="settings-card" style={{ marginTop: '20px' }}>
+          <div className="card-heading">
+            <div>
+              <h2>{t('bankDetails', 'Bank Details')}</h2>
+              <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748B' }}>
+                {t('bankDetailsSubtitle', 'Bank account information for billing, payouts, and payment references.')}
+              </p>
+            </div>
+            <span style={{ fontSize: '0.72rem', fontWeight: 700, background: '#F1F5F9', color: '#64748B', padding: '4px 10px', borderRadius: '6px' }}>
+              OPTIONAL
+            </span>
+          </div>
+
+          <div className="settings-grid">
+            <InputField
+              label={t('bankName', 'Bank Name')}
+              value={bankDetails.bankName || ''}
+              placeholder="e.g. State Bank of India"
+              onChange={(value) => setBankDetails(prev => ({ ...prev, bankName: value }))}
+            />
+
+            <InputField
+              label={t('accountHolderName', 'Account Holder Name')}
+              value={bankDetails.accountHolderName || ''}
+              placeholder="e.g. Royal Palace Hotel"
+              onChange={(value) => setBankDetails(prev => ({ ...prev, accountHolderName: value }))}
+            />
+
+            <InputField
+              label={t('accountNumber', 'Account Number')}
+              value={bankDetails.accountNumber || ''}
+              placeholder="e.g. 123456789012"
+              onChange={(value) => {
+                const digits = value.replace(/\D/g, "");
+                setBankDetails(prev => ({ ...prev, accountNumber: digits }));
+              }}
+            />
+
+            <InputField
+              label={t('ifscCode', 'IFSC Code')}
+              value={bankDetails.ifscCode || ''}
+              placeholder="e.g. SBIN0001234"
+              maxLength={11}
+              onChange={(value) => setBankDetails(prev => ({ ...prev, ifscCode: value.toUpperCase() }))}
+            />
+
+            <InputField
+              label={t('upiId', 'UPI ID / VPA')}
+              value={bankDetails.upiId || ''}
+              placeholder="e.g. royalpalace@upi"
+              onChange={(value) => setBankDetails(prev => ({ ...prev, upiId: value }))}
+            />
+
+            <InputField
+              label={t('bankPhone', 'Bank Registered Phone Number')}
+              value={bankDetails.bankPhone || ''}
+              placeholder="10-digit mobile number"
+              maxLength={10}
+              onChange={(value) => {
+                const digits = value.replace(/\D/g, "").slice(0, 10);
+                setBankDetails(prev => ({ ...prev, bankPhone: digits }));
+              }}
+            />
+          </div>
+        </div>
+
+        <div className="profile-meter">
+          <div className="profile-meter-top">
+            <span className="profile-meter-title">{t('profileCompletion', 'Profile Completion')}</span>
+            <span className="profile-meter-value">{toDevanagari(profileCompletion())}%</span>
+          </div>
+          <div className="profile-meter-track">
+            <div className="profile-meter-fill" style={{ width: `${profileCompletion()}%` }} />
+          </div>
+        </div>
+      </>
+    );
+  };
+
+  const renderGstConfiguration = () => {
+    return (
+      <>
+        {/* ========================================================
                 GST CONFIGURATION SECTION (INDEPENDENT SECTION)
                ======================================================== */}
-            <div className="settings-card" id="gst-configuration-section" style={{ marginTop: '0px' }}>
-              {/* GST Header & Action Bar */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '20px' }}>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#1F2937' }}>
-                      {t('gstConfiguration', 'GST Configuration & Compliance')}
-                    </h3>
+        <div className="settings-card" id="gst-configuration-section" style={{ marginTop: '0px' }}>
+          {/* GST Header & Action Bar */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '20px' }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#1F2937' }}>
+                  {t('gstConfiguration', 'GST Configuration & Compliance')}
+                </h3>
                 {/* Status Badge */}
                 <span
                   style={{
@@ -3025,1247 +3176,1557 @@ export default function Settings() {
         </div>
 
         {/* MODAL: ADD / EDIT TAX GROUP */}
-    {
-      editingTaxGroup && (
-        <div className="popup-overlay">
-          <div className="popup-box" style={{ maxWidth: '480px', width: '90%', textAlign: 'left', backgroundColor: '#FFFFFF', border: '1px solid #E5E7EB', color: '#1F2937' }}>
-            <h3 style={{ margin: '0 0 16px 0', fontSize: '18px', color: '#1F2937' }}>
-              {editingTaxGroup.id ? 'Edit Tax Group' : 'Add New Tax Group'}
-            </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div>
-                <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>Tax Group Name *</label>
-                <input
-                  type="text"
-                  value={editingTaxGroup.name || ""}
-                  onChange={(e) => setEditingTaxGroup({ ...editingTaxGroup, name: e.target.value })}
-                  placeholder="e.g. GST 5% (Restaurant Service)"
-                  className="settings-input"
-                />
-              </div>
+        {
+          editingTaxGroup && (
+            <div className="popup-overlay">
+              <div className="popup-box" style={{ maxWidth: '480px', width: '90%', textAlign: 'left', backgroundColor: '#FFFFFF', border: '1px solid #E5E7EB', color: '#1F2937' }}>
+                <h3 style={{ margin: '0 0 16px 0', fontSize: '18px', color: '#1F2937' }}>
+                  {editingTaxGroup.id ? 'Edit Tax Group' : 'Add New Tax Group'}
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  <div>
+                    <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>Tax Group Name *</label>
+                    <input
+                      type="text"
+                      value={editingTaxGroup.name || ""}
+                      onChange={(e) => setEditingTaxGroup({ ...editingTaxGroup, name: e.target.value })}
+                      placeholder="e.g. GST 5% (Restaurant Service)"
+                      className="settings-input"
+                    />
+                  </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <div>
-                  <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>GST Rate (%) *</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={editingTaxGroup.gstRate ?? ""}
-                    onChange={(e) => {
-                      const r = parseFloat(e.target.value) || 0;
-                      setEditingTaxGroup({
-                        ...editingTaxGroup,
-                        gstRate: r,
-                        cgstRate: r / 2,
-                        sgstRate: r / 2,
-                        igstRate: r,
-                      });
-                    }}
-                    className="settings-input"
-                  />
-                </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div>
+                      <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>GST Rate (%) *</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={editingTaxGroup.gstRate ?? ""}
+                        onChange={(e) => {
+                          const r = parseFloat(e.target.value) || 0;
+                          setEditingTaxGroup({
+                            ...editingTaxGroup,
+                            gstRate: r,
+                            cgstRate: r / 2,
+                            sgstRate: r / 2,
+                            igstRate: r,
+                          });
+                        }}
+                        className="settings-input"
+                      />
+                    </div>
 
-                <div>
-                  <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>Category *</label>
-                  <select
-                    value={editingTaxGroup.category || "Standard Services"}
-                    onChange={(e) => setEditingTaxGroup({ ...editingTaxGroup, category: e.target.value })}
-                    className="settings-input"
-                  >
-                    <option value="Standard Services">Standard Services</option>
-                    <option value="Hotel Accommodation">Hotel Accommodation</option>
-                    <option value="Luxury Accommodation / Catering">Luxury Accommodation / Catering</option>
-                    <option value="Special Supplies">Special Supplies</option>
-                    <option value="Nil Rated / Exempt">Nil Rated / Exempt</option>
-                    <option value="Goods">Goods</option>
-                  </select>
-                </div>
-              </div>
+                    <div>
+                      <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>Category *</label>
+                      <select
+                        value={editingTaxGroup.category || "Standard Services"}
+                        onChange={(e) => setEditingTaxGroup({ ...editingTaxGroup, category: e.target.value })}
+                        className="settings-input"
+                      >
+                        <option value="Standard Services">Standard Services</option>
+                        <option value="Hotel Accommodation">Hotel Accommodation</option>
+                        <option value="Luxury Accommodation / Catering">Luxury Accommodation / Catering</option>
+                        <option value="Special Supplies">Special Supplies</option>
+                        <option value="Nil Rated / Exempt">Nil Rated / Exempt</option>
+                        <option value="Goods">Goods</option>
+                      </select>
+                    </div>
+                  </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
-                <div>
-                  <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>CGST Rate (%)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={editingTaxGroup.cgstRate ?? ""}
-                    onChange={(e) => setEditingTaxGroup({ ...editingTaxGroup, cgstRate: parseFloat(e.target.value) || 0 })}
-                    className="settings-input"
-                  />
-                </div>
-                <div>
-                  <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>SGST Rate (%)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={editingTaxGroup.sgstRate ?? ""}
-                    onChange={(e) => setEditingTaxGroup({ ...editingTaxGroup, sgstRate: parseFloat(e.target.value) || 0 })}
-                    className="settings-input"
-                  />
-                </div>
-                <div>
-                  <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>IGST Rate (%)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={editingTaxGroup.igstRate ?? ""}
-                    onChange={(e) => setEditingTaxGroup({ ...editingTaxGroup, igstRate: parseFloat(e.target.value) || 0 })}
-                    className="settings-input"
-                  />
-                </div>
-              </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+                    <div>
+                      <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>CGST Rate (%)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={editingTaxGroup.cgstRate ?? ""}
+                        onChange={(e) => setEditingTaxGroup({ ...editingTaxGroup, cgstRate: parseFloat(e.target.value) || 0 })}
+                        className="settings-input"
+                      />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>SGST Rate (%)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={editingTaxGroup.sgstRate ?? ""}
+                        onChange={(e) => setEditingTaxGroup({ ...editingTaxGroup, sgstRate: parseFloat(e.target.value) || 0 })}
+                        className="settings-input"
+                      />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>IGST Rate (%)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={editingTaxGroup.igstRate ?? ""}
+                        onChange={(e) => setEditingTaxGroup({ ...editingTaxGroup, igstRate: parseFloat(e.target.value) || 0 })}
+                        className="settings-input"
+                      />
+                    </div>
+                  </div>
 
-              <div>
-                <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>Effective From Date</label>
-                <input
-                  type="date"
-                  value={editingTaxGroup.effectiveFrom || ""}
-                  onChange={(e) => setEditingTaxGroup({ ...editingTaxGroup, effectiveFrom: e.target.value })}
-                  className="settings-input"
-                />
-              </div>
+                  <div>
+                    <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>Effective From Date</label>
+                    <input
+                      type="date"
+                      value={editingTaxGroup.effectiveFrom || ""}
+                      onChange={(e) => setEditingTaxGroup({ ...editingTaxGroup, effectiveFrom: e.target.value })}
+                      className="settings-input"
+                    />
+                  </div>
 
-              <div className="popup-actions" style={{ marginTop: '10px' }}>
-                <button type="button" className="popup-cancel" onClick={() => setEditingTaxGroup(null)}>
-                  Cancel
-                </button>
-                <button type="button" className="popup-confirm" style={{ backgroundColor: '#8B3E16', color: '#FFFFFF' }} onClick={() => handleSaveTaxGroup(editingTaxGroup)}>
-                  Save Tax Group
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )
-    }
-
-    {/* MODAL: VIEW TAX GROUP */ }
-    {
-      viewingTaxGroup && (
-        <div className="popup-overlay">
-          <div className="popup-box" style={{ maxWidth: '440px', width: '90%', textAlign: 'left', backgroundColor: '#FFFFFF', border: '1px solid #E5E7EB', color: '#1F2937' }}>
-            <h3 style={{ margin: '0 0 14px 0', fontSize: '18px', color: '#1F2937' }}>
-              Tax Group Details
-            </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px', color: '#4B5563' }}>
-              <div><strong style={{ color: '#1F2937' }}>Name:</strong> {viewingTaxGroup.name}</div>
-              <div><strong style={{ color: '#1F2937' }}>Total Rate:</strong> <span style={{ color: '#8B3E16', fontWeight: 700 }}>{viewingTaxGroup.gstRate}%</span></div>
-              <div><strong style={{ color: '#1F2937' }}>Category:</strong> {viewingTaxGroup.category}</div>
-              <div><strong style={{ color: '#1F2937' }}>Intra-State:</strong> CGST {viewingTaxGroup.cgstRate}% + SGST {viewingTaxGroup.sgstRate}%</div>
-              <div><strong style={{ color: '#1F2937' }}>Inter-State:</strong> IGST {viewingTaxGroup.igstRate}%</div>
-              <div><strong style={{ color: '#1F2937' }}>Effective From:</strong> {viewingTaxGroup.effectiveFrom}</div>
-              <div><strong style={{ color: '#1F2937' }}>Status:</strong> {viewingTaxGroup.active ? 'Active' : 'Inactive'}</div>
-            </div>
-            <div className="popup-actions" style={{ marginTop: '18px' }}>
-              <button type="button" className="popup-confirm" style={{ backgroundColor: '#8B3E16', color: '#FFFFFF' }} onClick={() => setViewingTaxGroup(null)}>
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )
-    }
-
-    {/* MODAL: ADD / EDIT HSN/SAC */ }
-    {
-      editingHsnSac && (
-        <div className="popup-overlay">
-          <div className="popup-box" style={{ maxWidth: '460px', width: '90%', textAlign: 'left', backgroundColor: '#FFFFFF', border: '1px solid #E5E7EB', color: '#1F2937' }}>
-            <h3 style={{ margin: '0 0 16px 0', fontSize: '18px', color: '#1F2937' }}>
-              {editingHsnSac.id ? 'Edit Classification Code' : 'Add HSN / SAC Code'}
-            </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '10px' }}>
-                <div>
-                  <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>Code Type *</label>
-                  <select
-                    value={editingHsnSac.codeType || "SAC"}
-                    onChange={(e) => setEditingHsnSac({ ...editingHsnSac, codeType: e.target.value })}
-                    className="settings-input"
-                  >
-                    <option value="SAC">SAC (Services)</option>
-                    <option value="HSN">HSN (Goods)</option>
-                  </select>
-                </div>
-                <div>
-                  <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>Code *</label>
-                  <input
-                    type="text"
-                    value={editingHsnSac.code || ""}
-                    onChange={(e) => setEditingHsnSac({ ...editingHsnSac, code: e.target.value.replace(/\D/g, "") })}
-                    placeholder={editingHsnSac.codeType === "SAC" ? "e.g. 996331 (6 digits)" : "e.g. 2201 (4-8 digits)"}
-                    className="settings-input"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>Description *</label>
-                <input
-                  type="text"
-                  value={editingHsnSac.description || ""}
-                  onChange={(e) => setEditingHsnSac({ ...editingHsnSac, description: e.target.value })}
-                  placeholder="e.g. Restaurant services with air conditioning"
-                  className="settings-input"
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <div>
-                  <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>Category *</label>
-                  <select
-                    value={editingHsnSac.taxCategory || "Standard Services"}
-                    onChange={(e) => setEditingHsnSac({ ...editingHsnSac, taxCategory: e.target.value })}
-                    className="settings-input"
-                  >
-                    <option value="Standard Services">Standard Services</option>
-                    <option value="Hotel Accommodation">Hotel Accommodation</option>
-                    <option value="Luxury Accommodation / Catering">Luxury Accommodation / Catering</option>
-                    <option value="Special Supplies">Special Supplies</option>
-                    <option value="Nil Rated / Exempt">Nil Rated / Exempt</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>Tax Group / Rate *</label>
-                  <select
-                    value={editingHsnSac.taxGroupId || taxGroups[0]?.id}
-                    onChange={(e) => {
-                      const tgId = parseInt(e.target.value);
-                      const matched = taxGroups.find(g => g.id === tgId);
-                      setEditingHsnSac({
-                        ...editingHsnSac,
-                        taxGroupId: tgId,
-                        gstRate: matched ? matched.gstRate : editingHsnSac.gstRate,
-                      });
-                    }}
-                    className="settings-input"
-                  >
-                    {taxGroups.map(g => (
-                      <option key={g.id} value={g.id}>{g.name} ({g.gstRate}%)</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>Effective From</label>
-                <input
-                  type="date"
-                  value={editingHsnSac.effectiveFrom || ""}
-                  onChange={(e) => setEditingHsnSac({ ...editingHsnSac, effectiveFrom: e.target.value })}
-                  className="settings-input"
-                />
-              </div>
-
-              <div className="popup-actions" style={{ marginTop: '10px' }}>
-                <button type="button" className="popup-cancel" onClick={() => setEditingHsnSac(null)}>
-                  Cancel
-                </button>
-                <button type="button" className="popup-confirm" style={{ backgroundColor: '#8B3E16', color: '#FFFFFF' }} onClick={() => handleSaveHsnSac(editingHsnSac)}>
-                  Save Code
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )
-    }
-
-    {/* MODAL: CONFIGURE BRANCH GST */ }
-    {
-      editingBranchGst && (
-        <div className="popup-overlay">
-          <div className="popup-box" style={{ maxWidth: '480px', width: '90%', textAlign: 'left', backgroundColor: '#FFFFFF', border: '1px solid #E5E7EB', color: '#1F2937' }}>
-            <h3 style={{ margin: '0 0 16px 0', fontSize: '18px', color: '#1F2937' }}>
-              Configure GST for {editingBranchGst.branchName} ({editingBranchGst.branchCode})
-            </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '10px' }}>
-                <div>
-                  <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>Branch State *</label>
-                  <select
-                    value={editingBranchGst.state || "Maharashtra"}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      const match = INDIAN_STATES.find(s => s.name === val);
-                      setEditingBranchGst({
-                        ...editingBranchGst,
-                        state: val,
-                        stateCode: match ? match.code : editingBranchGst.stateCode,
-                      });
-                    }}
-                    className="settings-input"
-                  >
-                    {INDIAN_STATES.map(s => (
-                      <option key={s.name} value={s.name}>{s.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>State Code</label>
-                  <input
-                    type="text"
-                    value={editingBranchGst.stateCode || "27"}
-                    readOnly
-                    className="settings-input"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label style={{ fontSize: '12px', color: '#4B5563', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px', fontWeight: 500 }}>
-                  <span>Branch GSTIN (15 Chars)</span>
-                  {editingBranchGst.gstin && (
-                    <span style={{ fontSize: '10px', color: '#0F766E', background: '#CCFBF1', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
-                      PAN MASKED
-                    </span>
-                  )}
-                </label>
-                <div style={{ position: 'relative' }}>
-                  <input
-                    type="text"
-                    maxLength={15}
-                    value={
-                      isEditingBranchGst || showBranchGstin
-                        ? (editingBranchGst.gstin || "")
-                        : maskGstNumber(editingBranchGst.gstin)
-                    }
-                    onFocus={() => setIsEditingBranchGst(true)}
-                    onBlur={() => setIsEditingBranchGst(false)}
-                    onChange={(e) => {
-                      let val = e.target.value.toUpperCase();
-                      if (isMaskedGst(val)) {
-                        val = editingBranchGst._originalGstin || "";
-                      } else {
-                        val = val.slice(0, 15);
-                      }
-                      setEditingBranchGst({ ...editingBranchGst, gstin: val });
-                    }}
-                    placeholder="e.g. 27ABCDE1234F1Z5 (Leave blank if unregistered)"
-                    className="settings-input"
-                    style={{ fontFamily: 'monospace', fontWeight: 600, paddingRight: '40px' }}
-                  />
-                  {editingBranchGst.gstin && (
-                    <button
-                      type="button"
-                      onClick={() => setShowBranchGstin(!showBranchGstin)}
-                      style={{
-                        position: 'absolute',
-                        right: '8px',
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                        color: '#64748B',
-                        display: 'flex',
-                        alignItems: 'center',
-                      }}
-                      title={showBranchGstin ? 'Mask GST Number' : 'Show Full GST Number'}
-                    >
-                      {showBranchGstin ? <EyeOff size={16} /> : <Eye size={16} />}
+                  <div className="popup-actions" style={{ marginTop: '10px' }}>
+                    <button type="button" className="popup-cancel" onClick={() => setEditingTaxGroup(null)}>
+                      Cancel
                     </button>
-                  )}
+                    <button type="button" className="popup-confirm" style={{ backgroundColor: '#8B3E16', color: '#FFFFFF' }} onClick={() => handleSaveTaxGroup(editingTaxGroup)}>
+                      Save Tax Group
+                    </button>
+                  </div>
                 </div>
-                {editingBranchGst.gstin && !resolveGstForSave(editingBranchGst.gstin, editingBranchGst._originalGstin || "").startsWith(editingBranchGst.stateCode) && (
-                  <span style={{ fontSize: '11px', color: '#DC2626', marginTop: '3px', display: 'block' }}>
-                    Branch GSTIN must start with State Code {editingBranchGst.stateCode}
-                  </span>
-                )}
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <div>
-                  <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>Registration Status</label>
-                  <select
-                    value={editingBranchGst.registrationStatus || "Registered - Regular"}
-                    onChange={(e) => setEditingBranchGst({ ...editingBranchGst, registrationStatus: e.target.value })}
-                    className="settings-input"
-                  >
-                    <option value="Registered - Regular">Registered - Regular</option>
-                    <option value="Registered - Composition">Registered - Composition</option>
-                    <option value="Unregistered">Unregistered</option>
-                    <option value="SEZ / Special Zone">SEZ / Special Zone</option>
-                  </select>
-                </div>
-                <div>
-                  <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>Tax Treatment</label>
-                  <select
-                    value={editingBranchGst.taxTreatment || "Taxable"}
-                    onChange={(e) => setEditingBranchGst({ ...editingBranchGst, taxTreatment: e.target.value })}
-                    className="settings-input"
-                  >
-                    <option value="Taxable">Taxable</option>
-                    <option value="Nil Rated">Nil Rated</option>
-                    <option value="Exempt">Exempt</option>
-                    <option value="Non-GST">Non-GST</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>Branch Address</label>
-                <textarea
-                  rows="2"
-                  value={editingBranchGst.address || ""}
-                  onChange={(e) => setEditingBranchGst({ ...editingBranchGst, address: e.target.value })}
-                  placeholder="Enter branch address"
-                  className="settings-input settings-textarea"
-                />
-              </div>
-
-              <div className="popup-actions" style={{ marginTop: '10px' }}>
-                <button type="button" className="popup-cancel" onClick={() => setEditingBranchGst(null)}>
-                  Cancel
-                </button>
-                <button type="button" className="popup-confirm" style={{ backgroundColor: '#8B3E16', color: '#FFFFFF' }} onClick={() => handleSaveBranchGst(editingBranchGst)}>
-                  Save Branch GST
-                </button>
               </div>
             </div>
-          </div>
-        </div>
-      )
-    }
+          )
+        }
+
+        {/* MODAL: VIEW TAX GROUP */}
+        {
+          viewingTaxGroup && (
+            <div className="popup-overlay">
+              <div className="popup-box" style={{ maxWidth: '440px', width: '90%', textAlign: 'left', backgroundColor: '#FFFFFF', border: '1px solid #E5E7EB', color: '#1F2937' }}>
+                <h3 style={{ margin: '0 0 14px 0', fontSize: '18px', color: '#1F2937' }}>
+                  Tax Group Details
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px', color: '#4B5563' }}>
+                  <div><strong style={{ color: '#1F2937' }}>Name:</strong> {viewingTaxGroup.name}</div>
+                  <div><strong style={{ color: '#1F2937' }}>Total Rate:</strong> <span style={{ color: '#8B3E16', fontWeight: 700 }}>{viewingTaxGroup.gstRate}%</span></div>
+                  <div><strong style={{ color: '#1F2937' }}>Category:</strong> {viewingTaxGroup.category}</div>
+                  <div><strong style={{ color: '#1F2937' }}>Intra-State:</strong> CGST {viewingTaxGroup.cgstRate}% + SGST {viewingTaxGroup.sgstRate}%</div>
+                  <div><strong style={{ color: '#1F2937' }}>Inter-State:</strong> IGST {viewingTaxGroup.igstRate}%</div>
+                  <div><strong style={{ color: '#1F2937' }}>Effective From:</strong> {viewingTaxGroup.effectiveFrom}</div>
+                  <div><strong style={{ color: '#1F2937' }}>Status:</strong> {viewingTaxGroup.active ? 'Active' : 'Inactive'}</div>
+                </div>
+                <div className="popup-actions" style={{ marginTop: '18px' }}>
+                  <button type="button" className="popup-confirm" style={{ backgroundColor: '#8B3E16', color: '#FFFFFF' }} onClick={() => setViewingTaxGroup(null)}>
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )
+        }
+
+        {/* MODAL: ADD / EDIT HSN/SAC */}
+        {
+          editingHsnSac && (
+            <div className="popup-overlay">
+              <div className="popup-box" style={{ maxWidth: '460px', width: '90%', textAlign: 'left', backgroundColor: '#FFFFFF', border: '1px solid #E5E7EB', color: '#1F2937' }}>
+                <h3 style={{ margin: '0 0 16px 0', fontSize: '18px', color: '#1F2937' }}>
+                  {editingHsnSac.id ? 'Edit Classification Code' : 'Add HSN / SAC Code'}
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '10px' }}>
+                    <div>
+                      <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>Code Type *</label>
+                      <select
+                        value={editingHsnSac.codeType || "SAC"}
+                        onChange={(e) => setEditingHsnSac({ ...editingHsnSac, codeType: e.target.value })}
+                        className="settings-input"
+                      >
+                        <option value="SAC">SAC (Services)</option>
+                        <option value="HSN">HSN (Goods)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>Code *</label>
+                      <input
+                        type="text"
+                        value={editingHsnSac.code || ""}
+                        onChange={(e) => setEditingHsnSac({ ...editingHsnSac, code: e.target.value.replace(/\D/g, "") })}
+                        placeholder={editingHsnSac.codeType === "SAC" ? "e.g. 996331 (6 digits)" : "e.g. 2201 (4-8 digits)"}
+                        className="settings-input"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>Description *</label>
+                    <input
+                      type="text"
+                      value={editingHsnSac.description || ""}
+                      onChange={(e) => setEditingHsnSac({ ...editingHsnSac, description: e.target.value })}
+                      placeholder="e.g. Restaurant services with air conditioning"
+                      className="settings-input"
+                    />
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div>
+                      <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>Category *</label>
+                      <select
+                        value={editingHsnSac.taxCategory || "Standard Services"}
+                        onChange={(e) => setEditingHsnSac({ ...editingHsnSac, taxCategory: e.target.value })}
+                        className="settings-input"
+                      >
+                        <option value="Standard Services">Standard Services</option>
+                        <option value="Hotel Accommodation">Hotel Accommodation</option>
+                        <option value="Luxury Accommodation / Catering">Luxury Accommodation / Catering</option>
+                        <option value="Special Supplies">Special Supplies</option>
+                        <option value="Nil Rated / Exempt">Nil Rated / Exempt</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>Tax Group / Rate *</label>
+                      <select
+                        value={editingHsnSac.taxGroupId || taxGroups[0]?.id}
+                        onChange={(e) => {
+                          const tgId = parseInt(e.target.value);
+                          const matched = taxGroups.find(g => g.id === tgId);
+                          setEditingHsnSac({
+                            ...editingHsnSac,
+                            taxGroupId: tgId,
+                            gstRate: matched ? matched.gstRate : editingHsnSac.gstRate,
+                          });
+                        }}
+                        className="settings-input"
+                      >
+                        {taxGroups.map(g => (
+                          <option key={g.id} value={g.id}>{g.name} ({g.gstRate}%)</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>Effective From</label>
+                    <input
+                      type="date"
+                      value={editingHsnSac.effectiveFrom || ""}
+                      onChange={(e) => setEditingHsnSac({ ...editingHsnSac, effectiveFrom: e.target.value })}
+                      className="settings-input"
+                    />
+                  </div>
+
+                  <div className="popup-actions" style={{ marginTop: '10px' }}>
+                    <button type="button" className="popup-cancel" onClick={() => setEditingHsnSac(null)}>
+                      Cancel
+                    </button>
+                    <button type="button" className="popup-confirm" style={{ backgroundColor: '#8B3E16', color: '#FFFFFF' }} onClick={() => handleSaveHsnSac(editingHsnSac)}>
+                      Save Code
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )
+        }
+
+        {/* MODAL: CONFIGURE BRANCH GST */}
+        {
+          editingBranchGst && (
+            <div className="popup-overlay">
+              <div className="popup-box" style={{ maxWidth: '480px', width: '90%', textAlign: 'left', backgroundColor: '#FFFFFF', border: '1px solid #E5E7EB', color: '#1F2937' }}>
+                <h3 style={{ margin: '0 0 16px 0', fontSize: '18px', color: '#1F2937' }}>
+                  Configure GST for {editingBranchGst.branchName} ({editingBranchGst.branchCode})
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '10px' }}>
+                    <div>
+                      <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>Branch State *</label>
+                      <select
+                        value={editingBranchGst.state || "Maharashtra"}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          const match = INDIAN_STATES.find(s => s.name === val);
+                          setEditingBranchGst({
+                            ...editingBranchGst,
+                            state: val,
+                            stateCode: match ? match.code : editingBranchGst.stateCode,
+                          });
+                        }}
+                        className="settings-input"
+                      >
+                        {INDIAN_STATES.map(s => (
+                          <option key={s.name} value={s.name}>{s.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>State Code</label>
+                      <input
+                        type="text"
+                        value={editingBranchGst.stateCode || "27"}
+                        readOnly
+                        className="settings-input"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '12px', color: '#4B5563', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px', fontWeight: 500 }}>
+                      <span>Branch GSTIN (15 Chars)</span>
+                      {editingBranchGst.gstin && (
+                        <span style={{ fontSize: '10px', color: '#0F766E', background: '#CCFBF1', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                          PAN MASKED
+                        </span>
+                      )}
+                    </label>
+                    <div style={{ position: 'relative' }}>
+                      <input
+                        type="text"
+                        maxLength={15}
+                        value={
+                          isEditingBranchGst || showBranchGstin
+                            ? (editingBranchGst.gstin || "")
+                            : maskGstNumber(editingBranchGst.gstin)
+                        }
+                        onFocus={() => setIsEditingBranchGst(true)}
+                        onBlur={() => setIsEditingBranchGst(false)}
+                        onChange={(e) => {
+                          let val = e.target.value.toUpperCase();
+                          if (isMaskedGst(val)) {
+                            val = editingBranchGst._originalGstin || "";
+                          } else {
+                            val = val.slice(0, 15);
+                          }
+                          setEditingBranchGst({ ...editingBranchGst, gstin: val });
+                        }}
+                        placeholder="e.g. 27ABCDE1234F1Z5 (Leave blank if unregistered)"
+                        className="settings-input"
+                        style={{ fontFamily: 'monospace', fontWeight: 600, paddingRight: '40px' }}
+                      />
+                      {editingBranchGst.gstin && (
+                        <button
+                          type="button"
+                          onClick={() => setShowBranchGstin(!showBranchGstin)}
+                          style={{
+                            position: 'absolute',
+                            right: '8px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            color: '#64748B',
+                            display: 'flex',
+                            alignItems: 'center',
+                          }}
+                          title={showBranchGstin ? 'Mask GST Number' : 'Show Full GST Number'}
+                        >
+                          {showBranchGstin ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                      )}
+                    </div>
+                    {editingBranchGst.gstin && !resolveGstForSave(editingBranchGst.gstin, editingBranchGst._originalGstin || "").startsWith(editingBranchGst.stateCode) && (
+                      <span style={{ fontSize: '11px', color: '#DC2626', marginTop: '3px', display: 'block' }}>
+                        Branch GSTIN must start with State Code {editingBranchGst.stateCode}
+                      </span>
+                    )}
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div>
+                      <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>Registration Status</label>
+                      <select
+                        value={editingBranchGst.registrationStatus || "Registered - Regular"}
+                        onChange={(e) => setEditingBranchGst({ ...editingBranchGst, registrationStatus: e.target.value })}
+                        className="settings-input"
+                      >
+                        <option value="Registered - Regular">Registered - Regular</option>
+                        <option value="Registered - Composition">Registered - Composition</option>
+                        <option value="Unregistered">Unregistered</option>
+                        <option value="SEZ / Special Zone">SEZ / Special Zone</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>Tax Treatment</label>
+                      <select
+                        value={editingBranchGst.taxTreatment || "Taxable"}
+                        onChange={(e) => setEditingBranchGst({ ...editingBranchGst, taxTreatment: e.target.value })}
+                        className="settings-input"
+                      >
+                        <option value="Taxable">Taxable</option>
+                        <option value="Nil Rated">Nil Rated</option>
+                        <option value="Exempt">Exempt</option>
+                        <option value="Non-GST">Non-GST</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '12px', color: '#4B5563', display: 'block', marginBottom: '4px', fontWeight: 500 }}>Branch Address</label>
+                    <textarea
+                      rows="2"
+                      value={editingBranchGst.address || ""}
+                      onChange={(e) => setEditingBranchGst({ ...editingBranchGst, address: e.target.value })}
+                      placeholder="Enter branch address"
+                      className="settings-input settings-textarea"
+                    />
+                  </div>
+
+                  <div className="popup-actions" style={{ marginTop: '10px' }}>
+                    <button type="button" className="popup-cancel" onClick={() => setEditingBranchGst(null)}>
+                      Cancel
+                    </button>
+                    <button type="button" className="popup-confirm" style={{ backgroundColor: '#8B3E16', color: '#FFFFFF' }} onClick={() => handleSaveBranchGst(editingBranchGst)}>
+                      Save Branch GST
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )
+        }
 
       </>
     );
   };
 
-const renderBilling = () => {
-  return (
-    <div className="settings-card">
-      <div className="card-heading">
-        <div>
-          <h2>{t('billingSettings', 'Billing Settings')}</h2>
+  const renderBilling = () => {
+    return (
+      <div className="settings-card">
+        <div className="card-heading">
+          <div>
+            <h2>{t('billingSettings', 'Billing Settings')}</h2>
+          </div>
+        </div>
+
+        <div className="toggle-container" style={{ marginTop: 0 }}>
+          <Toggle
+            label="Enable Tax"
+            value={billing.tax}
+            onChange={(value) =>
+              setBilling((previous) => ({
+                ...previous,
+                tax: value,
+              }))
+            }
+          />
+
+          <Toggle
+            label="Enable Discount"
+            value={billing.discount}
+            onChange={(value) =>
+              setBilling((previous) => ({
+                ...previous,
+                discount: value,
+              }))
+            }
+          />
+
+          <Toggle
+            label="Enable Round Off"
+            value={billing.roundOff}
+            onChange={(value) =>
+              setBilling((previous) => ({
+                ...previous,
+                roundOff: value,
+              }))
+            }
+          />
+
+          <Toggle
+            label="Enable Thermal Receipt Printer (Bluetooth, Wi-Fi & USB)"
+            value={Boolean(billing.bluetoothPrinter)}
+            onChange={async (value) => {
+              const savedType = localStorage.getItem("ajalkar_printer_type") || "thermal_bt";
+              const newType = value ? (savedType !== "system" ? savedType : "thermal_bt") : "system";
+              const newMethod = value ? (newType === "thermal_wifi" ? "wifi" : newType === "thermal_usb" ? "usb" : "bluetooth") : "browser";
+
+              setBilling((previous) => ({
+                ...previous,
+                bluetoothPrinter: value,
+                printerType: newType,
+              }));
+              localStorage.setItem("ajalkar_default_print_method", newMethod);
+              localStorage.setItem("ajalkar_printer_type", newType);
+              printService.setDefaultPrintMethod(newMethod);
+
+              if (!value) {
+                try {
+                  await webBluetoothPrinter.disconnect();
+                } catch (e) { }
+                try {
+                  await webUsbPrinter.disconnect();
+                } catch (e) { }
+              }
+            }}
+          />
+
+          {Boolean(billing.bluetoothPrinter) && (
+            <div style={{ marginTop: 14, padding: 16, borderRadius: 12, border: "1px solid #E2E8F0", background: "#F8FAFC" }}>
+              {/* 3 Interface Selection Tabs */}
+              <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
+                {[
+                  { id: "thermal_bt", method: "bluetooth", label: "Bluetooth Thermal", icon: <Bluetooth size={14} /> },
+                  { id: "thermal_wifi", method: "wifi", label: "Wi-Fi / Network", icon: <Wifi size={14} /> },
+                  { id: "thermal_usb", method: "usb", label: "USB Direct", icon: <Usb size={14} /> },
+                ].map(mode => {
+                  const isSelected = (billing.printerType || (localStorage.getItem("ajalkar_printer_type") || "thermal_bt")) === mode.id;
+                  return (
+                    <button
+                      key={mode.id}
+                      type="button"
+                      onClick={() => {
+                        setBilling(b => ({ ...b, printerType: mode.id }));
+                        printService.setDefaultPrintMethod(mode.method);
+                        localStorage.setItem("ajalkar_default_print_method", mode.method);
+                        localStorage.setItem("ajalkar_printer_type", mode.id);
+                      }}
+                      style={{
+                        flex: 1,
+                        padding: "8px 12px",
+                        borderRadius: 8,
+                        border: isSelected ? "2px solid #090040" : "1px solid #CBD5E1",
+                        background: isSelected ? "#090040" : "#FFFFFF",
+                        color: isSelected ? "#FFFFFF" : "#090040",
+                        fontWeight: 700,
+                        fontSize: 12,
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 6,
+                      }}
+                    >
+                      {mode.icon}
+                      {mode.label}
+                      {isSelected && <Check size={13} strokeWidth={3} />}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Mode 1: Bluetooth Card */}
+              {(billing.printerType === "thermal_bt" || (!billing.printerType && localStorage.getItem("ajalkar_printer_type") !== "thermal_wifi" && localStorage.getItem("ajalkar_printer_type") !== "thermal_usb")) && (
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <div style={{ width: 34, height: 34, borderRadius: 8, background: "#090040", color: "#fff", display: "grid", placeItems: "center" }}>
+                        <Bluetooth size={18} />
+                      </div>
+                      <div>
+                        <div style={{ fontWeight: 800, fontSize: 13, color: "#090040" }}>Direct Bluetooth Thermal (ESC/POS)</div>
+                        <div style={{ fontSize: 11, color: "#64748B" }}>Pair with 58mm/80mm BLE thermal printers</div>
+                      </div>
+                    </div>
+                    <div style={{ width: 22, height: 22, borderRadius: "50%", background: "#090040", color: "#fff", display: "grid", placeItems: "center" }}>
+                      <Check size={14} strokeWidth={3} />
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: 14, padding: 12, borderRadius: 10, background: "#fff", border: "1px solid #CBD5E1" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                      <b style={{ fontSize: 12, color: "#090040" }}>Bluetooth Status</b>
+                      <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 12, background: btState === "connected" ? "#DCFCE7" : "#F1F5F9", color: btState === "connected" ? "#166534" : "#64748B" }}>
+                        {btState === "connected" ? `● Connected: ${btDevice?.name || "Thermal Printer"}` : "Disconnected"}
+                      </span>
+                    </div>
+
+                    <div style={{ display: "flex", gap: 8 }}>
+                      {btState === "connected" ? (
+                        <button
+                          type="button"
+                          onClick={handleDisconnectBtPrinter}
+                          style={{ padding: "6px 14px", borderRadius: 6, background: "#FEE2E2", color: "#991B1B", border: "1px solid #FECACA", fontSize: 12, fontWeight: 700, cursor: "pointer" }}
+                        >
+                          Disconnect
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={handleConnectBtPrinter}
+                          disabled={isConnectingBt}
+                          style={{ padding: "6px 14px", borderRadius: 6, background: "#090040", color: "#fff", border: "none", fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}
+                        >
+                          <Bluetooth size={13} />
+                          {isConnectingBt ? "Connecting..." : "Discover & Connect"}
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={handleTestBtPrint}
+                        disabled={isTestingBt}
+                        style={{ padding: "6px 14px", borderRadius: 6, background: "#F8FAFC", color: "#090040", border: "1px solid #CBD5E1", fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}
+                      >
+                        <Printer size={13} />
+                        {isTestingBt ? "Printing..." : "Test Print"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Mode 2: Wi-Fi / Network Card */}
+              {billing.printerType === "thermal_wifi" && (
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <div style={{ width: 34, height: 34, borderRadius: 8, background: "#166534", color: "#fff", display: "grid", placeItems: "center" }}>
+                        <Wifi size={18} />
+                      </div>
+                      <div>
+                        <div style={{ fontWeight: 800, fontSize: 13, color: "#090040" }}>Wi-Fi / Network Thermal (ESC/POS)</div>
+                        <div style={{ fontSize: 11, color: "#64748B" }}>LAN TCP/IP Socket Printing (Port 9100)</div>
+                      </div>
+                    </div>
+                    <div style={{ width: 22, height: 22, borderRadius: "50%", background: "#166534", color: "#fff", display: "grid", placeItems: "center" }}>
+                      <Check size={14} strokeWidth={3} />
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: 14, padding: 12, borderRadius: 10, background: "#fff", border: "1px solid #CBD5E1" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                      <b style={{ fontSize: 12, color: "#090040" }}>Wi-Fi Connection Settings</b>
+                      <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 12, background: "#DCFCE7", color: "#166534" }}>
+                        {wifiIp}:{wifiPort}
+                      </span>
+                    </div>
+
+                    <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+                      <div style={{ flex: 2 }}>
+                        <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "#64748B", marginBottom: 4 }}>Printer IP Address:</label>
+                        <input
+                          type="text"
+                          value={wifiIp}
+                          placeholder="192.168.1.100"
+                          onChange={e => setWifiIp(e.target.value)}
+                          style={{ width: "100%", padding: "6px 10px", borderRadius: 6, border: "1px solid #CBD5E1", fontSize: 12 }}
+                        />
+                      </div>
+                      <div style={{ width: 85 }}>
+                        <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "#64748B", marginBottom: 4 }}>Port:</label>
+                        <input
+                          type="number"
+                          value={wifiPort}
+                          placeholder="9100"
+                          onChange={e => setWifiPort(Number(e.target.value) || 9100)}
+                          style={{ width: "100%", padding: "6px 10px", borderRadius: 6, border: "1px solid #CBD5E1", fontSize: 12 }}
+                        />
+                      </div>
+                    </div>
+
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <button
+                        type="button"
+                        onClick={handleSaveWifiConfig}
+                        style={{ padding: "6px 14px", borderRadius: 6, background: "#090040", color: "#fff", border: "none", fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}
+                      >
+                        <Save size={13} />
+                        Save IP
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleTestWifiPrint}
+                        disabled={isTestingWifi}
+                        style={{ padding: "6px 14px", borderRadius: 6, background: "#F8FAFC", color: "#090040", border: "1px solid #CBD5E1", fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}
+                      >
+                        <Printer size={13} />
+                        {isTestingWifi ? "Printing..." : "Test Print"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Mode 3: USB Direct Card */}
+              {billing.printerType === "thermal_usb" && (
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <div style={{ width: 34, height: 34, borderRadius: 8, background: "#854D0E", color: "#fff", display: "grid", placeItems: "center" }}>
+                        <Usb size={18} />
+                      </div>
+                      <div>
+                        <div style={{ fontWeight: 800, fontSize: 13, color: "#090040" }}>Direct USB Thermal (ESC/POS)</div>
+                        <div style={{ fontSize: 11, color: "#64748B" }}>Fast plug-and-play USB thermal printing</div>
+                      </div>
+                    </div>
+                    <div style={{ width: 22, height: 22, borderRadius: "50%", background: "#854D0E", color: "#fff", display: "grid", placeItems: "center" }}>
+                      <Check size={14} strokeWidth={3} />
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: 14, padding: 12, borderRadius: 10, background: "#fff", border: "1px solid #CBD5E1" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                      <b style={{ fontSize: 12, color: "#090040" }}>USB Status</b>
+                      <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 12, background: usbState === "connected" ? "#DCFCE7" : "#F1F5F9", color: usbState === "connected" ? "#166534" : "#64748B" }}>
+                        {usbState === "connected" ? `● Connected: ${usbDevice?.name}` : "Disconnected"}
+                      </span>
+                    </div>
+
+                    <div style={{ display: "flex", gap: 8 }}>
+                      {usbState === "connected" ? (
+                        <button
+                          type="button"
+                          onClick={handleDisconnectUsbPrinter}
+                          style={{ padding: "6px 14px", borderRadius: 6, background: "#FEE2E2", color: "#991B1B", border: "1px solid #FECACA", fontSize: 12, fontWeight: 700, cursor: "pointer" }}
+                        >
+                          Disconnect
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={handleConnectUsbPrinter}
+                          disabled={isConnectingUsb}
+                          style={{ padding: "6px 14px", borderRadius: 6, background: "#090040", color: "#fff", border: "none", fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}
+                        >
+                          <Usb size={13} />
+                          {isConnectingUsb ? "Connecting..." : "Connect USB"}
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={handleTestUsbPrint}
+                        disabled={isTestingUsb}
+                        style={{ padding: "6px 14px", borderRadius: 6, background: "#F8FAFC", color: "#090040", border: "1px solid #CBD5E1", fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}
+                      >
+                        <Printer size={13} />
+                        {isTestingUsb ? "Printing..." : "Test Print"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Paper Size selector */}
+              <div style={{ marginTop: 14 }}>
+                <div style={{ fontSize: 12, fontWeight: 800, color: "#090040", marginBottom: 6 }}>Default Paper Size:</div>
+                <div style={{ display: "flex", gap: 10 }}>
+                  {[
+                    { id: "80mm", label: "80mm (3\" Standard)" },
+                    { id: "58mm", label: "58mm (2\" Pocket)" },
+                  ].map(opt => (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => {
+                        printService.setDefaultPaperSize(opt.id);
+                        localStorage.setItem("ajalkar_default_paper_size", opt.id);
+                        setBilling(b => ({ ...b, paperSize: opt.id }));
+                      }}
+                      style={{
+                        flex: 1,
+                        padding: "8px 12px",
+                        borderRadius: 8,
+                        border: (billing.paperSize || "80mm") === opt.id ? "2px solid #090040" : "1px solid #CBD5E1",
+                        background: (billing.paperSize || "80mm") === opt.id ? "#EFF6FF" : "#fff",
+                        fontWeight: 700,
+                        fontSize: 12,
+                        cursor: "pointer",
+                        textAlign: "center",
+                      }}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
+    );
+  };
 
-      <div className="toggle-container" style={{ marginTop: 0 }}>
+  const renderNotifications = () => {
+    return (
+      <div className="settings-card">
+        <div className="card-heading">
+          <div>
+            <h2>{t('notificationSettings', 'Notification Settings')}</h2>
+          </div>
+        </div>
+
         <Toggle
-          label="Enable Tax"
-          value={billing.tax}
+          label="Payment Received"
+          value={notifications.paymentReceived}
           onChange={(value) =>
-            setBilling((previous) => ({
+            setNotifications((previous) => ({
               ...previous,
-              tax: value,
+              paymentReceived: value,
             }))
           }
         />
 
         <Toggle
-          label="Enable Discount"
-          value={billing.discount}
+          label="Payment Failed"
+          value={notifications.paymentFailed}
           onChange={(value) =>
-            setBilling((previous) => ({
+            setNotifications((previous) => ({
               ...previous,
-              discount: value,
+              paymentFailed: value,
             }))
           }
         />
 
         <Toggle
-          label="Enable Round Off"
-          value={billing.roundOff}
+          label="Low Inventory"
+          value={notifications.lowInventory}
           onChange={(value) =>
-            setBilling((previous) => ({
+            setNotifications((previous) => ({
               ...previous,
-              roundOff: value,
+              lowInventory: value,
             }))
           }
         />
 
         <Toggle
-          label="Enable Thermal Receipt Printer (Bluetooth, Wi-Fi & USB)"
-          value={Boolean(billing.bluetoothPrinter)}
-          onChange={async (value) => {
-            const savedType = localStorage.getItem("ajalkar_printer_type") || "thermal_bt";
-            const newType = value ? (savedType !== "system" ? savedType : "thermal_bt") : "system";
-            const newMethod = value ? (newType === "thermal_wifi" ? "wifi" : newType === "thermal_usb" ? "usb" : "bluetooth") : "browser";
-
-            setBilling((previous) => ({
+          label="Maintenance Alert"
+          value={notifications.maintenance}
+          onChange={(value) =>
+            setNotifications((previous) => ({
               ...previous,
-              bluetoothPrinter: value,
-              printerType: newType,
-            }));
-            localStorage.setItem("ajalkar_default_print_method", newMethod);
-            localStorage.setItem("ajalkar_printer_type", newType);
-            printService.setDefaultPrintMethod(newMethod);
+              maintenance: value,
+            }))
+          }
+        />
 
-            if (!value) {
-              try {
-                await webBluetoothPrinter.disconnect();
-              } catch (e) {}
-              try {
-                await webUsbPrinter.disconnect();
-              } catch (e) {}
+        <Toggle
+          label="Email Notifications"
+          value={notifications.email}
+          onChange={(value) =>
+            setNotifications((previous) => ({
+              ...previous,
+              email: value,
+            }))
+          }
+        />
+
+        <Toggle
+          label="SMS Notifications"
+          value={notifications.sms}
+          onChange={(value) =>
+            setNotifications((previous) => ({
+              ...previous,
+              sms: value,
+            }))
+          }
+        />
+      </div>
+    );
+  };
+
+
+
+  const renderSystem = () => {
+    return (
+      <div className="settings-card">
+        <div className="card-heading">
+          <div>
+            <h2>{t('systemPreferences', 'System Preferences')}</h2>
+          </div>
+        </div>
+
+        <div className="settings-grid">
+          <SelectField
+            label="Date Format"
+            value={system.dateFormat}
+            options={[
+              "DD/MM/YYYY",
+              "MM/DD/YYYY",
+              "YYYY-MM-DD",
+            ]}
+            onChange={(value) =>
+              setSystem((previous) => ({
+                ...previous,
+                dateFormat: value,
+              }))
             }
+          />
+
+          <SelectField
+            label="Time Format"
+            value={system.timeFormat}
+            options={[
+              "12-hour",
+              "24-hour",
+            ]}
+            onChange={(value) =>
+              setSystem((previous) => ({
+                ...previous,
+                timeFormat: value,
+              }))
+            }
+          />
+
+          <SelectField
+            label="Language"
+            value={system.language}
+            options={[
+              "English",
+              "Marathi",
+              "Hindi",
+            ]}
+            onChange={(value) => handleLanguageChange(value)}
+          />
+
+          <SelectField
+            label="Backup Frequency"
+            value={system.backupFrequency}
+            options={[
+              "Daily at 11:00 PM (Night)",
+              "Daily",
+              "Weekly",
+              "Monthly",
+            ]}
+            onChange={(value) =>
+              setSystem((previous) => ({
+                ...previous,
+                backupFrequency: value,
+              }))
+            }
+          />
+        </div>
+
+        <div className="toggle-container">
+          <Toggle
+            label="Automatic Backup"
+            description={t('autoBackupDescNight', 'Automatically create secure system backups daily at 11:00 PM every night.')}
+            value={system.autoBackup}
+            onChange={(value) =>
+              setSystem((previous) => ({
+                ...previous,
+                autoBackup: value,
+              }))
+            }
+          />
+        </div>
+
+        {/* Daily Automated Backup (11:00 PM) Card */}
+        <div
+          className="owner-card"
+          style={{
+            backgroundColor: '#FFFFFF',
+            borderRadius: '12px',
+            border: '1px solid #E2E8F0',
+            padding: '24px 28px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+            marginTop: '20px',
+            marginBottom: '20px',
           }}
-        />
-
-        {Boolean(billing.bluetoothPrinter) && (
-          <div style={{ marginTop: 14, padding: 16, borderRadius: 12, border: "1px solid #E2E8F0", background: "#F8FAFC" }}>
-            {/* 3 Interface Selection Tabs */}
-            <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
-              {[
-                { id: "thermal_bt", method: "bluetooth", label: "Bluetooth Thermal", icon: <Bluetooth size={14} /> },
-                { id: "thermal_wifi", method: "wifi", label: "Wi-Fi / Network", icon: <Wifi size={14} /> },
-                { id: "thermal_usb", method: "usb", label: "USB Direct", icon: <Usb size={14} /> },
-              ].map(mode => {
-                const isSelected = (billing.printerType || (localStorage.getItem("ajalkar_printer_type") || "thermal_bt")) === mode.id;
-                return (
-                  <button
-                    key={mode.id}
-                    type="button"
-                    onClick={() => {
-                      setBilling(b => ({ ...b, printerType: mode.id }));
-                      printService.setDefaultPrintMethod(mode.method);
-                      localStorage.setItem("ajalkar_default_print_method", mode.method);
-                      localStorage.setItem("ajalkar_printer_type", mode.id);
-                    }}
-                    style={{
-                      flex: 1,
-                      padding: "8px 12px",
-                      borderRadius: 8,
-                      border: isSelected ? "2px solid #090040" : "1px solid #CBD5E1",
-                      background: isSelected ? "#090040" : "#FFFFFF",
-                      color: isSelected ? "#FFFFFF" : "#090040",
-                      fontWeight: 700,
-                      fontSize: 12,
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: 6,
-                    }}
-                  >
-                    {mode.icon}
-                    {mode.label}
-                    {isSelected && <Check size={13} strokeWidth={3} />}
-                  </button>
-                );
-              })}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#3B82F6', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFFFFF', flexShrink: 0 }}>
+                <Mail size={20} />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#0F172A' }}>
+                  {currentLanguageCode === 'mr' ? 'दैनिक स्वयंचलित हॉटेल बॅकअप (रात्री ११:००)' : 'Daily Automated Hotel Backup (11:00 PM)'}
+                </h3>
+                <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: '#64748B' }}>
+                  {currentLanguageCode === 'mr'
+                    ? 'दैनिक हॉटेल डेटा बॅकअप • रोज रात्री ११:०० वाजता ऑटोमॅटिक ईमेल'
+                    : 'Daily hotel data backup • Automatic email every night at 11:00 PM'}
+                </p>
+              </div>
             </div>
+            <span
+              style={{
+                backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                color: '#10B981',
+                border: '1px solid rgba(16, 185, 129, 0.35)',
+                padding: '4px 10px',
+                borderRadius: '6px',
+                fontSize: '0.75rem',
+                fontWeight: 800,
+                letterSpacing: '0.02em',
+              }}
+            >
+              {currentLanguageCode === 'mr' ? 'दररोज रात्री नियोजित (२३:००)' : 'SCHEDULED EVERY NIGHT (23:00)'}
+            </span>
+          </div>
 
-            {/* Mode 1: Bluetooth Card */}
-            {(billing.printerType === "thermal_bt" || (!billing.printerType && localStorage.getItem("ajalkar_printer_type") !== "thermal_wifi" && localStorage.getItem("ajalkar_printer_type") !== "thermal_usb")) && (
-              <div>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <div style={{ width: 34, height: 34, borderRadius: 8, background: "#090040", color: "#fff", display: "grid", placeItems: "center" }}>
-                      <Bluetooth size={18} />
-                    </div>
-                    <div>
-                      <div style={{ fontWeight: 800, fontSize: 13, color: "#090040" }}>Direct Bluetooth Thermal (ESC/POS)</div>
-                      <div style={{ fontSize: 11, color: "#64748B" }}>Pair with 58mm/80mm BLE thermal printers</div>
-                    </div>
-                  </div>
-                  <div style={{ width: 22, height: 22, borderRadius: "50%", background: "#090040", color: "#fff", display: "grid", placeItems: "center" }}>
-                    <Check size={14} strokeWidth={3} />
-                  </div>
-                </div>
-
-                <div style={{ marginTop: 14, padding: 12, borderRadius: 10, background: "#fff", border: "1px solid #CBD5E1" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                    <b style={{ fontSize: 12, color: "#090040" }}>Bluetooth Status</b>
-                    <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 12, background: btState === "connected" ? "#DCFCE7" : "#F1F5F9", color: btState === "connected" ? "#166534" : "#64748B" }}>
-                      {btState === "connected" ? `● Connected: ${btDevice?.name || "Thermal Printer"}` : "Disconnected"}
-                    </span>
-                  </div>
-
-                  <div style={{ display: "flex", gap: 8 }}>
-                    {btState === "connected" ? (
-                      <button
-                        type="button"
-                        onClick={handleDisconnectBtPrinter}
-                        style={{ padding: "6px 14px", borderRadius: 6, background: "#FEE2E2", color: "#991B1B", border: "1px solid #FECACA", fontSize: 12, fontWeight: 700, cursor: "pointer" }}
-                      >
-                        Disconnect
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={handleConnectBtPrinter}
-                        disabled={isConnectingBt}
-                        style={{ padding: "6px 14px", borderRadius: 6, background: "#090040", color: "#fff", border: "none", fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}
-                      >
-                        <Bluetooth size={13} />
-                        {isConnectingBt ? "Connecting..." : "Discover & Connect"}
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={handleTestBtPrint}
-                      disabled={isTestingBt}
-                      style={{ padding: "6px 14px", borderRadius: 6, background: "#F8FAFC", color: "#090040", border: "1px solid #CBD5E1", fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}
-                    >
-                      <Printer size={13} />
-                      {isTestingBt ? "Printing..." : "Test Print"}
-                    </button>
-                  </div>
-                </div>
-              </div>
+          <p style={{ fontSize: '0.86rem', color: '#475569', lineHeight: 1.6, margin: '0 0 16px 0' }}>
+            {currentLanguageCode === 'mr' ? (
+              <>
+                दररोज रात्री <strong>११:०० वाजता</strong>, सर्व दैनंदिन विक्री, ऑर्डर्स, इनव्हॉइसेस, पेमेंट्स, टेबल्स आणि खर्च संकलित केले जातात आणि Excel व PDF अहवाल स्वरूपात तुमच्या हॉटेल प्रोफाइल ईमेलवर (<strong>{profile.email || 'admin@royalpalace.com'}</strong>) आपोआप पाठवले जातात.
+              </>
+            ) : (
+              <>
+                Every night at <strong>11:00 PM</strong>, all daily sales, orders, invoices, payments, tables, and expenses are compiled and automatically sent to your Hotel Profile email (<strong>{profile.email || 'admin@royalpalace.com'}</strong>) with Excel and PDF summary attachments.
+              </>
             )}
+          </p>
 
-            {/* Mode 2: Wi-Fi / Network Card */}
-            {billing.printerType === "thermal_wifi" && (
-              <div>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <div style={{ width: 34, height: 34, borderRadius: 8, background: "#166534", color: "#fff", display: "grid", placeItems: "center" }}>
-                      <Wifi size={18} />
-                    </div>
-                    <div>
-                      <div style={{ fontWeight: 800, fontSize: 13, color: "#090040" }}>Wi-Fi / Network Thermal (ESC/POS)</div>
-                      <div style={{ fontSize: 11, color: "#64748B" }}>LAN TCP/IP Socket Printing (Port 9100)</div>
-                    </div>
-                  </div>
-                  <div style={{ width: 22, height: 22, borderRadius: "50%", background: "#166534", color: "#fff", display: "grid", placeItems: "center" }}>
-                    <Check size={14} strokeWidth={3} />
-                  </div>
-                </div>
-
-                <div style={{ marginTop: 14, padding: 12, borderRadius: 10, background: "#fff", border: "1px solid #CBD5E1" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                    <b style={{ fontSize: 12, color: "#090040" }}>Wi-Fi Connection Settings</b>
-                    <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 12, background: "#DCFCE7", color: "#166534" }}>
-                      {wifiIp}:{wifiPort}
-                    </span>
-                  </div>
-
-                  <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
-                    <div style={{ flex: 2 }}>
-                      <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "#64748B", marginBottom: 4 }}>Printer IP Address:</label>
-                      <input
-                        type="text"
-                        value={wifiIp}
-                        placeholder="192.168.1.100"
-                        onChange={e => setWifiIp(e.target.value)}
-                        style={{ width: "100%", padding: "6px 10px", borderRadius: 6, border: "1px solid #CBD5E1", fontSize: 12 }}
-                      />
-                    </div>
-                    <div style={{ width: 85 }}>
-                      <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "#64748B", marginBottom: 4 }}>Port:</label>
-                      <input
-                        type="number"
-                        value={wifiPort}
-                        placeholder="9100"
-                        onChange={e => setWifiPort(Number(e.target.value) || 9100)}
-                        style={{ width: "100%", padding: "6px 10px", borderRadius: 6, border: "1px solid #CBD5E1", fontSize: 12 }}
-                      />
-                    </div>
-                  </div>
-
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <button
-                      type="button"
-                      onClick={handleSaveWifiConfig}
-                      style={{ padding: "6px 14px", borderRadius: 6, background: "#090040", color: "#fff", border: "none", fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}
-                    >
-                      <Save size={13} />
-                      Save IP
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleTestWifiPrint}
-                      disabled={isTestingWifi}
-                      style={{ padding: "6px 14px", borderRadius: 6, background: "#F8FAFC", color: "#090040", border: "1px solid #CBD5E1", fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}
-                    >
-                      <Printer size={13} />
-                      {isTestingWifi ? "Printing..." : "Test Print"}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Mode 3: USB Direct Card */}
-            {billing.printerType === "thermal_usb" && (
-              <div>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <div style={{ width: 34, height: 34, borderRadius: 8, background: "#854D0E", color: "#fff", display: "grid", placeItems: "center" }}>
-                      <Usb size={18} />
-                    </div>
-                    <div>
-                      <div style={{ fontWeight: 800, fontSize: 13, color: "#090040" }}>Direct USB Thermal (ESC/POS)</div>
-                      <div style={{ fontSize: 11, color: "#64748B" }}>Fast plug-and-play USB thermal printing</div>
-                    </div>
-                  </div>
-                  <div style={{ width: 22, height: 22, borderRadius: "50%", background: "#854D0E", color: "#fff", display: "grid", placeItems: "center" }}>
-                    <Check size={14} strokeWidth={3} />
-                  </div>
-                </div>
-
-                <div style={{ marginTop: 14, padding: 12, borderRadius: 10, background: "#fff", border: "1px solid #CBD5E1" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                    <b style={{ fontSize: 12, color: "#090040" }}>USB Status</b>
-                    <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 12, background: usbState === "connected" ? "#DCFCE7" : "#F1F5F9", color: usbState === "connected" ? "#166534" : "#64748B" }}>
-                      {usbState === "connected" ? `● Connected: ${usbDevice?.name}` : "Disconnected"}
-                    </span>
-                  </div>
-
-                  <div style={{ display: "flex", gap: 8 }}>
-                    {usbState === "connected" ? (
-                      <button
-                        type="button"
-                        onClick={handleDisconnectUsbPrinter}
-                        style={{ padding: "6px 14px", borderRadius: 6, background: "#FEE2E2", color: "#991B1B", border: "1px solid #FECACA", fontSize: 12, fontWeight: 700, cursor: "pointer" }}
-                      >
-                        Disconnect
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={handleConnectUsbPrinter}
-                        disabled={isConnectingUsb}
-                        style={{ padding: "6px 14px", borderRadius: 6, background: "#090040", color: "#fff", border: "none", fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}
-                      >
-                        <Usb size={13} />
-                        {isConnectingUsb ? "Connecting..." : "Connect USB"}
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={handleTestUsbPrint}
-                      disabled={isTestingUsb}
-                      style={{ padding: "6px 14px", borderRadius: 6, background: "#F8FAFC", color: "#090040", border: "1px solid #CBD5E1", fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}
-                    >
-                      <Printer size={13} />
-                      {isTestingUsb ? "Printing..." : "Test Print"}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Paper Size selector */}
-            <div style={{ marginTop: 14 }}>
-              <div style={{ fontSize: 12, fontWeight: 800, color: "#090040", marginBottom: 6 }}>Default Paper Size:</div>
-              <div style={{ display: "flex", gap: 10 }}>
-                {[
-                  { id: "80mm", label: "80mm (3\" Standard)" },
-                  { id: "58mm", label: "58mm (2\" Pocket)" },
-                ].map(opt => (
-                  <button
-                    key={opt.id}
-                    type="button"
-                    onClick={() => {
-                      printService.setDefaultPaperSize(opt.id);
-                      localStorage.setItem("ajalkar_default_paper_size", opt.id);
-                      setBilling(b => ({ ...b, paperSize: opt.id }));
-                    }}
-                    style={{
-                      flex: 1,
-                      padding: "8px 12px",
-                      borderRadius: 8,
-                      border: (billing.paperSize || "80mm") === opt.id ? "2px solid #090040" : "1px solid #CBD5E1",
-                      background: (billing.paperSize || "80mm") === opt.id ? "#EFF6FF" : "#fff",
-                      fontWeight: 700,
-                      fontSize: 12,
-                      cursor: "pointer",
-                      textAlign: "center",
-                    }}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
+          {/* SMTP Status Notice */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              marginBottom: '18px',
+              padding: '11px 16px',
+              backgroundColor: 'rgba(16, 185, 129, 0.10)',
+              borderRadius: '10px',
+              border: '1px solid rgba(16, 185, 129, 0.28)',
+            }}
+          >
+            <CheckCircle2 size={18} color="#10B981" style={{ flexShrink: 0 }} />
+            <div>
+              <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#10B981' }}>
+                {currentLanguageCode === 'mr' ? 'Gmail SMTP कनेक्टेड (application.yml द्वारे)' : 'Gmail SMTP Connected via application.yml'}
+              </span>
+              <span style={{ fontSize: '0.78rem', color: '#64748B', marginLeft: '6px' }}>
+                ({smtpSenderEmail || 'omchaudhari553@gmail.com'}) — {currentLanguageCode === 'mr' ? 'क्रेडेन्शियल्स आधीच application.yml मध्ये कॉन्फिगर केलेले आहेत.' : 'Credentials already configured in application.yml.'}
+              </span>
             </div>
           </div>
-        )}
-      </div>
-    </div>
-  );
-};
 
-const renderNotifications = () => {
-  return (
-    <div className="settings-card">
-      <div className="card-heading">
-        <div>
-          <h2>{t('notificationSettings', 'Notification Settings')}</h2>
+          {lastBackupStatus.status !== 'idle' && (
+            <div
+              style={{
+                padding: '12px 16px',
+                borderRadius: '8px',
+                marginBottom: '16px',
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '10px',
+                fontSize: '0.84rem',
+                backgroundColor:
+                  lastBackupStatus.status === 'success'
+                    ? 'rgba(16, 185, 129, 0.12)'
+                    : lastBackupStatus.status === 'warning'
+                      ? 'rgba(245, 158, 11, 0.12)'
+                      : 'rgba(239, 68, 68, 0.12)',
+                border: `1px solid ${lastBackupStatus.status === 'success'
+                  ? 'rgba(16, 185, 129, 0.35)'
+                  : lastBackupStatus.status === 'warning'
+                    ? 'rgba(245, 158, 11, 0.35)'
+                    : 'rgba(239, 68, 68, 0.35)'
+                  }`,
+                color:
+                  lastBackupStatus.status === 'success'
+                    ? '#10B981'
+                    : lastBackupStatus.status === 'warning'
+                      ? '#F59E0B'
+                      : '#EF4444',
+              }}
+            >
+              {lastBackupStatus.status === 'success' ? (
+                <CheckCircle2 size={18} color="#10B981" style={{ flexShrink: 0, marginTop: '2px' }} />
+              ) : (
+                <AlertCircle size={18} color="#F59E0B" style={{ flexShrink: 0, marginTop: '2px' }} />
+              )}
+              <div>
+                <div style={{ fontWeight: 700 }}>
+                  {lastBackupStatus.status === 'success'
+                    ? (currentLanguageCode === 'mr' ? 'बॅकअप ईमेल यशस्वीरीत्या पाठवला!' : 'Backup Email Dispatched Successfully!')
+                    : (currentLanguageCode === 'mr' ? 'बॅकअप फाइल सर्व्हरवर सेव्ह केली!' : 'Backup File Saved Locally on Server!')}
+                </div>
+                <div style={{ marginTop: '2px', lineHeight: 1.4 }}>
+                  {lastBackupStatus.message}
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '4px' }}>
+            {/* Send Daily Backup to Email Now (Blue Square Icon Button) */}
+            <button
+              type="button"
+              disabled={backupSending}
+              onClick={handleSendDailyBackupNow}
+              title={currentLanguageCode === 'mr' ? 'बॅकअप ईमेल आता पाठवा' : (backupSending ? 'Sending Backup Email...' : 'Send Daily Backup to Email Now')}
+              aria-label="Send Daily Backup to Email Now"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '40px',
+                height: '40px',
+                backgroundColor: backupSending ? '#94A3B8' : '#2563EB',
+                color: '#FFFFFF',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: backupSending ? 'not-allowed' : 'pointer',
+                boxShadow: '0 2px 4px rgba(37, 99, 235, 0.25)',
+                transition: 'background-color 0.2s ease',
+              }}
+            >
+              <RefreshCw size={18} color="#FFFFFF" style={backupSending ? { animation: 'spin 1s linear infinite' } : undefined} />
+            </button>
+
+            {/* Download Excel (.xlsx) Backup (Green Square Icon Button) */}
+            <button
+              type="button"
+              onClick={handleDownloadDailyBackupExcel}
+              title={currentLanguageCode === 'mr' ? 'Excel बॅकअप (.xlsx) डाउनलोड करा' : 'Download Excel Backup (.xlsx)'}
+              aria-label="Download Excel Backup (.xlsx)"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '40px',
+                height: '40px',
+                backgroundColor: '#10B981',
+                color: '#FFFFFF',
+                border: '1px solid #059669',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                boxShadow: '0 2px 4px rgba(16, 185, 129, 0.25)',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#059669';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#10B981';
+              }}
+            >
+              <FileSpreadsheet size={18} color="#FFFFFF" />
+            </button>
+
+            {/* Download PDF Backup (White/Border Square Icon Button) */}
+            <button
+              type="button"
+              onClick={handleDownloadDailyBackupPdf}
+              title={currentLanguageCode === 'mr' ? 'PDF अहवाल (.pdf) डाउनलोड करा' : 'Download PDF Report (.pdf)'}
+              aria-label="Download PDF Report (.pdf)"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '40px',
+                height: '40px',
+                backgroundColor: '#FFFFFF',
+                color: '#1E293B',
+                border: '1px solid #CBD5E1',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = '#2563EB';
+                e.currentTarget.style.color = '#2563EB';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = '#CBD5E1';
+                e.currentTarget.style.color = '#1E293B';
+              }}
+            >
+              <FileText size={18} color="currentColor" />
+            </button>
+
+            {/* Download JSON Backup (White/Border Square Icon Button) */}
+            <button
+              type="button"
+              onClick={handleDownloadDailyBackup}
+              title={currentLanguageCode === 'mr' ? 'JSON बॅकअप (.json) डाउनलोड करा' : 'Download JSON Backup (.json)'}
+              aria-label="Download JSON Backup (.json)"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '40px',
+                height: '40px',
+                backgroundColor: '#FFFFFF',
+                color: '#1E293B',
+                border: '1px solid #CBD5E1',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = '#2563EB';
+                e.currentTarget.style.color = '#2563EB';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = '#CBD5E1';
+                e.currentTarget.style.color = '#1E293B';
+              }}
+            >
+              <Download size={18} color="currentColor" />
+            </button>
+          </div>
+        </div>
+
+        <div className="system-health">
+          <div className="health-card"><div className="health-label">{t('systemStatus', 'SYSTEM STATUS')}</div><div className="health-value"><span className="health-dot" />{t('operational', 'Operational')}</div></div>
+          <div className="health-card"><div className="health-label">{t('backup', 'BACKUP')}</div><div className="health-value">{system.autoBackup ? t(system.backupFrequency, system.backupFrequency) : t('disabled', 'Disabled')}</div></div>
+          <div className="health-card"><div className="health-label">{t('timeFormat', 'TIME FORMAT')}</div><div className="health-value">{t(system.timeFormat, system.timeFormat)}</div></div>
+        </div>
+
+        {/* DASHBOARD DISPLAY PREFERENCES (Requirement 3: Show/Hide Sections) */}
+        <div style={{ marginTop: '24px', padding: '20px', background: '#F8FAFC', borderRadius: '12px', border: '1px solid #E2E8F0' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
+            <div>
+              <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#0F172A' }}>
+                {t('dashboardSectionVisibility', 'Dashboard Section Visibility')}
+              </h4>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <Toggle
+              label={t('salesAndPaymentOverviewPanels', "Sales & Payment Overview Sections (Today's Sales, Sales Overview, Payment Summary)")}
+              value={dashboardDisplay.todaysSales !== false}
+              onChange={(val) => {
+                const updated = {
+                  ...dashboardDisplay,
+                  overviewSections: val,
+                  todaysSales: val,
+                  salesOverview: val,
+                  paymentSummary: val,
+                  billRequests: true,
+                };
+                setDashboardDisplay(updated);
+                try {
+                  localStorage.setItem("dashboard_display_config", JSON.stringify(updated));
+                } catch { }
+                window.dispatchEvent(new CustomEvent("dashboard-display-updated", { detail: updated }));
+                settingsService.saveSetting("dashboard", "display_config", JSON.stringify(updated)).catch(() => { });
+              }}
+            />
+          </div>
         </div>
       </div>
+    );
+  };
 
-      <Toggle
-        label="Payment Received"
-        value={notifications.paymentReceived}
-        onChange={(value) =>
-          setNotifications((previous) => ({
-            ...previous,
-            paymentReceived: value,
-          }))
-        }
-      />
+  const renderLicence = () => {
+    const daysLeft = licenceInfo?.daysRemaining != null ? licenceInfo.daysRemaining : 2;
+    const planName = licenceInfo?.subscriptionPlan || 'Hotel Starter';
+    const licenceVer = licenceInfo?.licenceVersion || 'STARTER';
+    const planLevel = (licenceInfo?.planLevel || licenceInfo?.subscriptionPlan || 'STARTER').toUpperCase().replace('HOTEL ', '').replace(' SUITE', '');
+    const trialStartDate = licenceInfo?.trialStartDate
+      ? new Date(licenceInfo.trialStartDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+      : '28 Oct 2026';
+    const trialEndDate = licenceInfo?.trialEndDate
+      ? new Date(licenceInfo.trialEndDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+      : '25 Nov 2026';
+    const renewalDate = licenceInfo?.renewalDate
+      ? new Date(licenceInfo.renewalDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+      : '30 Dec 2027';
 
-      <Toggle
-        label="Payment Failed"
-        value={notifications.paymentFailed}
-        onChange={(value) =>
-          setNotifications((previous) => ({
-            ...previous,
-            paymentFailed: value,
-          }))
-        }
-      />
-
-      <Toggle
-        label="Low Inventory"
-        value={notifications.lowInventory}
-        onChange={(value) =>
-          setNotifications((previous) => ({
-            ...previous,
-            lowInventory: value,
-          }))
-        }
-      />
-
-      <Toggle
-        label="Maintenance Alert"
-        value={notifications.maintenance}
-        onChange={(value) =>
-          setNotifications((previous) => ({
-            ...previous,
-            maintenance: value,
-          }))
-        }
-      />
-
-      <Toggle
-        label="Email Notifications"
-        value={notifications.email}
-        onChange={(value) =>
-          setNotifications((previous) => ({
-            ...previous,
-            email: value,
-          }))
-        }
-      />
-
-      <Toggle
-        label="SMS Notifications"
-        value={notifications.sms}
-        onChange={(value) =>
-          setNotifications((previous) => ({
-            ...previous,
-            sms: value,
-          }))
-        }
-      />
-    </div>
-  );
-};
-
-
-
-const renderSystem = () => {
-  return (
-    <div className="settings-card">
-      <div className="card-heading">
-        <div>
-          <h2>{t('systemPreferences', 'System Preferences')}</h2>
-        </div>
-      </div>
-
-      <div className="settings-grid">
-        <SelectField
-          label="Date Format"
-          value={system.dateFormat}
-          options={[
-            "DD/MM/YYYY",
-            "MM/DD/YYYY",
-            "YYYY-MM-DD",
-          ]}
-          onChange={(value) =>
-            setSystem((previous) => ({
-              ...previous,
-              dateFormat: value,
-            }))
-          }
-        />
-
-        <SelectField
-          label="Time Format"
-          value={system.timeFormat}
-          options={[
-            "12-hour",
-            "24-hour",
-          ]}
-          onChange={(value) =>
-            setSystem((previous) => ({
-              ...previous,
-              timeFormat: value,
-            }))
-          }
-        />
-
-        <SelectField
-          label="Language"
-          value={system.language}
-          options={[
-            "English",
-            "Marathi",
-            "Hindi",
-          ]}
-          onChange={(value) => handleLanguageChange(value)}
-        />
-
-        <SelectField
-          label="Backup Frequency"
-          value={system.backupFrequency}
-          options={[
-            "Daily at 11:00 PM (Night)",
-            "Daily",
-            "Weekly",
-            "Monthly",
-          ]}
-          onChange={(value) =>
-            setSystem((previous) => ({
-              ...previous,
-              backupFrequency: value,
-            }))
-          }
-        />
-      </div>
-
-      <div className="toggle-container">
-        <Toggle
-          label="Automatic Backup"
-          description={t('autoBackupDescNight', 'Automatically create secure system backups daily at 11:00 PM every night.')}
-          value={system.autoBackup}
-          onChange={(value) =>
-            setSystem((previous) => ({
-              ...previous,
-              autoBackup: value,
-            }))
-          }
-        />
-      </div>
-
-      {/* Daily Automated Backup (11:00 PM) Card */}
+    return (
       <div
-        className="owner-card"
+        className="settings-card"
         style={{
           backgroundColor: '#FFFFFF',
           borderRadius: '12px',
           border: '1px solid #E2E8F0',
           padding: '24px 28px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-          marginTop: '20px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
           marginBottom: '20px',
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#3B82F6', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFFFFF', flexShrink: 0 }}>
-              <Mail size={20} />
-            </div>
-            <div>
-              <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#0F172A' }}>
-                {currentLanguageCode === 'mr' ? 'दैनिक स्वयंचलित हॉटेल बॅकअप (रात्री ११:००)' : 'Daily Automated Hotel Backup (11:00 PM)'}
-              </h3>
-              <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: '#64748B' }}>
-                {currentLanguageCode === 'mr'
-                  ? 'दैनिक हॉटेल डेटा बॅकअप • रोज रात्री ११:०० वाजता ऑटोमॅटिक ईमेल'
-                  : 'Daily hotel data backup • Automatic email every night at 11:00 PM'}
-              </p>
-            </div>
-          </div>
-          <span
-            style={{
-              backgroundColor: 'rgba(16, 185, 129, 0.15)',
-              color: '#10B981',
-              border: '1px solid rgba(16, 185, 129, 0.35)',
-              padding: '4px 10px',
-              borderRadius: '6px',
-              fontSize: '0.75rem',
-              fontWeight: 800,
-              letterSpacing: '0.02em',
-            }}
-          >
-            {currentLanguageCode === 'mr' ? 'दररोज रात्री नियोजित (२३:००)' : 'SCHEDULED EVERY NIGHT (23:00)'}
+        {/* Header Row Matching Image 1 */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '22px', paddingBottom: '14px', borderBottom: '1px solid #E2E8F0', flexWrap: 'wrap', gap: '10px' }}>
+          <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: '#0F172A' }}>
+            {t('licenceAndSubscription', 'Licence & Subscription')}
+          </h2>
+          <span style={{ background: '#15803D', color: '#FFFFFF', padding: '4px 14px', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            {planLevel}
           </span>
         </div>
 
-        <p style={{ fontSize: '0.86rem', color: '#475569', lineHeight: 1.6, margin: '0 0 16px 0' }}>
-          {currentLanguageCode === 'mr' ? (
-            <>
-              दररोज रात्री <strong>११:०० वाजता</strong>, सर्व दैनंदिन विक्री, ऑर्डर्स, इनव्हॉइसेस, पेमेंट्स, टेबल्स आणि खर्च संकलित केले जातात आणि JSON डेटा व PDF अहवाल स्वरूपात तुमच्या हॉटेल प्रोफाइल ईमेलवर (<strong>{profile.email || 'admin@royalpalace.com'}</strong>) आपोआप पाठवले जातात.
-            </>
-          ) : (
-            <>
-              Every night at <strong>11:00 PM</strong>, all daily sales, orders, invoices, payments, tables, and expenses are compiled and automatically sent to your Hotel Profile email (<strong>{profile.email || 'admin@royalpalace.com'}</strong>) with JSON data and PDF summary attachments.
-            </>
-          )}
-        </p>
+        {/* 3 Detail Cards Grid Matching Image 1 */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+          {/* Card 1: Licence Version & Subscription Plan */}
+          <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '10px', padding: '16px 18px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingBottom: '12px', borderBottom: '1px solid #F1F5F9', marginBottom: '12px' }}>
+              <div>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  {t('licenceVersion', 'LICENCE VERSION')}
+                </span>
+                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0F172A', marginTop: '4px' }}>
+                  {licenceVer}
+                </div>
+              </div>
+              <span style={{ background: '#EFF6FF', color: '#2563EB', border: '1px solid #BFDBFE', padding: '3px 10px', borderRadius: '9999px', fontSize: '0.74rem', fontWeight: 700 }}>
+                v{licenceVer}
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  {t('subscriptionPlan', 'SUBSCRIPTION PLAN')}
+                </span>
+                <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0F172A', marginTop: '4px' }}>
+                  {planName}
+                </div>
+              </div>
+              <span style={{ background: '#F0FDF4', color: '#16A34A', border: '1px solid #BBF7D0', padding: '3px 10px', borderRadius: '9999px', fontSize: '0.74rem', fontWeight: 700 }}>
+                Active
+              </span>
+            </div>
+          </div>
 
-        {/* SMTP Status Notice */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            marginBottom: '18px',
-            padding: '11px 16px',
-            backgroundColor: 'rgba(16, 185, 129, 0.10)',
-            borderRadius: '10px',
-            border: '1px solid rgba(16, 185, 129, 0.28)',
-          }}
-        >
-          <CheckCircle2 size={18} color="#10B981" style={{ flexShrink: 0 }} />
-          <div>
-            <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#10B981' }}>
-              {currentLanguageCode === 'mr' ? 'Gmail SMTP कनेक्टेड (application.yml द्वारे)' : 'Gmail SMTP Connected via application.yml'}
-            </span>
-            <span style={{ fontSize: '0.78rem', color: '#64748B', marginLeft: '6px' }}>
-              ({smtpSenderEmail || 'omchaudhari553@gmail.com'}) — {currentLanguageCode === 'mr' ? 'क्रेडेन्शियल्स आधीच application.yml मध्ये कॉन्फिगर केलेले आहेत.' : 'Credentials already configured in application.yml.'}
-            </span>
+          {/* Card 2: Trial Start Date & Trial End Date */}
+          <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '10px', padding: '16px 18px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingBottom: '12px', borderBottom: '1px solid #F1F5F9', marginBottom: '12px' }}>
+              <div>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  {t('trialStartDate', 'TRIAL START DATE')}
+                </span>
+                <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0F172A', marginTop: '4px' }}>
+                  {trialStartDate}
+                </div>
+              </div>
+              <span style={{ background: '#FEF3C7', color: '#D97706', border: '1px solid #FDE68A', padding: '3px 10px', borderRadius: '9999px', fontSize: '0.74rem', fontWeight: 700 }}>
+                28 Days Free Trial
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  {t('trialEndDate', 'TRIAL END DATE')}
+                </span>
+                <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0F172A', marginTop: '4px' }}>
+                  {trialEndDate}
+                </div>
+              </div>
+              <span style={{ background: '#F0FDF4', color: '#16A34A', border: '1px solid #BBF7D0', padding: '3px 10px', borderRadius: '9999px', fontSize: '0.74rem', fontWeight: 700 }}>
+                {daysLeft} Days Remaining
+              </span>
+            </div>
+          </div>
+
+          {/* Card 3: Renewal Date & Trial Status */}
+          <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '10px', padding: '16px 18px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingBottom: '12px', borderBottom: '1px solid #F1F5F9', marginBottom: '12px' }}>
+              <div>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  {t('renewalDate', 'RENEWAL DATE')}
+                </span>
+                <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0F172A', marginTop: '4px' }}>
+                  {renewalDate}
+                </div>
+              </div>
+              <span style={{ background: '#F1F5F9', color: '#475569', border: '1px solid #E2E8F0', padding: '3px 10px', borderRadius: '9999px', fontSize: '0.74rem', fontWeight: 700 }}>
+                Auto-Renew
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  {t('trialStatus', 'TRIAL STATUS')}
+                </span>
+                <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#16A34A', marginTop: '4px' }}>
+                  Active
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent('open-subscription-modal', { detail: { mode: 'renew' } }));
+                }}
+                style={{
+                  background: '#16A34A',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  padding: '5px 14px',
+                  borderRadius: '9999px',
+                  fontSize: '0.8rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 6px rgba(22, 163, 74, 0.25)',
+                }}
+              >
+                {t('renewNow', 'Renew Now')}
+              </button>
+            </div>
           </div>
         </div>
 
-        {lastBackupStatus.status !== 'idle' && (
-          <div
-            style={{
-              padding: '12px 16px',
-              borderRadius: '8px',
-              marginBottom: '16px',
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: '10px',
-              fontSize: '0.84rem',
-              backgroundColor:
-                lastBackupStatus.status === 'success'
-                  ? 'rgba(16, 185, 129, 0.12)'
-                  : lastBackupStatus.status === 'warning'
-                  ? 'rgba(245, 158, 11, 0.12)'
-                  : 'rgba(239, 68, 68, 0.12)',
-              border: `1px solid ${
-                lastBackupStatus.status === 'success'
-                  ? 'rgba(16, 185, 129, 0.35)'
-                  : lastBackupStatus.status === 'warning'
-                  ? 'rgba(245, 158, 11, 0.35)'
-                  : 'rgba(239, 68, 68, 0.35)'
-              }`,
-              color:
-                lastBackupStatus.status === 'success'
-                  ? '#10B981'
-                  : lastBackupStatus.status === 'warning'
-                  ? '#F59E0B'
-                  : '#EF4444',
-            }}
-          >
-            {lastBackupStatus.status === 'success' ? (
-              <CheckCircle2 size={18} color="#10B981" style={{ flexShrink: 0, marginTop: '2px' }} />
-            ) : (
-              <AlertCircle size={18} color="#F59E0B" style={{ flexShrink: 0, marginTop: '2px' }} />
-            )}
+        {/* Special Offer Section Matching Image 2 */}
+        <div
+          style={{
+            background: 'linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%)',
+            border: '1.5px solid #86EFAC',
+            borderRadius: '14px',
+            padding: '24px',
+            marginBottom: '24px',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+            <div style={{ maxWidth: '650px' }}>
+              <span
+                style={{
+                  background: '#16A34A',
+                  color: '#FFFFFF',
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  padding: '3px 12px',
+                  borderRadius: '9999px',
+                  textTransform: 'uppercase',
+                  display: 'inline-block',
+                  marginBottom: '10px',
+                  letterSpacing: '0.5px',
+                }}
+              >
+                SPECIAL OFFER
+              </span>
+              <h3 style={{ margin: '0 0 8px 0', fontSize: '1.35rem', fontWeight: 800, color: '#14532D' }}>
+                Start Your 28 Days Free Trial
+              </h3>
+              <p style={{ margin: 0, fontSize: '0.95rem', color: '#166534', lineHeight: 1.5 }}>
+                Experience the Enterprise features of Ajalkar POS Billing with a 28-day free trial. Explore the available features before choosing your subscription plan.
+              </p>
+            </div>
             <div>
-              <div style={{ fontWeight: 700 }}>
-                {lastBackupStatus.status === 'success'
-                  ? (currentLanguageCode === 'mr' ? 'बॅकअप ईमेल यशस्वीरीत्या पाठवला!' : 'Backup Email Dispatched Successfully!')
-                  : (currentLanguageCode === 'mr' ? 'बॅकअप फाइल सर्व्हरवर सेव्ह केली!' : 'Backup File Saved Locally on Server!')}
-              </div>
-              <div style={{ marginTop: '2px', lineHeight: 1.4 }}>
-                {lastBackupStatus.message}
+              <div
+                style={{
+                  background: '#FFFFFF',
+                  border: '1.5px solid #22C55E',
+                  color: '#15803D',
+                  padding: '10px 18px',
+                  borderRadius: '10px',
+                  fontWeight: 800,
+                  fontSize: '0.92rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 2px 6px rgba(34, 197, 94, 0.15)',
+                }}
+              >
+                ✓ Trial Active · {daysLeft} Days
               </div>
             </div>
           </div>
-        )}
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-          <button
-            type="button"
-            disabled={backupSending}
-            onClick={handleSendDailyBackupNow}
-            title={currentLanguageCode === 'mr' ? 'बॅकअप ईमेल आता पाठवा' : (backupSending ? 'Sending Backup Email...' : 'Send Daily Backup to Email Now')}
-            aria-label="Send Daily Backup to Email Now"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '40px',
-              height: '40px',
-              backgroundColor: backupSending ? '#94A3B8' : '#3B82F6',
-              color: '#FFFFFF',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: backupSending ? 'not-allowed' : 'pointer',
-              boxShadow: '0 2px 4px rgba(59, 130, 246, 0.25)',
-              transition: 'background-color 0.2s ease',
-            }}
-          >
-            <RefreshCw size={18} color="#FFFFFF" style={backupSending ? { animation: 'spin 1s linear infinite' } : undefined} />
-          </button>
-
-          <button
-            type="button"
-            onClick={handleDownloadDailyBackup}
-            title={currentLanguageCode === 'mr' ? 'बॅकअप डाउनलोड करा (.json)' : 'Download Backup (.json)'}
-            aria-label="Download Backup (.json)"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '40px',
-              height: '40px',
-              backgroundColor: '#FFFFFF',
-              color: '#0F172A',
-              border: '1px solid #CBD5E1',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = '#D97706';
-              e.currentTarget.style.color = '#D97706';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = '#CBD5E1';
-              e.currentTarget.style.color = '#0F172A';
-            }}
-          >
-            <Download size={18} color="currentColor" />
-          </button>
-
-          <button
-            type="button"
-            onClick={handleDownloadDailyBackupPdf}
-            title={currentLanguageCode === 'mr' ? 'PDF अहवाल डाउनलोड करा (.pdf)' : 'Download PDF Report (.pdf)'}
-            aria-label="Download PDF Report (.pdf)"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '40px',
-              height: '40px',
-              backgroundColor: '#FFFFFF',
-              color: '#0F172A',
-              border: '1px solid #CBD5E1',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = '#D97706';
-              e.currentTarget.style.color = '#D97706';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = '#CBD5E1';
-              e.currentTarget.style.color = '#0F172A';
-            }}
-          >
-            <FileText size={18} color="currentColor" />
-          </button>
         </div>
-      </div>
 
-      <div className="system-health">
-        <div className="health-card"><div className="health-label">{t('systemStatus', 'SYSTEM STATUS')}</div><div className="health-value"><span className="health-dot" />{t('operational', 'Operational')}</div></div>
-        <div className="health-card"><div className="health-label">{t('backup', 'BACKUP')}</div><div className="health-value">{system.autoBackup ? t(system.backupFrequency, system.backupFrequency) : t('disabled', 'Disabled')}</div></div>
-        <div className="health-card"><div className="health-label">{t('timeFormat', 'TIME FORMAT')}</div><div className="health-value">{t(system.timeFormat, system.timeFormat)}</div></div>
-      </div>
-
-      {/* DASHBOARD DISPLAY PREFERENCES (Requirement 3: Show/Hide Sections) */}
-      <div style={{ marginTop: '24px', padding: '20px', background: '#F8FAFC', borderRadius: '12px', border: '1px solid #E2E8F0' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
+        {/* Subscription Actions Section Matching Image 2 */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '16px',
+            paddingTop: '16px',
+            borderTop: '1px solid #E2E8F0',
+          }}
+        >
           <div>
-            <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#0F172A' }}>
-              {t('dashboardSectionVisibility', 'Dashboard Section Visibility')}
+            <h4 style={{ margin: '0 0 4px 0', fontSize: '1.05rem', fontWeight: 800, color: '#1E293B' }}>
+              Subscription Actions
             </h4>
+            <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748B' }}>
+              Renew or upgrade your subscription plan at any time.
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={() => {
+                window.dispatchEvent(new CustomEvent('open-subscription-modal', { detail: { mode: 'renew' } }));
+              }}
+              style={{
+                background: '#0D9488',
+                color: '#FFFFFF',
+                border: 'none',
+                padding: '10px 22px',
+                borderRadius: '10px',
+                fontSize: '0.9rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: '0 2px 6px rgba(13, 148, 136, 0.25)',
+              }}
+            >
+              🔄 {t('renewSubscription', 'Renew Subscription')}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                window.dispatchEvent(new CustomEvent('open-subscription-modal', { detail: { mode: 'upgrade' } }));
+              }}
+              style={{
+                background: '#4338CA',
+                color: '#FFFFFF',
+                border: 'none',
+                padding: '10px 22px',
+                borderRadius: '10px',
+                fontSize: '0.9rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: '0 2px 6px rgba(67, 56, 202, 0.25)',
+              }}
+            >
+              ⬆ {t('upgradePlan', 'Upgrade Plan')}
+            </button>
           </div>
         </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <Toggle
-            label={t('salesAndPaymentOverviewPanels', "Sales & Payment Overview Sections (Today's Sales, Sales Overview, Payment Summary)")}
-            value={dashboardDisplay.todaysSales !== false}
-            onChange={(val) => {
-              const updated = {
-                ...dashboardDisplay,
-                overviewSections: val,
-                todaysSales: val,
-                salesOverview: val,
-                paymentSummary: val,
-                billRequests: true,
-              };
-              setDashboardDisplay(updated);
-              try {
-                localStorage.setItem("dashboard_display_config", JSON.stringify(updated));
-              } catch {}
-              window.dispatchEvent(new CustomEvent("dashboard-display-updated", { detail: updated }));
-              settingsService.saveSetting("dashboard", "display_config", JSON.stringify(updated)).catch(() => {});
-            }}
-          />
-        </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
-const renderContent = () => {
-  if (activeSection === "profile") {
-    return renderProfile();
-  }
+  const renderContent = () => {
+    if (activeSection === "profile") {
+      return renderProfile();
+    }
 
-  if (activeSection === "gst") {
-    return renderGstConfiguration();
-  }
+    if (activeSection === "licence") {
+      return renderLicence();
+    }
 
-  if (activeSection === "billing") {
-    return renderBilling();
-  }
+    if (activeSection === "gst") {
+      return renderGstConfiguration();
+    }
 
-  if (activeSection === "notifications") {
-    return renderNotifications();
-  }
+    if (activeSection === "billing") {
+      return renderBilling();
+    }
 
-  if (activeSection === "system") {
-    return renderSystem();
-  }
+    if (activeSection === "notifications") {
+      return renderNotifications();
+    }
 
-  if (activeSection === "reports") {
-    return (
-      <div style={{ background: "#ffffff", borderRadius: "14px", border: "1px solid #eee5df", padding: "18px 20px", minWidth: 0, overflowX: "hidden", boxSizing: "border-box" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", paddingBottom: "12px", borderBottom: "1px solid #f0e7e1" }}>
-          <div>
-            <h3 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 800, color: "#1F2937" }}>{t('reportsOverview', 'Reports & KPI Overview')}</h3>
+    if (activeSection === "system") {
+      return renderSystem();
+    }
+
+    if (activeSection === "reports") {
+      return (
+        <div style={{ background: "#ffffff", borderRadius: "14px", border: "1px solid #eee5df", padding: "18px 20px", minWidth: 0, overflowX: "hidden", boxSizing: "border-box" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", paddingBottom: "12px", borderBottom: "1px solid #f0e7e1" }}>
+            <div>
+              <h3 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 800, color: "#1F2937" }}>{t('reportsOverview', 'Reports & KPI Overview')}</h3>
+            </div>
+            <button
+              type="button"
+              onClick={() => navigate("/hotelreport")}
+              style={{
+                background: "#8f351d",
+                color: "#FFFFFF",
+                border: "none",
+                padding: "8px 16px",
+                borderRadius: "8px",
+                fontSize: "0.85rem",
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              {t('openFullScreenReport', 'Open Full Screen Report →')}
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => navigate("/hotelreport")}
-            style={{
-              background: "#8f351d",
-              color: "#FFFFFF",
-              border: "none",
-              padding: "8px 16px",
-              borderRadius: "8px",
-              fontSize: "0.85rem",
-              fontWeight: 700,
-              cursor: "pointer",
-            }}
-          >
-            {t('openFullScreenReport', 'Open Full Screen Report →')}
-          </button>
+          <HotelReport />
         </div>
-        <HotelReport />
-      </div>
-    );
-  }
+      );
+    }
 
-  if (activeSection === "gst-reports") {
-    return (
-      <GstReportComponent onBack={() => setActiveSection("profile")} />
-    );
-  }
+    if (activeSection === "gst-reports") {
+      return (
+        <GstReportComponent onBack={() => setActiveSection("profile")} />
+      );
+    }
 
-  return null;
-};
+    return null;
+  };
 
-return (
-  <div className="settings-page">
-    <style>{`
+  return (
+    <div className="settings-page">
+      <style>{`
         * {
           box-sizing: border-box;
         }
@@ -5217,132 +5678,267 @@ return (
           }
         }
       `}
-    </style>
+      </style>
 
-    <div className="settings-header">
-      <div>
-        <h1 className="settings-title">
-          {t('settings', 'Settings')}
-        </h1>
+      <div className="settings-header">
+        <div>
+          <h1 className="settings-title">
+            {t('settings', 'Settings')}
+          </h1>
+        </div>
       </div>
-    </div>
 
-    <div className="settings-toolbar">
-      <input
-        className="settings-search"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder={t('searchSettings', 'Search settings...')}
-        aria-label={t('searchSettings', 'Search settings')}
-      />
-      {lastSaved && <div className="toolbar-chip">{t('saved', 'Saved')} {lastSaved}</div>}
-    </div>
+      <div className="settings-toolbar">
+        <input
+          className="settings-search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder={t('searchSettings', 'Search settings...')}
+          aria-label={t('searchSettings', 'Search settings')}
+        />
+        {lastSaved && <div className="toolbar-chip">{t('saved', 'Saved')} {lastSaved}</div>}
+      </div>
 
-    <div className="settings-layout">
-      <aside
-        className="settings-sidebar"
-      >
-        {SETTINGS_SECTIONS.filter(sectionMatchesSearch).map(
-          (section) => (
-            <button
-              type="button"
-              key={section.id}
-              className={`settings-nav ${activeSection === section.id
-                ? "active"
-                : ""
-                }`}
-              onClick={() => {
-                setActiveSection(
-                  section.id
-                );
-                setErrors({});
-                setTouched({});
+      {/* Top Hero Banner Matching Image 1: Licensed Enterprise Version */}
+      {!isBranchUser && (
+        <div
+          style={{
+            background: "#FFFFFF",
+            borderRadius: "14px",
+            border: "1.5px solid #BBF7D0",
+            boxShadow: "0 2px 10px rgba(22, 101, 52, 0.05)",
+            padding: "16px 22px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: "14px",
+            marginBottom: "16px",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "14px", minWidth: "260px" }}>
+            <div
+              style={{
+                width: "46px",
+                height: "46px",
+                borderRadius: "12px",
+                background: "#DCFCE7",
+                border: "1.5px solid #86EFAC",
+                display: "grid",
+                placeItems: "center",
+                fontSize: "24px",
+                color: "#16A34A",
+                flexShrink: 0,
               }}
-              title={t(section.description, section.description)}
             >
-              <span className="nav-title">
-                {t(
-                  section.id === "profile"
-                    ? "hotelProfile"
-                    : section.id === "gst"
-                      ? "gstConfiguration"
-                      : section.id === "billing"
-                        ? "billing"
-                        : section.id === "notifications"
-                          ? "notifications"
-                          : section.id === "system"
-                            ? "systemPreferences"
-                            : section.id === "reports"
-                              ? "reportAndKpi"
-                              : section.id === "gst-reports"
-                                ? "gstSettingsAndReports"
-                                : section.title,
-                  section.title
-                )}
-              </span>
-            </button>
-          )
-        )}
-      </aside>
-
-      <main className="settings-content">
-        {search.trim() && !sectionMatchesSearch(SETTINGS_SECTIONS.find((item) => item.id === activeSection) || SETTINGS_SECTIONS[0]) ? (
-          <div className="settings-card empty-search">{t('noMatchingSettings', 'No matching settings found. Try another search term.')}</div>
-        ) : renderContent()}
-
-        {activeSection !== "reports" && activeSection !== "gst-reports" && (
-          <div className="settings-actions" style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "12px" }}>
-            {savedNotice && (
-              <div
+              <Shield size={24} color="#16A34A" />
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+              <h3 style={{ margin: 0, fontSize: "1.15rem", fontWeight: 800, color: "#166534" }}>
+                {t('licensedEnterpriseVersion', 'Licensed Enterprise Version')}
+              </h3>
+              <span
                 style={{
+                  background: "#DCFCE7",
+                  color: "#15803D",
+                  border: "1px solid #86EFAC",
+                  borderRadius: "9999px",
+                  padding: "2px 10px",
+                  fontSize: "0.75rem",
+                  fontWeight: 800,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "4px",
+                }}
+              >
+                ⚡ {licenceInfo?.subscriptionStatus || "Active"}
+              </span>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "24px", flexWrap: "wrap" }}>
+            <div>
+              <div style={{ fontSize: "0.7rem", fontWeight: 800, color: "#6B7280", letterSpacing: "0.05em", textTransform: "uppercase" }}>
+                {t('planName', 'PLAN NAME')}
+              </div>
+              <div style={{ fontSize: "0.95rem", fontWeight: 800, color: "#16A34A" }}>
+                {licenceInfo?.subscriptionPlan?.toLowerCase().includes('trial') || !licenceInfo?.subscriptionPlan ? "Trial" : licenceInfo.subscriptionPlan}
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: "0.7rem", fontWeight: 800, color: "#6B7280", letterSpacing: "0.05em", textTransform: "uppercase" }}>
+                {t('validity', 'VALIDITY')}
+              </div>
+              <div style={{ fontSize: "0.95rem", fontWeight: 800, color: "#111827" }}>
+                {licenceInfo?.daysRemaining != null ? licenceInfo.daysRemaining : 2} Days
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: "0.7rem", fontWeight: 800, color: "#6B7280", letterSpacing: "0.05em", textTransform: "uppercase" }}>
+                {t('licenseStatus', 'LICENSE STATUS')}
+              </div>
+              <div style={{ fontSize: "0.95rem", fontWeight: 800, color: "#16A34A" }}>
+                {licenceInfo?.subscriptionStatus || "Active"}
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              <button
+                type="button"
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent('open-subscription-modal', { detail: { mode: 'renew' } }));
+                }}
+                style={{
+                  background: "#059669",
+                  color: "#FFFFFF",
+                  border: "none",
+                  padding: "9px 18px",
+                  borderRadius: "8px",
+                  fontSize: "0.85rem",
+                  fontWeight: 700,
+                  cursor: "pointer",
                   display: "inline-flex",
                   alignItems: "center",
                   gap: "6px",
-                  backgroundColor: "#ECFDF5",
-                  border: "1px solid #86EFAC",
-                  color: "#059669",
-                  padding: "8px 16px",
-                  borderRadius: "8px",
-                  fontWeight: 800,
-                  fontSize: "13px",
-                  boxShadow: "0 2px 6px rgba(5, 150, 105, 0.15)",
-                  animation: "fadeIn 0.2s ease",
+                  boxShadow: "0 2px 6px rgba(5, 150, 105, 0.25)",
                 }}
               >
-                <Check size={16} />
-                <span>Settings Saved</span>
-              </div>
-            )}
-
-            <button
-              type="button"
-              className="reset-button"
-              onClick={resetCurrentSection}
-            >
-              {t('resetSection', 'Reset Section')}
-            </button>
-
-            <button
-              type="button"
-              className="save-button"
-              disabled={saving}
-              onClick={handleSave}
-            >
-              {saving
-                ? t('saving', 'Saving...')
-                : t('saveChanges', 'Save Changes')}
-            </button>
+                <RotateCcw size={14} color="#FFFFFF" />
+                {t('renewLicense', 'Renew License')}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent('open-subscription-modal', { detail: { mode: 'upgrade' } }));
+                }}
+                style={{
+                  background: "#1E293B",
+                  color: "#FFFFFF",
+                  border: "none",
+                  padding: "9px 18px",
+                  borderRadius: "8px",
+                  fontSize: "0.85rem",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                }}
+              >
+                <Sparkles size={14} color="#FFFFFF" />
+                {t('upgradePlan', 'Upgrade Plan')}
+              </button>
+            </div>
           </div>
-        )}
-      </main>
+        </div>
+      )}
+
+      <div className="settings-layout">
+        <aside
+          className="settings-sidebar"
+        >
+          {SETTINGS_SECTIONS.filter(sectionMatchesSearch).map(
+            (section) => (
+              <button
+                type="button"
+                key={section.id}
+                className={`settings-nav ${activeSection === section.id
+                  ? "active"
+                  : ""
+                  }`}
+                onClick={() => {
+                  setActiveSection(
+                    section.id
+                  );
+                  setErrors({});
+                  setTouched({});
+                }}
+                title={t(section.description, section.description)}
+              >
+                <span className="nav-title">
+                  {t(
+                    section.id === "profile"
+                      ? "hotelProfile"
+                      : section.id === "licence"
+                        ? "licenceAndSubscription"
+                        : section.id === "gst"
+                          ? "gstConfiguration"
+                          : section.id === "billing"
+                            ? "billing"
+                            : section.id === "notifications"
+                              ? "notifications"
+                              : section.id === "system"
+                                ? "systemPreferences"
+                                : section.id === "reports"
+                                  ? "reportAndKpi"
+                                  : section.id === "gst-reports"
+                                    ? "gstSettingsAndReports"
+                                    : section.title,
+                    section.title
+                  )}
+                </span>
+              </button>
+            )
+          )}
+        </aside>
+
+        <main className="settings-content">
+          {search.trim() && !sectionMatchesSearch(SETTINGS_SECTIONS.find((item) => item.id === activeSection) || SETTINGS_SECTIONS[0]) ? (
+            <div className="settings-card empty-search">{t('noMatchingSettings', 'No matching settings found. Try another search term.')}</div>
+          ) : renderContent()}
+
+          {activeSection !== "reports" && activeSection !== "gst-reports" && (
+            <div className="settings-actions" style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "12px" }}>
+              {savedNotice && (
+                <div
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    backgroundColor: "#ECFDF5",
+                    border: "1px solid #86EFAC",
+                    color: "#059669",
+                    padding: "8px 16px",
+                    borderRadius: "8px",
+                    fontWeight: 800,
+                    fontSize: "13px",
+                    boxShadow: "0 2px 6px rgba(5, 150, 105, 0.15)",
+                    animation: "fadeIn 0.2s ease",
+                  }}
+                >
+                  <Check size={16} />
+                  <span>Settings Saved</span>
+                </div>
+              )}
+
+              <button
+                type="button"
+                className="reset-button"
+                onClick={resetCurrentSection}
+              >
+                {t('resetSection', 'Reset Section')}
+              </button>
+
+              <button
+                type="button"
+                className="save-button"
+                disabled={saving}
+                onClick={handleSave}
+              >
+                {saving
+                  ? t('saving', 'Saving...')
+                  : t('saveChanges', 'Save Changes')}
+              </button>
+            </div>
+          )}
+        </main>
+      </div>
+
+
+      <Popup
+        popup={popup}
+        closePopup={closePopup}
+        confirmPopup={confirmPopup}
+      />
     </div>
-
-
-    <Popup
-      popup={popup}
-      closePopup={closePopup}
-      confirmPopup={confirmPopup}
-    />
-  </div>
-);
+  );
 } 

@@ -105,6 +105,7 @@ export type SettingsTabKey =
   | 'billing'
   | 'notifications'
   | 'system'
+  | 'licence'
   | 'reports'
   | 'gst-reports'
   | 'printer'
@@ -477,6 +478,14 @@ export const SettingsScreen: React.FC<{ navigation?: any; route?: any }> = ({ na
   const isDesktopLayout = width >= 860;
 
   const { user, logout } = useAuth();
+  const [userMode, setUserMode] = useState<string>('SINGLE');
+
+  useEffect(() => {
+    AsyncStorage.getItem('@ajalkar_user_mode').then((val) => {
+      if (val) setUserMode(val);
+    });
+  }, []);
+
   const isBranchUser = Boolean(
     user?.branchId ||
     (user?.role && !['OWNER', 'ADMIN', 'SUPER_ADMIN'].includes(String(user.role).toUpperCase()) && user?.branchId) ||
@@ -485,9 +494,30 @@ export const SettingsScreen: React.FC<{ navigation?: any; route?: any }> = ({ na
     user?.role === 'BRANCH_CASHIER'
   );
   const { language, setLanguage, t, formatDate, formatTime, toDevanagari, translateStatus } = useLanguage();
-  const { activeBranch, activeBranchNumId } = useBranch();
+  const { activeBranch, activeBranchNumId, branches } = useBranch();
   const { themeMode, setThemeMode, isDark } = useAppTheme();
   const styles = useMemo(() => getStyles(isDark, width), [isDark, width]);
+
+  // Sub-branch check: Sub-branches do not manage enterprise licenses
+  const isSubBranch = Boolean(
+    activeBranch?.parentBranchId ||
+    (activeBranch?.name && /sub/i.test(activeBranch.name)) ||
+    (activeBranch?.type && /sub/i.test(activeBranch.type)) ||
+    user?.role === 'SUB_BRANCH' ||
+    user?.role === 'BRANCH_CASHIER' ||
+    (user as any)?.isSubBranchUser
+  );
+
+  const userRole = String(user?.role || '').toUpperCase();
+  const isAdminOrOwner = ['OWNER', 'ADMIN', 'SUPER_ADMIN'].includes(userRole) || !user?.role;
+  const isSingleUser = userMode === 'SINGLE' || (!activeBranch?.parentBranchId && (branches?.length ?? 1) <= 1) || (user as any)?.accountType === 'SINGLE' || (user as any)?.role === 'SINGLE_USER';
+  const isOtherStaff = Boolean(
+    user?.role &&
+    ['CASHIER', 'BRANCH_CASHIER', 'STAFF', 'WAITER', 'KITCHEN', 'BRANCH_MANAGER', 'MANAGER'].includes(userRole)
+  );
+
+  // License Hero Card visibility: Always visible for Single User & Admin/Owner (hidden for sub-branches)
+  const showLicenseHeroCard = !isSubBranch && (isSingleUser || (isAdminOrOwner && !isOtherStaff));
 
   // Scroll ref for smooth jumping to selected setting
   const mainScrollRef = useRef<any>(null);
@@ -1563,7 +1593,8 @@ export const SettingsScreen: React.FC<{ navigation?: any; route?: any }> = ({ na
       const res = await apiClient.post('/hotel/backup/send-email', null, {
         params: {
           customEmail: email,
-        }
+        },
+        timeout: 60000,
       });
       const data = res.data?.data;
       const ref = data?.reference || 'HTL-SUCCESS';
@@ -2080,6 +2111,7 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
       case 'billing': return t('billing', 'Billing');
       case 'notifications': return t('notifications', 'Notifications');
       case 'system': return t('systemPreferences', 'System Preferences');
+      case 'licence': return t('licenceAndSubscription', 'Licence & Subscription');
       case 'reports': return t('reportAndKpi', 'Report & KPI');
       case 'gst-reports': return t('gstSettingsAndReports', 'GST Settings & Reports');
       case 'printer': return language === 'mr' ? 'प्रिंटर व्यवस्थापन' : language === 'hi' ? 'प्रिंटर सेटिंग्स' : 'Printer Settings';
@@ -2093,6 +2125,7 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
       case 'billing': return t('invoicePreferences', 'Invoice preferences');
       case 'notifications': return t('alertsAndNotifications', 'Alerts & notifications');
       case 'system': return t('systemAndBackup', 'System & backup');
+      case 'licence': return t('licenceDesc', 'Enterprise license & trial status');
       case 'reports': return t('businessAnalyticsReports', 'Business analytics & reports');
       case 'gst-reports': return t('gstConfigTaxReturnReports', 'GST configuration & tax return reports');
       case 'printer': return language === 'mr' ? 'ब्लूटूथ, वाय-फाय, USB थर्मल आणि Android सिस्टीम प्रिंटर' : language === 'hi' ? 'ब्लूटूथ, वाई-फाई, USB और एंड्रॉइड प्रिंटर' : 'Bluetooth, Wi-Fi, USB & Android Print Service';
@@ -2236,6 +2269,7 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
         { key: 'printer', label: getNavItemLabel('printer'), desc: getNavItemDesc('printer'), icon: Printer },
         { key: 'notifications', label: getNavItemLabel('notifications'), desc: getNavItemDesc('notifications'), icon: Bell },
         { key: 'system', label: getNavItemLabel('system'), desc: getNavItemDesc('system'), icon: SlidersHorizontal },
+        { key: 'licence', label: getNavItemLabel('licence'), desc: getNavItemDesc('licence'), icon: Shield },
         { key: 'reports', label: getNavItemLabel('reports'), desc: getNavItemDesc('reports'), icon: BarChart3 },
         { key: 'gst-reports', label: getNavItemLabel('gst-reports'), desc: getNavItemDesc('gst-reports'), icon: FileText },
       ];
@@ -2479,61 +2513,65 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
 
         {/* ===================================================
             HERO CARD: LICENSED ENTERPRISE VERSION BANNER
+            (Visible ONLY for Single User or Main Admin/Owner;
+             Strictly removed from Sub-Branches and restricted for other staff)
         =================================================== */}
-        <View style={styles.licenseHeroCard}>
-          <View style={styles.heroLeftSection}>
-            <View style={styles.shieldIconBox}>
-              <Shield size={26} color="#16A34A" />
-            </View>
-            <View style={{ flex: 1 }}>
-              <View style={styles.heroTitleRow}>
-                <Text style={styles.heroVersionTitle}>
-                  {t('licensedEnterpriseVersion', 'Licensed Enterprise Version')}
-                </Text>
-                <View style={styles.heroActiveBadge}>
-                  <Text style={styles.heroActiveBadgeText}>⚡ Active</Text>
+        {showLicenseHeroCard && (
+          <View style={styles.licenseHeroCard}>
+            <View style={styles.heroLeftSection}>
+              <View style={styles.shieldIconBox}>
+                <Shield size={26} color="#16A34A" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <View style={styles.heroTitleRow}>
+                  <Text style={styles.heroVersionTitle}>
+                    {t('licensedEnterpriseVersion', 'Licensed Enterprise Version')}
+                  </Text>
+                  <View style={styles.heroActiveBadge}>
+                    <Text style={styles.heroActiveBadgeText}>⚡ Active</Text>
+                  </View>
                 </View>
               </View>
             </View>
+
+            <View style={styles.heroRightSection}>
+              <View style={styles.heroMetaCol}>
+                <Text style={styles.heroMetaLabel}>{t('planName', 'PLAN NAME')}</Text>
+                <Text style={[styles.heroMetaVal, { color: '#16A34A' }]}>{activePlanName}</Text>
+              </View>
+
+              <View style={styles.heroMetaCol}>
+                <Text style={styles.heroMetaLabel}>{t('validity', 'VALIDITY')}</Text>
+                <Text style={styles.heroMetaVal}>{toDevanagari(daysRemaining)} {t('days', 'Days')}</Text>
+              </View>
+
+              <View style={styles.heroMetaCol}>
+                <Text style={styles.heroMetaLabel}>{t('licenseStatus', 'LICENSE STATUS')}</Text>
+                <Text style={[styles.heroMetaVal, { color: '#16A34A' }]}>{t('active', 'Active')}</Text>
+              </View>
+
+              <View style={styles.heroButtonsWrap}>
+                <TouchableOpacity
+                  style={styles.renewBtn}
+                  onPress={handleRenewLicense}
+                  activeOpacity={0.85}
+                >
+                  <RotateCcw size={13} color="#FFFFFF" />
+                  <Text style={styles.renewBtnText}>{t('renew', 'Renew License')}</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.upgradeBtn}
+                  onPress={() => setShowUpgradeModal(true)}
+                  activeOpacity={0.85}
+                >
+                  <Sparkles size={13} color="#FFFFFF" />
+                  <Text style={styles.upgradeBtnText}>{t('upgradePlan', 'Upgrade Plan')}</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
           </View>
-
-          <View style={styles.heroRightSection}>
-            <View style={styles.heroMetaCol}>
-              <Text style={styles.heroMetaLabel}>{t('planName', 'PLAN NAME')}</Text>
-              <Text style={[styles.heroMetaVal, { color: '#16A34A' }]}>{activePlanName}</Text>
-            </View>
-
-            <View style={styles.heroMetaCol}>
-              <Text style={styles.heroMetaLabel}>{t('validity', 'VALIDITY')}</Text>
-              <Text style={styles.heroMetaVal}>{toDevanagari(daysRemaining)} {t('days', 'Days')}</Text>
-            </View>
-
-            <View style={styles.heroMetaCol}>
-              <Text style={styles.heroMetaLabel}>{t('licenseStatus', 'LICENSE STATUS')}</Text>
-              <Text style={[styles.heroMetaVal, { color: '#16A34A' }]}>{t('active', 'Active')}</Text>
-            </View>
-
-            <View style={styles.heroButtonsWrap}>
-              <TouchableOpacity
-                style={styles.renewBtn}
-                onPress={handleRenewLicense}
-                activeOpacity={0.85}
-              >
-                <RotateCcw size={13} color="#FFFFFF" />
-                <Text style={styles.renewBtnText}>{t('renew', 'Renew License')}</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.upgradeBtn}
-                onPress={() => setShowUpgradeModal(true)}
-                activeOpacity={0.85}
-              >
-                <Sparkles size={13} color="#FFFFFF" />
-                <Text style={styles.upgradeBtnText}>{t('upgradePlan', 'Upgrade Plan')}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
+        )}
 
         {/* ===================================================
             HORIZONTAL TABS & CONTENT SETTINGS LAYOUT
@@ -6279,37 +6317,7 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                     </View>
                   </View>
 
-                  <View style={styles.visibilityCard}>
-                    <View style={[styles.visibilityHeader, { flexWrap: 'wrap', gap: 6 }]}>
-                      <Text style={[styles.visibilityTitle, { flex: 1, minWidth: 160 }]}>
-                        {t('dashboardSectionVisibility', 'Dashboard Section Visibility')}
-                      </Text>
-                      <View style={styles.liveSyncBadge}>
-                        <View style={styles.greenDot} />
-                        <Text style={styles.liveSyncText}>{t('syncActive', 'Sync Active')}</Text>
-                      </View>
-                    </View>
-                    <Text style={[styles.visibilityDesc, { marginTop: 4, lineHeight: 16 }]}>
-                      Configure which overview panels are displayed on the main Hotel Overview Dashboard. Changes sync across the application and persist in SQL Server.
-                    </Text>
 
-                    <View style={[styles.toggleRow, { borderBottomWidth: 0, marginTop: 10, paddingVertical: 4 }]}>
-                      <View style={{ flex: 1, paddingRight: 14 }}>
-                        <Text style={[styles.toggleLabel, { fontSize: 13, lineHeight: 18 }]}>
-                          Sales & Payment Overview Sections (Today's Sales, Sales Overview, Payment Summary)
-                        </Text>
-                        <Text style={[styles.toggleSub, { marginTop: 3, lineHeight: 16 }]}>
-                          Controls the visibility of Today's Sales top card, Sales Overview chart, and Payment Summary donut chart together. Synchronized with Dashboard Customize View.
-                        </Text>
-                      </View>
-                      <Switch
-                        value={overviewSectionsVisible}
-                        onValueChange={setOverviewSectionsVisible}
-                        trackColor={{ true: '#8F351D', false: '#D9D0CA' }}
-                        thumbColor="#FFFFFF"
-                      />
-                    </View>
-                  </View>
 
                   <View style={[styles.cardActionsRow, { marginTop: 18 }]}>
                     <TouchableOpacity
@@ -6324,6 +6332,163 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                       onPress={handleSaveSystem}
                     >
                       <Text style={styles.saveButtonText}>{t('saveChanges', 'Save Changes')}</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            )}
+
+            {/* ----------------------------------------------------
+                LICENCE & SUBSCRIPTION TAB (Placed After System Preferences)
+            ---------------------------------------------------- */}
+            {activeTab === 'licence' && (
+              <View style={[styles.settingsCard, { padding: 20 }]}>
+                {/* Header Row Matching Image 1 */}
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: '#E2E8F0', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
+                  <Text style={{ fontSize: 18, fontWeight: '800', color: '#0F172A' }}>
+                    {t('licenceAndSubscription', 'Licence & Subscription')}
+                  </Text>
+                  <View style={{ backgroundColor: '#15803D', paddingHorizontal: 14, paddingVertical: 4, borderRadius: 6 }}>
+                    <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                      {(activePlanName || 'STARTER').toUpperCase()}
+                    </Text>
+                  </View>
+                </View>
+
+                {/* 3 Detail Cards Grid Matching Image 1 */}
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 14, marginBottom: 20 }}>
+                  {/* Card 1: Licence Version & Subscription Plan */}
+                  <View style={{ flex: 1, minWidth: 260, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#E2E8F0', borderRadius: 10, padding: 14, elevation: 1 }}>
+                    <View style={{ paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: '#F1F5F9', marginBottom: 10 }}>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                        <Text style={{ fontSize: 10, fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                          {t('licenceVersion', 'LICENCE VERSION')}
+                        </Text>
+                        <View style={{ backgroundColor: '#EFF6FF', borderWidth: 1, borderColor: '#BFDBFE', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 9999 }}>
+                          <Text style={{ color: '#2563EB', fontSize: 10, fontWeight: '700' }}>vSTARTER</Text>
+                        </View>
+                      </View>
+                      <Text style={{ fontSize: 17, fontWeight: '800', color: '#0F172A', marginTop: 2 }}>STARTER</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <View>
+                        <Text style={{ fontSize: 10, fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                          {t('subscriptionPlan', 'SUBSCRIPTION PLAN')}
+                        </Text>
+                        <Text style={{ fontSize: 14, fontWeight: '800', color: '#0F172A', marginTop: 2 }}>Hotel Starter</Text>
+                      </View>
+                      <View style={{ backgroundColor: '#F0FDF4', borderWidth: 1, borderColor: '#BBF7D0', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 9999 }}>
+                        <Text style={{ color: '#16A34A', fontSize: 10, fontWeight: '700' }}>Active</Text>
+                      </View>
+                    </View>
+                  </View>
+
+                  {/* Card 2: Trial Start Date & Trial End Date */}
+                  <View style={{ flex: 1, minWidth: 260, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#E2E8F0', borderRadius: 10, padding: 14, elevation: 1 }}>
+                    <View style={{ paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: '#F1F5F9', marginBottom: 10 }}>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                        <Text style={{ fontSize: 10, fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                          {t('trialStartDate', 'TRIAL START DATE')}
+                        </Text>
+                        <View style={{ backgroundColor: '#FEF3C7', borderWidth: 1, borderColor: '#FDE68A', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 9999 }}>
+                          <Text style={{ color: '#D97706', fontSize: 10, fontWeight: '700' }}>28 Days Free Trial</Text>
+                        </View>
+                      </View>
+                      <Text style={{ fontSize: 16, fontWeight: '800', color: '#0F172A', marginTop: 2 }}>28 Oct 2026</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <View>
+                        <Text style={{ fontSize: 10, fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                          {t('trialEndDate', 'TRIAL END DATE')}
+                        </Text>
+                        <Text style={{ fontSize: 14, fontWeight: '800', color: '#0F172A', marginTop: 2 }}>25 Nov 2026</Text>
+                      </View>
+                      <View style={{ backgroundColor: '#F0FDF4', borderWidth: 1, borderColor: '#BBF7D0', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 9999 }}>
+                        <Text style={{ color: '#16A34A', fontSize: 10, fontWeight: '700' }}>{toDevanagari(daysRemaining)} Days Remaining</Text>
+                      </View>
+                    </View>
+                  </View>
+
+                  {/* Card 3: Renewal Date & Trial Status */}
+                  <View style={{ flex: 1, minWidth: 260, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#E2E8F0', borderRadius: 10, padding: 14, elevation: 1 }}>
+                    <View style={{ paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: '#F1F5F9', marginBottom: 10 }}>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                        <Text style={{ fontSize: 10, fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                          {t('renewalDate', 'RENEWAL DATE')}
+                        </Text>
+                        <View style={{ backgroundColor: '#F1F5F9', borderWidth: 1, borderColor: '#E2E8F0', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 9999 }}>
+                          <Text style={{ color: '#475569', fontSize: 10, fontWeight: '700' }}>Auto-Renew</Text>
+                        </View>
+                      </View>
+                      <Text style={{ fontSize: 16, fontWeight: '800', color: '#0F172A', marginTop: 2 }}>30 Dec 2027</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <View>
+                        <Text style={{ fontSize: 10, fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                          {t('trialStatus', 'TRIAL STATUS')}
+                        </Text>
+                        <Text style={{ fontSize: 15, fontWeight: '800', color: '#16A34A', marginTop: 2 }}>Active</Text>
+                      </View>
+                      <TouchableOpacity
+                        style={{ backgroundColor: '#16A34A', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 9999 }}
+                        onPress={handleRenewLicense}
+                        activeOpacity={0.85}
+                      >
+                        <Text style={{ color: '#FFFFFF', fontSize: 11, fontWeight: '700' }}>{t('renewNow', 'Renew Now')}</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Special Offer Box Matching Image 2 */}
+                <View
+                  style={{
+                    backgroundColor: '#F0FDF4',
+                    borderWidth: 1.5,
+                    borderColor: '#86EFAC',
+                    borderRadius: 12,
+                    padding: 18,
+                    marginBottom: 20,
+                  }}
+                >
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
+                    <View style={{ flex: 1, minWidth: 240 }}>
+                      <View style={{ backgroundColor: '#16A34A', alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 3, borderRadius: 9999, marginBottom: 8 }}>
+                        <Text style={{ color: '#FFFFFF', fontSize: 10, fontWeight: '800', textTransform: 'uppercase' }}>SPECIAL OFFER</Text>
+                      </View>
+                      <Text style={{ fontSize: 16, fontWeight: '800', color: '#14532D', marginBottom: 4 }}>
+                        Start Your 28 Days Free Trial
+                      </Text>
+                      <Text style={{ fontSize: 12, color: '#166534', lineHeight: 18 }}>
+                        Experience the Enterprise features of Ajalkar POS Billing with a 28-day free trial. Explore the available features before choosing your subscription plan.
+                      </Text>
+                    </View>
+                    <View style={{ backgroundColor: '#FFFFFF', borderWidth: 1.5, borderColor: '#22C55E', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10 }}>
+                      <Text style={{ color: '#15803D', fontWeight: '800', fontSize: 12 }}>✓ Trial Active · {toDevanagari(daysRemaining)} Days</Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Subscription Actions Matching Image 2 */}
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14, paddingTop: 16, borderTopWidth: 1, borderTopColor: '#E2E8F0' }}>
+                  <View>
+                    <Text style={{ fontSize: 15, fontWeight: '800', color: '#1E293B' }}>Subscription Actions</Text>
+                    <Text style={{ fontSize: 11.5, color: '#64748B', marginTop: 2 }}>Renew or upgrade your subscription plan at any time.</Text>
+                  </View>
+                  <View style={{ flexDirection: 'row', gap: 10 }}>
+                    <TouchableOpacity
+                      style={{ backgroundColor: '#0D9488', paddingHorizontal: 16, paddingVertical: 9, borderRadius: 8 }}
+                      onPress={handleRenewLicense}
+                      activeOpacity={0.85}
+                    >
+                      <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: '700' }}>🔄 {t('renewSubscription', 'Renew Subscription')}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={{ backgroundColor: '#4338CA', paddingHorizontal: 16, paddingVertical: 9, borderRadius: 8 }}
+                      onPress={() => setShowUpgradeModal(true)}
+                      activeOpacity={0.85}
+                    >
+                      <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: '700' }}>⬆ {t('upgradePlan', 'Upgrade Plan')}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -6488,6 +6653,97 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                       value={address}
                       onChangeText={setAddress}
                       placeholder="Hotel Premises..."
+                      placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
+                    />
+                  </View>
+                </View>
+
+                {/* ====================================================
+                    BANK DETAILS SECTION (Directly beneath Hotel Profile)
+                ==================================================== */}
+                <View style={{ height: 1, backgroundColor: isDark ? '#2A364F' : '#E2E8F0', marginVertical: 18 }} />
+
+                <View style={{ marginBottom: 14 }}>
+                  <Text style={[styles.cardTitle, { fontSize: 16 }]}>{t('bankDetails', 'Bank Details')}</Text>
+                  <Text style={styles.cardSubtitle}>
+                    {t('bankDetailsSubtitle', 'Bank account information for billing, payouts, and payment references.')}
+                  </Text>
+                </View>
+
+                {/* Bank Row 1: Bank Name & Account Holder Name */}
+                <View style={styles.formRow}>
+                  <View style={styles.formCol}>
+                    <Text style={styles.fieldLabel}>{t('bankName', 'Bank Name')}</Text>
+                    <TextInput
+                      style={styles.textInput}
+                      value={bankName}
+                      onChangeText={setBankName}
+                      placeholder="e.g. State Bank of India"
+                      placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
+                    />
+                  </View>
+
+                  <View style={styles.formCol}>
+                    <Text style={styles.fieldLabel}>{t('accountHolderName', 'Account Holder Name')}</Text>
+                    <TextInput
+                      style={styles.textInput}
+                      value={accountHolderName}
+                      onChangeText={setAccountHolderName}
+                      placeholder="e.g. Royal Palace Hotel"
+                      placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
+                    />
+                  </View>
+                </View>
+
+                {/* Bank Row 2: Account Number & IFSC Code */}
+                <View style={styles.formRow}>
+                  <View style={styles.formCol}>
+                    <Text style={styles.fieldLabel}>{t('accountNumber', 'Account Number')}</Text>
+                    <TextInput
+                      style={styles.textInput}
+                      value={accountNumber}
+                      onChangeText={setAccountNumber}
+                      placeholder="e.g. 123456789012"
+                      keyboardType="numeric"
+                      placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
+                    />
+                  </View>
+
+                  <View style={styles.formCol}>
+                    <Text style={styles.fieldLabel}>{t('ifscCode', 'IFSC Code')}</Text>
+                    <TextInput
+                      style={styles.textInput}
+                      value={ifscCode}
+                      onChangeText={(val) => setIfscCode(val.toUpperCase())}
+                      placeholder="e.g. SBIN0001234"
+                      autoCapitalize="characters"
+                      placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
+                    />
+                  </View>
+                </View>
+
+                {/* Bank Row 3: UPI ID & Bank Mobile Number */}
+                <View style={styles.formRow}>
+                  <View style={styles.formCol}>
+                    <Text style={styles.fieldLabel}>{t('upiId', 'UPI ID / VPA')}</Text>
+                    <TextInput
+                      style={styles.textInput}
+                      value={upiId}
+                      onChangeText={setUpiId}
+                      placeholder="e.g. royalpalace@upi"
+                      placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
+                    />
+                  </View>
+
+                  <View style={styles.formCol}>
+                    <Text style={styles.fieldLabel}>{t('bankPhone', 'Bank Registered Mobile Number')}</Text>
+                    <TextInput
+                      style={styles.textInput}
+                      value={bankPhone}
+                      onChangeText={(val) => setBankPhone(val.replace(/\D/g, '').slice(0, 10))}
+                      placeholder="10-digit mobile number"
+                      keyboardType="phone-pad"
+                      maxLength={10}
                       placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
                     />
                   </View>

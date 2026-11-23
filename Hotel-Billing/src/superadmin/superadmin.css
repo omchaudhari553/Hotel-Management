@@ -1,0 +1,673 @@
+/* ============================================================
+   SUPER ADMIN CENTRAL PLATFORM STYLESHEET
+   Comprehensive Dark Slate & Indigo Executive Theme
+   All styles strictly scoped to .superadmin-layout and .superadmin-modal
+   ============================================================ */
+
+/* Root Container */
+.superadmin-layout {
+  color: #F1F5F9;
+  background-color: #070B14;
+  min-height: 100vh;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.superadmin-layout *,
+.superadmin-modal *,
+.superadmin-modal-overlay * {
+  box-sizing: border-box;
+}
+
+.superadmin-layout a {
+  text-decoration: none !important;
+  color: inherit;
+}
+
+/* Custom Scrollbars */
+.superadmin-layout .custom-scrollbar::-webkit-scrollbar,
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.superadmin-layout .custom-scrollbar::-webkit-scrollbar-track,
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.6);
+}
+.superadmin-layout .custom-scrollbar::-webkit-scrollbar-thumb,
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+.superadmin-layout .custom-scrollbar::-webkit-scrollbar-thumb:hover,
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #6366F1;
+}
+
+/* Layout & Display */
+.superadmin-layout .block { display: block; }
+.superadmin-layout .inline-block { display: inline-block; }
+.superadmin-layout .inline { display: inline; }
+.superadmin-layout .flex { display: flex; }
+.superadmin-layout .inline-flex { display: inline-flex; }
+.superadmin-layout .grid { display: grid; }
+.superadmin-layout .hidden { display: none; }
+
+.superadmin-layout .flex-col { flex-direction: column; }
+.superadmin-layout .flex-wrap { flex-wrap: wrap; }
+.superadmin-layout .items-center { align-items: center; }
+.superadmin-layout .items-start { align-items: flex-start; }
+.superadmin-layout .justify-between { justify-content: space-between; }
+.superadmin-layout .justify-center { justify-content: center; }
+.superadmin-layout .justify-end { justify-content: flex-end; }
+.superadmin-layout .justify-start { justify-content: flex-start; }
+.superadmin-layout .flex-1 { flex: 1 1 0%; }
+.superadmin-layout .flex-shrink-0 { flex-shrink: 0; }
+.superadmin-layout .self-start { align-self: flex-start; }
+
+/* Grid Columns */
+.superadmin-layout .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+.superadmin-layout .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.superadmin-layout .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.superadmin-layout .grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.superadmin-layout .col-span-1 { grid-column: span 1 / span 1; }
+.superadmin-layout .col-span-2 { grid-column: span 2 / span 2; }
+.superadmin-layout .col-span-3 { grid-column: span 3 / span 3; }
+.superadmin-layout .col-span-4 { grid-column: span 4 / span 4; }
+
+@media (min-width: 640px) {
+  .superadmin-layout .sm\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .superadmin-layout .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .superadmin-layout .sm\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .superadmin-layout .sm\:flex-row { flex-direction: row; }
+  .superadmin-layout .sm\:items-center { align-items: center; }
+  .superadmin-layout .sm\:justify-between { justify-content: space-between; }
+  .superadmin-layout .sm\:self-auto { align-self: auto; }
+}
+
+@media (min-width: 768px) {
+  .superadmin-layout .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .superadmin-layout .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .superadmin-layout .md\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .superadmin-layout .md\:col-span-2 { grid-column: span 2 / span 2; }
+  .superadmin-layout .md\:col-span-3 { grid-column: span 3 / span 3; }
+  .superadmin-layout .md\:flex-row { flex-direction: row; }
+  .superadmin-layout .md\:items-center { align-items: center; }
+}
+
+@media (min-width: 1024px) {
+  .superadmin-layout .lg\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .superadmin-layout .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .superadmin-layout .lg\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .superadmin-layout .lg\:col-span-2 { grid-column: span 2 / span 2; }
+}
+
+@media (min-width: 1280px) {
+  .superadmin-layout .xl\:grid-cols-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+
+/* Sizing */
+.superadmin-layout .w-full { width: 100%; }
+.superadmin-layout .h-full { height: 100%; }
+.superadmin-layout .min-h-screen { min-height: 100vh; }
+.superadmin-layout .w-2\.5 { width: 0.625rem; }
+.superadmin-layout .h-2\.5 { height: 0.625rem; }
+.superadmin-layout .w-3 { width: 0.75rem; }
+.superadmin-layout .h-3 { height: 0.75rem; }
+.superadmin-layout .w-3\.5 { width: 0.875rem; }
+.superadmin-layout .h-3\.5 { height: 0.875rem; }
+.superadmin-layout .w-4 { width: 1rem; }
+.superadmin-layout .h-4 { height: 1rem; }
+.superadmin-layout .w-5 { width: 1.25rem; }
+.superadmin-layout .h-5 { height: 1.25rem; }
+.superadmin-layout .w-6 { width: 1.5rem; }
+.superadmin-layout .h-6 { height: 1.5rem; }
+.superadmin-layout .w-8 { width: 2rem; }
+.superadmin-layout .h-8 { height: 2rem; }
+.superadmin-layout .w-9 { width: 2.25rem; }
+.superadmin-layout .h-9 { height: 2.25rem; }
+.superadmin-layout .w-10 { width: 2.5rem; }
+.superadmin-layout .h-10 { height: 2.5rem; }
+.superadmin-layout .w-11 { width: 2.75rem; }
+.superadmin-layout .w-12 { width: 3rem; }
+.superadmin-layout .h-12 { height: 3rem; }
+.superadmin-layout .w-16 { width: 4rem; }
+.superadmin-layout .h-16 { height: 4rem; }
+.superadmin-layout .w-48 { width: 12rem; }
+.superadmin-layout .h-44 { height: 11rem; }
+.superadmin-layout .h-48 { height: 12rem; }
+.superadmin-layout .h-64 { height: 16rem; }
+.superadmin-layout .min-h-\[32px\] { min-height: 32px; }
+
+.superadmin-layout .max-w-xs { max-width: 20rem; }
+.superadmin-layout .max-w-md { max-width: 28rem; }
+.superadmin-layout .max-w-lg { max-width: 32rem; }
+.superadmin-layout .max-w-xl { max-width: 36rem; }
+.superadmin-layout .max-w-2xl { max-width: 42rem; }
+.superadmin-layout .max-w-3xl { max-width: 48rem; }
+.superadmin-layout .max-h-60 { max-height: 15rem; }
+.superadmin-layout .max-h-\[90vh\] { max-height: 90vh; }
+
+/* Positioning */
+.superadmin-layout .relative { position: relative; }
+.superadmin-layout .absolute { position: absolute; }
+.superadmin-layout .fixed { position: fixed; }
+.superadmin-layout .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+.superadmin-layout .top-0 { top: 0; }
+.superadmin-layout .left-0 { left: 0; }
+.superadmin-layout .right-0 { right: 0; }
+.superadmin-layout .bottom-0 { bottom: 0; }
+.superadmin-layout .top-1\/2 { top: 50%; }
+.superadmin-layout .left-3\.5 { left: 0.875rem; }
+.superadmin-layout .-translate-y-1\/2 { transform: translateY(-50%); }
+.superadmin-layout .z-10 { z-index: 10; }
+.superadmin-layout .z-20 { z-index: 20; }
+.superadmin-layout .z-30 { z-index: 30; }
+.superadmin-layout .z-40 { z-index: 40; }
+.superadmin-layout .z-50 { z-index: 50; }
+
+/* Gaps & Spacing */
+.superadmin-layout .gap-1 { gap: 0.25rem; }
+.superadmin-layout .gap-1\.5 { gap: 0.375rem; }
+.superadmin-layout .gap-2 { gap: 0.5rem; }
+.superadmin-layout .gap-3 { gap: 0.75rem; }
+.superadmin-layout .gap-4 { gap: 1rem; }
+.superadmin-layout .gap-6 { gap: 1.5rem; }
+.superadmin-layout .gap-8 { gap: 2rem; }
+
+.superadmin-layout .space-y-1 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.25rem; }
+.superadmin-layout .space-y-1\.5 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.375rem; }
+.superadmin-layout .space-y-2 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.5rem; }
+.superadmin-layout .space-y-3 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.75rem; }
+.superadmin-layout .space-y-4 > :not([hidden]) ~ :not([hidden]) { margin-top: 1rem; }
+.superadmin-layout .space-y-5 > :not([hidden]) ~ :not([hidden]) { margin-top: 1.25rem; }
+.superadmin-layout .space-y-6 > :not([hidden]) ~ :not([hidden]) { margin-top: 1.5rem; }
+.superadmin-layout .space-y-8 > :not([hidden]) ~ :not([hidden]) { margin-top: 2rem; }
+
+.superadmin-layout .space-x-2 > :not([hidden]) ~ :not([hidden]) { margin-left: 0.5rem; }
+
+/* Margins */
+.superadmin-layout .m-0 { margin: 0; }
+.superadmin-layout .mt-0\.5 { margin-top: 0.125rem; }
+.superadmin-layout .mt-1 { margin-top: 0.25rem; }
+.superadmin-layout .mt-2 { margin-top: 0.5rem; }
+.superadmin-layout .mt-5 { margin-top: 1.25rem; }
+.superadmin-layout .mt-6 { margin-top: 1.5rem; }
+.superadmin-layout .mt-8 { margin-top: 2rem; }
+.superadmin-layout .mb-1 { margin-bottom: 0.25rem; }
+.superadmin-layout .mb-2 { margin-bottom: 0.5rem; }
+.superadmin-layout .mb-3 { margin-bottom: 0.75rem; }
+.superadmin-layout .mb-4 { margin-bottom: 1rem; }
+.superadmin-layout .mb-6 { margin-bottom: 1.5rem; }
+.superadmin-layout .mb-8 { margin-bottom: 2rem; }
+.superadmin-layout .ml-1 { margin-left: 0.25rem; }
+.superadmin-layout .ml-2 { margin-left: 0.5rem; }
+.superadmin-layout .ml-4 { margin-left: 1rem; }
+.superadmin-layout .ml-auto { margin-left: auto; }
+.superadmin-layout .mr-1 { margin-right: 0.25rem; }
+.superadmin-layout .mr-4 { margin-right: 1rem; }
+.superadmin-layout .mx-auto { margin-left: auto; margin-right: auto; }
+.superadmin-layout .my-4 { margin-top: 1rem; margin-bottom: 1rem; }
+
+/* Paddings */
+.superadmin-layout .p-1 { padding: 0.25rem; }
+.superadmin-layout .p-1\.5 { padding: 0.375rem; }
+.superadmin-layout .p-2 { padding: 0.5rem; }
+.superadmin-layout .p-2\.5 { padding: 0.625rem; }
+.superadmin-layout .p-3 { padding: 0.75rem; }
+.superadmin-layout .p-3\.5 { padding: 0.875rem; }
+.superadmin-layout .p-4 { padding: 1rem; }
+.superadmin-layout .p-5 { padding: 1.25rem; }
+.superadmin-layout .p-6 { padding: 1.5rem; }
+.superadmin-layout .p-8 { padding: 2rem; }
+
+.superadmin-layout .px-1\.5 { padding-left: 0.375rem; padding-right: 0.375rem; }
+.superadmin-layout .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+.superadmin-layout .px-2\.5 { padding-left: 0.625rem; padding-right: 0.625rem; }
+.superadmin-layout .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+.superadmin-layout .px-3\.5 { padding-left: 0.875rem; padding-right: 0.875rem; }
+.superadmin-layout .px-4 { padding-left: 1rem; padding-right: 1rem; }
+.superadmin-layout .px-5 { padding-left: 1.25rem; padding-right: 1.25rem; }
+.superadmin-layout .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+
+.superadmin-layout .py-0\.2 { padding-top: 0.05rem; padding-bottom: 0.05rem; }
+.superadmin-layout .py-0\.5 { padding-top: 0.125rem; padding-bottom: 0.125rem; }
+.superadmin-layout .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+.superadmin-layout .py-1\.5 { padding-top: 0.375rem; padding-bottom: 0.375rem; }
+.superadmin-layout .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+.superadmin-layout .py-2\.5 { padding-top: 0.625rem; padding-bottom: 0.625rem; }
+.superadmin-layout .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+.superadmin-layout .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+.superadmin-layout .py-8 { padding-top: 2rem; padding-bottom: 2rem; }
+.superadmin-layout .py-12 { padding-top: 3rem; padding-bottom: 3rem; }
+
+.superadmin-layout .pt-1 { padding-top: 0.25rem; }
+.superadmin-layout .pt-2 { padding-top: 0.5rem; }
+.superadmin-layout .pt-3 { padding-top: 0.75rem; }
+.superadmin-layout .pt-4 { padding-top: 1rem; }
+.superadmin-layout .pt-6 { padding-top: 1.5rem; }
+.superadmin-layout .pb-2 { padding-bottom: 0.5rem; }
+.superadmin-layout .pb-3 { padding-bottom: 0.75rem; }
+.superadmin-layout .pb-4 { padding-bottom: 1rem; }
+.superadmin-layout .pl-10 { padding-left: 2.5rem; }
+.superadmin-layout .pl-11 { padding-left: 2.75rem; }
+.superadmin-layout .pr-4 { padding-right: 1rem; }
+
+/* Background Colors & Transparencies */
+.superadmin-layout .bg-slate-950 { background-color: #070B14; }
+.superadmin-layout .bg-slate-950\/60 { background-color: rgba(7, 11, 20, 0.6); }
+.superadmin-layout .bg-slate-950\/80 { background-color: rgba(7, 11, 20, 0.8); }
+.superadmin-layout .bg-slate-900 { background-color: #0F172A; }
+.superadmin-layout .bg-slate-900\/70 { background-color: rgba(15, 23, 42, 0.7); }
+.superadmin-layout .bg-slate-900\/80 { background-color: rgba(15, 23, 42, 0.8); }
+.superadmin-layout .bg-slate-900\/90 { background-color: rgba(15, 23, 42, 0.9); }
+.superadmin-layout .bg-slate-850 { background-color: #172033; }
+.superadmin-layout .bg-slate-800 { background-color: #1E293B; }
+.superadmin-layout .bg-slate-800\/40 { background-color: rgba(30, 41, 59, 0.4); }
+.superadmin-layout .bg-slate-800\/90 { background-color: rgba(30, 41, 59, 0.9); }
+.superadmin-layout .bg-slate-700 { background-color: #334155; }
+.superadmin-layout .bg-slate-700\/60 { background-color: rgba(51, 65, 85, 0.6); }
+.superadmin-layout .bg-black\/75 { background-color: rgba(0, 0, 0, 0.75); }
+.superadmin-layout .bg-white { background-color: #FFFFFF; }
+
+.superadmin-layout .bg-indigo-600 { background-color: #4F46E5; }
+.superadmin-layout .bg-indigo-500 { background-color: #6366F1; }
+.superadmin-layout .bg-indigo-500\/10 { background-color: rgba(99, 102, 241, 0.1); }
+.superadmin-layout .bg-indigo-500\/20 { background-color: rgba(99, 102, 241, 0.2); }
+.superadmin-layout .bg-indigo-950\/40 { background-color: rgba(30, 27, 75, 0.4); }
+
+.superadmin-layout .bg-emerald-600 { background-color: #059669; }
+.superadmin-layout .bg-emerald-500 { background-color: #10B981; }
+.superadmin-layout .bg-emerald-500\/10 { background-color: rgba(16, 185, 129, 0.1); }
+.superadmin-layout .bg-emerald-500\/20 { background-color: rgba(16, 185, 129, 0.2); }
+.superadmin-layout .bg-emerald-950\/10 { background-color: rgba(6, 78, 59, 0.1); }
+
+.superadmin-layout .bg-amber-600 { background-color: #D97706; }
+.superadmin-layout .bg-amber-500 { background-color: #F59E0B; }
+.superadmin-layout .bg-amber-500\/10 { background-color: rgba(245, 158, 11, 0.1); }
+.superadmin-layout .bg-amber-500\/20 { background-color: rgba(245, 158, 11, 0.2); }
+
+.superadmin-layout .bg-cyan-600 { background-color: #0891B2; }
+.superadmin-layout .bg-cyan-500 { background-color: #06B6D4; }
+.superadmin-layout .bg-cyan-500\/10 { background-color: rgba(6, 182, 212, 0.1); }
+
+.superadmin-layout .bg-purple-500\/10 { background-color: rgba(168, 85, 247, 0.1); }
+.superadmin-layout .bg-purple-500\/20 { background-color: rgba(168, 85, 247, 0.2); }
+.superadmin-layout .bg-blue-500\/10 { background-color: rgba(59, 130, 246, 0.1); }
+.superadmin-layout .bg-red-500\/10 { background-color: rgba(239, 68, 68, 0.1); }
+.superadmin-layout .bg-red-500\/20 { background-color: rgba(239, 68, 68, 0.2); }
+.superadmin-layout .bg-rose-500\/10 { background-color: rgba(244, 63, 94, 0.1); }
+
+/* Text Colors */
+.superadmin-layout .text-white { color: #FFFFFF !important; }
+.superadmin-layout .text-slate-100 { color: #F1F5F9 !important; }
+.superadmin-layout .text-slate-200 { color: #E2E8F0 !important; }
+.superadmin-layout .text-slate-300 { color: #CBD5E1 !important; }
+.superadmin-layout .text-slate-400 { color: #94A3B8 !important; }
+.superadmin-layout .text-slate-500 { color: #64748B !important; }
+
+.superadmin-layout .text-indigo-600 { color: #4F46E5 !important; }
+.superadmin-layout .text-indigo-400 { color: #818CF8 !important; }
+.superadmin-layout .text-indigo-300 { color: #A5B4FC !important; }
+
+.superadmin-layout .text-emerald-400 { color: #34D399 !important; }
+.superadmin-layout .text-emerald-300 { color: #6EE7B7 !important; }
+.superadmin-layout .text-emerald-500\/80 { color: rgba(16, 185, 129, 0.8) !important; }
+
+.superadmin-layout .text-amber-400 { color: #FBBF24 !important; }
+.superadmin-layout .text-amber-300 { color: #FCD34D !important; }
+.superadmin-layout .text-amber-400\/80 { color: rgba(251, 191, 36, 0.8) !important; }
+.superadmin-layout .text-amber-400\/90 { color: rgba(251, 191, 36, 0.9) !important; }
+
+.superadmin-layout .text-cyan-400 { color: #38BDF8 !important; }
+.superadmin-layout .text-cyan-300 { color: #7DD3FC !important; }
+.superadmin-layout .text-cyan-400\/80 { color: rgba(56, 189, 248, 0.8) !important; }
+.superadmin-layout .text-cyan-400\/90 { color: rgba(56, 189, 248, 0.9) !important; }
+
+.superadmin-layout .text-blue-400 { color: #60A5FA !important; }
+.superadmin-layout .text-purple-400 { color: #C084FC !important; }
+.superadmin-layout .text-violet-400 { color: #A78BFA !important; }
+.superadmin-layout .text-red-400 { color: #F87171 !important; }
+.superadmin-layout .text-rose-400 { color: #FB7185 !important; }
+
+/* Font Sizes */
+.superadmin-layout .text-\[9px\] { font-size: 9px; line-height: 12px; }
+.superadmin-layout .text-\[10px\] { font-size: 10px; line-height: 14px; }
+.superadmin-layout .text-\[11px\] { font-size: 11px; line-height: 15px; }
+.superadmin-layout .text-xs { font-size: 0.75rem; line-height: 1rem; }
+.superadmin-layout .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+.superadmin-layout .text-base { font-size: 1rem; line-height: 1.5rem; }
+.superadmin-layout .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+.superadmin-layout .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+.superadmin-layout .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+
+/* Font Weights & Align */
+.superadmin-layout .font-medium { font-weight: 500; }
+.superadmin-layout .font-semibold { font-weight: 600; }
+.superadmin-layout .font-bold { font-weight: 700; }
+.superadmin-layout .font-black { font-weight: 900; }
+.superadmin-layout .font-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+
+.superadmin-layout .text-left { text-align: left; }
+.superadmin-layout .text-center { text-align: center; }
+.superadmin-layout .text-right { text-align: right; }
+.superadmin-layout .uppercase { text-transform: uppercase; }
+.superadmin-layout .tracking-tight { letter-spacing: -0.025em; }
+.superadmin-layout .tracking-wider { letter-spacing: 0.05em; }
+.superadmin-layout .leading-tight { line-height: 1.25; }
+.superadmin-layout .whitespace-nowrap { white-space: nowrap; }
+.superadmin-layout .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Line Clamp */
+.superadmin-layout .line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Borders */
+.superadmin-layout .border { border-width: 1px; border-style: solid; }
+.superadmin-layout .border-2 { border-width: 2px; border-style: solid; }
+.superadmin-layout .border-b { border-bottom-width: 1px; border-bottom-style: solid; }
+.superadmin-layout .border-t { border-top-width: 1px; border-top-style: solid; }
+.superadmin-layout .border-r { border-right-width: 1px; border-right-style: solid; }
+
+.superadmin-layout .border-slate-800 { border-color: #1E293B !important; }
+.superadmin-layout .border-slate-800\/80 { border-color: rgba(30, 41, 59, 0.8) !important; }
+.superadmin-layout .border-slate-700 { border-color: #334155 !important; }
+.superadmin-layout .border-slate-700\/60 { border-color: rgba(51, 65, 85, 0.6) !important; }
+.superadmin-layout .border-slate-600\/60 { border-color: rgba(71, 85, 105, 0.6) !important; }
+
+.superadmin-layout .border-indigo-500 { border-color: #6366F1 !important; }
+.superadmin-layout .border-indigo-500\/20 { border-color: rgba(99, 102, 241, 0.2) !important; }
+.superadmin-layout .border-indigo-500\/30 { border-color: rgba(99, 102, 241, 0.3) !important; }
+
+.superadmin-layout .border-emerald-500\/20 { border-color: rgba(16, 185, 129, 0.2) !important; }
+.superadmin-layout .border-emerald-500\/30 { border-color: rgba(16, 185, 129, 0.3) !important; }
+.superadmin-layout .border-emerald-500\/50 { border-color: rgba(16, 185, 129, 0.5) !important; }
+
+.superadmin-layout .border-amber-500\/20 { border-color: rgba(245, 158, 11, 0.2) !important; }
+.superadmin-layout .border-amber-500\/30 { border-color: rgba(245, 158, 11, 0.3) !important; }
+.superadmin-layout .border-amber-500\/50 { border-color: rgba(245, 158, 11, 0.5) !important; }
+
+.superadmin-layout .border-cyan-500\/30 { border-color: rgba(6, 182, 212, 0.3) !important; }
+.superadmin-layout .border-cyan-500\/50 { border-color: rgba(6, 182, 212, 0.5) !important; }
+
+.superadmin-layout .border-blue-500\/20 { border-color: rgba(59, 130, 246, 0.2) !important; }
+.superadmin-layout .border-blue-500\/30 { border-color: rgba(59, 130, 246, 0.3) !important; }
+
+.superadmin-layout .border-red-500\/30 { border-color: rgba(239, 68, 68, 0.3) !important; }
+.superadmin-layout .border-rose-500\/20 { border-color: rgba(244, 63, 94, 0.2) !important; }
+.superadmin-layout .border-rose-500\/30 { border-color: rgba(244, 63, 94, 0.3) !important; }
+
+/* Table Row Dividers */
+.superadmin-layout .divide-y > :not([hidden]) ~ :not([hidden]) {
+  border-top-width: 1px;
+  border-top-style: solid;
+}
+.superadmin-layout .divide-slate-800\/60 > :not([hidden]) ~ :not([hidden]) {
+  border-top-color: rgba(30, 41, 59, 0.6) !important;
+}
+
+/* Rounded */
+.superadmin-layout .rounded { border-radius: 0.25rem; }
+.superadmin-layout .rounded-md { border-radius: 0.375rem; }
+.superadmin-layout .rounded-lg { border-radius: 0.5rem; }
+.superadmin-layout .rounded-xl { border-radius: 0.75rem; }
+.superadmin-layout .rounded-2xl { border-radius: 1rem; }
+.superadmin-layout .rounded-full { border-radius: 9999px; }
+
+/* Shadows */
+.superadmin-layout .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+.superadmin-layout .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+.superadmin-layout .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2); }
+.superadmin-layout .shadow-xl { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); }
+.superadmin-layout .shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+.superadmin-layout .shadow-indigo-500\/10 { box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1); }
+.superadmin-layout .shadow-indigo-500\/25 { box-shadow: 0 6px 16px rgba(99, 102, 241, 0.25); }
+.superadmin-layout .shadow-indigo-500\/30 { box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3); }
+.superadmin-layout .shadow-indigo-600\/25 { box-shadow: 0 6px 16px rgba(79, 70, 229, 0.25); }
+.superadmin-layout .shadow-indigo-600\/30 { box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3); }
+.superadmin-layout .shadow-emerald-600\/20 { box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2); }
+.superadmin-layout .shadow-emerald-600\/30 { box-shadow: 0 6px 16px rgba(5, 150, 105, 0.3); }
+.superadmin-layout .shadow-amber-600\/30 { box-shadow: 0 6px 16px rgba(217, 119, 6, 0.3); }
+.superadmin-layout .shadow-cyan-600\/30 { box-shadow: 0 6px 16px rgba(8, 145, 178, 0.3); }
+
+/* Backdrop Blur */
+.superadmin-layout .backdrop-blur-sm,
+.superadmin-modal-overlay {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.superadmin-layout .backdrop-blur-xl {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Transitions & Transforms */
+.superadmin-layout .transition-all { transition: all 0.15s ease; }
+.superadmin-layout .transition-colors { transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease; }
+.superadmin-layout .transition-transform { transition: transform 0.15s ease; }
+.superadmin-layout .transform { transform: translateZ(0); }
+.superadmin-layout .cursor-pointer { cursor: pointer; }
+.superadmin-layout .cursor-not-allowed { cursor: not-allowed; }
+.superadmin-layout .pointer-events-none { pointer-events: none; }
+.superadmin-layout .select-none { user-select: none; }
+
+/* Ring */
+.superadmin-layout .ring-1 { box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.5); }
+.superadmin-layout .ring-indigo-500 { box-shadow: 0 0 0 1px #6366F1; }
+
+/* Animations */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.superadmin-layout .animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Hover States */
+.superadmin-layout .hover\:bg-slate-800:hover { background-color: #1E293B !important; }
+.superadmin-layout .hover\:bg-slate-800\/40:hover { background-color: rgba(30, 41, 59, 0.4) !important; }
+.superadmin-layout .hover\:bg-slate-700:hover { background-color: #334155 !important; }
+.superadmin-layout .hover\:bg-indigo-600:hover { background-color: #4F46E5 !important; }
+.superadmin-layout .hover\:bg-indigo-500:hover { background-color: #6366F1 !important; }
+.superadmin-layout .hover\:bg-emerald-600:hover { background-color: #059669 !important; }
+.superadmin-layout .hover\:bg-emerald-500:hover { background-color: #10B981 !important; }
+.superadmin-layout .hover\:bg-emerald-500\/20:hover { background-color: rgba(16, 185, 129, 0.2) !important; }
+.superadmin-layout .hover\:bg-amber-600:hover { background-color: #D97706 !important; }
+.superadmin-layout .hover\:bg-amber-500\/20:hover { background-color: rgba(245, 158, 11, 0.2) !important; }
+.superadmin-layout .hover\:bg-red-600:hover { background-color: #DC2626 !important; }
+.superadmin-layout .hover\:bg-red-500\/20:hover { background-color: rgba(239, 68, 68, 0.2) !important; }
+.superadmin-layout .hover\:bg-rose-600:hover { background-color: #E11D48 !important; }
+
+.superadmin-layout .hover\:border-slate-700:hover { border-color: #334155 !important; }
+.superadmin-layout .hover\:text-white:hover { color: #FFFFFF !important; }
+.superadmin-layout .hover\:text-indigo-300:hover { color: #A5B4FC !important; }
+
+/* Form Controls Inside Super Admin */
+.superadmin-layout input[type="text"],
+.superadmin-layout input[type="email"],
+.superadmin-layout input[type="password"],
+.superadmin-layout input[type="number"],
+.superadmin-layout input[type="date"],
+.superadmin-layout select,
+.superadmin-layout textarea {
+  background-color: #070B14 !important;
+  border: 1px solid #334155 !important;
+  color: #F8FAFC !important;
+  border-radius: 0.75rem !important;
+  padding: 0.55rem 0.85rem !important;
+  font-size: 0.8rem !important;
+  outline: none !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+  box-sizing: border-box !important;
+}
+
+.superadmin-layout input:focus,
+.superadmin-layout select:focus,
+.superadmin-layout textarea:focus {
+  border-color: #6366F1 !important;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25) !important;
+}
+
+/* Tables inside Super Admin */
+.superadmin-layout table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  color: #E2E8F0;
+  font-size: 0.8rem;
+}
+
+.superadmin-layout thead th {
+  background-color: #0B1120;
+  color: #94A3B8;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #1E293B;
+}
+
+.superadmin-layout tbody tr {
+  border-bottom: 1px solid #1E293B;
+  transition: background-color 0.15s ease;
+}
+
+.superadmin-layout tbody tr:hover {
+  background-color: rgba(30, 41, 59, 0.45);
+}
+
+.superadmin-layout tbody td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #1E293B;
+  vertical-align: middle;
+}
+
+/* Buttons in Super Admin - Complete Clean Executive Reset */
+.superadmin-layout button,
+.superadmin-modal button {
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+  font-family: inherit;
+  color: inherit;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+
+/* Additional Utility Classes Scoped to Super Admin */
+.superadmin-layout .mt-0\.5, .superadmin-modal .mt-0\.5 { margin-top: 0.125rem !important; }
+.superadmin-layout .gap-1\.5, .superadmin-modal .gap-1\.5 { gap: 0.375rem !important; }
+.superadmin-layout .p-1\.5, .superadmin-modal .p-1\.5 { padding: 0.375rem !important; }
+.superadmin-layout .p-2\.5, .superadmin-modal .p-2\.5 { padding: 0.625rem !important; }
+.superadmin-layout .py-0\.5, .superadmin-modal .py-0\.5 { padding-top: 0.125rem !important; padding-bottom: 0.125rem !important; }
+.superadmin-layout .py-1\.5, .superadmin-modal .py-1\.5 { padding-top: 0.375rem !important; padding-bottom: 0.375rem !important; }
+.superadmin-layout .py-2\.5, .superadmin-modal .py-2\.5 { padding-top: 0.625rem !important; padding-bottom: 0.625rem !important; }
+.superadmin-layout .px-1\.5, .superadmin-modal .px-1\.5 { padding-left: 0.375rem !important; padding-right: 0.375rem !important; }
+.superadmin-layout .px-2\.5, .superadmin-modal .px-2\.5 { padding-left: 0.625rem !important; padding-right: 0.625rem !important; }
+.superadmin-layout .py-0\.2, .superadmin-modal .py-0\.2 { padding-top: 0.1rem !important; padding-bottom: 0.1rem !important; }
+
+.superadmin-layout .w-2\.5, .superadmin-modal .w-2\.5 { width: 0.625rem !important; }
+.superadmin-layout .h-2\.5, .superadmin-modal .h-2\.5 { height: 0.625rem !important; }
+.superadmin-layout .w-3\.5, .superadmin-modal .w-3\.5 { width: 0.875rem !important; }
+.superadmin-layout .h-3\.5, .superadmin-modal .h-3\.5 { height: 0.875rem !important; }
+
+.superadmin-layout .text-\[9px\], .superadmin-modal .text-\[9px\] { font-size: 9px !important; }
+.superadmin-layout .text-\[10px\], .superadmin-modal .text-\[10px\] { font-size: 10px !important; }
+.superadmin-layout .text-\[11px\], .superadmin-modal .text-\[11px\] { font-size: 11px !important; }
+
+.superadmin-layout .overflow-hidden, .superadmin-modal .overflow-hidden { overflow: hidden !important; }
+.superadmin-layout .overflow-x-auto, .superadmin-modal .overflow-x-auto { overflow-x: auto !important; }
+.superadmin-layout .overflow-y-auto, .superadmin-modal .overflow-y-auto { overflow-y: auto !important; }
+.superadmin-layout .max-h-\[90vh\], .superadmin-modal .max-h-\[90vh\] { max-height: 90vh !important; }
+.superadmin-layout .min-h-\[32px\], .superadmin-modal .min-h-\[32px\] { min-height: 32px !important; }
+
+.superadmin-layout .left-3\.5, .superadmin-modal .left-3\.5 { left: 0.875rem !important; }
+.superadmin-layout .top-1\/2, .superadmin-modal .top-1\/2 { top: 50% !important; }
+.superadmin-layout .-translate-y-1\/2, .superadmin-modal .-translate-y-1\/2 { transform: translateY(-50%) !important; }
+
+.superadmin-layout .bg-slate-900\/90, .superadmin-modal .bg-slate-900\/90 { background-color: rgba(15, 23, 42, 0.9) !important; }
+.superadmin-layout .bg-slate-950\/60, .superadmin-modal .bg-slate-950\/60 { background-color: rgba(2, 6, 23, 0.6) !important; }
+.superadmin-layout .bg-slate-950\/80, .superadmin-modal .bg-slate-950\/80 { background-color: rgba(2, 6, 23, 0.8) !important; }
+.superadmin-layout .bg-black\/75, .superadmin-modal .bg-black\/75 { background-color: rgba(0, 0, 0, 0.75) !important; }
+
+.superadmin-layout .bg-indigo-500\/10, .superadmin-modal .bg-indigo-500\/10 { background-color: rgba(99, 102, 241, 0.1) !important; }
+.superadmin-layout .bg-indigo-500\/20, .superadmin-modal .bg-indigo-500\/20 { background-color: rgba(99, 102, 241, 0.2) !important; }
+.superadmin-layout .bg-indigo-950\/40, .superadmin-modal .bg-indigo-950\/40 { background-color: rgba(30, 27, 75, 0.4) !important; }
+.superadmin-layout .bg-emerald-500\/10, .superadmin-modal .bg-emerald-500\/10 { background-color: rgba(16, 185, 129, 0.1) !important; }
+.superadmin-layout .bg-emerald-950\/10, .superadmin-modal .bg-emerald-950\/10 { background-color: rgba(6, 78, 59, 0.1) !important; }
+.superadmin-layout .bg-blue-500\/10, .superadmin-modal .bg-blue-500\/10 { background-color: rgba(59, 130, 246, 0.1) !important; }
+.superadmin-layout .bg-purple-500\/10, .superadmin-modal .bg-purple-500\/10 { background-color: rgba(168, 85, 247, 0.1) !important; }
+
+.superadmin-layout .border-slate-800\/80, .superadmin-modal .border-slate-800\/80 { border-color: rgba(30, 41, 59, 0.8) !important; }
+.superadmin-layout .border-indigo-500\/20, .superadmin-modal .border-indigo-500\/20 { border-color: rgba(99, 102, 241, 0.2) !important; }
+.superadmin-layout .border-indigo-500\/30, .superadmin-modal .border-indigo-500\/30 { border-color: rgba(99, 102, 241, 0.3) !important; }
+.superadmin-layout .border-emerald-500\/30, .superadmin-modal .border-emerald-500\/30 { border-color: rgba(16, 185, 129, 0.3) !important; }
+.superadmin-layout .divide-slate-800\/60 > * + *, .superadmin-modal .divide-slate-800\/60 > * + * { border-color: rgba(30, 41, 59, 0.6) !important; }
+
+.superadmin-layout .text-amber-400\/80, .superadmin-modal .text-amber-400\/80 { color: rgba(251, 191, 36, 0.8) !important; }
+.superadmin-layout .text-amber-400\/90, .superadmin-modal .text-amber-400\/90 { color: rgba(251, 191, 36, 0.9) !important; }
+.superadmin-layout .text-cyan-400\/80, .superadmin-modal .text-cyan-400\/80 { color: rgba(34, 211, 238, 0.8) !important; }
+.superadmin-layout .text-cyan-400\/90, .superadmin-modal .text-cyan-400\/90 { color: rgba(34, 211, 238, 0.9) !important; }
+.superadmin-layout .text-emerald-500\/80, .superadmin-modal .text-emerald-500\/80 { color: rgba(16, 185, 129, 0.8) !important; }
+
+.superadmin-layout .shadow-indigo-600\/25, .superadmin-modal .shadow-indigo-600\/25 { box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.25) !important; }
+.superadmin-layout .shadow-indigo-600\/30, .superadmin-modal .shadow-indigo-600\/30 { box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3) !important; }
+.superadmin-layout .shadow-emerald-600\/20, .superadmin-modal .shadow-emerald-600\/20 { box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2) !important; }
+
+.superadmin-layout .space-y-1\.5 > * + *, .superadmin-modal .space-y-1\.5 > * + * { margin-top: 0.375rem !important; }
+.superadmin-layout .placeholder-slate-500::placeholder, .superadmin-modal .placeholder-slate-500::placeholder { color: #64748B !important; }
+
+.superadmin-layout .sa-sidebar {
+  width: 16rem;
+  background-color: #0F172A;
+  border-right: 1px solid #1E293B;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 40;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Custom Period Switcher & Button States */
+.superadmin-layout .period-btn-active {
+  background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%) !important;
+  color: #FFFFFF !important;
+  border: 1px solid #6366F1 !important;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4) !important;
+}
+
+.superadmin-layout .period-btn-inactive {
+  background-color: #1E293B !important;
+  color: #94A3B8 !important;
+  border: 1px solid #334155 !important;
+}
+
+.superadmin-layout .period-btn-inactive:hover {
+  background-color: #334155 !important;
+  color: #FFFFFF !important;
+}
+
+.superadmin-layout .h-72,
+.h-72 {
+  height: 18rem !important;
+  min-height: 18rem !important;
+}
+
+.superadmin-layout .h-80,
+.h-80 {
+  height: 20rem !important;
+  min-height: 20rem !important;
+}

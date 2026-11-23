@@ -1,0 +1,1892 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R 4 0 R 5 0 R 6 0 R 7 0 R 8 0 R] /Count 6 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 9 0 R /F2 10 0 R >> >> /Contents 11 0 R >>
+endobj
+4 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 9 0 R /F2 10 0 R >> >> /Contents 12 0 R >>
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 9 0 R /F2 10 0 R >> >> /Contents 13 0 R >>
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 9 0 R /F2 10 0 R >> >> /Contents 14 0 R >>
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 9 0 R /F2 10 0 R >> >> /Contents 15 0 R >>
+endobj
+8 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 9 0 R /F2 10 0 R >> >> /Contents 16 0 R >>
+endobj
+9 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+10 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+11 0 obj
+<< /Length 17791 >>
+stream
+q 0.12 0.23 0.54 rg 40 760 515 50 re f Q
+BT /F2 16 Tf 1 1 1 rg 55 788 Td (ROYAL PALACE HOTEL - OPERATIONS BACKUP) Tj ET
+BT /F1 9 Tf 0.85 0.92 1 rg 55 772 Td (Hotel POS & Billing Management - Full Operations Report) Tj ET
+BT /F2 9 Tf 0.3 0.9 0.4 rg 450 788 Td (STATUS: SUCCESS) Tj ET
+BT /F1 8 Tf 0.85 0.92 1 rg 450 772 Td (Ref: HTL-93041) Tj ET
+q 0.96 0.97 0.99 rg 40 680 515 65 re f Q
+q 0.80 0.85 0.92 RG 1 w 40 680 515 65 re S Q
+BT /F2 9 Tf 0.12 0.23 0.54 rg 50 730 Td (HOTEL PROFILE & BACKUP INFO) Tj ET
+BT /F1 8 Tf 0.25 0.30 0.40 rg 50 717 Td (Property: Royal Palace Hotel | Code: HOTEL_GRANDHERITAGE12) Tj ET
+BT /F1 8 Tf 0.25 0.30 0.40 rg 50 704 Td (Email: om0818655@gmail.com | Phone: 9876543210) Tj ET
+BT /F1 8 Tf 0.25 0.30 0.40 rg 50 691 Td (Backup Date: 20-Nov-2026 03:57 PM | Ref: HTL-93041) Tj ET
+q 0.98 0.99 1 rg 310 685 240 55 re f Q
+q 0.85 0.88 0.95 RG 0.5 w 310 685 240 55 re S Q
+BT /F2 8 Tf 0.10 0.15 0.25 rg 320 725 Td (Total Sales: Rs. 56575.86) Tj ET
+BT /F2 8 Tf 0.10 0.15 0.25 rg 320 712 Td (Total Expenses: Rs. 20250.00) Tj ET
+BT /F2 8 Tf 0.12 0.50 0.25 rg 320 699 Td (Net Balance: Rs. 36325.86) Tj ET
+BT /F1 7.5 Tf 0.35 0.40 0.50 rg 440 725 Td (Invoices: 55) Tj ET
+BT /F1 7.5 Tf 0.35 0.40 0.50 rg 440 712 Td (Orders: 63) Tj ET
+BT /F1 7.5 Tf 0.35 0.40 0.50 rg 440 699 Td (Tables: 21 | Menu: 42) Tj ET
+BT /F2 11 Tf 0.08 0.18 0.45 rg 40 657.0 Td (1. RECENT INVOICES & SALES) Tj ET
+BT /F1 8.5 Tf 0.40 0.45 0.55 rg 260 657.0 Td (All recorded customer invoices \(55\)) Tj ET
+q 0.15 0.30 0.65 RG 1 w 40 653.0 m 555 653.0 l S Q
+q 0.12 0.23 0.54 rg 40 631.0 515 18 re f Q
+BT /F2 8.5 Tf 1 1 1 rg 44.0 636.0 Td (Invoice #) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 129.0 636.0 Td (Customer) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 244.0 636.0 Td (Total) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 319.0 636.0 Td (Paid) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 394.0 636.0 Td (Date) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 479.0 636.0 Td (Status) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 615.0 m 555 615.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 619.0 Td (INV-1001) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 619.0 Td (Shubham Chaudhari) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 619.0 Td (Rs. 1323.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 619.0 Td (Rs. 1323.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 619.0 Td (2026-10-28) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 619.0 Td (PAID) Tj ET
+q 0.96 0.97 0.98 rg 40 599.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 599.0 m 555 599.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 603.0 Td (INV-1020) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 603.0 Td (Ajinkya Kolkar) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 603.0 Td (Rs. 934.50) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 603.0 Td (Rs. 934.50) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 603.0 Td (2026-10-28) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 603.0 Td (PAID) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 583.0 m 555 583.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 587.0 Td (INV-1003) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 587.0 Td (Akshay ) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 587.0 Td (Rs. 1470.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 587.0 Td (Rs. 1470.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 587.0 Td (2026-10-29) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 587.0 Td (PAID) Tj ET
+q 0.96 0.97 0.98 rg 40 567.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 567.0 m 555 567.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 571.0 Td (INV-1004) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 571.0 Td (Amrut Patil) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 571.0 Td (Rs. 1102.50) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 571.0 Td (Rs. 1102.50) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 571.0 Td (2026-10-29) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 571.0 Td (PAID) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 551.0 m 555 551.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 555.0 Td (INV-1005) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 555.0 Td (Yuvi) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 555.0 Td (Rs. 1748.26) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 555.0 Td (Rs. 1748.26) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 555.0 Td (2026-10-29) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 555.0 Td (PAID) Tj ET
+q 0.96 0.97 0.98 rg 40 535.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 535.0 m 555 535.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 539.0 Td (INV-1011) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 539.0 Td (Omkar) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 539.0 Td (Rs. 651.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 539.0 Td (Rs. 651.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 539.0 Td (2026-10-29) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 539.0 Td (PAID) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 519.0 m 555 519.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 523.0 Td (INV-1010) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 523.0 Td (Anant Chopade) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 523.0 Td (Rs. 588.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 523.0 Td (Rs. 588.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 523.0 Td (2026-10-30) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 523.0 Td (PAID) Tj ET
+q 0.96 0.97 0.98 rg 40 503.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 503.0 m 555 503.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 507.0 Td (INV-1013) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 507.0 Td (Vaishnavi) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 507.0 Td (Rs. 1092.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 507.0 Td (Rs. 1092.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 507.0 Td (2026-10-30) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 507.0 Td (PAID) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 487.0 m 555 487.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 491.0 Td (INV-1014) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 491.0 Td (Gaurav Taneja) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 491.0 Td (Rs. 1092.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 491.0 Td (Rs. 1092.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 491.0 Td (2026-10-30) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 491.0 Td (PAID) Tj ET
+q 0.96 0.97 0.98 rg 40 471.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 471.0 m 555 471.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 475.0 Td (INV-1016) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 475.0 Td (Samir Bawaskar) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 475.0 Td (Rs. 651.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 475.0 Td (Rs. 651.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 475.0 Td (2026-10-30) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 475.0 Td (PAID) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 455.0 m 555 455.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 459.0 Td (INV-1019) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 459.0 Td (Native Test Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 459.0 Td (Rs. 735.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 459.0 Td (Rs. 735.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 459.0 Td (2026-10-31) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 459.0 Td (PAID) Tj ET
+q 0.96 0.97 0.98 rg 40 439.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 439.0 m 555 439.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 443.0 Td (INV-1021) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 443.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 443.0 Td (Rs. 1281.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 443.0 Td (Rs. 1281.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 443.0 Td (2026-10-31) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 443.0 Td (PAID) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 423.0 m 555 423.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 427.0 Td (INV-1022) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 427.0 Td (Harish Patil) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 427.0 Td (Rs. 1312.50) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 427.0 Td (Rs. 1312.50) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 427.0 Td (2026-10-31) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 427.0 Td (PAID) Tj ET
+q 0.96 0.97 0.98 rg 40 407.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 407.0 m 555 407.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 411.0 Td (INV-1023) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 411.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 411.0 Td (Rs. 724.50) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 411.0 Td (Rs. 724.50) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 411.0 Td (2026-10-31) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 411.0 Td (PAID) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 391.0 m 555 391.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 395.0 Td (INV-1024) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 395.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 395.0 Td (Rs. 724.50) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 395.0 Td (Rs. 724.50) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 395.0 Td (2026-10-31) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 395.0 Td (PAID) Tj ET
+q 0.96 0.97 0.98 rg 40 375.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 375.0 m 555 375.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 379.0 Td (INV-1025) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 379.0 Td (Rajesh Patil) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 379.0 Td (Rs. 1302.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 379.0 Td (Rs. 1302.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 379.0 Td (2026-10-31) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 379.0 Td (PAID) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 359.0 m 555 359.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 363.0 Td (INV-1026) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 363.0 Td (Abhishek) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 363.0 Td (Rs. 651.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 363.0 Td (Rs. 651.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 363.0 Td (2026-10-31) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 363.0 Td (PAID) Tj ET
+q 0.96 0.97 0.98 rg 40 343.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 343.0 m 555 343.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 347.0 Td (INV-1027) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 347.0 Td (Om) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 347.0 Td (Rs. 651.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 347.0 Td (Rs. 651.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 347.0 Td (2026-10-31) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 347.0 Td (PAID) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 327.0 m 555 327.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 331.0 Td (INV-1028) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 331.0 Td (Anant) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 331.0 Td (Rs. 693.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 331.0 Td (Rs. 693.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 331.0 Td (2026-10-31) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 331.0 Td (PAID) Tj ET
+q 0.96 0.97 0.98 rg 40 311.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 311.0 m 555 311.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 315.0 Td (INV-1029) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 315.0 Td (Ankita) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 315.0 Td (Rs. 672.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 315.0 Td (Rs. 672.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 315.0 Td (2026-11-01) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 315.0 Td (PAID) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 295.0 m 555 295.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 299.0 Td (INV-PUNE-101) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 299.0 Td () Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 299.0 Td (Rs. 4500.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 299.0 Td (Rs. 4500.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 299.0 Td (2026-11-01) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 299.0 Td (PAID) Tj ET
+q 0.96 0.97 0.98 rg 40 279.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 279.0 m 555 279.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 283.0 Td (INV-DHULE-101) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 283.0 Td () Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 283.0 Td (Rs. 3200.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 283.0 Td (Rs. 3200.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 283.0 Td (2026-11-01) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 283.0 Td (PAID) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 263.0 m 555 263.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 267.0 Td (INV-BEED-101) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 267.0 Td () Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 267.0 Td (Rs. 2800.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 267.0 Td (Rs. 2800.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 267.0 Td (2026-11-01) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 267.0 Td (PAID) Tj ET
+q 0.96 0.97 0.98 rg 40 247.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 247.0 m 555 247.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 251.0 Td (INV-1030) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 251.0 Td (Shubham Chaudhari) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 251.0 Td (Rs. 1386.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 251.0 Td (Rs. 0.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 251.0 Td (2026-11-01) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 251.0 Td (UNPAID) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 231.0 m 555 231.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 235.0 Td (INV-1031) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 235.0 Td (Shailesh) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 235.0 Td (Rs. 1092.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 235.0 Td (Rs. 1092.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 235.0 Td (2026-11-02) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 235.0 Td (PAID) Tj ET
+q 0.96 0.97 0.98 rg 40 215.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 215.0 m 555 215.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 219.0 Td (INV-1099) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 219.0 Td () Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 219.0 Td (Rs. 892.50) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 219.0 Td (Rs. 892.50) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 219.0 Td (2026-11-03) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 219.0 Td (PAID) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 199.0 m 555 199.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 203.0 Td (INV-1100) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 203.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 203.0 Td (Rs. 1596.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 203.0 Td (Rs. 1596.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 203.0 Td (2026-11-03) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 203.0 Td (PAID) Tj ET
+q 0.96 0.97 0.98 rg 40 183.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 183.0 m 555 183.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 187.0 Td (INV-1002) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 187.0 Td (Walk-in Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 187.0 Td (Rs. 966.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 187.0 Td (Rs. 966.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 187.0 Td (2026-11-03) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 187.0 Td (PAID) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 167.0 m 555 167.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 171.0 Td (INV-1101) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 171.0 Td (Jayesh Kolte) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 171.0 Td (Rs. 651.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 171.0 Td (Rs. 651.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 171.0 Td (2026-11-16) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 171.0 Td (PAID) Tj ET
+q 0.96 0.97 0.98 rg 40 151.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 151.0 m 555 151.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 155.0 Td (INV-1032) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 155.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 155.0 Td (Rs. 0.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 155.0 Td (Rs. 0.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 155.0 Td (2026-11-17) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 155.0 Td (PAID) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 135.0 m 555 135.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 139.0 Td (INV-1034) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 139.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 139.0 Td (Rs. 2730.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 139.0 Td (Rs. 2730.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 139.0 Td (2026-11-17) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 139.0 Td (PAID) Tj ET
+q 0.96 0.97 0.98 rg 40 119.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 119.0 m 555 119.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 123.0 Td (INV-1102) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 123.0 Td (Walk-in Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 123.0 Td (Rs. 966.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 123.0 Td (Rs. 966.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 123.0 Td (2026-11-18) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 123.0 Td (PAID) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 103.0 m 555 103.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 107.0 Td (INV-1103) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 107.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 107.0 Td (Rs. 1071.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 107.0 Td (Rs. 1071.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 107.0 Td (2026-11-18) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 107.0 Td (PAID) Tj ET
+q 0.96 0.97 0.98 rg 40 87.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 87.0 m 555 87.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 91.0 Td (INV-1104) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 91.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 91.0 Td (Rs. 1092.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 91.0 Td (Rs. 1092.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 91.0 Td (2026-11-18) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 91.0 Td (PAID) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 71.0 m 555 71.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 75.0 Td (INV-1105) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 75.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 75.0 Td (Rs. 651.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 75.0 Td (Rs. 651.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 75.0 Td (2026-11-18) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 75.0 Td (PAID) Tj ET
+q 0.85 0.85 0.85 RG 0.5 w 40 38 m 555 38 l S Q
+BT /F1 7.5 Tf 0.45 0.45 0.50 rg 40 26 Td (Royal Palace Hotel POS Management Suite - Automated Daily Backup Report) Tj ET
+BT /F2 7.5 Tf 0.45 0.45 0.50 rg 510 26 Td (Page 1) Tj ET
+
+endstream
+endobj
+12 0 obj
+<< /Length 20435 >>
+stream
+q 0.12 0.23 0.54 rg 40 805 515 22 re f Q
+BT /F2 9 Tf 1 1 1 rg 50 812 Td (ROYAL PALACE HOTEL - Daily Operations Backup | Ref: HTL-93041) Tj ET
+BT /F1 8 Tf 1 1 1 rg 500 812 Td (Page 2) Tj ET
+q 0.96 0.97 0.98 rg 40 778.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 778.0 m 555 778.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 782.0 Td (INV-1035) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 782.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 782.0 Td (Rs. 0.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 782.0 Td (Rs. 0.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 782.0 Td (2026-11-18) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 782.0 Td (PAID) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 762.0 m 555 762.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 766.0 Td (INV-1106) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 766.0 Td () Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 766.0 Td (Rs. 189.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 766.0 Td (Rs. 189.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 766.0 Td (2026-11-18) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 766.0 Td (PAID) Tj ET
+q 0.96 0.97 0.98 rg 40 746.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 746.0 m 555 746.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 750.0 Td (INV-1107) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 750.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 750.0 Td (Rs. 1538.26) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 750.0 Td (Rs. 1538.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 750.0 Td (2026-11-18) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 750.0 Td (PARTIAL) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 730.0 m 555 730.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 734.0 Td (INV-1108) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 734.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 734.0 Td (Rs. 609.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 734.0 Td (Rs. 609.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 734.0 Td (2026-11-18) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 734.0 Td (PAID) Tj ET
+q 0.96 0.97 0.98 rg 40 714.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 714.0 m 555 714.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 718.0 Td (INV-1109) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 718.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 718.0 Td (Rs. 2079.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 718.0 Td (Rs. 2079.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 718.0 Td (2026-11-18) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 718.0 Td (PAID) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 698.0 m 555 698.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 702.0 Td (INV-1110) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 702.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 702.0 Td (Rs. 831.60) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 702.0 Td (Rs. 831.60) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 702.0 Td (2026-11-18) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 702.0 Td (PAID) Tj ET
+q 0.96 0.97 0.98 rg 40 682.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 682.0 m 555 682.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 686.0 Td (INV-1111) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 686.0 Td (Walk-in Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 686.0 Td (Rs. 966.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 686.0 Td (Rs. 966.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 686.0 Td (2026-11-18) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 686.0 Td (PAID) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 666.0 m 555 666.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 670.0 Td (INV-1036) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 670.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 670.0 Td (Rs. 0.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 670.0 Td (Rs. 0.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 670.0 Td (2026-11-18) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 670.0 Td (PAID) Tj ET
+q 0.96 0.97 0.98 rg 40 650.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 650.0 m 555 650.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 654.0 Td (INV-1112) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 654.0 Td (Om Chaudhari) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 654.0 Td (Rs. 651.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 654.0 Td (Rs. 651.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 654.0 Td (2026-11-18) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 654.0 Td (PAID) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 634.0 m 555 634.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 638.0 Td (INV-1113) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 638.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 638.0 Td (Rs. 1638.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 638.0 Td (Rs. 1638.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 638.0 Td (2026-11-18) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 638.0 Td (PAID) Tj ET
+q 0.96 0.97 0.98 rg 40 618.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 618.0 m 555 618.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 622.0 Td (INV-1037) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 622.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 622.0 Td (Rs. 2079.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 622.0 Td (Rs. 2079.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 622.0 Td (2026-11-19) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 622.0 Td (PAID) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 602.0 m 555 602.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 606.0 Td (INV-1038) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 606.0 Td (Kalpesh) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 606.0 Td (Rs. 798.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 606.0 Td (Rs. 798.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 606.0 Td (2026-11-19) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 606.0 Td (PAID) Tj ET
+q 0.96 0.97 0.98 rg 40 586.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 586.0 m 555 586.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 590.0 Td (INV-1039) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 590.0 Td (Test Connectivity Gu..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 590.0 Td (Rs. 588.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 590.0 Td (Rs. 588.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 590.0 Td (2026-11-19) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 590.0 Td (PAID) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 570.0 m 555 570.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 574.0 Td (INV-1040) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 574.0 Td (Yash) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 574.0 Td (Rs. 651.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 574.0 Td (Rs. 651.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 574.0 Td (2026-11-19) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 574.0 Td (PAID) Tj ET
+q 0.96 0.97 0.98 rg 40 554.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 554.0 m 555 554.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 558.0 Td (INV-1041) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 558.0 Td (Mobile Connectivity ..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 558.0 Td (Rs. 168.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 558.0 Td (Rs. 168.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 558.0 Td (2026-11-19) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 558.0 Td (PAID) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 538.0 m 555 538.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 542.0 Td (INV-1042) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 542.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 542.0 Td (Rs. 0.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 542.0 Td (Rs. 0.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 542.0 Td (2026-11-19) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 542.0 Td (PAID) Tj ET
+q 0.96 0.97 0.98 rg 40 522.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 522.0 m 555 522.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 526.0 Td (INV-1043) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 526.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 526.0 Td (Rs. 0.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 526.0 Td (Rs. 0.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 526.0 Td (2026-11-19) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 526.0 Td (PAID) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 506.0 m 555 506.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 510.0 Td (INV-1044) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 510.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 510.0 Td (Rs. 0.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 510.0 Td (Rs. 0.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 510.0 Td (2026-11-19) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 510.0 Td (PAID) Tj ET
+q 0.96 0.97 0.98 rg 40 490.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 490.0 m 555 490.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 494.0 Td (INV-1114) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 494.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 494.0 Td (Rs. 336.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 494.0 Td (Rs. 336.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 494.0 Td (2026-11-20) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 494.0 Td (PAID) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 474.0 m 555 474.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 478.0 Td (INV-1115) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 478.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 244.0 478.0 Td (Rs. 1848.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 319.0 478.0 Td (Rs. 1848.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 394.0 478.0 Td (2026-11-20) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 479.0 478.0 Td (PAID) Tj ET
+BT /F2 11 Tf 0.08 0.18 0.45 rg 40 462.0 Td (2. GUEST ORDERS & KOT) Tj ET
+BT /F1 8.5 Tf 0.40 0.45 0.55 rg 260 462.0 Td (All recorded guest dining orders \(63\)) Tj ET
+q 0.15 0.30 0.65 RG 1 w 40 458.0 m 555 458.0 l S Q
+q 0.12 0.23 0.54 rg 40 436.0 515 18 re f Q
+BT /F2 8.5 Tf 1 1 1 rg 44.0 441.0 Td (Order #) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 129.0 441.0 Td (Guest Name) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 249.0 441.0 Td (Table) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 314.0 441.0 Td (Source) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 379.0 441.0 Td (Amount) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 469.0 441.0 Td (Status) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 420.0 m 555 420.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 424.0 Td (ORD-1793182411..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 424.0 Td (Shubham Chaudhari) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 424.0 Td (Table 01) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 424.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 424.0 Td (Rs. 1323.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 424.0 Td (COMPLETED) Tj ET
+q 0.96 0.97 0.98 rg 40 404.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 404.0 m 555 404.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 408.0 Td (ORD-1793182614..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 408.0 Td (Ajinkya Kolkar) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 408.0 Td (Table 02) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 408.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 408.0 Td (Rs. 934.50) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 408.0 Td (COMPLETED) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 388.0 m 555 388.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 392.0 Td (ORD-1793258856..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 392.0 Td (Akshay ) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 392.0 Td (Table 03) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 392.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 392.0 Td (Rs. 1470.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 392.0 Td (COMPLETED) Tj ET
+q 0.96 0.97 0.98 rg 40 372.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 372.0 m 555 372.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 376.0 Td (ORD-1793258998..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 376.0 Td (Amrut Patil) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 376.0 Td (Table 08) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 376.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 376.0 Td (Rs. 1102.50) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 376.0 Td (COMPLETED) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 356.0 m 555 356.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 360.0 Td (ORD-1793270872..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 360.0 Td (Yuvi) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 360.0 Td (Table 03) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 360.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 360.0 Td (Rs. 1748.25) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 360.0 Td (COMPLETED) Tj ET
+q 0.96 0.97 0.98 rg 40 340.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 340.0 m 555 340.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 344.0 Td (ORD-1793278241..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 344.0 Td (Omkar) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 344.0 Td (Table 01) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 344.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 344.0 Td (Rs. 651.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 344.0 Td (COMPLETED) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 324.0 m 555 324.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 328.0 Td (ORD-1793335508..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 328.0 Td (Anant Chopade) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 328.0 Td (Table 08) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 328.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 328.0 Td (Rs. 588.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 328.0 Td (COMPLETED) Tj ET
+q 0.96 0.97 0.98 rg 40 308.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 308.0 m 555 308.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 312.0 Td (ORD-1793337458..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 312.0 Td (Vaishnavi) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 312.0 Td (Table 09) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 312.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 312.0 Td (Rs. 1092.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 312.0 Td (COMPLETED) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 292.0 m 555 292.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 296.0 Td (ORD-1793338091..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 296.0 Td (Harish Patil) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 296.0 Td (Table 10) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 296.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 296.0 Td (Rs. 1365.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 296.0 Td (COMPLETED) Tj ET
+q 0.96 0.97 0.98 rg 40 276.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 276.0 m 555 276.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 280.0 Td (ORD-1793338349..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 280.0 Td (Rajesh Patil) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 280.0 Td (Table 03) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 280.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 280.0 Td (Rs. 651.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 280.0 Td (COMPLETED) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 260.0 m 555 260.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 264.0 Td (ORD-1793342410..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 264.0 Td (Gaurav Taneja) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 264.0 Td (Table 01) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 264.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 264.0 Td (Rs. 1092.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 264.0 Td (COMPLETED) Tj ET
+q 0.96 0.97 0.98 rg 40 244.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 244.0 m 555 244.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 248.0 Td (ORD-1793354163..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 248.0 Td (Samir Bawaskar) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 248.0 Td (Table 01) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 248.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 248.0 Td (Rs. 651.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 248.0 Td (COMPLETED) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 228.0 m 555 228.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 232.0 Td (ORD-1793379847..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 232.0 Td (Native Test Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 232.0 Td (Table 999) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 232.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 232.0 Td (Rs. 735.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 232.0 Td (COMPLETED) Tj ET
+q 0.96 0.97 0.98 rg 40 212.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 212.0 m 555 212.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 216.0 Td (ORD-1793425917..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 216.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 216.0 Td (T-728) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 216.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 216.0 Td (Rs. 1281.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 216.0 Td (COMPLETED) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 196.0 m 555 196.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 200.0 Td (ORD-1793426270..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 200.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 200.0 Td (Table 01) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 200.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 200.0 Td (Rs. 724.50) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 200.0 Td (COMPLETED) Tj ET
+q 0.96 0.97 0.98 rg 40 180.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 180.0 m 555 180.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 184.0 Td (ORD-1793426273..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 184.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 184.0 Td (Table 01) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 184.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 184.0 Td (Rs. 724.50) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 184.0 Td (COMPLETED) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 164.0 m 555 164.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 168.0 Td (ORD-1793447692..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 168.0 Td (Abhishek) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 168.0 Td (Table 10) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 168.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 168.0 Td (Rs. 651.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 168.0 Td (COMPLETED) Tj ET
+q 0.96 0.97 0.98 rg 40 148.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 148.0 m 555 148.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 152.0 Td (ORD-1793448785..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 152.0 Td (Om) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 152.0 Td (Table 02) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 152.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 152.0 Td (Rs. 651.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 152.0 Td (COMPLETED) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 132.0 m 555 132.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 136.0 Td (ORD-1793449988..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 136.0 Td (Anant) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 136.0 Td (Table 02) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 136.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 136.0 Td (Rs. 693.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 136.0 Td (COMPLETED) Tj ET
+q 0.96 0.97 0.98 rg 40 116.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 116.0 m 555 116.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 120.0 Td (ORD-1793512154..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 120.0 Td (Yash) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 120.0 Td (Table 03) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 120.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 120.0 Td (Rs. 651.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 120.0 Td (COMPLETED) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 100.0 m 555 100.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 104.0 Td (ORD-1793513684..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 104.0 Td (Ankita) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 104.0 Td (Table 01) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 104.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 104.0 Td (Rs. 672.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 104.0 Td (COMPLETED) Tj ET
+q 0.96 0.97 0.98 rg 40 84.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 84.0 m 555 84.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 88.0 Td (ORD-1793514594..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 88.0 Td (Test Connectivity Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 88.0 Td (Table 01) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 88.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 88.0 Td (Rs. 588.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 88.0 Td (COMPLETED) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 68.0 m 555 68.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 72.0 Td (ORD-1793530762..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 72.0 Td (Shubham Chaudhari) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 72.0 Td (Table 03) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 72.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 72.0 Td (Rs. 1386.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 72.0 Td (COMPLETED) Tj ET
+q 0.85 0.85 0.85 RG 0.5 w 40 38 m 555 38 l S Q
+BT /F1 7.5 Tf 0.45 0.45 0.50 rg 40 26 Td (Royal Palace Hotel POS Management Suite - Automated Daily Backup Report) Tj ET
+BT /F2 7.5 Tf 0.45 0.45 0.50 rg 510 26 Td (Page 2) Tj ET
+
+endstream
+endobj
+13 0 obj
+<< /Length 20493 >>
+stream
+q 0.12 0.23 0.54 rg 40 805 515 22 re f Q
+BT /F2 9 Tf 1 1 1 rg 50 812 Td (ROYAL PALACE HOTEL - Daily Operations Backup | Ref: HTL-93041) Tj ET
+BT /F1 8 Tf 1 1 1 rg 500 812 Td (Page 3) Tj ET
+q 0.96 0.97 0.98 rg 40 778.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 778.0 m 555 778.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 782.0 Td (ORD-1793611225..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 782.0 Td (Shailesh) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 782.0 Td (Table 04) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 782.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 782.0 Td (Rs. 1092.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 782.0 Td (COMPLETED) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 762.0 m 555 762.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 766.0 Td (ORD-1793682879..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 766.0 Td (Walk-in Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 766.0 Td (Table 01) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 766.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 766.0 Td (Rs. 966.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 766.0 Td (COMPLETED) Tj ET
+q 0.96 0.97 0.98 rg 40 746.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 746.0 m 555 746.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 750.0 Td (ORD-1793687911..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 750.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 750.0 Td (Table P-2) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 750.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 750.0 Td (Rs. 0.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 750.0 Td (BILL_REQUESTED) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 730.0 m 555 730.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 734.0 Td (ORD-1793687928..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 734.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 734.0 Td (Table P-1) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 734.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 734.0 Td (Rs. 0.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 734.0 Td (BILL_REQUESTED) Tj ET
+q 0.96 0.97 0.98 rg 40 714.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 714.0 m 555 714.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 718.0 Td (ORD-1793699431..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 718.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 718.0 Td (T-99) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 718.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 718.0 Td (Rs. 0.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 718.0 Td (BILL_REQUESTED) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 698.0 m 555 698.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 702.0 Td (ORD-1793699526..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 702.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 702.0 Td (T-728) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 702.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 702.0 Td (Rs. 1596.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 702.0 Td (COMPLETED) Tj ET
+q 0.96 0.97 0.98 rg 40 682.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 682.0 m 555 682.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 686.0 Td (ORD-1793699924..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 686.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 686.0 Td (T-728) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 686.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 686.0 Td (Rs. 0.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 686.0 Td (BILL_REQUESTED) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 666.0 m 555 666.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 670.0 Td (ORD-1793699944..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 670.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 670.0 Td (Table 10) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 670.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 670.0 Td (Rs. 0.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 670.0 Td (BILL_REQUESTED) Tj ET
+q 0.96 0.97 0.98 rg 40 650.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 650.0 m 555 650.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 654.0 Td (ORD-1793699963..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 654.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 654.0 Td (Table 09) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 654.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 654.0 Td (Rs. 0.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 654.0 Td (BILL_REQUESTED) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 634.0 m 555 634.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 638.0 Td (ORD-1793700094..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 638.0 Td (Kalpesh) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 638.0 Td (Table 08) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 638.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 638.0 Td (Rs. 798.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 638.0 Td (COMPLETED) Tj ET
+q 0.96 0.97 0.98 rg 40 618.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 618.0 m 555 618.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 622.0 Td (ORD-1793774345..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 622.0 Td (Mobile Connectivity T..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 622.0 Td (Table 01) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 622.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 622.0 Td (Rs. 168.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 622.0 Td (COMPLETED) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 602.0 m 555 602.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 606.0 Td (ORD-1794805666..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 606.0 Td (Jayesh Kolte) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 606.0 Td (Table 05) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 606.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 606.0 Td (Rs. 651.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 606.0 Td (COMPLETED) Tj ET
+q 0.96 0.97 0.98 rg 40 586.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 586.0 m 555 586.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 590.0 Td (ORD-1794822129..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 590.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 590.0 Td (Table 02) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 590.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 590.0 Td (Rs. 2079.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 590.0 Td (COMPLETED) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 570.0 m 555 570.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 574.0 Td (ORD-1794831861..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 574.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 574.0 Td (T-304) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 574.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 574.0 Td (Rs. 2730.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 574.0 Td (COMPLETED) Tj ET
+q 0.96 0.97 0.98 rg 40 554.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 554.0 m 555 554.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 558.0 Td (ORD-1794904245..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 558.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 558.0 Td (Table P-2) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 558.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 558.0 Td (Rs. 0.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 558.0 Td (CANCELLED) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 538.0 m 555 538.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 542.0 Td (ORD-1794917246..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 542.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 542.0 Td (Table 01) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 542.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 542.0 Td (Rs. 1092.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 542.0 Td (COMPLETED) Tj ET
+q 0.96 0.97 0.98 rg 40 522.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 522.0 m 555 522.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 526.0 Td (ORD-1794981792..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 526.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 526.0 Td (Table 02) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 526.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 526.0 Td (Rs. 1071.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 526.0 Td (BILL_REQUESTED) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 506.0 m 555 506.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 510.0 Td (ORD-1794984161..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 510.0 Td (Walk-in Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 510.0 Td (Table 10) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 510.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 510.0 Td (Rs. 966.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 510.0 Td (COMPLETED) Tj ET
+q 0.96 0.97 0.98 rg 40 490.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 490.0 m 555 490.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 494.0 Td (ORD-1794984185..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 494.0 Td (Walk-in Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 494.0 Td () Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 494.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 494.0 Td (Rs. 966.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 494.0 Td (COMPLETED) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 474.0 m 555 474.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 478.0 Td (ORD-1794986527..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 478.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 478.0 Td (Table 12) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 478.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 478.0 Td (Rs. 609.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 478.0 Td (COMPLETED) Tj ET
+q 0.96 0.97 0.98 rg 40 458.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 458.0 m 555 458.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 462.0 Td (ORD-1794987770..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 462.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 462.0 Td (Table 02) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 462.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 462.0 Td (Rs. 1538.25) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 462.0 Td (COMPLETED) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 442.0 m 555 442.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 446.0 Td (ORD-1794988317..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 446.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 446.0 Td (T-99) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 446.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 446.0 Td (Rs. 651.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 446.0 Td (COMPLETED) Tj ET
+q 0.96 0.97 0.98 rg 40 426.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 426.0 m 555 426.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 430.0 Td (ORD-1795004269..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 430.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 430.0 Td (Table 02) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 430.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 430.0 Td (Rs. 924.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 430.0 Td (COMPLETED) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 410.0 m 555 410.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 414.0 Td (ORD-1795005650..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 414.0 Td (Om Chaudhari) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 414.0 Td (Table 01) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 414.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 414.0 Td (Rs. 651.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 414.0 Td (COMPLETED) Tj ET
+q 0.96 0.97 0.98 rg 40 394.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 394.0 m 555 394.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 398.0 Td (ORD-1795007883..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 398.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 398.0 Td (Table 02) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 398.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 398.0 Td (Rs. 1638.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 398.0 Td (COMPLETED) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 378.0 m 555 378.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 382.0 Td (ORD-1795064986..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 382.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 382.0 Td (Table 01) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 382.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 382.0 Td (Rs. 2079.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 382.0 Td (COMPLETED) Tj ET
+q 0.96 0.97 0.98 rg 40 362.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 362.0 m 555 362.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 366.0 Td (ORD-1795068063..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 366.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 366.0 Td (Table 02) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 366.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 366.0 Td (Rs. 0.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 366.0 Td (CANCELLED) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 346.0 m 555 346.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 350.0 Td (ORD-1795068083..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 350.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 350.0 Td (Table 02) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 350.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 350.0 Td (Rs. 1848.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 350.0 Td (COMPLETED) Tj ET
+q 0.96 0.97 0.98 rg 40 330.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 330.0 m 555 330.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 334.0 Td (ORD-1795160089..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 334.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 334.0 Td (Table 03) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 334.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 334.0 Td (Rs. 336.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 334.0 Td (COMPLETED) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 314.0 m 555 314.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 318.0 Td (ORD-1795161900..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 318.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 318.0 Td (Table 01) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 318.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 318.0 Td (Rs. 1659.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 318.0 Td (BILL_REQUESTED) Tj ET
+q 0.96 0.97 0.98 rg 40 298.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 298.0 m 555 298.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 302.0 Td (ORD-1795167849..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 302.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 302.0 Td (Table 02) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 302.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 302.0 Td (Rs. 0.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 302.0 Td (CANCELLED) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 282.0 m 555 282.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 286.0 Td (ORD-1795167850..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 286.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 286.0 Td (Table 02) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 286.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 286.0 Td (Rs. 0.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 286.0 Td (CANCELLED) Tj ET
+q 0.96 0.97 0.98 rg 40 266.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 266.0 m 555 266.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 270.0 Td (ORD-1795167850..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 270.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 270.0 Td (Table 02) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 270.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 270.0 Td (Rs. 0.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 270.0 Td (OPEN) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 250.0 m 555 250.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 254.0 Td (ORD-1795167850..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 254.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 254.0 Td (Table 02) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 254.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 254.0 Td (Rs. 0.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 254.0 Td (OPEN) Tj ET
+q 0.96 0.97 0.98 rg 40 234.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 234.0 m 555 234.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 238.0 Td (ORD-1795167850..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 238.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 238.0 Td (Table 02) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 238.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 238.0 Td (Rs. 0.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 238.0 Td (OPEN) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 218.0 m 555 218.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 222.0 Td (ORD-1795167850..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 222.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 222.0 Td (Table 02) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 222.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 222.0 Td (Rs. 0.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 222.0 Td (OPEN) Tj ET
+q 0.96 0.97 0.98 rg 40 202.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 202.0 m 555 202.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 206.0 Td (ORD-1795167850..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 206.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 206.0 Td (Table 02) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 206.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 206.0 Td (Rs. 0.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 206.0 Td (OPEN) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 186.0 m 555 186.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 190.0 Td (ORD-1795167850..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 190.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 190.0 Td (Table 02) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 190.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 190.0 Td (Rs. 0.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 190.0 Td (OPEN) Tj ET
+q 0.96 0.97 0.98 rg 40 170.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 170.0 m 555 170.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 174.0 Td (ORD-1795167851..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 174.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 174.0 Td (Table 02) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 174.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 174.0 Td (Rs. 0.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 174.0 Td (OPEN) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 154.0 m 555 154.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 158.0 Td (ORD-1795167851..) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 129.0 158.0 Td (Guest) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 249.0 158.0 Td (Table 02) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 158.0 Td (INTERNAL) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 379.0 158.0 Td (Rs. 0.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 158.0 Td (OPEN) Tj ET
+BT /F2 11 Tf 0.08 0.18 0.45 rg 40 142.0 Td (3. PAYMENTS & TRANSACTIONS) Tj ET
+BT /F1 8.5 Tf 0.40 0.45 0.55 rg 260 142.0 Td (Total transactions recorded \(49\)) Tj ET
+q 0.15 0.30 0.65 RG 1 w 40 138.0 m 555 138.0 l S Q
+q 0.12 0.23 0.54 rg 40 116.0 515 18 re f Q
+BT /F2 8.5 Tf 1 1 1 rg 44.0 121.0 Td (Txn Ref) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 154.0 121.0 Td (Method) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 229.0 121.0 Td (Amount) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 314.0 121.0 Td (Date) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 399.0 121.0 Td (Status) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 469.0 121.0 Td (Notes) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 100.0 m 555 100.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 104.0 Td (TXN-INV-1) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 104.0 Td (UPI) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 104.0 Td (Rs. 1323.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 104.0 Td (2026-10-28) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 104.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 104.0 Td (Counter settlem..) Tj ET
+q 0.96 0.97 0.98 rg 40 84.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 84.0 m 555 84.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 88.0 Td (KOT-PAY-1793258943378) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 88.0 Td (CASH) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 88.0 Td (Rs. 1470.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 88.0 Td (2026-10-29) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 88.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 88.0 Td (KOT settlement ..) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 68.0 m 555 68.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 72.0 Td (KOT-PAY-1793259110465) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 72.0 Td (UPI) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 72.0 Td (Rs. 1102.50) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 72.0 Td (2026-10-29) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 72.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 72.0 Td (KOT settlement ..) Tj ET
+q 0.85 0.85 0.85 RG 0.5 w 40 38 m 555 38 l S Q
+BT /F1 7.5 Tf 0.45 0.45 0.50 rg 40 26 Td (Royal Palace Hotel POS Management Suite - Automated Daily Backup Report) Tj ET
+BT /F2 7.5 Tf 0.45 0.45 0.50 rg 510 26 Td (Page 3) Tj ET
+
+endstream
+endobj
+14 0 obj
+<< /Length 21039 >>
+stream
+q 0.12 0.23 0.54 rg 40 805 515 22 re f Q
+BT /F2 9 Tf 1 1 1 rg 50 812 Td (ROYAL PALACE HOTEL - Daily Operations Backup | Ref: HTL-93041) Tj ET
+BT /F1 8 Tf 1 1 1 rg 500 812 Td (Page 4) Tj ET
+q 0.96 0.97 0.98 rg 40 778.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 778.0 m 555 778.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 782.0 Td (KOT-PAY-1793275661997) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 782.0 Td (UPI) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 782.0 Td (Rs. 1748.26) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 782.0 Td (2026-10-29) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 782.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 782.0 Td (KOT settlement ..) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 762.0 m 555 762.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 766.0 Td (KOT-PAY-1793335569923) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 766.0 Td (CASH) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 766.0 Td (Rs. 588.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 766.0 Td (2026-10-30) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 766.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 766.0 Td (KOT settlement ..) Tj ET
+q 0.96 0.97 0.98 rg 40 746.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 746.0 m 555 746.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 750.0 Td (CASH/REC-462) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 750.0 Td (CASH) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 750.0 Td (Rs. 651.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 750.0 Td (2026-10-30) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 750.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 750.0 Td (Payment for Tab..) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 730.0 m 555 730.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 734.0 Td (CASH/REC-347) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 734.0 Td (CASH) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 734.0 Td (Rs. 1092.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 734.0 Td (2026-10-30) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 734.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 734.0 Td (Payment for Tab..) Tj ET
+q 0.96 0.97 0.98 rg 40 714.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 714.0 m 555 714.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 718.0 Td (KOT-PAY-1793342465688) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 718.0 Td (UPI) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 718.0 Td (Rs. 1092.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 718.0 Td (2026-10-30) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 718.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 718.0 Td (KOT settlement ..) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 698.0 m 555 698.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 702.0 Td (CASH/REC-269) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 702.0 Td (CASH) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 702.0 Td (Rs. 651.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 702.0 Td (2026-10-30) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 702.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 702.0 Td (Payment for Tab..) Tj ET
+q 0.96 0.97 0.98 rg 40 682.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 682.0 m 555 682.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 686.0 Td (CASH/REC-625) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 686.0 Td (CASH) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 686.0 Td (Rs. 735.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 686.0 Td (2026-10-31) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 686.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 686.0 Td (Payment for Tab..) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 666.0 m 555 666.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 670.0 Td (CASH/REC-413) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 670.0 Td (CASH) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 670.0 Td (Rs. 934.50) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 670.0 Td (2026-10-31) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 670.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 670.0 Td (Payment for Tab..) Tj ET
+q 0.96 0.97 0.98 rg 40 650.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 650.0 m 555 650.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 654.0 Td (CASH/REC-909) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 654.0 Td (CASH) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 654.0 Td (Rs. 1281.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 654.0 Td (2026-10-31) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 654.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 654.0 Td (Payment for T-7..) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 634.0 m 555 634.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 638.0 Td (CASH/REC-677) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 638.0 Td (CASH) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 638.0 Td (Rs. 1312.50) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 638.0 Td (2026-10-31) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 638.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 638.0 Td (Payment for Tab..) Tj ET
+q 0.96 0.97 0.98 rg 40 618.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 618.0 m 555 618.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 622.0 Td (CASH/REC-205) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 622.0 Td (CASH) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 622.0 Td (Rs. 724.50) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 622.0 Td (2026-10-31) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 622.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 622.0 Td (Payment for Tab..) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 602.0 m 555 602.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 606.0 Td (CASH/REC-154) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 606.0 Td (CASH) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 606.0 Td (Rs. 724.50) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 606.0 Td (2026-10-31) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 606.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 606.0 Td (Payment for Tab..) Tj ET
+q 0.96 0.97 0.98 rg 40 586.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 586.0 m 555 586.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 590.0 Td (KOT-PAY-1793434006549) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 590.0 Td (UPI) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 590.0 Td (Rs. 1302.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 590.0 Td (2026-10-31) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 590.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 590.0 Td (KOT settlement ..) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 570.0 m 555 570.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 574.0 Td (KOT-PAY-1793447740965) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 574.0 Td (CASH) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 574.0 Td (Rs. 651.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 574.0 Td (2026-10-31) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 574.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 574.0 Td (KOT settlement ..) Tj ET
+q 0.96 0.97 0.98 rg 40 554.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 554.0 m 555 554.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 558.0 Td (KOT-PAY-1793449004303) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 558.0 Td (UPI) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 558.0 Td (Rs. 651.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 558.0 Td (2026-10-31) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 558.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 558.0 Td (KOT settlement ..) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 538.0 m 555 538.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 542.0 Td (TXN-INV-PUNE-101) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 542.0 Td (UPI) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 542.0 Td (Rs. 4500.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 542.0 Td (2026-11-01) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 542.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 542.0 Td () Tj ET
+q 0.96 0.97 0.98 rg 40 522.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 522.0 m 555 522.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 526.0 Td (TXN-INV-DHULE-101) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 526.0 Td (UPI) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 526.0 Td (Rs. 3200.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 526.0 Td (2026-11-01) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 526.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 526.0 Td () Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 506.0 m 555 506.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 510.0 Td (TXN-INV-BEED-101) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 510.0 Td (UPI) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 510.0 Td (Rs. 2800.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 510.0 Td (2026-11-01) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 510.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 510.0 Td () Tj ET
+q 0.96 0.97 0.98 rg 40 490.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 490.0 m 555 490.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 494.0 Td (KOT-PAY-1793611644950) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 494.0 Td (UPI) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 494.0 Td (Rs. 1092.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 494.0 Td (2026-11-02) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 494.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 494.0 Td (KOT settlement ..) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 474.0 m 555 474.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 478.0 Td (UPI/222849120) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 478.0 Td (UPI) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 478.0 Td (Rs. 850.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 478.0 Td (2026-11-03) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 478.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 478.0 Td (Manual payment ..) Tj ET
+q 0.96 0.97 0.98 rg 40 458.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 458.0 m 555 458.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 462.0 Td (COUNTER-CASH) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 462.0 Td (CASH) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 462.0 Td (Rs. 672.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 462.0 Td (2026-11-03) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 462.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 462.0 Td () Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 442.0 m 555 442.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 446.0 Td (KOT-PAY-1793699720608) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 446.0 Td (UPI) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 446.0 Td (Rs. 1596.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 446.0 Td (2026-11-03) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 446.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 446.0 Td (KOT settlement ..) Tj ET
+q 0.96 0.97 0.98 rg 40 426.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 426.0 m 555 426.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 430.0 Td (KOT-PAY-1794805718772) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 430.0 Td (UPI) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 430.0 Td (Rs. 651.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 430.0 Td (2026-11-16) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 430.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 430.0 Td (KOT settlement ..) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 410.0 m 555 410.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 414.0 Td (CASH/REC-868) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 414.0 Td (CASH) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 414.0 Td (Rs. 966.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 414.0 Td (2026-11-18) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 414.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 414.0 Td (Payment for Tab..) Tj ET
+q 0.96 0.97 0.98 rg 40 394.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 394.0 m 555 394.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 398.0 Td (CASH/REC-178) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 398.0 Td (CASH) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 398.0 Td (Rs. 1071.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 398.0 Td (2026-11-18) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 398.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 398.0 Td (Payment for Tab..) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 378.0 m 555 378.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 382.0 Td (CASH/REC-499) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 382.0 Td (CASH) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 382.0 Td (Rs. 1092.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 382.0 Td (2026-11-18) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 382.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 382.0 Td (Payment for Tab..) Tj ET
+q 0.96 0.97 0.98 rg 40 362.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 362.0 m 555 362.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 366.0 Td (CASH/REC-372) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 366.0 Td (CASH) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 366.0 Td (Rs. 651.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 366.0 Td (2026-11-18) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 366.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 366.0 Td (Payment for T-9..) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 346.0 m 555 346.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 350.0 Td (CASH/REC-833) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 350.0 Td (CASH) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 350.0 Td (Rs. 189.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 350.0 Td (2026-11-18) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 350.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 350.0 Td (Payment for Tab..) Tj ET
+q 0.96 0.97 0.98 rg 40 330.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 330.0 m 555 330.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 334.0 Td (CASH/REC-929) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 334.0 Td (CASH) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 334.0 Td (Rs. 1538.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 334.0 Td (2026-11-18) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 334.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 334.0 Td (Payment for Tab..) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 314.0 m 555 314.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 318.0 Td (CASH/REC-272) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 318.0 Td (CASH) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 318.0 Td (Rs. 609.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 318.0 Td (2026-11-18) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 318.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 318.0 Td (Payment for Tab..) Tj ET
+q 0.96 0.97 0.98 rg 40 298.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 298.0 m 555 298.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 302.0 Td (CASH/REC-218) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 302.0 Td (CASH) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 302.0 Td (Rs. 2079.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 302.0 Td (2026-11-18) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 302.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 302.0 Td (Payment for Tab..) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 282.0 m 555 282.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 286.0 Td (TXN-INV-10045) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 286.0 Td (UPI) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 286.0 Td (Rs. 2730.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 286.0 Td (2026-11-18) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 286.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 286.0 Td (Counter settlem..) Tj ET
+q 0.96 0.97 0.98 rg 40 266.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 266.0 m 555 266.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 270.0 Td (UPI/178667464) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 270.0 Td (UPI) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 270.0 Td (Rs. 831.60) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 270.0 Td (2026-11-18) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 270.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 270.0 Td (Payment for Tab..) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 250.0 m 555 250.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 254.0 Td (UPI/982746250) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 254.0 Td (UPI) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 254.0 Td (Rs. 966.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 254.0 Td (2026-11-18) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 254.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 254.0 Td (Payment for Tab..) Tj ET
+q 0.96 0.97 0.98 rg 40 234.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 234.0 m 555 234.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 238.0 Td (CASH/REC-156) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 238.0 Td (CASH) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 238.0 Td (Rs. 42.50) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 238.0 Td (2026-11-18) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 238.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 238.0 Td (Payment for Tab..) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 218.0 m 555 218.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 222.0 Td (CASH/REC-685) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 222.0 Td (CASH) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 222.0 Td (Rs. 651.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 222.0 Td (2026-11-18) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 222.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 222.0 Td (Payment for Tab..) Tj ET
+q 0.96 0.97 0.98 rg 40 202.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 202.0 m 555 202.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 206.0 Td (CASH/REC-236) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 206.0 Td (CASH) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 206.0 Td (Rs. 1638.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 206.0 Td (2026-11-18) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 206.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 206.0 Td (Payment for Tab..) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 186.0 m 555 186.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 190.0 Td (TXN-INV-10060) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 190.0 Td (UPI) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 190.0 Td (Rs. 2079.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 190.0 Td (2026-11-19) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 190.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 190.0 Td (Counter settlem..) Tj ET
+q 0.96 0.97 0.98 rg 40 170.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 170.0 m 555 170.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 174.0 Td (TXN-INV-10061) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 174.0 Td (UPI) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 174.0 Td (Rs. 798.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 174.0 Td (2026-11-19) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 174.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 174.0 Td (Counter settlem..) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 154.0 m 555 154.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 158.0 Td (TXN-INV-10030) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 158.0 Td (UPI) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 158.0 Td (Rs. 693.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 158.0 Td (2026-11-19) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 158.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 158.0 Td (Counter settlem..) Tj ET
+q 0.96 0.97 0.98 rg 40 138.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 138.0 m 555 138.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 142.0 Td (TXN-INV-10063) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 142.0 Td (UPI) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 142.0 Td (Rs. 651.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 142.0 Td (2026-11-19) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 142.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 142.0 Td (Counter settlem..) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 122.0 m 555 122.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 126.0 Td (TXN-INV-10062) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 126.0 Td (UPI) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 126.0 Td (Rs. 588.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 126.0 Td (2026-11-19) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 126.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 126.0 Td (Counter settlem..) Tj ET
+q 0.96 0.97 0.98 rg 40 106.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 106.0 m 555 106.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 110.0 Td (TXN-INV-10041) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 110.0 Td (UPI) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 110.0 Td (Rs. 966.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 110.0 Td (2026-11-19) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 110.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 110.0 Td (Counter settlem..) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 90.0 m 555 90.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 94.0 Td (TXN-INV-10064) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 94.0 Td (UPI) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 94.0 Td (Rs. 168.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 94.0 Td (2026-11-19) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 94.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 94.0 Td (Counter settlem..) Tj ET
+q 0.96 0.97 0.98 rg 40 74.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 74.0 m 555 74.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 78.0 Td (CASH/REC-299) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 78.0 Td (CASH) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 78.0 Td (Rs. 336.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 78.0 Td (2026-11-20) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 78.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 78.0 Td (Payment for Tab..) Tj ET
+q 0.85 0.85 0.85 RG 0.5 w 40 38 m 555 38 l S Q
+BT /F1 7.5 Tf 0.45 0.45 0.50 rg 40 26 Td (Royal Palace Hotel POS Management Suite - Automated Daily Backup Report) Tj ET
+BT /F2 7.5 Tf 0.45 0.45 0.50 rg 510 26 Td (Page 4) Tj ET
+
+endstream
+endobj
+15 0 obj
+<< /Length 16518 >>
+stream
+q 0.12 0.23 0.54 rg 40 805 515 22 re f Q
+BT /F2 9 Tf 1 1 1 rg 50 812 Td (ROYAL PALACE HOTEL - Daily Operations Backup | Ref: HTL-93041) Tj ET
+BT /F1 8 Tf 1 1 1 rg 500 812 Td (Page 5) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 778.0 m 555 778.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 782.0 Td (CASH/REC-560) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 782.0 Td (CASH) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 229.0 782.0 Td (Rs. 1848.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 314.0 782.0 Td (2026-11-20) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 782.0 Td (SUCCESS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 782.0 Td (Payment for Tab..) Tj ET
+BT /F2 11 Tf 0.08 0.18 0.45 rg 40 766.0 Td (4. OPERATING EXPENSES) Tj ET
+BT /F1 8.5 Tf 0.40 0.45 0.55 rg 260 766.0 Td (Total recorded expense vouchers \(5\)) Tj ET
+q 0.15 0.30 0.65 RG 1 w 40 762.0 m 555 762.0 l S Q
+q 0.12 0.23 0.54 rg 40 740.0 515 18 re f Q
+BT /F2 8.5 Tf 1 1 1 rg 44.0 745.0 Td (Expense Name) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 169.0 745.0 Td (Category) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 264.0 745.0 Td (Amount) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 349.0 745.0 Td (Mode) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 434.0 745.0 Td (Date) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 724.0 m 555 724.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 728.0 Td (Electricity) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 169.0 728.0 Td (Electricity) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 264.0 728.0 Td (Rs. 15000.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 349.0 728.0 Td (UPI) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 434.0 728.0 Td (2026-10-28) Tj ET
+q 0.96 0.97 0.98 rg 40 708.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 708.0 m 555 708.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 712.0 Td (Kitchen Utilities) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 169.0 712.0 Td (UTILITIES) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 264.0 712.0 Td (Rs. 1250.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 349.0 712.0 Td (UPI) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 434.0 712.0 Td (2026-10-29) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 692.0 m 555 692.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 696.0 Td (Kitchen Utilities) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 169.0 696.0 Td (UTILITIES) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 264.0 696.0 Td (Rs. 1250.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 349.0 696.0 Td (UPI) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 434.0 696.0 Td (2026-10-29) Tj ET
+q 0.96 0.97 0.98 rg 40 676.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 676.0 m 555 676.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 680.0 Td (Kitchen Utilities) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 169.0 680.0 Td (UTILITIES) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 264.0 680.0 Td (Rs. 1250.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 349.0 680.0 Td (UPI) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 434.0 680.0 Td (2026-10-29) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 660.0 m 555 660.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 664.0 Td (water) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 169.0 664.0 Td (Water) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 264.0 664.0 Td (Rs. 1500.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 349.0 664.0 Td (UPI) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 434.0 664.0 Td (2026-11-16) Tj ET
+BT /F2 11 Tf 0.08 0.18 0.45 rg 40 648.0 Td (5. DINING TABLES & SEATING) Tj ET
+BT /F1 8.5 Tf 0.40 0.45 0.55 rg 260 648.0 Td (All registered floor dining tables \(21\)) Tj ET
+q 0.15 0.30 0.65 RG 1 w 40 644.0 m 555 644.0 l S Q
+q 0.12 0.23 0.54 rg 40 622.0 515 18 re f Q
+BT /F2 8.5 Tf 1 1 1 rg 44.0 627.0 Td (Table Name) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 154.0 627.0 Td (Area / Section) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 269.0 627.0 Td (Seats) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 329.0 627.0 Td (Status) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 429.0 627.0 Td (Notes) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 606.0 m 555 606.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 610.0 Td (Table 01) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 610.0 Td (Main Dining) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 269.0 610.0 Td (1) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 329.0 610.0 Td (OCCUPIED) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 429.0 610.0 Td () Tj ET
+q 0.96 0.97 0.98 rg 40 590.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 590.0 m 555 590.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 594.0 Td (Table 02) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 594.0 Td (Main Dining) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 269.0 594.0 Td (4) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 329.0 594.0 Td (OCCUPIED) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 429.0 594.0 Td () Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 574.0 m 555 574.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 578.0 Td (Table 03) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 578.0 Td (Main Dining) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 269.0 578.0 Td (4) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 329.0 578.0 Td (AVAILABLE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 429.0 578.0 Td () Tj ET
+q 0.96 0.97 0.98 rg 40 558.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 558.0 m 555 558.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 562.0 Td (T-99) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 562.0 Td (Rooftop Garden) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 269.0 562.0 Td (4) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 329.0 562.0 Td (OCCUPIED) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 429.0 562.0 Td () Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 542.0 m 555 542.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 546.0 Td (T-728) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 546.0 Td (Outdoor Patio) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 269.0 546.0 Td (4) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 329.0 546.0 Td (OCCUPIED) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 429.0 546.0 Td () Tj ET
+q 0.96 0.97 0.98 rg 40 526.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 526.0 m 555 526.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 530.0 Td (T-304) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 530.0 Td (Outdoor Patio) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 269.0 530.0 Td (4) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 329.0 530.0 Td (AVAILABLE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 429.0 530.0 Td () Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 510.0 m 555 510.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 514.0 Td (T-899) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 514.0 Td (Outdoor Patio) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 269.0 514.0 Td (4) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 329.0 514.0 Td (AVAILABLE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 429.0 514.0 Td (Multi-laptop test table) Tj ET
+q 0.96 0.97 0.98 rg 40 494.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 494.0 m 555 494.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 498.0 Td (Table 08) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 498.0 Td (Main Dining) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 269.0 498.0 Td (4) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 329.0 498.0 Td (AVAILABLE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 429.0 498.0 Td () Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 478.0 m 555 478.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 482.0 Td (Table 09) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 482.0 Td (Main Dining) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 269.0 482.0 Td (4) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 329.0 482.0 Td (OCCUPIED) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 429.0 482.0 Td () Tj ET
+q 0.96 0.97 0.98 rg 40 462.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 462.0 m 555 462.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 466.0 Td (Table 10) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 466.0 Td (Main Dining) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 269.0 466.0 Td (4) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 329.0 466.0 Td (OCCUPIED) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 429.0 466.0 Td () Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 446.0 m 555 446.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 450.0 Td (Table 999) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 450.0 Td (Rooftop Terrace) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 269.0 450.0 Td (4) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 329.0 450.0 Td (AVAILABLE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 429.0 450.0 Td () Tj ET
+q 0.96 0.97 0.98 rg 40 430.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 430.0 m 555 430.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 434.0 Td (Table P-1) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 434.0 Td (Ground Floor) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 269.0 434.0 Td (4) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 329.0 434.0 Td (OCCUPIED) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 429.0 434.0 Td () Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 414.0 m 555 414.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 418.0 Td (Table P-2) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 418.0 Td (Ground Floor) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 269.0 418.0 Td (6) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 329.0 418.0 Td (OCCUPIED) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 429.0 418.0 Td () Tj ET
+q 0.96 0.97 0.98 rg 40 398.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 398.0 m 555 398.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 402.0 Td (Table D-1) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 402.0 Td (Ground Floor) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 269.0 402.0 Td (4) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 329.0 402.0 Td (AVAILABLE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 429.0 402.0 Td () Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 382.0 m 555 382.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 386.0 Td (Table D-2) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 386.0 Td (Ground Floor) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 269.0 386.0 Td (6) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 329.0 386.0 Td (AVAILABLE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 429.0 386.0 Td () Tj ET
+q 0.96 0.97 0.98 rg 40 366.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 366.0 m 555 366.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 370.0 Td (Table B-1) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 370.0 Td (Ground Floor) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 269.0 370.0 Td (4) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 329.0 370.0 Td (AVAILABLE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 429.0 370.0 Td () Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 350.0 m 555 350.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 354.0 Td (Table B-2) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 354.0 Td (Ground Floor) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 269.0 354.0 Td (6) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 329.0 354.0 Td (AVAILABLE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 429.0 354.0 Td () Tj ET
+q 0.96 0.97 0.98 rg 40 334.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 334.0 m 555 334.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 338.0 Td (Table 03) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 338.0 Td (Main Dining) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 269.0 338.0 Td (4) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 329.0 338.0 Td (OCCUPIED) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 429.0 338.0 Td () Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 318.0 m 555 318.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 322.0 Td (Table 04) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 322.0 Td (Main Dining) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 269.0 322.0 Td (4) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 329.0 322.0 Td (AVAILABLE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 429.0 322.0 Td () Tj ET
+q 0.96 0.97 0.98 rg 40 302.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 302.0 m 555 302.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 306.0 Td (Table 05) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 306.0 Td (Main Dining) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 269.0 306.0 Td (4) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 329.0 306.0 Td (AVAILABLE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 429.0 306.0 Td () Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 286.0 m 555 286.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 290.0 Td (Table 12) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 154.0 290.0 Td (Main Dining) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 269.0 290.0 Td (4) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 329.0 290.0 Td (AVAILABLE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 429.0 290.0 Td () Tj ET
+BT /F2 11 Tf 0.08 0.18 0.45 rg 40 274.0 Td (6. MENU ITEMS CATALOG) Tj ET
+BT /F1 8.5 Tf 0.40 0.45 0.55 rg 260 274.0 Td (Complete restaurant food & beverage menu \(42\)) Tj ET
+q 0.15 0.30 0.65 RG 1 w 40 270.0 m 555 270.0 l S Q
+q 0.12 0.23 0.54 rg 40 248.0 515 18 re f Q
+BT /F2 8.5 Tf 1 1 1 rg 44.0 253.0 Td (Item Name) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 209.0 253.0 Td (Category) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 324.0 253.0 Td (Price) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 399.0 253.0 Td (Status) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 469.0 253.0 Td (Description) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 232.0 m 555 232.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 236.0 Td (Veg Spring Rolls) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 236.0 Td (STARTERS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 236.0 Td (Rs. 180.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 236.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 236.0 Td (Veg Spring Rolls) Tj ET
+q 0.96 0.97 0.98 rg 40 216.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 216.0 m 555 216.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 220.0 Td (Veg Spring Rolls) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 220.0 Td (STARTERS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 220.0 Td (Rs. 180.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 220.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 220.0 Td (Veg Spring Rolls) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 200.0 m 555 200.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 204.0 Td (Paneer Tikka) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 204.0 Td (STARTERS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 204.0 Td (Rs. 260.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 204.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 204.0 Td (Paneer Tikka) Tj ET
+q 0.96 0.97 0.98 rg 40 184.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 184.0 m 555 184.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 188.0 Td (Paneer Tikka) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 188.0 Td (STARTERS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 188.0 Td (Rs. 260.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 188.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 188.0 Td (Paneer Tikka) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 168.0 m 555 168.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 172.0 Td (Chicken Tikka) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 172.0 Td (STARTERS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 172.0 Td (Rs. 320.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 172.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 172.0 Td (Chicken Tikka) Tj ET
+q 0.96 0.97 0.98 rg 40 152.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 152.0 m 555 152.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 156.0 Td (Chicken Tikka) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 156.0 Td (STARTERS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 156.0 Td (Rs. 320.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 156.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 156.0 Td (Chicken Tikka) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 136.0 m 555 136.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 140.0 Td (French Fries) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 140.0 Td (STARTERS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 140.0 Td (Rs. 140.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 140.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 140.0 Td (French Fries) Tj ET
+q 0.96 0.97 0.98 rg 40 120.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 120.0 m 555 120.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 124.0 Td (French Fries) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 124.0 Td (STARTERS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 124.0 Td (Rs. 140.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 124.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 124.0 Td (French Fries) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 104.0 m 555 104.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 108.0 Td (Masala Papad) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 108.0 Td (STARTERS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 108.0 Td (Rs. 60.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 108.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 108.0 Td (Masala Papad) Tj ET
+q 0.96 0.97 0.98 rg 40 88.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 88.0 m 555 88.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 92.0 Td (Paneer Butter Masala) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 92.0 Td (MAIN COURSE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 92.0 Td (Rs. 290.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 92.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 92.0 Td (Paneer Butter M..) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 72.0 m 555 72.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 76.0 Td (Masala Papad) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 76.0 Td (STARTERS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 76.0 Td (Rs. 60.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 76.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 76.0 Td (Masala Papad) Tj ET
+q 0.85 0.85 0.85 RG 0.5 w 40 38 m 555 38 l S Q
+BT /F1 7.5 Tf 0.45 0.45 0.50 rg 40 26 Td (Royal Palace Hotel POS Management Suite - Automated Daily Backup Report) Tj ET
+BT /F2 7.5 Tf 0.45 0.45 0.50 rg 510 26 Td (Page 5) Tj ET
+
+endstream
+endobj
+16 0 obj
+<< /Length 12730 >>
+stream
+q 0.12 0.23 0.54 rg 40 805 515 22 re f Q
+BT /F2 9 Tf 1 1 1 rg 50 812 Td (ROYAL PALACE HOTEL - Daily Operations Backup | Ref: HTL-93041) Tj ET
+BT /F1 8 Tf 1 1 1 rg 500 812 Td (Page 6) Tj ET
+q 0.96 0.97 0.98 rg 40 778.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 778.0 m 555 778.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 782.0 Td (Butter Chicken) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 782.0 Td (MAIN COURSE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 782.0 Td (Rs. 380.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 782.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 782.0 Td (Butter Chicken) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 762.0 m 555 762.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 766.0 Td (Paneer Butter Masala) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 766.0 Td (MAIN COURSE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 766.0 Td (Rs. 290.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 766.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 766.0 Td (Paneer Butter M..) Tj ET
+q 0.96 0.97 0.98 rg 40 746.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 746.0 m 555 746.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 750.0 Td (Veg Kolhapuri) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 750.0 Td (MAIN COURSE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 750.0 Td (Rs. 240.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 750.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 750.0 Td (Veg Kolhapuri) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 730.0 m 555 730.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 734.0 Td (Butter Chicken) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 734.0 Td (MAIN COURSE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 734.0 Td (Rs. 380.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 734.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 734.0 Td (Butter Chicken) Tj ET
+q 0.96 0.97 0.98 rg 40 714.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 714.0 m 555 714.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 718.0 Td (Dal Tadka) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 718.0 Td (MAIN COURSE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 718.0 Td (Rs. 190.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 718.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 718.0 Td (Dal Tadka) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 698.0 m 555 698.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 702.0 Td (Veg Kolhapuri) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 702.0 Td (MAIN COURSE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 702.0 Td (Rs. 240.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 702.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 702.0 Td (Veg Kolhapuri) Tj ET
+q 0.96 0.97 0.98 rg 40 682.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 682.0 m 555 682.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 686.0 Td (Butter Naan) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 686.0 Td (BREADS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 686.0 Td (Rs. 45.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 686.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 686.0 Td (Butter Naan) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 666.0 m 555 666.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 670.0 Td (Tandoori Roti) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 670.0 Td (BREADS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 670.0 Td (Rs. 25.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 670.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 670.0 Td (Tandoori Roti) Tj ET
+q 0.96 0.97 0.98 rg 40 650.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 650.0 m 555 650.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 654.0 Td (Dal Tadka) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 654.0 Td (MAIN COURSE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 654.0 Td (Rs. 190.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 654.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 654.0 Td (Dal Tadka) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 634.0 m 555 634.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 638.0 Td (Butter Naan) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 638.0 Td (BREADS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 638.0 Td (Rs. 45.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 638.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 638.0 Td (Butter Naan) Tj ET
+q 0.96 0.97 0.98 rg 40 618.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 618.0 m 555 618.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 622.0 Td (Butter Roti) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 622.0 Td (BREADS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 622.0 Td (Rs. 30.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 622.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 622.0 Td (Butter Roti) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 602.0 m 555 602.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 606.0 Td (Tandoori Roti) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 606.0 Td (BREADS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 606.0 Td (Rs. 25.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 606.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 606.0 Td (Tandoori Roti) Tj ET
+q 0.96 0.97 0.98 rg 40 586.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 586.0 m 555 586.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 590.0 Td (Butter Roti) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 590.0 Td (BREADS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 590.0 Td (Rs. 30.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 590.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 590.0 Td (Butter Roti) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 570.0 m 555 570.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 574.0 Td (Jeera Rice) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 574.0 Td (RICE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 574.0 Td (Rs. 160.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 574.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 574.0 Td (Jeera Rice) Tj ET
+q 0.96 0.97 0.98 rg 40 554.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 554.0 m 555 554.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 558.0 Td (Jeera Rice) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 558.0 Td (RICE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 558.0 Td (Rs. 160.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 558.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 558.0 Td (Jeera Rice) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 538.0 m 555 538.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 542.0 Td (Chicken Biryani Special) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 542.0 Td (RICE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 542.0 Td (Rs. 340.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 542.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 542.0 Td (Chicken Biryani..) Tj ET
+q 0.96 0.97 0.98 rg 40 522.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 522.0 m 555 522.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 526.0 Td (Chicken Biryani Special) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 526.0 Td (RICE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 526.0 Td (Rs. 340.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 526.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 526.0 Td (Chicken Biryani..) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 506.0 m 555 506.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 510.0 Td (Gulab Jamun \(2 pcs\)) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 510.0 Td (DESSERT) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 510.0 Td (Rs. 70.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 510.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 510.0 Td (Gulab Jamun \(2 ..) Tj ET
+q 0.96 0.97 0.98 rg 40 490.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 490.0 m 555 490.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 494.0 Td (Gulab Jamun \(2 pcs\)) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 494.0 Td (DESSERT) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 494.0 Td (Rs. 70.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 494.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 494.0 Td (Gulab Jamun \(2 ..) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 474.0 m 555 474.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 478.0 Td (Chocolate Sizzling Brownie) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 478.0 Td (DESSERT) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 478.0 Td (Rs. 160.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 478.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 478.0 Td (Chocolate Sizzl..) Tj ET
+q 0.96 0.97 0.98 rg 40 458.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 458.0 m 555 458.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 462.0 Td (Chocolate Sizzling Brownie) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 462.0 Td (DESSERT) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 462.0 Td (Rs. 160.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 462.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 462.0 Td (Chocolate Sizzl..) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 442.0 m 555 442.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 446.0 Td (Mineral Water \(Packaged\)) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 446.0 Td (BEVERAGES) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 446.0 Td (Rs. 20.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 446.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 446.0 Td (Mineral Water \(..) Tj ET
+q 0.96 0.97 0.98 rg 40 426.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 426.0 m 555 426.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 430.0 Td (Mineral Water \(Packaged\)) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 430.0 Td (BEVERAGES) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 430.0 Td (Rs. 20.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 430.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 430.0 Td (Mineral Water \(..) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 410.0 m 555 410.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 414.0 Td (Solkadhi / Chaas) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 414.0 Td (BEVERAGES) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 414.0 Td (Rs. 40.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 414.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 414.0 Td (Solkadhi / Chaas) Tj ET
+q 0.96 0.97 0.98 rg 40 394.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 394.0 m 555 394.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 398.0 Td (Solkadhi / Chaas) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 398.0 Td (BEVERAGES) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 398.0 Td (Rs. 40.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 398.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 398.0 Td (Solkadhi / Chaas) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 378.0 m 555 378.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 382.0 Td (Test Burger) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 382.0 Td (STARTERS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 382.0 Td (Rs. 150.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 382.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 382.0 Td (Test Burger) Tj ET
+q 0.96 0.97 0.98 rg 40 362.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 362.0 m 555 362.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 366.0 Td (Test Burger) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 366.0 Td (STARTERS) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 366.0 Td (Rs. 150.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 366.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 366.0 Td (Test Burger) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 346.0 m 555 346.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 350.0 Td (Special Masala Chai) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 350.0 Td (BEVERAGES) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 350.0 Td (Rs. 40.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 350.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 350.0 Td (Authentic ginge..) Tj ET
+q 0.96 0.97 0.98 rg 40 330.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 330.0 m 555 330.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 334.0 Td (Item-625) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 334.0 Td (MAIN_COURSE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 334.0 Td (Rs. 220.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 334.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 334.0 Td (Centralized men..) Tj ET
+q 0.88 0.90 0.93 RG 0.5 w 40 314.0 m 555 314.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 318.0 Td (Item-329) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 318.0 Td (MAIN_COURSE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 318.0 Td (Rs. 220.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 318.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 318.0 Td (Centralized men..) Tj ET
+q 0.96 0.97 0.98 rg 40 298.0 515 16 re f Q
+q 0.88 0.90 0.93 RG 0.5 w 40 298.0 m 555 298.0 l S Q
+BT /F1 8 Tf 0.15 0.18 0.22 rg 44.0 302.0 Td (Item-618) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 209.0 302.0 Td (MAIN_COURSE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 324.0 302.0 Td (Rs. 220.00) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 399.0 302.0 Td (ACTIVE) Tj ET
+BT /F1 8 Tf 0.15 0.18 0.22 rg 469.0 302.0 Td (Centralized men..) Tj ET
+q 0.85 0.85 0.85 RG 0.5 w 40 38 m 555 38 l S Q
+BT /F1 7.5 Tf 0.45 0.45 0.50 rg 40 26 Td (Royal Palace Hotel POS Management Suite - Automated Daily Backup Report) Tj ET
+BT /F2 7.5 Tf 0.45 0.45 0.50 rg 510 26 Td (Page 6) Tj ET
+
+endstream
+endobj
+xref
+0 17
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000145 00000 n 
+0000000283 00000 n 
+0000000421 00000 n 
+0000000559 00000 n 
+0000000697 00000 n 
+0000000835 00000 n 
+0000000973 00000 n 
+0000001043 00000 n 
+0000001119 00000 n 
+0000018964 00000 n 
+0000039453 00000 n 
+0000060000 00000 n 
+0000081093 00000 n 
+0000097665 00000 n 
+trailer
+<< /Size 17 /Root 1 0 R >>
+startxref
+110449
+%%EOF

@@ -52,9 +52,20 @@ public class CurrentUser {
         return get().getBranch() != null;
     }
 
+    public boolean isSuperAdmin() {
+        User u = get();
+        return u.getRole() == UserRole.SUPER_ADMIN || u.getRole() == UserRole.PLATFORM_ADMIN || u.isSuperAdmin();
+    }
+
+    public void requireSuperAdmin() {
+        if (!isSuperAdmin()) {
+            throw new AccessDeniedException("Access denied: Super Admin privileges required for this platform resource.");
+        }
+    }
+
     public boolean isOwner() {
         User u = get();
-        return u.getRole() == UserRole.OWNER || (u.getBranch() == null && u.getRole() == UserRole.ADMIN);
+        return u.getRole() == UserRole.OWNER || u.getRole() == UserRole.SUPER_ADMIN || (u.getBranch() == null && u.getRole() == UserRole.ADMIN);
     }
 
     public void requireOwner() {

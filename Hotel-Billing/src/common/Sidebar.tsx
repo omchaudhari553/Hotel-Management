@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { useBranch } from '../context/BranchContext';
 import { licenceService, LicenceInfo } from '../services/licenceService';
 import { settingsService } from '../services/settingsService';
+import apiClient from '../services/api';
 import {
   Building2,
   UtensilsCrossed,
@@ -33,6 +34,7 @@ import {
   Settings as SettingsIcon,
   Sparkles,
   ChefHat,
+  ShieldCheck,
   X,
 } from 'lucide-react';
 
@@ -122,6 +124,51 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onCloseMob
     window.addEventListener('branding-updated', handleBranding);
     return () => window.removeEventListener('branding-updated', handleBranding);
   }, []);
+
+  // Central Platform Feature Modules Enabled / Disabled Map
+  const [moduleStatus, setModuleStatus] = useState<Record<string, boolean>>(() => {
+    try {
+      const raw = localStorage.getItem('platform_hotel_modules_status');
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  useEffect(() => {
+    const handleModuleSync = () => {
+      try {
+        const raw = localStorage.getItem('platform_hotel_modules_status');
+        if (raw) setModuleStatus(JSON.parse(raw));
+      } catch {}
+    };
+
+    window.addEventListener('platform-modules-updated', handleModuleSync);
+    window.addEventListener('storage', handleModuleSync);
+
+    // Initial load from backend for Hotel (Product ID = 1)
+    apiClient.get('/superadmin/products/1/modules')
+      .then(res => {
+        const list = res.data?.data;
+        if (Array.isArray(list)) {
+          const map: Record<string, boolean> = {};
+          list.forEach((m: any) => { map[m.code] = m.active; });
+          setModuleStatus(map);
+          localStorage.setItem('platform_hotel_modules_status', JSON.stringify(map));
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      window.removeEventListener('platform-modules-updated', handleModuleSync);
+      window.removeEventListener('storage', handleModuleSync);
+    };
+  }, []);
+
+  const isModuleEnabled = (code: string) => {
+    // If explicitly set to false, it is disabled across all hotel logins
+    return moduleStatus[code] !== false;
+  };
 
   const handleUpgradePlan = () => {
     window.dispatchEvent(
@@ -348,53 +395,94 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onCloseMob
                 </div>
               )}
 
-              {/* 1. Hotel Dashboard */}
-              <NavLink to="/hotel/dashboard" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-                <LayoutDashboard size={18} />
-                <span>{t('hotelOverview', 'Hotel Overview')}</span>
-              </NavLink>
+              {/* Central Super Admin Panel Direct Switch */}
+              {(user?.role === 'SUPER_ADMIN' || (user as any)?.isSuperAdmin || user?.username === 'superadmin' || (typeof window !== 'undefined' && !!localStorage.getItem('superadmin_token'))) && (
+                <NavLink
+                  to="/superadmin/dashboard"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '11px 14px',
+                    borderRadius: '10px',
+                    backgroundColor: '#4338CA',
+                    color: '#FFFFFF',
+                    fontWeight: 800,
+                    fontSize: '0.86rem',
+                    textDecoration: 'none',
+                    marginBottom: '10px',
+                    border: '1.5px solid #818CF8',
+                    boxShadow: '0 4px 12px rgba(67, 56, 202, 0.35)',
+                  }}
+                >
+                  <ShieldCheck size={18} color="#C7D2FE" />
+                  <span>Central Super Admin</span>
+                </NavLink>
+              )}
+
+              {/* 1. Hotel Overview */}
+              {isModuleEnabled('HOTEL_OVERVIEW') && isModuleEnabled('HOTEL_DASHBOARD') && (
+                <NavLink to="/hotel/dashboard" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+                  <LayoutDashboard size={18} />
+                  <span>{t('hotelOverview', 'Hotel Overview')}</span>
+                </NavLink>
+              )}
 
               {/* 2. KOT Management */}
-              <NavLink to="/hotel/kot" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-                <ChefHat size={18} />
-                <span>{t('kot', 'KOT')}</span>
-              </NavLink>
+              {isModuleEnabled('HOTEL_KOT') && (
+                <NavLink to="/hotel/kot" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+                  <ChefHat size={18} />
+                  <span>{t('kot', 'KOT')}</span>
+                </NavLink>
+              )}
 
               {/* 3. Billing / Invoices */}
-              <NavLink to="/hotelbilling" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-                <FileText size={18} />
-                <span>{t('billingAndInvoices', 'Billing / Invoices')}</span>
-              </NavLink>
+              {isModuleEnabled('HOTEL_BILLING') && (
+                <NavLink to="/hotelbilling" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+                  <FileText size={18} />
+                  <span>{t('billingAndInvoices', 'Billing / Invoices')}</span>
+                </NavLink>
+              )}
 
               {/* 4. Tables Management */}
-              <NavLink to="/hotel/Tables" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-                <BedDouble size={18} />
-                <span>{t('tables', 'Tables')}</span>
-              </NavLink>
+              {isModuleEnabled('HOTEL_TABLES') && (
+                <NavLink to="/hotel/Tables" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+                  <BedDouble size={18} />
+                  <span>{t('tables', 'Tables')}</span>
+                </NavLink>
+              )}
 
               {/* 5. Payments */}
-              <NavLink to="/hotelpayment" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-                <CreditCard size={18} />
-                <span>{t('payments', 'Payments')}</span>
-              </NavLink>
+              {isModuleEnabled('HOTEL_PAYMENTS') && (
+                <NavLink to="/hotelpayment" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+                  <CreditCard size={18} />
+                  <span>{t('payments', 'Payments')}</span>
+                </NavLink>
+              )}
 
               {/* 6. Purchase Management */}
-              <NavLink to="/purchase" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-                <ShoppingCart size={18} />
-                <span>{t('purchase', 'Purchase')}</span>
-              </NavLink>
+              {isModuleEnabled('HOTEL_PURCHASE') && (
+                <NavLink to="/purchase" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+                  <ShoppingCart size={18} />
+                  <span>{t('purchase', 'Purchase')}</span>
+                </NavLink>
+              )}
 
               {/* 7. Staff Management */}
-              <NavLink to="/hotel/staff" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-                <Users size={18} />
-                <span>{t('staff', 'Staff')}</span>
-              </NavLink>
+              {isModuleEnabled('HOTEL_STAFF') && (
+                <NavLink to="/hotel/staff" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+                  <Users size={18} />
+                  <span>{t('staff', 'Staff')}</span>
+                </NavLink>
+              )}
 
               {/* 8. Settings (includes Reports & GST Reports) */}
-              <NavLink to="/hotel/Settings" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-                <SettingsIcon size={18} />
-                <span>{t('settings', 'Settings')}</span>
-              </NavLink>
+              {isModuleEnabled('HOTEL_SETTINGS') && isModuleEnabled('HOTEL_REPORTS') && (
+                <NavLink to="/hotel/Settings" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+                  <SettingsIcon size={18} />
+                  <span>{t('settings', 'Settings')}</span>
+                </NavLink>
+              )}
             </>
           )}
 

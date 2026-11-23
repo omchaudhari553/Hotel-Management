@@ -5813,14 +5813,8 @@ export function PoReceiptModal({ po, supplier, branch, onClose }) {
     }
   }, [po]);
 
-  // Fallback realistic items matching reference receipt if PO items are not yet populated
-  const sampleFallbackItems = [
-    { name: 'Rice (Premium Quality)', hsn: '100630', qty: 50, unit: 'Kg', rate: 40.00, amount: 2000.00 },
-    { name: 'Toor Dal', hsn: '100640', qty: 20, unit: 'Kg', rate: 120.00, amount: 2400.00 },
-    { name: 'Cooking Oil (Sunflower)', hsn: '151219', qty: 10, unit: 'Ltr', rate: 160.00, amount: 1600.00 },
-    { name: 'Wheat Flour (Atta)', hsn: '110100', qty: 30, unit: 'Kg', rate: 32.00, amount: 960.00 },
-    { name: 'Masala Mix', hsn: '090422', qty: 5, unit: 'Kg', rate: 280.00, amount: 1400.00 },
-  ];
+  // Realistic items if PO items are not yet populated
+  const sampleFallbackItems = [];
 
   const rawItems = (poData?.items && poData.items.length > 0) ? poData.items : sampleFallbackItems;
 

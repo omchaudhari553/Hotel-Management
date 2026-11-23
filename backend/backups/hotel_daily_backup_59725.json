@@ -1,0 +1,33 @@
+{
+  "system" : "Hotel Shourywada - Hotel POS & Billing Management",
+  "reference" : "HTL-59725",
+  "backupTimestamp" : "2026-11-22T23:00:20.072260700",
+  "backupDateFormatted" : "22-Nov-2026 11:00 pm",
+  "hotel" : {
+    "id" : 4,
+    "hotelName" : "Hotel Shourywada",
+    "code" : "HOTEL_SHOURYWADA23",
+    "ownerName" : "Vikas Hande",
+    "contactEmail" : "shourywada23@gmail.com",
+    "phone" : "8998877878",
+    "address" : null,
+    "city" : null,
+    "state" : null,
+    "currency" : "INR",
+    "taxNumber" : null
+  },
+  "summary" : {
+    "Total Sales Amount" : "₹ 0",
+    "Total Orders Count" : 0,
+    "Total Invoices Count" : 0,
+    "Total Payments Recorded" : 0,
+    "Total Expenses" : "₹ 0",
+    "Total Tables Registered" : 0,
+    "Total Menu Items Active" : 0
+  },
+  "tables" : [ ],
+  "menuItems" : [ ],
+  "invoices" : [ ],
+  "payments" : [ ],
+  "expenses" : [ ]
+}

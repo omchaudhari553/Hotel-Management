@@ -1,0 +1,115 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+6 0 obj
+<< /Length 4857 >>
+stream
+q 0.12 0.23 0.54 rg 40 760 515 50 re f Q
+BT /F2 16 Tf 1 1 1 rg 55 788 Td (ROYAL PALACE HOTEL - OPERATIONS BACKUP) Tj ET
+BT /F1 9 Tf 0.85 0.92 1 rg 55 772 Td (Hotel POS & Billing Management - Full Operations Report) Tj ET
+BT /F2 9 Tf 0.3 0.9 0.4 rg 450 788 Td (STATUS: SUCCESS) Tj ET
+BT /F1 8 Tf 0.85 0.92 1 rg 450 772 Td (Ref: HTL-78787) Tj ET
+q 0.96 0.97 0.99 rg 40 680 515 65 re f Q
+q 0.80 0.85 0.92 RG 1 w 40 680 515 65 re S Q
+BT /F2 9 Tf 0.12 0.23 0.54 rg 50 730 Td (HOTEL PROFILE & BACKUP INFO) Tj ET
+BT /F1 8 Tf 0.25 0.30 0.40 rg 50 717 Td (Property: Royal Palace Hotel | Code: HOTEL_HOTELADMIN) Tj ET
+BT /F1 8 Tf 0.25 0.30 0.40 rg 50 704 Td (Email: admin@royalpalace.com | Phone: 9876543210) Tj ET
+BT /F1 8 Tf 0.25 0.30 0.40 rg 50 691 Td (Backup Date: 22-Nov-2026 11:00 PM | Ref: HTL-78787) Tj ET
+q 0.98 0.99 1 rg 310 685 240 55 re f Q
+q 0.85 0.88 0.95 RG 0.5 w 310 685 240 55 re S Q
+BT /F2 8 Tf 0.10 0.15 0.25 rg 320 725 Td (Total Sales: Rs. 0) Tj ET
+BT /F2 8 Tf 0.10 0.15 0.25 rg 320 712 Td (Total Expenses: Rs. 0) Tj ET
+BT /F2 8 Tf 0.12 0.50 0.25 rg 320 699 Td (Net Balance: Rs. 0) Tj ET
+BT /F1 7.5 Tf 0.35 0.40 0.50 rg 440 725 Td (Invoices: 0) Tj ET
+BT /F1 7.5 Tf 0.35 0.40 0.50 rg 440 712 Td (Orders: 0) Tj ET
+BT /F1 7.5 Tf 0.35 0.40 0.50 rg 440 699 Td (Tables: 0 | Menu: 0) Tj ET
+BT /F2 11 Tf 0.08 0.18 0.45 rg 40 657.0 Td (1. RECENT INVOICES & SALES) Tj ET
+BT /F1 8.5 Tf 0.40 0.45 0.55 rg 260 657.0 Td (All recorded customer invoices \(0\)) Tj ET
+q 0.15 0.30 0.65 RG 1 w 40 653.0 m 555 653.0 l S Q
+q 0.12 0.23 0.54 rg 40 631.0 515 18 re f Q
+BT /F2 8.5 Tf 1 1 1 rg 44.0 636.0 Td (Invoice #) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 129.0 636.0 Td (Customer) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 244.0 636.0 Td (Total) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 319.0 636.0 Td (Paid) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 394.0 636.0 Td (Date) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 479.0 636.0 Td (Status) Tj ET
+BT /F2 11 Tf 0.08 0.18 0.45 rg 40 619.0 Td (2. GUEST ORDERS & KOT) Tj ET
+BT /F1 8.5 Tf 0.40 0.45 0.55 rg 260 619.0 Td (All recorded guest dining orders \(0\)) Tj ET
+q 0.15 0.30 0.65 RG 1 w 40 615.0 m 555 615.0 l S Q
+q 0.12 0.23 0.54 rg 40 593.0 515 18 re f Q
+BT /F2 8.5 Tf 1 1 1 rg 44.0 598.0 Td (Order #) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 129.0 598.0 Td (Guest Name) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 249.0 598.0 Td (Table) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 314.0 598.0 Td (Source) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 379.0 598.0 Td (Amount) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 469.0 598.0 Td (Status) Tj ET
+BT /F2 11 Tf 0.08 0.18 0.45 rg 40 581.0 Td (3. PAYMENTS & TRANSACTIONS) Tj ET
+BT /F1 8.5 Tf 0.40 0.45 0.55 rg 260 581.0 Td (Total transactions recorded \(0\)) Tj ET
+q 0.15 0.30 0.65 RG 1 w 40 577.0 m 555 577.0 l S Q
+q 0.12 0.23 0.54 rg 40 555.0 515 18 re f Q
+BT /F2 8.5 Tf 1 1 1 rg 44.0 560.0 Td (Txn Ref) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 154.0 560.0 Td (Method) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 229.0 560.0 Td (Amount) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 314.0 560.0 Td (Date) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 399.0 560.0 Td (Status) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 469.0 560.0 Td (Notes) Tj ET
+BT /F2 11 Tf 0.08 0.18 0.45 rg 40 543.0 Td (4. OPERATING EXPENSES) Tj ET
+BT /F1 8.5 Tf 0.40 0.45 0.55 rg 260 543.0 Td (Total recorded expense vouchers \(0\)) Tj ET
+q 0.15 0.30 0.65 RG 1 w 40 539.0 m 555 539.0 l S Q
+q 0.12 0.23 0.54 rg 40 517.0 515 18 re f Q
+BT /F2 8.5 Tf 1 1 1 rg 44.0 522.0 Td (Expense Name) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 169.0 522.0 Td (Category) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 264.0 522.0 Td (Amount) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 349.0 522.0 Td (Mode) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 434.0 522.0 Td (Date) Tj ET
+BT /F2 11 Tf 0.08 0.18 0.45 rg 40 505.0 Td (5. DINING TABLES & SEATING) Tj ET
+BT /F1 8.5 Tf 0.40 0.45 0.55 rg 260 505.0 Td (All registered floor dining tables \(0\)) Tj ET
+q 0.15 0.30 0.65 RG 1 w 40 501.0 m 555 501.0 l S Q
+q 0.12 0.23 0.54 rg 40 479.0 515 18 re f Q
+BT /F2 8.5 Tf 1 1 1 rg 44.0 484.0 Td (Table Name) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 154.0 484.0 Td (Area / Section) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 269.0 484.0 Td (Seats) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 329.0 484.0 Td (Status) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 429.0 484.0 Td (Notes) Tj ET
+BT /F2 11 Tf 0.08 0.18 0.45 rg 40 467.0 Td (6. MENU ITEMS CATALOG) Tj ET
+BT /F1 8.5 Tf 0.40 0.45 0.55 rg 260 467.0 Td (Complete restaurant food & beverage menu \(0\)) Tj ET
+q 0.15 0.30 0.65 RG 1 w 40 463.0 m 555 463.0 l S Q
+q 0.12 0.23 0.54 rg 40 441.0 515 18 re f Q
+BT /F2 8.5 Tf 1 1 1 rg 44.0 446.0 Td (Item Name) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 209.0 446.0 Td (Category) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 324.0 446.0 Td (Price) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 399.0 446.0 Td (Status) Tj ET
+BT /F2 8.5 Tf 1 1 1 rg 469.0 446.0 Td (Description) Tj ET
+q 0.85 0.85 0.85 RG 0.5 w 40 38 m 555 38 l S Q
+BT /F1 7.5 Tf 0.45 0.45 0.50 rg 40 26 Td (Royal Palace Hotel POS Management Suite - Automated Daily Backup Report) Tj ET
+BT /F2 7.5 Tf 0.45 0.45 0.50 rg 510 26 Td (Page 1) Tj ET
+
+endstream
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000251 00000 n 
+0000000321 00000 n 
+0000000396 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+5305
+%%EOF

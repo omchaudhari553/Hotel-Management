@@ -7,4 +7,5 @@ import java.time.*;
 
 public interface BusinessRepository extends JpaRepository<Business,Long> {
     Business findByCode(String code);
+    long countByActive(boolean active);
 }

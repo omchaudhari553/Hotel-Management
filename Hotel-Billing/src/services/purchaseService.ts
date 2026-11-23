@@ -148,13 +148,13 @@ export const purchaseService = {
     try {
       const params = branchId ? { branchId } : {};
       const response = await api.get<ApiResponse<PurchaseOrder[]>>('/hotel/purchase-orders', { params });
-      if (response.data && response.data.data && Array.isArray(response.data.data) && response.data.data.length > 0) {
+      if (response.data && response.data.data && Array.isArray(response.data.data)) {
         return response.data.data;
       }
     } catch (err) {
-      console.warn('Backend getPurchaseOrders failed, using fallback database bundle', err);
+      console.warn('Backend getPurchaseOrders failed', err);
     }
-    return (purchaseDataBundle.purchaseOrders as unknown as PurchaseOrder[]) || [];
+    return [];
   },
 
   createPurchaseOrder: async (payload: {
@@ -236,13 +236,13 @@ export const purchaseService = {
   getGoodsReceipts: async (): Promise<GoodsReceipt[]> => {
     try {
       const response = await api.get<ApiResponse<GoodsReceipt[]>>('/hotel/goods-receipts');
-      if (response.data && response.data.data && Array.isArray(response.data.data) && response.data.data.length > 0) {
+      if (response.data && response.data.data && Array.isArray(response.data.data)) {
         return response.data.data;
       }
     } catch (err) {
-      console.warn('Backend getGoodsReceipts failed, using fallback database bundle', err);
+      console.warn('Backend getGoodsReceipts failed', err);
     }
-    return (purchaseDataBundle.goodsReceipts as unknown as GoodsReceipt[]) || [];
+    return [];
   },
 
   createGoodsReceipt: async (payload: {
@@ -273,13 +273,13 @@ export const purchaseService = {
   getPurchaseInvoices: async (): Promise<PurchaseInvoice[]> => {
     try {
       const response = await api.get<ApiResponse<PurchaseInvoice[]>>('/hotel/purchase-invoices');
-      if (response.data && response.data.data && Array.isArray(response.data.data) && response.data.data.length > 0) {
+      if (response.data && response.data.data && Array.isArray(response.data.data)) {
         return response.data.data;
       }
     } catch (err) {
-      console.warn('Backend getPurchaseInvoices failed, using fallback database bundle', err);
+      console.warn('Backend getPurchaseInvoices failed', err);
     }
-    return (purchaseDataBundle.purchaseInvoices as unknown as PurchaseInvoice[]) || [];
+    return [];
   },
 
   createPurchaseInvoice: async (payload: {
@@ -312,13 +312,13 @@ export const purchaseService = {
   getPurchaseReturns: async (): Promise<PurchaseReturn[]> => {
     try {
       const response = await api.get<ApiResponse<PurchaseReturn[]>>('/hotel/purchase-returns');
-      if (response.data && response.data.data && Array.isArray(response.data.data) && response.data.data.length > 0) {
+      if (response.data && response.data.data && Array.isArray(response.data.data)) {
         return response.data.data;
       }
     } catch (err) {
-      console.warn('Backend getPurchaseReturns failed, using fallback database bundle', err);
+      console.warn('Backend getPurchaseReturns failed', err);
     }
-    return (purchaseDataBundle.purchaseReturns as unknown as PurchaseReturn[]) || [];
+    return [];
   },
 
   createPurchaseReturn: async (payload: {
@@ -349,13 +349,13 @@ export const purchaseService = {
   getSupplierPayments: async (): Promise<SupplierPayment[]> => {
     try {
       const response = await api.get<ApiResponse<SupplierPayment[]>>('/hotel/supplier-payments');
-      if (response.data && response.data.data && Array.isArray(response.data.data) && response.data.data.length > 0) {
+      if (response.data && response.data.data && Array.isArray(response.data.data)) {
         return response.data.data;
       }
     } catch (err) {
-      console.warn('Backend getSupplierPayments failed, using fallback database bundle', err);
+      console.warn('Backend getSupplierPayments failed', err);
     }
-    return (purchaseDataBundle.supplierPayments as unknown as SupplierPayment[]) || [];
+    return [];
   },
 
   recordSupplierPayment: async (payload: {

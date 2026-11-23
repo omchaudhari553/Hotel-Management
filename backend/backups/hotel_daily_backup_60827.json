@@ -1,0 +1,1174 @@
+{
+  "system" : "Royal Palace Hotel - Hotel POS & Billing Management",
+  "reference" : "HTL-60827",
+  "backupTimestamp" : "2026-11-20T15:33:29.919502300",
+  "backupDateFormatted" : "20-Nov-2026 03:33 pm",
+  "hotel" : {
+    "id" : 1,
+    "hotelName" : "Royal Palace Hotel",
+    "code" : "HOTEL_GRANDHERITAGE12",
+    "ownerName" : "Rahul Patil",
+    "contactEmail" : "poonamg7057@gmail.com",
+    "phone" : "7840921087",
+    "address" : "Hotel Premises, MG Road, Pune",
+    "city" : "Pune",
+    "state" : "Maharashtra",
+    "currency" : "INR",
+    "taxNumber" : ""
+  },
+  "summary" : {
+    "Total Sales Amount" : "₹ 56575.86",
+    "Total Orders Count" : 63,
+    "Total Invoices Count" : 55,
+    "Total Payments Recorded" : 49,
+    "Total Expenses" : "₹ 20250.00",
+    "Total Tables Registered" : 21,
+    "Total Menu Items Active" : 42
+  },
+  "tables" : [ {
+    "id" : 1,
+    "name" : "Table 01",
+    "status" : "OCCUPIED",
+    "capacity" : 1,
+    "area" : "Main Dining"
+  }, {
+    "id" : 2,
+    "name" : "Table 02",
+    "status" : "OCCUPIED",
+    "capacity" : 4,
+    "area" : "Main Dining"
+  }, {
+    "id" : 3,
+    "name" : "Table 03",
+    "status" : "AVAILABLE",
+    "capacity" : 4,
+    "area" : "Main Dining"
+  }, {
+    "id" : 4,
+    "name" : "T-99",
+    "status" : "OCCUPIED",
+    "capacity" : 4,
+    "area" : "Rooftop Garden"
+  }, {
+    "id" : 5,
+    "name" : "T-728",
+    "status" : "OCCUPIED",
+    "capacity" : 4,
+    "area" : "Outdoor Patio"
+  }, {
+    "id" : 6,
+    "name" : "T-304",
+    "status" : "AVAILABLE",
+    "capacity" : 4,
+    "area" : "Outdoor Patio"
+  }, {
+    "id" : 7,
+    "name" : "T-899",
+    "status" : "AVAILABLE",
+    "capacity" : 4,
+    "area" : "Outdoor Patio"
+  }, {
+    "id" : 8,
+    "name" : "Table 08",
+    "status" : "AVAILABLE",
+    "capacity" : 4,
+    "area" : "Main Dining"
+  }, {
+    "id" : 9,
+    "name" : "Table 09",
+    "status" : "OCCUPIED",
+    "capacity" : 4,
+    "area" : "Main Dining"
+  }, {
+    "id" : 10,
+    "name" : "Table 10",
+    "status" : "OCCUPIED",
+    "capacity" : 4,
+    "area" : "Main Dining"
+  }, {
+    "id" : 11,
+    "name" : "Table 999",
+    "status" : "AVAILABLE",
+    "capacity" : 4,
+    "area" : "Rooftop Terrace"
+  }, {
+    "id" : 12,
+    "name" : "Table P-1",
+    "status" : "OCCUPIED",
+    "capacity" : 4,
+    "area" : "Ground Floor"
+  }, {
+    "id" : 13,
+    "name" : "Table P-2",
+    "status" : "OCCUPIED",
+    "capacity" : 6,
+    "area" : "Ground Floor"
+  }, {
+    "id" : 14,
+    "name" : "Table D-1",
+    "status" : "AVAILABLE",
+    "capacity" : 4,
+    "area" : "Ground Floor"
+  }, {
+    "id" : 15,
+    "name" : "Table D-2",
+    "status" : "AVAILABLE",
+    "capacity" : 6,
+    "area" : "Ground Floor"
+  }, {
+    "id" : 16,
+    "name" : "Table B-1",
+    "status" : "AVAILABLE",
+    "capacity" : 4,
+    "area" : "Ground Floor"
+  }, {
+    "id" : 17,
+    "name" : "Table B-2",
+    "status" : "AVAILABLE",
+    "capacity" : 6,
+    "area" : "Ground Floor"
+  }, {
+    "id" : 18,
+    "name" : "Table 03",
+    "status" : "OCCUPIED",
+    "capacity" : 4,
+    "area" : "Main Dining"
+  }, {
+    "id" : 19,
+    "name" : "Table 04",
+    "status" : "AVAILABLE",
+    "capacity" : 4,
+    "area" : "Main Dining"
+  }, {
+    "id" : 20,
+    "name" : "Table 05",
+    "status" : "AVAILABLE",
+    "capacity" : 4,
+    "area" : "Main Dining"
+  }, {
+    "id" : 21,
+    "name" : "Table 12",
+    "status" : "AVAILABLE",
+    "capacity" : 4,
+    "area" : "Main Dining"
+  } ],
+  "menuItems" : [ {
+    "id" : 1,
+    "name" : "Veg Spring Rolls",
+    "category" : "STARTERS",
+    "price" : 180.00,
+    "active" : true
+  }, {
+    "id" : 2,
+    "name" : "Veg Spring Rolls",
+    "category" : "STARTERS",
+    "price" : 180.00,
+    "active" : true
+  }, {
+    "id" : 3,
+    "name" : "Paneer Tikka",
+    "category" : "STARTERS",
+    "price" : 260.00,
+    "active" : true
+  }, {
+    "id" : 4,
+    "name" : "Paneer Tikka",
+    "category" : "STARTERS",
+    "price" : 260.00,
+    "active" : true
+  }, {
+    "id" : 5,
+    "name" : "Chicken Tikka",
+    "category" : "STARTERS",
+    "price" : 320.00,
+    "active" : true
+  }, {
+    "id" : 6,
+    "name" : "Chicken Tikka",
+    "category" : "STARTERS",
+    "price" : 320.00,
+    "active" : true
+  }, {
+    "id" : 7,
+    "name" : "French Fries",
+    "category" : "STARTERS",
+    "price" : 140.00,
+    "active" : true
+  }, {
+    "id" : 8,
+    "name" : "French Fries",
+    "category" : "STARTERS",
+    "price" : 140.00,
+    "active" : true
+  }, {
+    "id" : 9,
+    "name" : "Masala Papad",
+    "category" : "STARTERS",
+    "price" : 60.00,
+    "active" : true
+  }, {
+    "id" : 10,
+    "name" : "Paneer Butter Masala",
+    "category" : "MAIN COURSE",
+    "price" : 290.00,
+    "active" : true
+  }, {
+    "id" : 11,
+    "name" : "Masala Papad",
+    "category" : "STARTERS",
+    "price" : 60.00,
+    "active" : true
+  }, {
+    "id" : 12,
+    "name" : "Butter Chicken",
+    "category" : "MAIN COURSE",
+    "price" : 380.00,
+    "active" : true
+  }, {
+    "id" : 13,
+    "name" : "Paneer Butter Masala",
+    "category" : "MAIN COURSE",
+    "price" : 290.00,
+    "active" : true
+  }, {
+    "id" : 14,
+    "name" : "Veg Kolhapuri",
+    "category" : "MAIN COURSE",
+    "price" : 240.00,
+    "active" : true
+  }, {
+    "id" : 15,
+    "name" : "Butter Chicken",
+    "category" : "MAIN COURSE",
+    "price" : 380.00,
+    "active" : true
+  }, {
+    "id" : 16,
+    "name" : "Dal Tadka",
+    "category" : "MAIN COURSE",
+    "price" : 190.00,
+    "active" : true
+  }, {
+    "id" : 17,
+    "name" : "Veg Kolhapuri",
+    "category" : "MAIN COURSE",
+    "price" : 240.00,
+    "active" : true
+  }, {
+    "id" : 18,
+    "name" : "Butter Naan",
+    "category" : "BREADS",
+    "price" : 45.00,
+    "active" : true
+  }, {
+    "id" : 19,
+    "name" : "Tandoori Roti",
+    "category" : "BREADS",
+    "price" : 25.00,
+    "active" : true
+  }, {
+    "id" : 20,
+    "name" : "Dal Tadka",
+    "category" : "MAIN COURSE",
+    "price" : 190.00,
+    "active" : true
+  }, {
+    "id" : 21,
+    "name" : "Butter Naan",
+    "category" : "BREADS",
+    "price" : 45.00,
+    "active" : true
+  }, {
+    "id" : 22,
+    "name" : "Butter Roti",
+    "category" : "BREADS",
+    "price" : 30.00,
+    "active" : true
+  }, {
+    "id" : 23,
+    "name" : "Tandoori Roti",
+    "category" : "BREADS",
+    "price" : 25.00,
+    "active" : true
+  }, {
+    "id" : 24,
+    "name" : "Butter Roti",
+    "category" : "BREADS",
+    "price" : 30.00,
+    "active" : true
+  }, {
+    "id" : 25,
+    "name" : "Jeera Rice",
+    "category" : "RICE",
+    "price" : 160.00,
+    "active" : true
+  }, {
+    "id" : 26,
+    "name" : "Jeera Rice",
+    "category" : "RICE",
+    "price" : 160.00,
+    "active" : true
+  }, {
+    "id" : 27,
+    "name" : "Chicken Biryani Special",
+    "category" : "RICE",
+    "price" : 340.00,
+    "active" : true
+  }, {
+    "id" : 28,
+    "name" : "Chicken Biryani Special",
+    "category" : "RICE",
+    "price" : 340.00,
+    "active" : true
+  }, {
+    "id" : 29,
+    "name" : "Gulab Jamun (2 pcs)",
+    "category" : "DESSERT",
+    "price" : 70.00,
+    "active" : true
+  }, {
+    "id" : 30,
+    "name" : "Gulab Jamun (2 pcs)",
+    "category" : "DESSERT",
+    "price" : 70.00,
+    "active" : true
+  }, {
+    "id" : 31,
+    "name" : "Chocolate Sizzling Brownie",
+    "category" : "DESSERT",
+    "price" : 160.00,
+    "active" : true
+  }, {
+    "id" : 32,
+    "name" : "Chocolate Sizzling Brownie",
+    "category" : "DESSERT",
+    "price" : 160.00,
+    "active" : true
+  }, {
+    "id" : 33,
+    "name" : "Mineral Water (Packaged)",
+    "category" : "BEVERAGES",
+    "price" : 20.00,
+    "active" : true
+  }, {
+    "id" : 34,
+    "name" : "Mineral Water (Packaged)",
+    "category" : "BEVERAGES",
+    "price" : 20.00,
+    "active" : true
+  }, {
+    "id" : 35,
+    "name" : "Solkadhi / Chaas",
+    "category" : "BEVERAGES",
+    "price" : 40.00,
+    "active" : true
+  }, {
+    "id" : 36,
+    "name" : "Solkadhi / Chaas",
+    "category" : "BEVERAGES",
+    "price" : 40.00,
+    "active" : true
+  }, {
+    "id" : 37,
+    "name" : "Test Burger",
+    "category" : "STARTERS",
+    "price" : 150.00,
+    "active" : true
+  }, {
+    "id" : 38,
+    "name" : "Test Burger",
+    "category" : "STARTERS",
+    "price" : 150.00,
+    "active" : true
+  }, {
+    "id" : 39,
+    "name" : "Special Masala Chai",
+    "category" : "BEVERAGES",
+    "price" : 40.00,
+    "active" : true
+  }, {
+    "id" : 40,
+    "name" : "Item-625",
+    "category" : "MAIN_COURSE",
+    "price" : 220.00,
+    "active" : true
+  }, {
+    "id" : 41,
+    "name" : "Item-329",
+    "category" : "MAIN_COURSE",
+    "price" : 220.00,
+    "active" : true
+  }, {
+    "id" : 42,
+    "name" : "Item-618",
+    "category" : "MAIN_COURSE",
+    "price" : 220.00,
+    "active" : true
+  } ],
+  "invoices" : [ {
+    "id" : 1,
+    "invoiceNumber" : "INV-1001",
+    "customerName" : "Shubham Chaudhari",
+    "grandTotal" : 1323.00,
+    "invoiceDate" : "2026-10-28",
+    "status" : "PAID"
+  }, {
+    "id" : 2,
+    "invoiceNumber" : "INV-1020",
+    "customerName" : "Ajinkya Kolkar",
+    "grandTotal" : 934.50,
+    "invoiceDate" : "2026-10-28",
+    "status" : "PAID"
+  }, {
+    "id" : 10004,
+    "invoiceNumber" : "INV-1003",
+    "customerName" : "Akshay ",
+    "grandTotal" : 1470.00,
+    "invoiceDate" : "2026-10-29",
+    "status" : "PAID"
+  }, {
+    "id" : 10005,
+    "invoiceNumber" : "INV-1004",
+    "customerName" : "Amrut Patil",
+    "grandTotal" : 1102.50,
+    "invoiceDate" : "2026-10-29",
+    "status" : "PAID"
+  }, {
+    "id" : 10007,
+    "invoiceNumber" : "INV-1005",
+    "customerName" : "Yuvi",
+    "grandTotal" : 1748.26,
+    "invoiceDate" : "2026-10-29",
+    "status" : "PAID"
+  }, {
+    "id" : 10009,
+    "invoiceNumber" : "INV-1011",
+    "customerName" : "Omkar",
+    "grandTotal" : 651.00,
+    "invoiceDate" : "2026-10-29",
+    "status" : "PAID"
+  }, {
+    "id" : 10010,
+    "invoiceNumber" : "INV-1010",
+    "customerName" : "Anant Chopade",
+    "grandTotal" : 588.00,
+    "invoiceDate" : "2026-10-30",
+    "status" : "PAID"
+  }, {
+    "id" : 10013,
+    "invoiceNumber" : "INV-1013",
+    "customerName" : "Vaishnavi",
+    "grandTotal" : 1092.00,
+    "invoiceDate" : "2026-10-30",
+    "status" : "PAID"
+  }, {
+    "id" : 10014,
+    "invoiceNumber" : "INV-1014",
+    "customerName" : "Gaurav Taneja",
+    "grandTotal" : 1092.00,
+    "invoiceDate" : "2026-10-30",
+    "status" : "PAID"
+  }, {
+    "id" : 10015,
+    "invoiceNumber" : "INV-1016",
+    "customerName" : "Samir Bawaskar",
+    "grandTotal" : 651.00,
+    "invoiceDate" : "2026-10-30",
+    "status" : "PAID"
+  }, {
+    "id" : 10017,
+    "invoiceNumber" : "INV-1019",
+    "customerName" : "Native Test Guest",
+    "grandTotal" : 735.00,
+    "invoiceDate" : "2026-10-31",
+    "status" : "PAID"
+  }, {
+    "id" : 10018,
+    "invoiceNumber" : "INV-1021",
+    "customerName" : "Guest",
+    "grandTotal" : 1281.00,
+    "invoiceDate" : "2026-10-31",
+    "status" : "PAID"
+  }, {
+    "id" : 10019,
+    "invoiceNumber" : "INV-1022",
+    "customerName" : "Harish Patil",
+    "grandTotal" : 1312.50,
+    "invoiceDate" : "2026-10-31",
+    "status" : "PAID"
+  }, {
+    "id" : 10021,
+    "invoiceNumber" : "INV-1023",
+    "customerName" : "Guest",
+    "grandTotal" : 724.50,
+    "invoiceDate" : "2026-10-31",
+    "status" : "PAID"
+  }, {
+    "id" : 10023,
+    "invoiceNumber" : "INV-1024",
+    "customerName" : "Guest",
+    "grandTotal" : 724.50,
+    "invoiceDate" : "2026-10-31",
+    "status" : "PAID"
+  }, {
+    "id" : 10027,
+    "invoiceNumber" : "INV-1025",
+    "customerName" : "Rajesh Patil",
+    "grandTotal" : 1302.00,
+    "invoiceDate" : "2026-10-31",
+    "status" : "PAID"
+  }, {
+    "id" : 10028,
+    "invoiceNumber" : "INV-1026",
+    "customerName" : "Abhishek",
+    "grandTotal" : 651.00,
+    "invoiceDate" : "2026-10-31",
+    "status" : "PAID"
+  }, {
+    "id" : 10029,
+    "invoiceNumber" : "INV-1027",
+    "customerName" : "Om",
+    "grandTotal" : 651.00,
+    "invoiceDate" : "2026-10-31",
+    "status" : "PAID"
+  }, {
+    "id" : 10030,
+    "invoiceNumber" : "INV-1028",
+    "customerName" : "Anant",
+    "grandTotal" : 693.00,
+    "invoiceDate" : "2026-10-31",
+    "status" : "PAID"
+  }, {
+    "id" : 10031,
+    "invoiceNumber" : "INV-1029",
+    "customerName" : "Ankita",
+    "grandTotal" : 672.00,
+    "invoiceDate" : "2026-11-01",
+    "status" : "PAID"
+  }, {
+    "id" : 10032,
+    "invoiceNumber" : "INV-PUNE-101",
+    "customerName" : "",
+    "grandTotal" : 4500.00,
+    "invoiceDate" : "2026-11-01",
+    "status" : "PAID"
+  }, {
+    "id" : 10033,
+    "invoiceNumber" : "INV-DHULE-101",
+    "customerName" : "",
+    "grandTotal" : 3200.00,
+    "invoiceDate" : "2026-11-01",
+    "status" : "PAID"
+  }, {
+    "id" : 10034,
+    "invoiceNumber" : "INV-BEED-101",
+    "customerName" : "",
+    "grandTotal" : 2800.00,
+    "invoiceDate" : "2026-11-01",
+    "status" : "PAID"
+  }, {
+    "id" : 10035,
+    "invoiceNumber" : "INV-1030",
+    "customerName" : "Shubham Chaudhari",
+    "grandTotal" : 1386.00,
+    "invoiceDate" : "2026-11-01",
+    "status" : "UNPAID"
+  }, {
+    "id" : 10036,
+    "invoiceNumber" : "INV-1031",
+    "customerName" : "Shailesh",
+    "grandTotal" : 1092.00,
+    "invoiceDate" : "2026-11-02",
+    "status" : "PAID"
+  }, {
+    "id" : 10037,
+    "invoiceNumber" : "INV-1099",
+    "customerName" : "",
+    "grandTotal" : 892.50,
+    "invoiceDate" : "2026-11-03",
+    "status" : "PAID"
+  }, {
+    "id" : 10038,
+    "invoiceNumber" : "INV-1100",
+    "customerName" : "Guest",
+    "grandTotal" : 1596.00,
+    "invoiceDate" : "2026-11-03",
+    "status" : "PAID"
+  }, {
+    "id" : 10041,
+    "invoiceNumber" : "INV-1002",
+    "customerName" : "Walk-in Guest",
+    "grandTotal" : 966.00,
+    "invoiceDate" : "2026-11-03",
+    "status" : "PAID"
+  }, {
+    "id" : 10043,
+    "invoiceNumber" : "INV-1101",
+    "customerName" : "Jayesh Kolte",
+    "grandTotal" : 651.00,
+    "invoiceDate" : "2026-11-16",
+    "status" : "PAID"
+  }, {
+    "id" : 10044,
+    "invoiceNumber" : "INV-1032",
+    "customerName" : "Guest",
+    "grandTotal" : 0.00,
+    "invoiceDate" : "2026-11-17",
+    "status" : "PAID"
+  }, {
+    "id" : 10045,
+    "invoiceNumber" : "INV-1034",
+    "customerName" : "Guest",
+    "grandTotal" : 2730.00,
+    "invoiceDate" : "2026-11-17",
+    "status" : "PAID"
+  }, {
+    "id" : 10046,
+    "invoiceNumber" : "INV-1102",
+    "customerName" : "Walk-in Guest",
+    "grandTotal" : 966.00,
+    "invoiceDate" : "2026-11-18",
+    "status" : "PAID"
+  }, {
+    "id" : 10047,
+    "invoiceNumber" : "INV-1103",
+    "customerName" : "Guest",
+    "grandTotal" : 1071.00,
+    "invoiceDate" : "2026-11-18",
+    "status" : "PAID"
+  }, {
+    "id" : 10048,
+    "invoiceNumber" : "INV-1104",
+    "customerName" : "Guest",
+    "grandTotal" : 1092.00,
+    "invoiceDate" : "2026-11-18",
+    "status" : "PAID"
+  }, {
+    "id" : 10049,
+    "invoiceNumber" : "INV-1105",
+    "customerName" : "Guest",
+    "grandTotal" : 651.00,
+    "invoiceDate" : "2026-11-18",
+    "status" : "PAID"
+  }, {
+    "id" : 10050,
+    "invoiceNumber" : "INV-1035",
+    "customerName" : "Guest",
+    "grandTotal" : 0.00,
+    "invoiceDate" : "2026-11-18",
+    "status" : "PAID"
+  }, {
+    "id" : 10051,
+    "invoiceNumber" : "INV-1106",
+    "customerName" : "",
+    "grandTotal" : 189.00,
+    "invoiceDate" : "2026-11-18",
+    "status" : "PAID"
+  }, {
+    "id" : 10052,
+    "invoiceNumber" : "INV-1107",
+    "customerName" : "Guest",
+    "grandTotal" : 1538.26,
+    "invoiceDate" : "2026-11-18",
+    "status" : "PARTIAL"
+  }, {
+    "id" : 10053,
+    "invoiceNumber" : "INV-1108",
+    "customerName" : "Guest",
+    "grandTotal" : 609.00,
+    "invoiceDate" : "2026-11-18",
+    "status" : "PAID"
+  }, {
+    "id" : 10054,
+    "invoiceNumber" : "INV-1109",
+    "customerName" : "Guest",
+    "grandTotal" : 2079.00,
+    "invoiceDate" : "2026-11-18",
+    "status" : "PAID"
+  }, {
+    "id" : 10055,
+    "invoiceNumber" : "INV-1110",
+    "customerName" : "Guest",
+    "grandTotal" : 831.60,
+    "invoiceDate" : "2026-11-18",
+    "status" : "PAID"
+  }, {
+    "id" : 10056,
+    "invoiceNumber" : "INV-1111",
+    "customerName" : "Walk-in Guest",
+    "grandTotal" : 966.00,
+    "invoiceDate" : "2026-11-18",
+    "status" : "PAID"
+  }, {
+    "id" : 10057,
+    "invoiceNumber" : "INV-1036",
+    "customerName" : "Guest",
+    "grandTotal" : 0.00,
+    "invoiceDate" : "2026-11-18",
+    "status" : "PAID"
+  }, {
+    "id" : 10058,
+    "invoiceNumber" : "INV-1112",
+    "customerName" : "Om Chaudhari",
+    "grandTotal" : 651.00,
+    "invoiceDate" : "2026-11-18",
+    "status" : "PAID"
+  }, {
+    "id" : 10059,
+    "invoiceNumber" : "INV-1113",
+    "customerName" : "Guest",
+    "grandTotal" : 1638.00,
+    "invoiceDate" : "2026-11-18",
+    "status" : "PAID"
+  }, {
+    "id" : 10060,
+    "invoiceNumber" : "INV-1037",
+    "customerName" : "Guest",
+    "grandTotal" : 2079.00,
+    "invoiceDate" : "2026-11-19",
+    "status" : "PAID"
+  }, {
+    "id" : 10061,
+    "invoiceNumber" : "INV-1038",
+    "customerName" : "Kalpesh",
+    "grandTotal" : 798.00,
+    "invoiceDate" : "2026-11-19",
+    "status" : "PAID"
+  }, {
+    "id" : 10062,
+    "invoiceNumber" : "INV-1039",
+    "customerName" : "Test Connectivity Guest",
+    "grandTotal" : 588.00,
+    "invoiceDate" : "2026-11-19",
+    "status" : "PAID"
+  }, {
+    "id" : 10063,
+    "invoiceNumber" : "INV-1040",
+    "customerName" : "Yash",
+    "grandTotal" : 651.00,
+    "invoiceDate" : "2026-11-19",
+    "status" : "PAID"
+  }, {
+    "id" : 10064,
+    "invoiceNumber" : "INV-1041",
+    "customerName" : "Mobile Connectivity Test",
+    "grandTotal" : 168.00,
+    "invoiceDate" : "2026-11-19",
+    "status" : "PAID"
+  }, {
+    "id" : 10065,
+    "invoiceNumber" : "INV-1042",
+    "customerName" : "Guest",
+    "grandTotal" : 0.00,
+    "invoiceDate" : "2026-11-19",
+    "status" : "PAID"
+  }, {
+    "id" : 10066,
+    "invoiceNumber" : "INV-1043",
+    "customerName" : "Guest",
+    "grandTotal" : 0.00,
+    "invoiceDate" : "2026-11-19",
+    "status" : "PAID"
+  }, {
+    "id" : 10067,
+    "invoiceNumber" : "INV-1044",
+    "customerName" : "Guest",
+    "grandTotal" : 0.00,
+    "invoiceDate" : "2026-11-19",
+    "status" : "PAID"
+  }, {
+    "id" : 10068,
+    "invoiceNumber" : "INV-1114",
+    "customerName" : "Guest",
+    "grandTotal" : 336.00,
+    "invoiceDate" : "2026-11-20",
+    "status" : "PAID"
+  }, {
+    "id" : 10069,
+    "invoiceNumber" : "INV-1115",
+    "customerName" : "Guest",
+    "grandTotal" : 1848.00,
+    "invoiceDate" : "2026-11-20",
+    "status" : "PAID"
+  } ],
+  "payments" : [ {
+    "id" : 1,
+    "amount" : 1323.00,
+    "paymentMethod" : "UPI",
+    "paymentDate" : "2026-10-28",
+    "transactionRef" : "TXN-INV-1",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 2,
+    "amount" : 1470.00,
+    "paymentMethod" : "CASH",
+    "paymentDate" : "2026-10-29",
+    "transactionRef" : "KOT-PAY-1793258943378",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 3,
+    "amount" : 1102.50,
+    "paymentMethod" : "UPI",
+    "paymentDate" : "2026-10-29",
+    "transactionRef" : "KOT-PAY-1793259110465",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 4,
+    "amount" : 1748.26,
+    "paymentMethod" : "UPI",
+    "paymentDate" : "2026-10-29",
+    "transactionRef" : "KOT-PAY-1793275661997",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 5,
+    "amount" : 588.00,
+    "paymentMethod" : "CASH",
+    "paymentDate" : "2026-10-30",
+    "transactionRef" : "KOT-PAY-1793335569923",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 6,
+    "amount" : 651.00,
+    "paymentMethod" : "CASH",
+    "paymentDate" : "2026-10-30",
+    "transactionRef" : "CASH/REC-462",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 7,
+    "amount" : 1092.00,
+    "paymentMethod" : "CASH",
+    "paymentDate" : "2026-10-30",
+    "transactionRef" : "CASH/REC-347",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 8,
+    "amount" : 1092.00,
+    "paymentMethod" : "UPI",
+    "paymentDate" : "2026-10-30",
+    "transactionRef" : "KOT-PAY-1793342465688",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 9,
+    "amount" : 651.00,
+    "paymentMethod" : "CASH",
+    "paymentDate" : "2026-10-30",
+    "transactionRef" : "CASH/REC-269",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 10,
+    "amount" : 735.00,
+    "paymentMethod" : "CASH",
+    "paymentDate" : "2026-10-31",
+    "transactionRef" : "CASH/REC-625",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 11,
+    "amount" : 934.50,
+    "paymentMethod" : "CASH",
+    "paymentDate" : "2026-10-31",
+    "transactionRef" : "CASH/REC-413",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 12,
+    "amount" : 1281.00,
+    "paymentMethod" : "CASH",
+    "paymentDate" : "2026-10-31",
+    "transactionRef" : "CASH/REC-909",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 13,
+    "amount" : 1312.50,
+    "paymentMethod" : "CASH",
+    "paymentDate" : "2026-10-31",
+    "transactionRef" : "CASH/REC-677",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 14,
+    "amount" : 724.50,
+    "paymentMethod" : "CASH",
+    "paymentDate" : "2026-10-31",
+    "transactionRef" : "CASH/REC-205",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 15,
+    "amount" : 724.50,
+    "paymentMethod" : "CASH",
+    "paymentDate" : "2026-10-31",
+    "transactionRef" : "CASH/REC-154",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 16,
+    "amount" : 1302.00,
+    "paymentMethod" : "UPI",
+    "paymentDate" : "2026-10-31",
+    "transactionRef" : "KOT-PAY-1793434006549",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 17,
+    "amount" : 651.00,
+    "paymentMethod" : "CASH",
+    "paymentDate" : "2026-10-31",
+    "transactionRef" : "KOT-PAY-1793447740965",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 18,
+    "amount" : 651.00,
+    "paymentMethod" : "UPI",
+    "paymentDate" : "2026-10-31",
+    "transactionRef" : "KOT-PAY-1793449004303",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 19,
+    "amount" : 4500.00,
+    "paymentMethod" : "UPI",
+    "paymentDate" : "2026-11-01",
+    "transactionRef" : "TXN-INV-PUNE-101",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 20,
+    "amount" : 3200.00,
+    "paymentMethod" : "UPI",
+    "paymentDate" : "2026-11-01",
+    "transactionRef" : "TXN-INV-DHULE-101",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 21,
+    "amount" : 2800.00,
+    "paymentMethod" : "UPI",
+    "paymentDate" : "2026-11-01",
+    "transactionRef" : "TXN-INV-BEED-101",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 22,
+    "amount" : 1092.00,
+    "paymentMethod" : "UPI",
+    "paymentDate" : "2026-11-02",
+    "transactionRef" : "KOT-PAY-1793611644950",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 23,
+    "amount" : 850.00,
+    "paymentMethod" : "UPI",
+    "paymentDate" : "2026-11-03",
+    "transactionRef" : "UPI/222849120",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 24,
+    "amount" : 672.00,
+    "paymentMethod" : "CASH",
+    "paymentDate" : "2026-11-03",
+    "transactionRef" : "COUNTER-CASH",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 25,
+    "amount" : 1596.00,
+    "paymentMethod" : "UPI",
+    "paymentDate" : "2026-11-03",
+    "transactionRef" : "KOT-PAY-1793699720608",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 26,
+    "amount" : 651.00,
+    "paymentMethod" : "UPI",
+    "paymentDate" : "2026-11-16",
+    "transactionRef" : "KOT-PAY-1794805718772",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 27,
+    "amount" : 966.00,
+    "paymentMethod" : "CASH",
+    "paymentDate" : "2026-11-18",
+    "transactionRef" : "CASH/REC-868",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 28,
+    "amount" : 1071.00,
+    "paymentMethod" : "CASH",
+    "paymentDate" : "2026-11-18",
+    "transactionRef" : "CASH/REC-178",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 29,
+    "amount" : 1092.00,
+    "paymentMethod" : "CASH",
+    "paymentDate" : "2026-11-18",
+    "transactionRef" : "CASH/REC-499",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 30,
+    "amount" : 651.00,
+    "paymentMethod" : "CASH",
+    "paymentDate" : "2026-11-18",
+    "transactionRef" : "CASH/REC-372",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 31,
+    "amount" : 189.00,
+    "paymentMethod" : "CASH",
+    "paymentDate" : "2026-11-18",
+    "transactionRef" : "CASH/REC-833",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 32,
+    "amount" : 1538.00,
+    "paymentMethod" : "CASH",
+    "paymentDate" : "2026-11-18",
+    "transactionRef" : "CASH/REC-929",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 33,
+    "amount" : 609.00,
+    "paymentMethod" : "CASH",
+    "paymentDate" : "2026-11-18",
+    "transactionRef" : "CASH/REC-272",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 34,
+    "amount" : 2079.00,
+    "paymentMethod" : "CASH",
+    "paymentDate" : "2026-11-18",
+    "transactionRef" : "CASH/REC-218",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 35,
+    "amount" : 2730.00,
+    "paymentMethod" : "UPI",
+    "paymentDate" : "2026-11-18",
+    "transactionRef" : "TXN-INV-10045",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 36,
+    "amount" : 831.60,
+    "paymentMethod" : "UPI",
+    "paymentDate" : "2026-11-18",
+    "transactionRef" : "UPI/178667464",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 37,
+    "amount" : 966.00,
+    "paymentMethod" : "UPI",
+    "paymentDate" : "2026-11-18",
+    "transactionRef" : "UPI/982746250",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 38,
+    "amount" : 42.50,
+    "paymentMethod" : "CASH",
+    "paymentDate" : "2026-11-18",
+    "transactionRef" : "CASH/REC-156",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 39,
+    "amount" : 651.00,
+    "paymentMethod" : "CASH",
+    "paymentDate" : "2026-11-18",
+    "transactionRef" : "CASH/REC-685",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 40,
+    "amount" : 1638.00,
+    "paymentMethod" : "CASH",
+    "paymentDate" : "2026-11-18",
+    "transactionRef" : "CASH/REC-236",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 41,
+    "amount" : 2079.00,
+    "paymentMethod" : "UPI",
+    "paymentDate" : "2026-11-19",
+    "transactionRef" : "TXN-INV-10060",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 42,
+    "amount" : 798.00,
+    "paymentMethod" : "UPI",
+    "paymentDate" : "2026-11-19",
+    "transactionRef" : "TXN-INV-10061",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 43,
+    "amount" : 693.00,
+    "paymentMethod" : "UPI",
+    "paymentDate" : "2026-11-19",
+    "transactionRef" : "TXN-INV-10030",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 44,
+    "amount" : 651.00,
+    "paymentMethod" : "UPI",
+    "paymentDate" : "2026-11-19",
+    "transactionRef" : "TXN-INV-10063",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 45,
+    "amount" : 588.00,
+    "paymentMethod" : "UPI",
+    "paymentDate" : "2026-11-19",
+    "transactionRef" : "TXN-INV-10062",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 46,
+    "amount" : 966.00,
+    "paymentMethod" : "UPI",
+    "paymentDate" : "2026-11-19",
+    "transactionRef" : "TXN-INV-10041",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 47,
+    "amount" : 168.00,
+    "paymentMethod" : "UPI",
+    "paymentDate" : "2026-11-19",
+    "transactionRef" : "TXN-INV-10064",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 48,
+    "amount" : 336.00,
+    "paymentMethod" : "CASH",
+    "paymentDate" : "2026-11-20",
+    "transactionRef" : "CASH/REC-299",
+    "status" : "SUCCESS"
+  }, {
+    "id" : 49,
+    "amount" : 1848.00,
+    "paymentMethod" : "CASH",
+    "paymentDate" : "2026-11-20",
+    "transactionRef" : "CASH/REC-560",
+    "status" : "SUCCESS"
+  } ],
+  "expenses" : [ {
+    "id" : 1,
+    "name" : "Electricity",
+    "category" : "Electricity",
+    "amount" : 15000.00,
+    "expenseDate" : "2026-10-28",
+    "paymentMode" : "UPI"
+  }, {
+    "id" : 2,
+    "name" : "Kitchen Utilities",
+    "category" : "UTILITIES",
+    "amount" : 1250.00,
+    "expenseDate" : "2026-10-29",
+    "paymentMode" : "UPI"
+  }, {
+    "id" : 3,
+    "name" : "Kitchen Utilities",
+    "category" : "UTILITIES",
+    "amount" : 1250.00,
+    "expenseDate" : "2026-10-29",
+    "paymentMode" : "UPI"
+  }, {
+    "id" : 4,
+    "name" : "Kitchen Utilities",
+    "category" : "UTILITIES",
+    "amount" : 1250.00,
+    "expenseDate" : "2026-10-29",
+    "paymentMode" : "UPI"
+  }, {
+    "id" : 5,
+    "name" : "water",
+    "category" : "Water",
+    "amount" : 1500.00,
+    "expenseDate" : "2026-11-16",
+    "paymentMode" : "UPI"
+  } ]
+}

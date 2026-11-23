@@ -340,11 +340,14 @@ public class HotelService {
         HotelOrder o=new HotelOrder();
         o.setBusiness(cu.get().getBusiness());
         o.setBranch(branch(q.branchId()));
+        boolean hasItems = q.items() != null && !q.items().isEmpty();
         if(q.tableId()!=null) {
             HotelTable tbl = tables.findByIdAndBusinessId(q.tableId(),cu.businessId()).orElseThrow(()->new NotFoundException("Table not found"));
             o.setTable(tbl);
-            tbl.setStatus(TableStatus.OCCUPIED);
-            tables.save(tbl);
+            if (hasItems) {
+                tbl.setStatus(TableStatus.OCCUPIED);
+                tables.save(tbl);
+            }
         }
         o.setOrderNumber("ORD-"+System.currentTimeMillis());
         o.setGuestName((q.guestName() != null && !q.guestName().isBlank()) ? q.guestName().trim() : "Guest");
@@ -364,16 +367,18 @@ public class HotelService {
             subtotal=subtotal.add(x.getTotalPrice());
         }
         o.setTotalAmount(subtotal.subtract(o.getDiscount()).max(BigDecimal.ZERO).multiply(BigDecimal.ONE.add(o.getTaxRate().divide(BigDecimal.valueOf(100),4,RoundingMode.HALF_UP))).setScale(2,RoundingMode.HALF_UP));
-        o.setSentToKitchen(true);
+        o.setSentToKitchen(hasItems);
         HotelOrder savedOrder = orders.save(o);
 
-        Kot k = new Kot();
-        k.setBusiness(cu.get().getBusiness());
-        k.setBranch(savedOrder.getBranch());
-        k.setOrder(savedOrder);
-        k.setKotNumber("KOT-" + System.currentTimeMillis());
-        k.setInstructions("Order " + savedOrder.getOrderNumber() + " for " + savedOrder.getGuestName());
-        kots.save(k);
+        if (hasItems) {
+            Kot k = new Kot();
+            k.setBusiness(cu.get().getBusiness());
+            k.setBranch(savedOrder.getBranch());
+            k.setOrder(savedOrder);
+            k.setKotNumber("KOT-" + System.currentTimeMillis());
+            k.setInstructions("Order " + savedOrder.getOrderNumber() + " for " + savedOrder.getGuestName());
+            kots.save(k);
+        }
 
         return orderMap(savedOrder);
     }
@@ -582,6 +587,9 @@ public class HotelService {
     @Transactional public Map<String,Object> createKot(KotRequest q) {
         if(q.orderId()!=null) {
             HotelOrder ord = orders.findByIdAndBusinessId(q.orderId(),cu.businessId()).orElseThrow(()->new NotFoundException("Order not found"));
+            if (ord.getItems() == null || ord.getItems().isEmpty()) {
+                throw new IllegalArgumentException("Cannot create KOT for an empty order without items.");
+            }
             List<Kot> existing = kots.findAllByOrderId(ord.getId());
             Optional<Kot> active = existing.stream().filter(k -> k.getStatus() != KotStatus.CANCELLED && k.getStatus() != KotStatus.COMPLETED).findFirst();
             if (active.isPresent()) {
@@ -607,13 +615,7 @@ public class HotelService {
             k.setInstructions(q.instructions() != null ? q.instructions() : ("Order " + ord.getOrderNumber() + " for " + ord.getGuestName()));
             return kotMap(kots.save(k));
         }
-        Kot k=new Kot();
-        k.setBusiness(cu.get().getBusiness());
-        k.setBranch(branch(q.branchId()));
-        k.setKotNumber("KOT-"+System.currentTimeMillis());
-        k.setStatus(KotStatus.SENT_TO_KITCHEN);
-        k.setInstructions(q.instructions());
-        return kotMap(kots.save(k));
+        throw new IllegalArgumentException("Order ID with items is required to create a KOT.");
     }
     public List<Map<String,Object>> kots() {
         return kots(null);
@@ -626,6 +628,10 @@ public class HotelService {
         return kots.findAllByBusinessIdOrderByCreatedAtDesc(cu.businessId()).stream()
                 .filter(k -> allowed.isEmpty() ? true : (k.getBranch() != null && allowed.contains(k.getBranch().getId())))
                 .filter(k -> {
+                    // Filter out any KOT with no order or 0 items
+                    if (k.getOrder() == null || k.getOrder().getItems() == null || k.getOrder().getItems().isEmpty()) {
+                        return false;
+                    }
                     if (k.getCreatedAt() == null) return true;
                     LocalDate dt = k.getCreatedAt().toLocalDate();
                     if (startDate != null && dt.isBefore(startDate)) return false;

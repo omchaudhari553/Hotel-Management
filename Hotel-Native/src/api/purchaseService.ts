@@ -311,12 +311,19 @@ class PurchaseStore {
       const saved = await AsyncStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        this.suppliers = parsed.suppliers || [];
-        this.purchaseOrders = parsed.purchaseOrders || [];
-        this.goodsReceipts = parsed.goodsReceipts || [];
-        this.purchaseInvoices = parsed.purchaseInvoices || [];
-        this.purchaseReturns = parsed.purchaseReturns || [];
-        this.supplierPayments = parsed.supplierPayments || [];
+        // Clear old demo mock data if detected
+        const hasDemoData = parsed.purchaseOrders?.some((po: any) => String(po.poNumber).includes('1791192640785') || String(po.supplierName) === 'Namdev')
+          || parsed.suppliers?.some((s: any) => String(s.name) === 'Namdev');
+        if (hasDemoData) {
+          this.loadDefaultBundle();
+        } else {
+          this.suppliers = parsed.suppliers || [];
+          this.purchaseOrders = parsed.purchaseOrders || [];
+          this.goodsReceipts = parsed.goodsReceipts || [];
+          this.purchaseInvoices = parsed.purchaseInvoices || [];
+          this.purchaseReturns = parsed.purchaseReturns || [];
+          this.supplierPayments = parsed.supplierPayments || [];
+        }
       } else {
         this.loadDefaultBundle();
       }
@@ -331,12 +338,12 @@ class PurchaseStore {
   }
 
   private loadDefaultBundle() {
-    this.suppliers = (purchaseDataBundle.suppliers as unknown as Supplier[]) || [];
-    this.purchaseOrders = (purchaseDataBundle.purchaseOrders as unknown as PurchaseOrder[]) || [];
-    this.goodsReceipts = (purchaseDataBundle.goodsReceipts as unknown as GoodsReceipt[]) || [];
-    this.purchaseInvoices = (purchaseDataBundle.purchaseInvoices as unknown as PurchaseInvoice[]) || [];
-    this.purchaseReturns = (purchaseDataBundle.purchaseReturns as unknown as PurchaseReturn[]) || [];
-    this.supplierPayments = (purchaseDataBundle.supplierPayments as unknown as SupplierPayment[]) || [];
+    this.suppliers = [];
+    this.purchaseOrders = [];
+    this.goodsReceipts = [];
+    this.purchaseInvoices = [];
+    this.purchaseReturns = [];
+    this.supplierPayments = [];
     this.persist();
   }
 
