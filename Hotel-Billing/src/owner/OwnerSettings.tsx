@@ -934,6 +934,10 @@ export const OwnerSettings: React.FC = () => {
           </div>
         </form>
       </div>
+<<<<<<< HEAD
+=======
+
+>>>>>>> 569d853fefe750dfe6821fa2fb984598e642f748
       {/* Daily Automated Backup (11:00 PM) Card */}
       <div
         className="owner-card"
@@ -1159,6 +1163,10 @@ export const OwnerSettings: React.FC = () => {
           </button>
         </div>
       </div>
+<<<<<<< HEAD
+=======
+
+>>>>>>> 569d853fefe750dfe6821fa2fb984598e642f748
       {/* Standalone / Direct Subscription Modal for 100% Reliable Triggering */}
       <SubscriptionModal
         isOpen={showUpgradeModal}
