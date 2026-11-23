@@ -15,8 +15,12 @@ public class User extends BaseEntity implements org.springframework.security.cor
     @Column(nullable=false) private boolean active=true;
     @Enumerated(EnumType.STRING) @Column(nullable=false) private com.hotelmanagement.enums.UserRole role=com.hotelmanagement.enums.UserRole.ADMIN;
 
+    public boolean isSuperAdmin() {
+        return this.role == com.hotelmanagement.enums.UserRole.SUPER_ADMIN || this.role == com.hotelmanagement.enums.UserRole.PLATFORM_ADMIN || "superadmin".equalsIgnoreCase(this.username);
+    }
+
     public boolean isOwner() {
-        return this.role == com.hotelmanagement.enums.UserRole.OWNER || (this.branch == null && this.role == com.hotelmanagement.enums.UserRole.ADMIN);
+        return isSuperAdmin() || this.role == com.hotelmanagement.enums.UserRole.OWNER || (this.branch == null && this.role == com.hotelmanagement.enums.UserRole.ADMIN);
     }
 
     public boolean isBranchUser() {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useIndustry } from '../context/IndustryContext';
@@ -84,6 +84,38 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleMobileMenu }) => {
 
   // Licence & trial status state
   const [licenceInfo, setLicenceInfo] = useState<LicenceInfo | null>(null);
+
+  // Super Admin view mode detection
+  const isSuperAdminViewing = useMemo(() => {
+    try {
+      if (sessionStorage.getItem('superadmin_viewing_hotel') === 'true') return true;
+      const raw = localStorage.getItem('superadmin_user') || localStorage.getItem('ajalkar_user') || localStorage.getItem('user');
+      if (raw) {
+        const u = JSON.parse(raw);
+        return Boolean(
+          u?.role === 'SUPER_ADMIN' ||
+          u?.role === 'PLATFORM_ADMIN' ||
+          (u as any)?.isSuperAdmin ||
+          u?.roles?.includes('ROLE_SUPER_ADMIN') ||
+          u?.username?.toLowerCase() === 'superadmin'
+        );
+      }
+    } catch {}
+    return Boolean(
+      user?.role === 'SUPER_ADMIN' ||
+      user?.role === 'PLATFORM_ADMIN' ||
+      (user as any)?.isSuperAdmin ||
+      user?.roles?.includes('ROLE_SUPER_ADMIN') ||
+      user?.username?.toLowerCase() === 'superadmin'
+    );
+  }, [user]);
+
+  const handleReturnToSuperAdmin = () => {
+    try {
+      sessionStorage.removeItem('superadmin_viewing_hotel');
+    } catch {}
+    window.location.href = '/superadmin/dashboard';
+  };
 
   const fetchLicence = async () => {
     try {
@@ -922,6 +954,36 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleMobileMenu }) => {
 
       {/* ================= RIGHT SECTION: Language, DB, Date, Bell, Profile ================= */}
       <div className="navbar-right">
+        {/* Super Admin Return Button when viewing Hotel */}
+        {isSuperAdminViewing && (
+          <button
+            type="button"
+            onClick={handleReturnToSuperAdmin}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 14px',
+              borderRadius: '20px',
+              backgroundColor: '#4338CA',
+              color: '#FFFFFF',
+              fontWeight: 800,
+              fontSize: '12px',
+              border: '1.5px solid #6366F1',
+              cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(99, 102, 241, 0.4)',
+              flexShrink: 0,
+              transition: 'all 0.15s ease',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#3730A3'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#4338CA'; }}
+            title={language === 'mr' ? 'हॉटेल डॅशबोर्डमधून बाहेर पडून परत सुपर ॲडमिन पॅनलकडे जा' : 'Return to Super Admin Dashboard'}
+          >
+            <Shield size={14} color="#A5B4FC" />
+            <span>Super Admin Panel</span>
+          </button>
+        )}
+
         {/* Multi-Branch Selector */}
         {!user?.branchId ? (
           <div ref={branchDropdownRef} style={{ position: 'relative', flexShrink: 0 }}>
@@ -1696,6 +1758,34 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleMobileMenu }) => {
                 <span>{t('plansAndLicencing', 'Plans & Licencing')}</span>
               </div>
 
+
+              {isSuperAdminViewing && (
+                <div
+                  onClick={() => {
+                    setIsProfileOpen(false);
+                    handleReturnToSuperAdmin();
+                  }}
+                  style={{
+                    padding: '9px 12px',
+                    borderRadius: '8px',
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    color: '#4338CA',
+                    backgroundColor: '#EEF2FF',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '9px',
+                    marginBottom: '4px',
+                    transition: 'background-color 0.15s ease',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#E0E7FF')}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#EEF2FF')}
+                >
+                  <Shield size={15} color="#4F46E5" />
+                  <span>{language === 'mr' ? 'सुपर ॲडमिन पॅनलकडे परत जा' : 'Back to Super Admin Panel'}</span>
+                </div>
+              )}
 
               <div style={{ height: '1px', backgroundColor: '#F0ECE7', margin: '6px 4px' }} />
 

@@ -14,6 +14,8 @@ export interface OnboardingPayload {
   planId: string;
   billingCycle?: 'MONTHLY' | 'ANNUAL';
   adminPassword?: string;
+  role?: string;
+  businessType?: string;
 }
 
 export interface OnboardingResult {
@@ -36,6 +38,8 @@ export const onboardingService = {
       password: payload.adminPassword || 'Admin@123',
       phone: payload.mobile,
       industryType: payload.industryType,
+      role: payload.role || 'SINGLE_USER',
+      businessType: payload.businessType || 'SINGLE',
     };
 
     let response;

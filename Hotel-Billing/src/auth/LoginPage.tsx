@@ -83,6 +83,20 @@ export const LoginPage: React.FC = () => {
     if (savedIdentifier) {
       setIdentifier(savedIdentifier);
     }
+    try {
+      const uRaw = localStorage.getItem('superadmin_user') || localStorage.getItem('user');
+      const token = localStorage.getItem('superadmin_token') || localStorage.getItem('token');
+      if (token && uRaw) {
+        const u = JSON.parse(uRaw);
+        if (
+          u?.role === 'SUPER_ADMIN' ||
+          (u as any)?.isSuperAdmin ||
+          u?.username?.toLowerCase() === 'superadmin'
+        ) {
+          window.location.href = '/superadmin/dashboard';
+        }
+      }
+    } catch {}
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -101,6 +115,30 @@ export const LoginPage: React.FC = () => {
       const res = await login(identifier.trim(), password, rememberMe);
       showToast('success', t('loginSuccess', 'Logged in successfully!'));
       const loggedInUser = res?.user;
+
+      // 0. Super Admin Auto-Redirection
+      const isSuperAdmin =
+        (loggedInUser as any)?.isSuperAdmin === true ||
+        loggedInUser?.role === 'SUPER_ADMIN' ||
+        loggedInUser?.role === 'PLATFORM_ADMIN' ||
+        loggedInUser?.roles?.includes('ROLE_SUPER_ADMIN') ||
+        loggedInUser?.roles?.includes('ROLE_PLATFORM_ADMIN') ||
+        loggedInUser?.username?.toLowerCase() === 'superadmin' ||
+        loggedInUser?.email?.toLowerCase() === 'superadmin@platform.com' ||
+        identifier.trim().toLowerCase() === 'superadmin' ||
+        identifier.trim().toLowerCase() === 'superadmin@platform.com';
+
+      if (isSuperAdmin) {
+        localStorage.setItem('token', res.token);
+        localStorage.setItem('ajalkar_token', res.token);
+        localStorage.setItem('superadmin_token', res.token);
+        localStorage.setItem('user', JSON.stringify(loggedInUser || { username: 'superadmin', role: 'SUPER_ADMIN', isSuperAdmin: true }));
+        localStorage.setItem('superadmin_user', JSON.stringify(loggedInUser || { username: 'superadmin', role: 'SUPER_ADMIN', isSuperAdmin: true }));
+        localStorage.setItem('ajalkar_user', JSON.stringify(loggedInUser || { username: 'superadmin', role: 'SUPER_ADMIN', isSuperAdmin: true }));
+        sessionStorage.removeItem('superadmin_viewing_hotel');
+        window.location.href = '/superadmin/dashboard';
+        return;
+      }
       const isBranchUser = Boolean(loggedInUser?.branchId);
       const isOwner =
         loggedInUser?.isOwner === true ||

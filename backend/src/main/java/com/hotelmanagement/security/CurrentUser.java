@@ -52,9 +52,14 @@ public class CurrentUser {
         return get().getBranch() != null;
     }
 
+    public boolean isSuperAdmin() {
+        User u = get();
+        return u != null && (u.getRole() == UserRole.SUPER_ADMIN || u.getRole() == UserRole.PLATFORM_ADMIN || "superadmin".equalsIgnoreCase(u.getUsername()));
+    }
+
     public boolean isOwner() {
         User u = get();
-        return u.getRole() == UserRole.OWNER || (u.getBranch() == null && u.getRole() == UserRole.ADMIN);
+        return isSuperAdmin() || u.getRole() == UserRole.OWNER || (u.getBranch() == null && u.getRole() == UserRole.ADMIN);
     }
 
     public void requireOwner() {

@@ -64,8 +64,97 @@ import { OwnerBillingPerformance } from '../owner/OwnerBillingPerformance';
 import { OwnerSettings } from '../owner/OwnerSettings';
 import { HotelSubscriptionDashboard } from '../hotel/HotelSubscriptionDashboard';
 
+// Centralized Super Admin Panel Imports
+import { SuperAdminGuard } from '../superadmin/SuperAdminGuard';
+import { SuperAdminLayout } from '../superadmin/SuperAdminLayout';
+import { SuperAdminLogin } from '../superadmin/SuperAdminLogin';
+import { SuperAdminDashboardPage } from '../superadmin/pages/SuperAdminDashboardPage';
+import { BusinessManagementPage } from '../superadmin/pages/BusinessManagementPage';
+import { BranchManagementPage } from '../superadmin/pages/BranchManagementPage';
+import { ProductManagementPage } from '../superadmin/pages/ProductManagementPage';
+import { SubscriptionManagementPage } from '../superadmin/pages/SubscriptionManagementPage';
+import { SubscriptionPlansPage } from '../superadmin/pages/SubscriptionPlansPage';
+import { FreeTrialManagementPage } from '../superadmin/pages/FreeTrialManagementPage';
+import { PaymentManagementPage } from '../superadmin/pages/PaymentManagementPage';
+import { InvoiceManagementPage } from '../superadmin/pages/InvoiceManagementPage';
+import { UserRoleManagementPage } from '../superadmin/pages/UserRoleManagementPage';
+import { ProductModuleManagementPage } from '../superadmin/pages/ProductModuleManagementPage';
+import { BranchSalesPage } from '../superadmin/pages/BranchSalesPage';
+import { ProfitAnalysisPage } from '../superadmin/pages/ProfitAnalysisPage';
+import { ReportsAnalyticsPage } from '../superadmin/pages/ReportsAnalyticsPage';
+import { SupportManagementPage } from '../superadmin/pages/SupportManagementPage';
+import { NotificationsPage } from '../superadmin/pages/NotificationsPage';
+import { AuditLogsPage } from '../superadmin/pages/AuditLogsPage';
+import { SettingsPage } from '../superadmin/pages/SettingsPage';
+
 const DynamicRootRedirect: React.FC = () => {
   return <Navigate to="/choose-industry" replace />;
+};
+
+const HotelModuleRoute: React.FC<{ moduleCode: string; children: React.ReactNode }> = ({ moduleCode, children }) => {
+  const [enabled, setEnabled] = React.useState<boolean>(() => {
+    try {
+      const raw = localStorage.getItem('platform_hotel_modules_status');
+      if (!raw) return true;
+      const parsed = JSON.parse(raw);
+      if (moduleCode === 'HOTEL_OVERVIEW') {
+        return parsed['HOTEL_OVERVIEW'] !== false && parsed['HOTEL_DASHBOARD'] !== false;
+      }
+      if (moduleCode === 'HOTEL_SETTINGS') {
+        return parsed['HOTEL_SETTINGS'] !== false && parsed['HOTEL_REPORTS'] !== false;
+      }
+      return parsed[moduleCode] !== false;
+    } catch {
+      return true;
+    }
+  });
+
+  React.useEffect(() => {
+    const handleSync = () => {
+      try {
+        const raw = localStorage.getItem('platform_hotel_modules_status');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (moduleCode === 'HOTEL_OVERVIEW') {
+            setEnabled(parsed['HOTEL_OVERVIEW'] !== false && parsed['HOTEL_DASHBOARD'] !== false);
+          } else if (moduleCode === 'HOTEL_SETTINGS') {
+            setEnabled(parsed['HOTEL_SETTINGS'] !== false && parsed['HOTEL_REPORTS'] !== false);
+          } else {
+            setEnabled(parsed[moduleCode] !== false);
+          }
+        }
+      } catch {}
+    };
+    window.addEventListener('platform-modules-updated', handleSync);
+    window.addEventListener('storage', handleSync);
+    return () => {
+      window.removeEventListener('platform-modules-updated', handleSync);
+      window.removeEventListener('storage', handleSync);
+    };
+  }, [moduleCode]);
+
+  if (!enabled) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', textAlign: 'center', padding: '24px' }}>
+        <div style={{ width: '56px', height: '56px', borderRadius: '16px', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#EF4444', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', fontSize: '26px' }}>
+          🔒
+        </div>
+        <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0F172A', marginBottom: '8px' }}>Module Disabled by Platform Admin</h2>
+        <p style={{ fontSize: '0.85rem', color: '#64748B', maxWidth: '420px', lineHeight: 1.5, marginBottom: '20px' }}>
+          This feature module ({moduleCode}) has been disabled from the Central Super Admin Panel. Contact your platform administrator to re-enable access.
+        </p>
+        <button
+          type="button"
+          onClick={() => { window.location.href = '/hotel/dashboard'; }}
+          style={{ padding: '8px 20px', backgroundColor: '#4F46E5', color: '#FFFFFF', borderRadius: '10px', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '0.82rem' }}
+        >
+          Return to Hotel Dashboard
+        </button>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
 };
 
 export const AppRoutes: React.FC = () => {
@@ -76,6 +165,40 @@ export const AppRoutes: React.FC = () => {
       <Route element={<AuthLayout />}>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
+      </Route>
+
+      {/* Super Admin Login */}
+      <Route path="/superadmin/login" element={<SuperAdminLogin />} />
+
+      {/* ================= CENTRALIZED SUPER ADMIN PANEL (18 Modules) ================= */}
+      <Route
+        path="/superadmin"
+        element={
+          <SuperAdminGuard>
+            <SuperAdminLayout />
+          </SuperAdminGuard>
+        }
+      >
+        <Route index element={<Navigate to="/superadmin/dashboard" replace />} />
+        <Route path="dashboard" element={<SuperAdminDashboardPage />} />
+        <Route path="businesses" element={<BusinessManagementPage />} />
+        <Route path="branches" element={<BranchManagementPage />} />
+        <Route path="products" element={<ProductManagementPage />} />
+        <Route path="subscriptions" element={<SubscriptionManagementPage />} />
+        <Route path="plans" element={<SubscriptionPlansPage />} />
+        <Route path="trials" element={<FreeTrialManagementPage />} />
+        <Route path="payments" element={<PaymentManagementPage />} />
+        <Route path="invoices" element={<InvoiceManagementPage />} />
+        <Route path="users" element={<UserRoleManagementPage />} />
+        <Route path="modules" element={<ProductModuleManagementPage />} />
+        <Route path="branch-sales" element={<BranchSalesPage />} />
+        <Route path="profit-analysis" element={<ProfitAnalysisPage />} />
+        <Route path="reports" element={<ReportsAnalyticsPage />} />
+        <Route path="support" element={<SupportManagementPage />} />
+        <Route path="notifications" element={<NotificationsPage />} />
+        <Route path="audit-logs" element={<AuditLogsPage />} />
+        <Route path="settings" element={<SettingsPage />} />
+        <Route path="*" element={<Navigate to="/superadmin/dashboard" replace />} />
       </Route>
 
       <Route path="/owner/login" element={<Navigate to="/login" replace />} />

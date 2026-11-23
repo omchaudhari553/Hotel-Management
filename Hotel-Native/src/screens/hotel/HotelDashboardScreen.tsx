@@ -324,8 +324,14 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
   }, [branchPaymentsToday, branchOrdersToday]);
 
   const liveOrdersCount = useMemo(() => {
-    return branchOrdersToday.length;
-  }, [branchOrdersToday]);
+    const todayIds = new Set<string>();
+    branchOrdersToday.forEach((o) => todayIds.add(o.id));
+    branchPaymentsToday.forEach((p) => {
+      if (p.orderId) todayIds.add(String(p.orderId));
+      else todayIds.add(`pay-${p.billId}`);
+    });
+    return todayIds.size > 0 ? todayIds.size : (branchOrdersToday.length > 0 ? branchOrdersToday.length : (liveSalesTotalNum > 0 ? 1 : 0));
+  }, [branchOrdersToday, branchPaymentsToday, liveSalesTotalNum]);
 
   // Dynamic Hourly Sales calculation for the Sales Overview Chart
   const liveSalesChartData = useMemo(() => {
@@ -466,8 +472,18 @@ export const HotelDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
       { y: 126, label: '₹0' },
     ];
 
-    const liveAvgBill = liveOrdersCount > 0 ? Math.round(liveSalesTotalNum / liveOrdersCount) : 0;
-    const liveTotalCust = branchOrdersToday.length > 0 ? branchOrdersToday.length : 0;
+    const effectiveOrdersCount = liveOrdersCount > 0 ? liveOrdersCount : (liveSalesTotalNum > 0 ? 1 : 0);
+    const liveAvgBill = effectiveOrdersCount > 0 ? Math.round(liveSalesTotalNum / effectiveOrdersCount) : 0;
+    const uniqueCust = new Set<string>();
+    branchOrdersToday.forEach((o) => {
+      const c = (o.customer || '').trim();
+      if (c && c.toLowerCase() !== 'walk-in guest' && c.toLowerCase() !== 'guest') uniqueCust.add(c.toLowerCase());
+    });
+    branchPaymentsToday.forEach((p) => {
+      const c = (p.customerName || '').trim();
+      if (c && c.toLowerCase() !== 'walk-in guest' && c.toLowerCase() !== 'guest') uniqueCust.add(c.toLowerCase());
+    });
+    const liveTotalCust = uniqueCust.size > 0 ? uniqueCust.size : effectiveOrdersCount;
     const orderDiscounts = branchOrdersToday.reduce((acc, o) => acc + (Number(o.discountAmount) || 0), 0);
     const liveTotalDiscounts = orderDiscounts > 0 ? orderDiscounts : 0;
 

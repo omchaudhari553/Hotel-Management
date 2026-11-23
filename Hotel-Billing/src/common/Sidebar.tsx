@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useIndustry } from '../context/IndustryContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -33,6 +33,7 @@ import {
   Settings as SettingsIcon,
   Sparkles,
   ChefHat,
+  Shield,
   X,
 } from 'lucide-react';
 
@@ -55,6 +56,30 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onCloseMob
     user?.isOwner === true ||
     user?.role === 'OWNER' ||
     (!user?.branchId && (user?.roles?.includes('ROLE_OWNER') || user?.roles?.includes('ROLE_ADMIN') || user?.role === 'ADMIN'));
+
+  const isSuperAdminViewing = useMemo(() => {
+    try {
+      if (sessionStorage.getItem('superadmin_viewing_hotel') === 'true') return true;
+      const raw = localStorage.getItem('superadmin_user') || localStorage.getItem('ajalkar_user') || localStorage.getItem('user');
+      if (raw) {
+        const u = JSON.parse(raw);
+        return Boolean(
+          u?.role === 'SUPER_ADMIN' ||
+          u?.role === 'PLATFORM_ADMIN' ||
+          (u as any)?.isSuperAdmin ||
+          u?.roles?.includes('ROLE_SUPER_ADMIN') ||
+          u?.username?.toLowerCase() === 'superadmin'
+        );
+      }
+    } catch {}
+    return Boolean(
+      user?.role === 'SUPER_ADMIN' ||
+      user?.role === 'PLATFORM_ADMIN' ||
+      (user as any)?.isSuperAdmin ||
+      user?.roles?.includes('ROLE_SUPER_ADMIN') ||
+      user?.username?.toLowerCase() === 'superadmin'
+    );
+  }, [user]);
   const navigate = useNavigate();
   const [licenceInfo, setLicenceInfo] = useState<LicenceInfo | null>(null);
 
@@ -307,7 +332,30 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onCloseMob
         <nav className="sidebar-nav" style={{ paddingTop: '8px' }}>
           {activeIndustryCode === 'HOTEL' && (
             <>
-              {isOwner && localStorage.getItem('ajalkar_user_mode') !== 'SINGLE' && (
+              {/* Central Super Admin Link for Super Admin */}
+              {isSuperAdminViewing ? (
+                <NavLink
+                  to="/superadmin/dashboard"
+                  className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                  style={{
+                    backgroundColor: '#4F46E5',
+                    border: '1px solid #6366F1',
+                    marginBottom: '10px',
+                    borderRadius: '8px',
+                    color: '#FFFFFF',
+                    fontWeight: 700,
+                    boxShadow: '0 2px 8px rgba(79, 70, 229, 0.4)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '10px 14px',
+                    textDecoration: 'none'
+                  }}
+                >
+                  <Shield size={18} color="#FFFFFF" />
+                  <span>Central Super Admin</span>
+                </NavLink>
+              ) : isOwner && localStorage.getItem('ajalkar_user_mode') !== 'SINGLE' ? (
                 <NavLink
                   to="/owner/dashboard"
                   className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
@@ -323,7 +371,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onCloseMob
                   <Building2 size={18} color="#F97316" />
                   <span>Owner Admin Panel</span>
                 </NavLink>
-              )}
+              ) : null}
 
               {user?.branchId && (
                 <div

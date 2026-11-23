@@ -403,7 +403,9 @@ public class AuthService {
             m.put("branchStatus", null);
             m.put("isBranchUser", false);
             long branchCount = loaded.getBusiness() != null ? branches.countByBusinessId(loaded.getBusiness().getId()) : 0;
-            boolean isOwner = loaded.getRole() == UserRole.OWNER || (loaded.getBranch() == null && loaded.getRole() == UserRole.ADMIN);
+            boolean isSuperAdmin = loaded.getRole() == UserRole.SUPER_ADMIN || loaded.getRole() == UserRole.PLATFORM_ADMIN || "superadmin".equalsIgnoreCase(loaded.getUsername());
+            boolean isOwner = isSuperAdmin || loaded.getRole() == UserRole.OWNER || (loaded.getBranch() == null && loaded.getRole() == UserRole.ADMIN);
+            m.put("isSuperAdmin", isSuperAdmin);
             m.put("isOwner", isOwner);
             m.put("isMultiBranch", branchCount > 1);
             m.put("branchCount", branchCount);

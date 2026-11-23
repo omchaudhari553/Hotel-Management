@@ -8,6 +8,13 @@ export interface User {
   role: string;
   phone?: string;
   branchId?: string | number;
+  username?: string;
+  isBranchUser?: boolean;
+  isOwner?: boolean;
+  isMultiBranch?: boolean;
+  accountRole?: string;
+  businessType?: string;
+  roles?: string[];
 }
 
 export interface Business {

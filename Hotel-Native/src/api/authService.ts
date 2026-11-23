@@ -68,15 +68,27 @@ export const authService = {
       password: details.password,
       phone: details.phone || '9876543210',
       industryType: details.industryType || 'HOTEL',
+      role: details.role || 'SINGLE_USER',
+      businessType: details.businessType || 'SINGLE',
     };
     try {
       const response = await apiClient.post('/auth/register', payload);
       const data = response.data?.data || response.data;
       const token = data.token || data.jwt;
-      const user = data.user || { id: '1', name: details.name, email: details.email, role: 'ADMIN' };
+      const user = data.user || {
+        id: '1',
+        name: details.name || details.fullName,
+        email: details.email,
+        role: details.role || 'SINGLE_USER',
+        accountRole: details.role || 'SINGLE_USER',
+        businessType: details.businessType || 'SINGLE',
+      };
       if (token) {
         await AsyncStorage.setItem(STORAGE_KEYS.TOKEN, token);
         await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+        if (data.business) {
+          await AsyncStorage.setItem(STORAGE_KEYS.BUSINESS, JSON.stringify(data.business));
+        }
         setMemoryAuthToken(token);
       }
       return { user, token };
@@ -87,7 +99,14 @@ export const authService = {
         } catch { }
       }
       const token = (await ensureBackendToken(true)) || 'offline-token';
-      const demoUser: User = { id: '1', name: details.name || 'User', email: details.email, role: 'ADMIN' };
+      const demoUser: User = {
+        id: '1',
+        name: details.name || 'User',
+        email: details.email,
+        role: details.role || 'SINGLE_USER',
+        accountRole: details.role || 'SINGLE_USER',
+        businessType: details.businessType || 'SINGLE',
+      };
       return { user: demoUser, token };
     }
   },

@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useIndustry } from '../context/IndustryContext';
 import { useAuth } from '../context/AuthContext';
@@ -28,6 +28,7 @@ import {
   Sparkles,
   HelpCircle,
   X,
+  GitBranch,
 } from 'lucide-react';
 
 export type IndustryCode = 'HOTEL' | 'MESS' | 'CAFE';
@@ -259,12 +260,15 @@ export const GetStartedPage: React.FC = () => {
   const { showToast } = useToast();
   const navigate = useNavigate();
 
-  // Wizard Step State
+  // Wizard Step State - Always start at Step 1 (Choose Business) for new setup
   const [currentStep, setCurrentStep] = useState<number>(() => {
     if (queryStep >= 1 && queryStep <= 4) return queryStep;
-    if (isAuthenticated) return 2;
     return 1;
   });
+
+  // Role & Business Type Selection
+  const [selectedRole, setSelectedRole] = useState<'SINGLE_USER' | 'ADMIN_OWNER'>('SINGLE_USER');
+  const [selectedBusinessType, setSelectedBusinessType] = useState<'SINGLE' | 'MULTI_BRANCH'>('SINGLE');
 
   // Step 1: Industry Selection
   const [selectedIndustryType, setSelectedIndustryType] = useState<IndustryCode>(() => {
@@ -486,6 +490,25 @@ export const GetStartedPage: React.FC = () => {
     setSubmitting(true);
     setFormErrors({});
 
+    const emailKey = email.trim().toLowerCase();
+    const usernameKey = (email.split('@')[0] || '').toLowerCase();
+    const meta = {
+      role: selectedRole,
+      businessType: selectedBusinessType,
+      email: emailKey,
+      name: ownerName.trim(),
+    };
+    try {
+      localStorage.setItem('user_meta_' + emailKey, JSON.stringify(meta));
+      localStorage.setItem('user_meta_' + usernameKey, JSON.stringify(meta));
+      localStorage.setItem('ajalkar_selected_role', selectedRole);
+      localStorage.setItem('ajalkar_business_type', selectedBusinessType);
+      localStorage.setItem(
+        'ajalkar_user_mode',
+        selectedRole === 'SINGLE_USER' || selectedBusinessType === 'SINGLE' ? 'SINGLE' : 'MULTI_BRANCH'
+      );
+    } catch {}
+
     const payload: OnboardingPayload = {
       industryType: selectedIndustryType,
       businessName: businessName.trim() || 'My Business',
@@ -499,6 +522,8 @@ export const GetStartedPage: React.FC = () => {
       planId: selectedPlanId,
       billingCycle: billingCycle,
       adminPassword: adminPassword || undefined,
+      role: selectedRole,
+      businessType: selectedBusinessType,
     };
 
     localStorage.setItem('ajalkar_industry', selectedIndustryType);
@@ -1090,8 +1115,153 @@ export const GetStartedPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Form Fields Structured in 3 Clean Sections */}
+            {/* Form Fields Structured in Clean Sections */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+              {/* SECTION 0: ROLE & BUSINESS TYPE SELECTION */}
+              <div
+                style={{
+                  backgroundColor: '#F8FAFC',
+                  borderRadius: '16px',
+                  border: '1.5px solid #E2E8F0',
+                  padding: '18px 20px',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+                  <div style={{ fontSize: '0.82rem', fontWeight: 800, textTransform: 'uppercase', color: selectedBusinessOption?.themeColor || '#090040', letterSpacing: '0.06em' }}>
+                    खाते भूमिका व व्यवसाय प्रकार (Account Role & Business Setup)
+                  </div>
+                  <span style={{ fontSize: '0.78rem', color: '#64748B', fontWeight: 600 }}>
+                    {selectedRole === 'SINGLE_USER' ? 'सिंगल युझर खात्यासाठी (Single User Access)' : 'अ‍ॅडमिन / मल्टी-शाखा खात्यासाठी (Admin / Multiple Access)'}
+                  </span>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
+                  {/* 1. Role Selection */}
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <label style={{ fontSize: '0.84rem', fontWeight: 700, color: '#1E293B' }}>
+                        भूमिका निवडा (Role) <span style={{ color: '#DC2626' }}>*</span>
+                      </label>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#EA580C' }}>
+                        {selectedRole === 'SINGLE_USER' ? 'सिंगल युझर' : 'अ‍ॅडमिन / ओनर'}
+                      </span>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedRole('SINGLE_USER');
+                          setSelectedBusinessType('SINGLE');
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          padding: '10px 12px',
+                          borderRadius: '10px',
+                          border: selectedRole === 'SINGLE_USER' ? '2px solid #EA580C' : '1px solid #CBD5E1',
+                          backgroundColor: selectedRole === 'SINGLE_USER' ? '#FFF7ED' : '#FFFFFF',
+                          color: selectedRole === 'SINGLE_USER' ? '#C2410C' : '#64748B',
+                          fontWeight: selectedRole === 'SINGLE_USER' ? 800 : 600,
+                          fontSize: '0.85rem',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease',
+                        }}
+                      >
+                        <User size={16} />
+                        <span>Single User</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedRole('ADMIN_OWNER');
+                          setSelectedBusinessType('MULTI_BRANCH');
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          padding: '10px 12px',
+                          borderRadius: '10px',
+                          border: selectedRole === 'ADMIN_OWNER' ? '2px solid #EA580C' : '1px solid #CBD5E1',
+                          backgroundColor: selectedRole === 'ADMIN_OWNER' ? '#FFF7ED' : '#FFFFFF',
+                          color: selectedRole === 'ADMIN_OWNER' ? '#C2410C' : '#64748B',
+                          fontWeight: selectedRole === 'ADMIN_OWNER' ? 800 : 600,
+                          fontSize: '0.85rem',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease',
+                        }}
+                      >
+                        <ShieldCheck size={16} />
+                        <span>Admin / Owner</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* 2. Business Type Selection */}
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <label style={{ fontSize: '0.84rem', fontWeight: 700, color: '#1E293B' }}>
+                        व्यवसाय प्रकार (Business Type) <span style={{ color: '#DC2626' }}>*</span>
+                      </label>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#64748B' }}>
+                        {selectedBusinessType === 'SINGLE' ? 'सिंगल' : 'मल्टिपल'}
+                      </span>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedBusinessType('SINGLE')}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          padding: '10px 12px',
+                          borderRadius: '10px',
+                          border: selectedBusinessType === 'SINGLE' ? '2px solid #EA580C' : '1px solid #CBD5E1',
+                          backgroundColor: selectedBusinessType === 'SINGLE' ? '#FFF7ED' : '#FFFFFF',
+                          color: selectedBusinessType === 'SINGLE' ? '#C2410C' : '#64748B',
+                          fontWeight: selectedBusinessType === 'SINGLE' ? 800 : 600,
+                          fontSize: '0.85rem',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease',
+                        }}
+                      >
+                        <Building2 size={16} />
+                        <span>Single</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setSelectedBusinessType('MULTI_BRANCH')}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          padding: '10px 12px',
+                          borderRadius: '10px',
+                          border: selectedBusinessType === 'MULTI_BRANCH' ? '2px solid #EA580C' : '1px solid #CBD5E1',
+                          backgroundColor: selectedBusinessType === 'MULTI_BRANCH' ? '#FFF7ED' : '#FFFFFF',
+                          color: selectedBusinessType === 'MULTI_BRANCH' ? '#C2410C' : '#64748B',
+                          fontWeight: selectedBusinessType === 'MULTI_BRANCH' ? 800 : 600,
+                          fontSize: '0.85rem',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease',
+                        }}
+                      >
+                        <GitBranch size={16} />
+                        <span>Multiple</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* SECTION 1: BUSINESS IDENTITY */}
               <div>
                 <div style={{ fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', color: selectedBusinessOption?.themeColor || '#090040', letterSpacing: '0.06em', marginBottom: '14px' }}>

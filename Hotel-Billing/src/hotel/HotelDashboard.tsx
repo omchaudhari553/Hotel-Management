@@ -27,7 +27,9 @@ import {
   Calendar,
   Clock,
   Sparkles,
+  Shield,
   ShieldCheck,
+  ArrowLeft,
   AlertCircle,
   Plus,
   Trash2,
@@ -114,6 +116,31 @@ export const HotelDashboard: React.FC = () => {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [kots, setKots] = useState<KotItem[]>([]);
+
+  // Super Admin view mode check
+  const isSuperAdminViewing = useMemo(() => {
+    try {
+      if (sessionStorage.getItem('superadmin_viewing_hotel') === 'true') return true;
+      const raw = localStorage.getItem('superadmin_user') || localStorage.getItem('ajalkar_user') || localStorage.getItem('user');
+      if (raw) {
+        const u = JSON.parse(raw);
+        return Boolean(
+          u?.role === 'SUPER_ADMIN' ||
+          u?.role === 'PLATFORM_ADMIN' ||
+          (u as any)?.isSuperAdmin ||
+          u?.roles?.includes('ROLE_SUPER_ADMIN') ||
+          u?.username?.toLowerCase() === 'superadmin'
+        );
+      }
+    } catch {}
+    return Boolean(
+      user?.role === 'SUPER_ADMIN' ||
+      user?.role === 'PLATFORM_ADMIN' ||
+      (user as any)?.isSuperAdmin ||
+      user?.roles?.includes('ROLE_SUPER_ADMIN') ||
+      user?.username?.toLowerCase() === 'superadmin'
+    );
+  }, [user]);
 
   // Navbar Date Filter synchronization
   const [navDateFilter, setNavDateFilter] = useState<{
@@ -672,14 +699,61 @@ export const HotelDashboard: React.FC = () => {
   const availablePercent = totalTablesCount > 0 ? Math.round((availableTablesCount / totalTablesCount) * 100) : 0;
   const occupiedPercent = totalTablesCount > 0 ? Math.round((occupiedTablesCount / totalTablesCount) * 100) : 0;
 
-  // Orders Count (Strictly Today's Orders)
-  const totalOrdersCount = useMemo(() => {
-    const todayCount = orders.filter((o) => {
-      const d = o.createdAt ? o.createdAt.split('T')[0] : '';
+  // Dynamic Sales & Payments Calculation matching actual DB
+  const todayRevenue = useMemo(() => {
+    const todayInvs = invoices.filter((inv) => {
+      const d = inv.createdAt ? inv.createdAt.split('T')[0] : (inv.invoiceDate || '');
       return d === todayStr;
-    }).length;
-    return todayCount;
-  }, [orders, todayStr]);
+    });
+    const invRev = todayInvs.reduce((acc, inv) => acc + (Number(inv.total ?? inv.grandTotal) || 0), 0);
+    const ordRev = orders.filter((o) => (o.createdAt || '').startsWith(todayStr)).reduce((acc, o) => acc + (Number(o.totalAmount) || 0), 0);
+    const backendRev = Number(stats?.todayRevenue ?? stats?.todayCafeSales) || 0;
+    return Math.max(invRev, ordRev, backendRev);
+  }, [invoices, orders, stats, todayStr]);
+
+  // Orders Count (Strictly Today's Active Orders & Billed/Paid Transactions)
+  const totalOrdersCount = useMemo(() => {
+    // Map invoice ID to order ID to properly de-duplicate
+    const invToOrderMap = new Map<number | string, number | string>();
+    invoices.forEach((inv) => {
+      if (inv.id && inv.orderId) {
+        invToOrderMap.set(inv.id, inv.orderId);
+        invToOrderMap.set(String(inv.id), inv.orderId);
+      }
+    });
+
+    const todayOrderIds = new Set<string | number>();
+    orders.forEach((o) => {
+      const d = o.createdAt ? o.createdAt.split('T')[0] : '';
+      if (d === todayStr) todayOrderIds.add(o.id);
+    });
+    invoices.forEach((inv) => {
+      const d = inv.createdAt ? inv.createdAt.split('T')[0] : (inv.invoiceDate || '');
+      if (d === todayStr) {
+        const idKey = inv.orderId || `inv-${inv.id}`;
+        todayOrderIds.add(idKey);
+      }
+    });
+    payments.forEach((p) => {
+      const rawDate = p.paymentDate || (p as any).createdAt || (p as any).date || '';
+      let d = '';
+      if (typeof rawDate === 'string' && rawDate) {
+        d = rawDate.includes('T') ? rawDate.split('T')[0] : rawDate.split(' ')[0];
+      }
+      if (d === todayStr) {
+        const linkedOrderId = (p as any).orderId || (p.invoiceId ? invToOrderMap.get(p.invoiceId) : null);
+        if (linkedOrderId) {
+          todayOrderIds.add(linkedOrderId);
+        } else if (p.invoiceId) {
+          todayOrderIds.add(`inv-${p.invoiceId}`);
+        } else {
+          todayOrderIds.add(`pay-${p.id}`);
+        }
+      }
+    });
+    const fallbackCount = todayRevenue > 0 ? 1 : 0;
+    return Math.max(todayOrderIds.size, fallbackCount);
+  }, [orders, invoices, payments, todayRevenue, todayStr]);
 
   // Bill Requests matching the exact active flow of the Billing module (pendingKOTs & live orders/invoices)
   const billRequestItems = useMemo(() => {
@@ -842,17 +916,6 @@ export const HotelDashboard: React.FC = () => {
   // Additional overview metrics (strictly display-only)
   const totalItemsSold = filteredOrders.reduce((sum, o) => sum + (o.items?.reduce((isum, it) => isum + it.quantity, 0) || 0), 0);
 
-  // Dynamic Sales & Payments Calculation matching actual DB
-  const todayRevenue = useMemo(() => {
-    const todayInvs = invoices.filter((inv) => {
-      const d = inv.createdAt ? inv.createdAt.split('T')[0] : (inv.invoiceDate || '');
-      return d === todayStr;
-    });
-    const invRev = todayInvs.reduce((acc, inv) => acc + (Number(inv.total ?? inv.grandTotal) || 0), 0);
-    const ordRev = orders.filter((o) => (o.createdAt || '').startsWith(todayStr)).reduce((acc, o) => acc + (Number(o.totalAmount) || 0), 0);
-    const backendRev = Number(stats?.todayRevenue ?? stats?.todayCafeSales) || 0;
-    return Math.max(invRev, ordRev, backendRev);
-  }, [invoices, orders, stats, todayStr]);
 
   const paymentBreakdown = useMemo(() => {
     let cash = 0;
@@ -924,9 +987,68 @@ export const HotelDashboard: React.FC = () => {
 
   const displayBillRequests = billRequestItems;
 
-  const avgBillValue = totalOrdersCount > 0 ? Math.round(todayRevenue / Math.max(1, totalOrdersCount)) : 0;
-  const totalCustomers = totalOrdersCount > 0 ? (Number(stats?.activeCustomers) || totalOrdersCount) : 0;
-  const totalDiscounts = totalOrdersCount > 0 ? 157 : 0;
+  // Average Bill Value: Today's Revenue divided by Today's Billed/Order Count
+  const avgBillValue = useMemo(() => {
+    if (todayRevenue <= 0) return 0;
+    const count = Math.max(1, totalOrdersCount);
+    return Math.round(todayRevenue / count);
+  }, [todayRevenue, totalOrdersCount]);
+
+  // Total Customers: Unique customers served today from Invoices, Orders and Payments
+  const totalCustomers = useMemo(() => {
+    const custSet = new Set<string>();
+    invoices.forEach((inv) => {
+      const d = inv.createdAt ? inv.createdAt.split('T')[0] : (inv.invoiceDate || '');
+      if (d === todayStr) {
+        const name = (inv.guestName || (inv as any).customerName || '').trim();
+        if (name && name.toLowerCase() !== 'walk-in guest' && name.toLowerCase() !== 'guest') {
+          custSet.add(name.toLowerCase());
+        }
+      }
+    });
+    orders.forEach((o) => {
+      const d = o.createdAt ? o.createdAt.split('T')[0] : '';
+      if (d === todayStr) {
+        const name = (o.guestName || '').trim();
+        if (name && name.toLowerCase() !== 'walk-in guest' && name.toLowerCase() !== 'guest') {
+          custSet.add(name.toLowerCase());
+        }
+      }
+    });
+    payments.forEach((p) => {
+      const rawDate = p.paymentDate || (p as any).createdAt || '';
+      let d = '';
+      if (typeof rawDate === 'string' && rawDate) {
+        d = rawDate.includes('T') ? rawDate.split('T')[0] : rawDate.split(' ')[0];
+      }
+      if (d === todayStr) {
+        const name = ((p as any).customerName || (p as any).guestName || '').trim();
+        if (name && name.toLowerCase() !== 'walk-in guest' && name.toLowerCase() !== 'guest') {
+          custSet.add(name.toLowerCase());
+        }
+      }
+    });
+    const uniqueKnown = custSet.size;
+    return uniqueKnown > 0 ? uniqueKnown : totalOrdersCount;
+  }, [invoices, orders, payments, totalOrdersCount, todayStr]);
+
+  // Total Discounts: Actual sum of discounts given on today's invoices and orders
+  const totalDiscounts = useMemo(() => {
+    let sum = 0;
+    invoices.forEach((inv) => {
+      const d = inv.createdAt ? inv.createdAt.split('T')[0] : (inv.invoiceDate || '');
+      if (d === todayStr) {
+        sum += Number(inv.discountAmount || (inv as any).discount || 0);
+      }
+    });
+    orders.forEach((o) => {
+      const d = o.createdAt ? o.createdAt.split('T')[0] : '';
+      if (d === todayStr) {
+        sum += Number(o.discount || 0);
+      }
+    });
+    return Math.round(sum);
+  }, [invoices, orders, todayStr]);
 
   /* =========================================================
      OFFERS HANDLERS (2)
@@ -1125,6 +1247,80 @@ export const HotelDashboard: React.FC = () => {
         boxSizing: 'border-box',
       }}
     >
+      {/* Super Admin Preview Return Banner */}
+      {isSuperAdminViewing && (
+        <div
+          style={{
+            backgroundColor: '#1E1B4B',
+            border: '1.5px solid #6366F1',
+            borderRadius: '12px',
+            padding: '12px 20px',
+            marginBottom: '18px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '16px',
+            boxShadow: '0 4px 14px rgba(79, 70, 229, 0.25)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '8px',
+                backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Shield size={18} color="#A5B4FC" />
+            </div>
+            <div>
+              <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#FFFFFF' }}>
+                {language === 'mr' ? 'सुपर ॲडमिन हॉटेल व्ह्यू' : 'Super Admin Hotel Preview Mode'}
+              </div>
+              <div style={{ fontSize: '0.76rem', color: '#CBD5E1' }}>
+                {language === 'mr'
+                  ? 'तुम्ही सध्या सुपर ॲडमिन म्हणून हॉटेलचा थेट डेटा पाहत आहात.'
+                  : 'You are viewing live hotel operations in authorized Super Admin preview mode.'}
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              try {
+                sessionStorage.removeItem('superadmin_viewing_hotel');
+              } catch {}
+              window.location.href = '/superadmin/dashboard';
+            }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '8px 18px',
+              backgroundColor: '#4F46E5',
+              color: '#FFFFFF',
+              borderRadius: '10px',
+              border: 'none',
+              fontWeight: 800,
+              fontSize: '0.84rem',
+              cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+              transition: 'background-color 0.15s ease',
+              whiteSpace: 'nowrap',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#4338CA'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#4F46E5'; }}
+          >
+            <ArrowLeft size={16} />
+            <span>{language === 'mr' ? 'सुपर ॲडमिनकडे परत जा' : 'Back to Super Admin'}</span>
+          </button>
+        </div>
+      )}
+
       {/* =====================================================
           PAGE HEADER (Clean, Professional - Screenshot 1 Layout)
       ===================================================== */}
@@ -1568,7 +1764,7 @@ export const HotelDashboard: React.FC = () => {
                   {t('averageBillValue', 'Average Bill Value')}
                 </div>
                 <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#166534', marginTop: '2px' }}>
-                  ₹{toDevanagari(avgBillValue)}
+                  ₹{formatNumber(avgBillValue, { decimals: 0 })}
                 </div>
               </div>
 
@@ -1585,7 +1781,7 @@ export const HotelDashboard: React.FC = () => {
                   {t('totalCustomers', 'Total Customers')}
                 </div>
                 <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#166534', marginTop: '2px' }}>
-                  {toDevanagari(totalCustomers)}
+                  {formatNumber(totalCustomers, { decimals: 0 })}
                 </div>
               </div>
 
@@ -1602,7 +1798,7 @@ export const HotelDashboard: React.FC = () => {
                   {t('totalDiscounts', 'Total Discounts')}
                 </div>
                 <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#166534', marginTop: '2px' }}>
-                  ₹{toDevanagari(totalDiscounts)}
+                  ₹{formatNumber(totalDiscounts, { decimals: 0 })}
                 </div>
               </div>
             </div>

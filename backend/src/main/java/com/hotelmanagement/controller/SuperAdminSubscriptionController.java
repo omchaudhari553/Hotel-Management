@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/admin")
+@RequestMapping({"/api/v1/admin", "/api/v1/superadmin"})
 @Tag(name = "Super Admin Subscriptions", description = "Central Super Admin & Platform Owner Subscription APIs")
 public class SuperAdminSubscriptionController {
 
@@ -34,14 +34,14 @@ public class SuperAdminSubscriptionController {
     }
 
     // 1. DASHBOARD KPIS & ANALYTICS
-    @GetMapping("/dashboard/subscription-kpis")
+    @GetMapping({"/dashboard/subscription-kpis", "/dashboard/kpis"})
     @Operation(summary = "Get Super Admin subscription KPI metrics")
     public ApiResponse<SuperAdminKpiResponse> getDashboardKpis() {
         currentUser.requireOwner();
         return ApiResponse.ok("Subscription KPIs fetched", service.getDashboardKpis());
     }
 
-    @GetMapping("/dashboard/subscription-analytics")
+    @GetMapping({"/dashboard/subscription-analytics", "/dashboard/analytics", "/dashboard/revenue-chart"})
     @Operation(summary = "Get monthly revenue trend, conversion rate and plan distribution")
     public ApiResponse<SuperAdminAnalyticsResponse> getDashboardAnalytics() {
         currentUser.requireOwner();
@@ -49,7 +49,7 @@ public class SuperAdminSubscriptionController {
     }
 
     // 2. HOTEL BUSINESSES
-    @GetMapping("/hotels")
+    @GetMapping({"/hotels", "/businesses"})
     @Operation(summary = "List all registered hotel businesses with subscription status")
     public ApiResponse<List<HotelSubscriptionSummaryDto>> getAllHotels() {
         currentUser.requireOwner();
@@ -57,28 +57,28 @@ public class SuperAdminSubscriptionController {
     }
 
     // 3. SUBSCRIPTION PLANS
-    @GetMapping("/subscription-plans")
+    @GetMapping({"/subscription-plans", "/plans"})
     @Operation(summary = "List all subscription plans (active & inactive)")
     public ApiResponse<List<PlanDto>> getAllPlans() {
         currentUser.requireOwner();
         return ApiResponse.ok("Plans fetched", service.getAllPlans());
     }
 
-    @PostMapping("/subscription-plans")
+    @PostMapping({"/subscription-plans", "/plans"})
     @Operation(summary = "Create a new subscription plan with feature limits")
     public ApiResponse<PlanDto> createPlan(@RequestBody PlanSaveRequest req) {
         String admin = getAdminUsername();
         return ApiResponse.ok("Subscription plan created successfully", service.createPlan(req, admin));
     }
 
-    @PutMapping("/subscription-plans/{id}")
+    @PutMapping({"/subscription-plans/{id}", "/plans/{id}"})
     @Operation(summary = "Update an existing subscription plan")
     public ApiResponse<PlanDto> updatePlan(@PathVariable("id") Long id, @RequestBody PlanSaveRequest req) {
         String admin = getAdminUsername();
         return ApiResponse.ok("Subscription plan updated successfully", service.updatePlan(id, req, admin));
     }
 
-    @PatchMapping("/subscription-plans/{id}/status")
+    @PatchMapping({"/subscription-plans/{id}/status", "/plans/{id}/status"})
     @Operation(summary = "Activate or deactivate a subscription plan")
     public ApiResponse<String> togglePlanStatus(@PathVariable("id") Long id, @RequestParam("active") boolean active) {
         String admin = getAdminUsername();
@@ -86,7 +86,7 @@ public class SuperAdminSubscriptionController {
         return ApiResponse.ok(active ? "Plan activated" : "Plan deactivated", null);
     }
 
-    @DeleteMapping("/subscription-plans/{id}")
+    @DeleteMapping({"/subscription-plans/{id}", "/plans/{id}"})
     @Operation(summary = "Delete or archive a subscription plan")
     public ApiResponse<String> deletePlan(@PathVariable("id") Long id) {
         String admin = getAdminUsername();
@@ -152,7 +152,7 @@ public class SuperAdminSubscriptionController {
     }
 
     // 6. PAYMENTS & TRANSACTIONS
-    @GetMapping("/subscription-payments")
+    @GetMapping({"/subscription-payments", "/payments"})
     @Operation(summary = "Get all subscription payment transactions")
     public ApiResponse<List<Map<String, Object>>> getAllPayments() {
         currentUser.requireOwner();
@@ -160,7 +160,7 @@ public class SuperAdminSubscriptionController {
     }
 
     // 7. SUBSCRIPTION HISTORY & AUDIT LOGS
-    @GetMapping("/subscription-history")
+    @GetMapping({"/subscription-history", "/audit-logs"})
     @Operation(summary = "Get all subscription activity history")
     public ApiResponse<List<SubscriptionHistoryDto>> getSubscriptionHistory() {
         currentUser.requireOwner();
