@@ -12,6 +12,30 @@ export const IndustryGuard: React.FC<IndustryGuardProps> = ({ requiredIndustry, 
   const { isAuthenticated, business, user } = useAuth();
   const { activeIndustryCode, setIndustryCode } = useIndustry();
 
+  // Resolve current active user with safe fallbacks
+  let currentUser = user;
+  if (!currentUser && typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem('ajalkar_user') || localStorage.getItem('superadmin_user') || localStorage.getItem('user');
+      if (saved) currentUser = JSON.parse(saved);
+    } catch {}
+  }
+
+  // 1. If user is Super Admin, verify if viewing hotel or should stay on superadmin dashboard
+  const isSuperAdminUser =
+    currentUser?.role === 'SUPER_ADMIN' ||
+    currentUser?.role === 'PLATFORM_ADMIN' ||
+    (currentUser as any)?.isSuperAdmin ||
+    currentUser?.username === 'superadmin' ||
+    (typeof window !== 'undefined' && !!localStorage.getItem('superadmin_token'));
+
+  if (isSuperAdminUser) {
+    if (sessionStorage.getItem('superadmin_viewing_hotel') !== 'true') {
+      return <Navigate to="/superadmin/dashboard" replace />;
+    }
+    return <>{children}</>;
+  }
+
   // Resolve authorized subscribed industry from user's business profile
   const authorizedIndustry = (business?.industryType?.toUpperCase() ||
     activeIndustryCode ||
@@ -28,39 +52,9 @@ export const IndustryGuard: React.FC<IndustryGuardProps> = ({ requiredIndustry, 
     }
   }, [isAuthenticated, activeIndustryCode, authorizedIndustry, setIndustryCode]);
 
-  // 1. If user is not authenticated, redirect to Login
+  // 2. If user is not authenticated, redirect to Login
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
-  }
-
-  // 2. Strict Super Admin Redirection: Super Admin must view only Super Admin panel
-  const isSuperAdmin = (() => {
-    try {
-      const raw = localStorage.getItem('superadmin_user') || localStorage.getItem('ajalkar_user') || localStorage.getItem('user');
-      if (raw) {
-        const u = JSON.parse(raw);
-        if (
-          u?.role === 'SUPER_ADMIN' ||
-          u?.role === 'PLATFORM_ADMIN' ||
-          (u as any)?.isSuperAdmin ||
-          u?.roles?.includes('ROLE_SUPER_ADMIN') ||
-          u?.username?.toLowerCase() === 'superadmin'
-        ) {
-          return true;
-        }
-      }
-    } catch {}
-    return Boolean(
-      user?.role === 'SUPER_ADMIN' ||
-      user?.role === 'PLATFORM_ADMIN' ||
-      (user as any)?.isSuperAdmin ||
-      user?.roles?.includes('ROLE_SUPER_ADMIN') ||
-      user?.username?.toLowerCase() === 'superadmin'
-    );
-  })();
-
-  if (isSuperAdmin && sessionStorage.getItem('superadmin_viewing_hotel') !== 'true') {
-    return <Navigate to="/superadmin/dashboard" replace />;
   }
 
   // 3. Strict single-industry restriction: if requested route does not match authorized industry, block and redirect
@@ -75,6 +69,26 @@ export const IndustryGuard: React.FC<IndustryGuardProps> = ({ requiredIndustry, 
 export const SharedModuleGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, business, user } = useAuth();
   const { activeIndustryCode, setIndustryCode } = useIndustry();
+
+  // Resolve current active user with safe fallbacks
+  let currentUser = user;
+  if (!currentUser && typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem('ajalkar_user') || localStorage.getItem('superadmin_user') || localStorage.getItem('user');
+      if (saved) currentUser = JSON.parse(saved);
+    } catch {}
+  }
+
+  // 1. If user is Super Admin, allow seamless inspection
+  const isSuperAdminUser =
+    currentUser?.role === 'SUPER_ADMIN' ||
+    (currentUser as any)?.isSuperAdmin ||
+    currentUser?.username === 'superadmin' ||
+    (typeof window !== 'undefined' && !!localStorage.getItem('superadmin_token'));
+
+  if (isSuperAdminUser) {
+    return <>{children}</>;
+  }
 
   // Resolve authorized subscribed industry from user's business profile
   const authorizedIndustry = (business?.industryType?.toUpperCase() ||
@@ -92,7 +106,7 @@ export const SharedModuleGuard: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   }, [isAuthenticated, activeIndustryCode, authorizedIndustry, setIndustryCode]);
 
-  // 1. If user is not authenticated, redirect to Login
+  // 2. If user is not authenticated, redirect to Login
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }

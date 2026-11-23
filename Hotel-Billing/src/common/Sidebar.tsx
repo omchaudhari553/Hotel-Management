@@ -7,6 +7,7 @@ import { useBranch } from '../context/BranchContext';
 import { licenceService, LicenceInfo } from '../services/licenceService';
 import { settingsService } from '../services/settingsService';
 import { industryService } from '../services/industryService';
+import apiClient from '../services/api';
 import {
   Building2,
   UtensilsCrossed,
@@ -35,6 +36,7 @@ import {
   Sparkles,
   ChefHat,
   Shield,
+  ShieldCheck,
   X,
 } from 'lucide-react';
 
@@ -243,6 +245,51 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onCloseMob
     window.addEventListener('branding-updated', handleBranding);
     return () => window.removeEventListener('branding-updated', handleBranding);
   }, []);
+
+  // Central Platform Feature Modules Enabled / Disabled Map
+  const [moduleStatus, setModuleStatus] = useState<Record<string, boolean>>(() => {
+    try {
+      const raw = localStorage.getItem('platform_hotel_modules_status');
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  useEffect(() => {
+    const handleModuleSync = () => {
+      try {
+        const raw = localStorage.getItem('platform_hotel_modules_status');
+        if (raw) setModuleStatus(JSON.parse(raw));
+      } catch {}
+    };
+
+    window.addEventListener('platform-modules-updated', handleModuleSync);
+    window.addEventListener('storage', handleModuleSync);
+
+    // Initial load from backend for Hotel (Product ID = 1)
+    apiClient.get('/superadmin/products/1/modules')
+      .then(res => {
+        const list = res.data?.data;
+        if (Array.isArray(list)) {
+          const map: Record<string, boolean> = {};
+          list.forEach((m: any) => { map[m.code] = m.active; });
+          setModuleStatus(map);
+          localStorage.setItem('platform_hotel_modules_status', JSON.stringify(map));
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      window.removeEventListener('platform-modules-updated', handleModuleSync);
+      window.removeEventListener('storage', handleModuleSync);
+    };
+  }, []);
+
+  const isModuleEnabled = (code: string) => {
+    // If explicitly set to false, it is disabled across all hotel logins
+    return moduleStatus[code] !== false;
+  };
 
   const handleUpgradePlan = () => {
     window.dispatchEvent(
@@ -490,6 +537,31 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onCloseMob
                     {user.branchName || selectedBranch?.name || 'Branch'}
                   </span>
                 </div>
+              )}
+
+              {/* Central Super Admin Panel Direct Switch */}
+              {(user?.role === 'SUPER_ADMIN' || (user as any)?.isSuperAdmin || user?.username === 'superadmin' || (typeof window !== 'undefined' && !!localStorage.getItem('superadmin_token'))) && (
+                <NavLink
+                  to="/superadmin/dashboard"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '11px 14px',
+                    borderRadius: '10px',
+                    backgroundColor: '#4338CA',
+                    color: '#FFFFFF',
+                    fontWeight: 800,
+                    fontSize: '0.86rem',
+                    textDecoration: 'none',
+                    marginBottom: '10px',
+                    border: '1.5px solid #818CF8',
+                    boxShadow: '0 4px 12px rgba(67, 56, 202, 0.35)',
+                  }}
+                >
+                  <ShieldCheck size={18} color="#C7D2FE" />
+                  <span>Central Super Admin</span>
+                </NavLink>
               )}
 
               {/* 1. Hotel Dashboard */}

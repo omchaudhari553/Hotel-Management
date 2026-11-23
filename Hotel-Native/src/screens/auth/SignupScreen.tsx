@@ -14,6 +14,7 @@ import {
 import { Colors } from '../../theme/colors';
 import { useAuth } from '../../context/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Hotel,
   Building2,
@@ -82,6 +83,7 @@ const BUSINESS_OPTIONS: BusinessOption[] = [
 ];
 
 export const SignupScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
+  const insets = useSafeAreaInsets();
   const { register, isLoading } = useAuth();
 
   // Wizard Step: 1 = Choose Business, 2 = Business Registration Setup
@@ -190,7 +192,7 @@ export const SignupScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={styles.container}
+      style={[styles.container, { paddingTop: insets.top }]}
     >
       <ScrollView contentContainerStyle={styles.scroll}>
         {/* Brand Header */}
@@ -641,7 +643,7 @@ export const SignupScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.primaryBtn, { flex: 1.6, backgroundColor: selectedOption.themeColor }]}
+                style={[styles.submitBtnInRow, { backgroundColor: selectedOption.themeColor }]}
                 onPress={handleRegister}
                 disabled={isLoading}
                 activeOpacity={0.85}
@@ -650,7 +652,14 @@ export const SignupScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                   <ActivityIndicator color="#FFFFFF" />
                 ) : (
                   <>
-                    <Text style={styles.btnText}>Register & Complete Setup</Text>
+                    <Text
+                      style={styles.submitBtnText}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit={true}
+                      minimumFontScale={0.85}
+                    >
+                      Register & Complete Setup
+                    </Text>
                     <ArrowRight size={16} color="#FFFFFF" style={{ marginLeft: 6 }} />
                   </>
                 )}
@@ -998,13 +1007,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    marginTop: 10,
+    marginTop: 14,
   },
   backBtn: {
-    flex: 1,
-    height: 46,
+    width: 90,
+    height: 48,
     borderRadius: 10,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#CBD5E1',
     backgroundColor: '#F8FAFC',
     flexDirection: 'row',
@@ -1016,6 +1025,22 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700',
     color: '#475569',
+  },
+  submitBtnInRow: {
+    flex: 1,
+    height: 48,
+    borderRadius: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 12,
+    elevation: 3,
+  },
+  submitBtnText: {
+    color: '#FFFFFF',
+    fontSize: 13.5,
+    fontWeight: '800',
+    flexShrink: 1,
   },
   switchRow: {
     flexDirection: 'row',

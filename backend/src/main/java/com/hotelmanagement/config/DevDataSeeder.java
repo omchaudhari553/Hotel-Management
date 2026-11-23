@@ -38,6 +38,43 @@ public class DevDataSeeder {
         String ownerUsername = "hoteladmin";
         String ownerEmail = "admin@royalpalace.com";
 
+        // Always guarantee Central Platform Super Admin user exists
+        Business firstBiz = bs.findAll().stream().findFirst().orElse(null);
+        if (firstBiz == null) {
+            firstBiz = new Business();
+            firstBiz.setName("Royal Palace Hotel");
+            firstBiz.setCode("HOTEL_HOTELADMIN");
+            firstBiz.setIndustryType(IndustryType.HOTEL);
+            firstBiz.setOwnerName("Rahul Patil");
+            firstBiz.setContactEmail(ownerEmail);
+            firstBiz.setPhone("9876543210");
+            firstBiz.setCurrency("INR");
+            firstBiz.setActive(true);
+            firstBiz = bs.save(firstBiz);
+        }
+        final Business defaultBiz = firstBiz;
+
+        us.findByUsernameIgnoreCase("superadmin").ifPresentOrElse(u -> {
+            u.setEmail("superadmin@platform.com");
+            u.setPasswordHash(enc.encode("SuperAdmin@123"));
+            u.setActive(true);
+            u.setRole(UserRole.SUPER_ADMIN);
+            u.setBranch(null);
+            us.save(u);
+        }, () -> {
+            User u = new User();
+            u.setBusiness(defaultBiz);
+            u.setUsername("superadmin");
+            u.setEmail("superadmin@platform.com");
+            u.setFullName("Platform Super Administrator");
+            u.setPasswordHash(enc.encode("SuperAdmin@123"));
+            u.setRole(UserRole.SUPER_ADMIN);
+            u.setBranch(null);
+            u.setActive(true);
+            us.save(u);
+            log.info("Seeded superadmin account: superadmin / SuperAdmin@123");
+        });
+
         // Never overwrite existing data on restarts
         if (us.findByUsernameIgnoreCase(ownerUsername).isPresent() && br.count() >= 4) {
             log.info("Multi-branch system already initialized. Preserving all existing database records.");
@@ -100,6 +137,27 @@ public class DevDataSeeder {
             u.setFullName("Administrator");
             u.setPasswordHash(enc.encode("Admin@123"));
             u.setRole(UserRole.OWNER);
+            u.setBranch(null);
+            u.setActive(true);
+            us.save(u);
+        });
+
+        // Ensure Central Platform Super Admin user (username: superadmin, email: superadmin@platform.com, password: SuperAdmin@123)
+        us.findByUsernameIgnoreCase("superadmin").ifPresentOrElse(u -> {
+            u.setEmail("superadmin@platform.com");
+            u.setPasswordHash(enc.encode("SuperAdmin@123"));
+            u.setActive(true);
+            u.setRole(UserRole.SUPER_ADMIN);
+            u.setBranch(null);
+            us.save(u);
+        }, () -> {
+            User u = new User();
+            u.setBusiness(business);
+            u.setUsername("superadmin");
+            u.setEmail("superadmin@platform.com");
+            u.setFullName("Platform Super Administrator");
+            u.setPasswordHash(enc.encode("SuperAdmin@123"));
+            u.setRole(UserRole.SUPER_ADMIN);
             u.setBranch(null);
             u.setActive(true);
             us.save(u);

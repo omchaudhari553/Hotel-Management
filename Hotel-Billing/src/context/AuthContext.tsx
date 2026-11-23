@@ -165,6 +165,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async (): Promise<void> => {
     try {
+      const savedModules = localStorage.getItem('platform_hotel_modules_status');
+      localStorage.clear();
+      sessionStorage.clear();
+      if (savedModules) {
+        localStorage.setItem('platform_hotel_modules_status', savedModules);
+      }
+    } catch (e) {}
+    try {
       await authService.logout();
     } catch {
       // Ignore network errors on logout
@@ -172,21 +180,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(null);
       setBusiness(null);
       setToken(null);
-      localStorage.removeItem('token');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('ajalkar_token');
-      localStorage.removeItem('ajalkar_user');
-      localStorage.removeItem('ajalkar_business');
-      localStorage.removeItem('ajalkar_industry');
-      localStorage.removeItem('ajalkar_selected_branch_id');
-      localStorage.removeItem('ajalkar_selected_main_branch_id');
-      localStorage.removeItem('ajalkar_selected_sub_branch_id');
-      localStorage.removeItem('superadmin_token');
-      localStorage.removeItem('superadmin_user');
-      localStorage.removeItem('user');
-      try {
-        sessionStorage.clear();
-      } catch {}
+      window.location.replace('/login');
     }
   };
 

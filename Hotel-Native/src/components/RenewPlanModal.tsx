@@ -360,12 +360,12 @@ export const RenewPlanModal: React.FC<RenewPlanModalProps> = ({
                 onPress={() => setCurrentStep((prev) => (prev - 1) as any)}
                 style={styles.backBtn}
               >
-                <ChevronLeft size={20} color="#FFFFFF" />
+                <ChevronLeft size={20} color="#0F172A" />
                 <Text style={styles.backBtnText}>Back</Text>
               </TouchableOpacity>
             ) : (
               <TouchableOpacity onPress={onClose} style={styles.backBtn}>
-                <ChevronLeft size={20} color="#FFFFFF" />
+                <ChevronLeft size={20} color="#0F172A" />
                 <Text style={styles.brandTitle}>Hotel Billing</Text>
               </TouchableOpacity>
             )}
@@ -376,7 +376,7 @@ export const RenewPlanModal: React.FC<RenewPlanModalProps> = ({
               <Text style={styles.orderRefText}>Ref: {orderRef}</Text>
             </View>
             <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-              <X size={18} color="#94A3B8" />
+              <X size={18} color="#64748B" />
             </TouchableOpacity>
           </View>
         </View>
@@ -438,7 +438,7 @@ export const RenewPlanModal: React.FC<RenewPlanModalProps> = ({
             <View style={styles.stepContent}>
               {/* Official Upgrade Banner */}
               <View style={styles.upgradeBadge}>
-                <Sparkles size={14} color="#F59E0B" />
+                <Sparkles size={14} color="#15803D" />
                 <Text style={styles.upgradeBadgeText}>Official Subscription & License Upgrade</Text>
               </View>
 
@@ -451,7 +451,7 @@ export const RenewPlanModal: React.FC<RenewPlanModalProps> = ({
               <View style={styles.accountCard}>
                 <View style={styles.accountCardHeader}>
                   <View style={styles.accountTitleRow}>
-                    <ShieldCheck size={18} color="#3B82F6" />
+                    <ShieldCheck size={18} color="#16A34A" />
                     <Text style={styles.accountCardLabel}>ACCOUNT LICENSE</Text>
                   </View>
                   <View style={styles.verifiedBadge}>
@@ -464,7 +464,7 @@ export const RenewPlanModal: React.FC<RenewPlanModalProps> = ({
                 <View style={styles.accountStatsRow}>
                   <View style={styles.accountStatCol}>
                     <Text style={styles.statLabel}>Status</Text>
-                    <Text style={[styles.statValue, { color: '#10B981' }]}>Active Account</Text>
+                    <Text style={[styles.statValue, { color: '#16A34A' }]}>Active Account</Text>
                   </View>
                   <View style={styles.accountStatCol}>
                     <Text style={styles.statLabel}>Current Plan</Text>
@@ -472,14 +472,14 @@ export const RenewPlanModal: React.FC<RenewPlanModalProps> = ({
                   </View>
                   <View style={styles.accountStatCol}>
                     <Text style={styles.statLabel}>Valid till</Text>
-                    <Text style={[styles.statValue, { color: '#38BDF8' }]}>{currentExpiryDate}</Text>
+                    <Text style={[styles.statValue, { color: '#16A34A' }]}>{currentExpiryDate}</Text>
                   </View>
                 </View>
 
                 <View style={styles.guaranteeBox}>
-                  <CheckCircle2 size={16} color="#10B981" style={{ marginTop: 2 }} />
+                  <CheckCircle2 size={16} color="#16A34A" style={{ marginTop: 2 }} />
                   <Text style={styles.guaranteeText}>
-                    <Text style={{ fontWeight: '800', color: '#FFFFFF' }}>Early Renewal Guarantee: </Text>
+                    <Text style={{ fontWeight: '800', color: '#0F172A' }}>Early Renewal Guarantee: </Text>
                     Any remaining validity is automatically added to your new term. You will not lose any active subscription days by renewing now.
                   </Text>
                 </View>
@@ -538,7 +538,7 @@ export const RenewPlanModal: React.FC<RenewPlanModalProps> = ({
                         <View style={styles.cardHeaderLeft}>
                           {item.icon}
                           <Text style={styles.cardTitle}>{item.title}</Text>
-                          <View style={[styles.platformBadge, { backgroundColor: '#0F172A', borderColor: '#334155' }]}>
+                          <View style={[styles.platformBadge, { backgroundColor: isSel ? '#DCFCE7' : '#F1F5F9', borderColor: isSel ? '#86EFAC' : '#E2E8F0' }]}>
                             <Text style={[styles.platformBadgeText, { color: item.badgeColor }]}>{item.badge}</Text>
                           </View>
                         </View>
@@ -675,13 +675,13 @@ export const RenewPlanModal: React.FC<RenewPlanModalProps> = ({
                           <View
                             style={[
                               styles.durationBadge,
-                              { backgroundColor: item.highlight ? '#065F46' : '#1E3A8A' },
+                              { backgroundColor: item.highlight ? '#DCFCE7' : '#F1F5F9' },
                             ]}
                           >
                             <Text
                               style={[
                                 styles.durationBadgeText,
-                                { color: item.highlight ? '#34D399' : '#60A5FA' },
+                                { color: item.highlight ? '#15803D' : '#475569' },
                               ]}
                             >
                               {item.badge}
@@ -692,7 +692,7 @@ export const RenewPlanModal: React.FC<RenewPlanModalProps> = ({
                       </View>
 
                       <View style={styles.durationRightRow}>
-                        <Text style={[styles.durationPriceText, item.highlight && { color: '#10B981' }]}>
+                        <Text style={[styles.durationPriceText, item.highlight && { color: '#16A34A' }]}>
                           {item.price}
                         </Text>
                         <View style={[styles.radioOuter, isSel && styles.radioOuterSelected]}>
@@ -736,7 +736,7 @@ export const RenewPlanModal: React.FC<RenewPlanModalProps> = ({
 
                 {/* Proposed Validity Box */}
                 <View style={styles.validityBox}>
-                  <Calendar size={18} color="#38BDF8" />
+                  <Calendar size={18} color="#15803D" />
                   <View style={{ flex: 1 }}>
                     <Text style={styles.validityLabel}>Proposed Validity:</Text>
                     <Text style={styles.validityValue}>{calculateProposedValidity()}</Text>
@@ -784,7 +784,7 @@ export const RenewPlanModal: React.FC<RenewPlanModalProps> = ({
               {/* Need Customized Software box */}
               <View style={styles.customBox}>
                 <View style={styles.customIconCircle}>
-                  <Sparkles size={16} color="#A5B4FC" />
+                  <Sparkles size={16} color="#15803D" />
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.customTitle}>Need Customized Software?</Text>
@@ -979,11 +979,11 @@ export const RenewPlanModal: React.FC<RenewPlanModalProps> = ({
               <View style={styles.accountCard}>
                 <View style={styles.accountCardHeader}>
                   <View style={styles.accountTitleRow}>
-                    <Lock size={15} color="#94A3B8" />
+                    <Lock size={15} color="#64748B" />
                     <Text style={styles.accountCardLabel}>LOCKED ORDER INFORMATION</Text>
                   </View>
-                  <View style={[styles.verifiedBadge, { backgroundColor: '#0F172A', borderColor: '#334155' }]}>
-                    <Text style={[styles.verifiedBadgeText, { color: '#94A3B8' }]}>Read-Only</Text>
+                  <View style={[styles.verifiedBadge, { backgroundColor: '#F1F5F9', borderColor: '#E2E8F0' }]}>
+                    <Text style={[styles.verifiedBadgeText, { color: '#64748B' }]}>Read-Only</Text>
                   </View>
                 </View>
 
@@ -1053,7 +1053,7 @@ export const RenewPlanModal: React.FC<RenewPlanModalProps> = ({
                     activeOpacity={0.8}
                   >
                     <View style={styles.uploadIconCircle}>
-                      <UploadCloud size={24} color="#38BDF8" />
+                      <UploadCloud size={24} color="#15803D" />
                     </View>
                     <Text style={styles.uploadDropTitle}>Upload Payment Screenshot</Text>
                     <Text style={styles.uploadDropSub}>Tap here to select slip from gallery or files</Text>
@@ -1087,13 +1087,13 @@ export const RenewPlanModal: React.FC<RenewPlanModalProps> = ({
                   <View
                     style={[
                       styles.reqBadge,
-                      { backgroundColor: completedRequirements === 2 ? '#065F46' : '#1E3A8A' },
+                      { backgroundColor: completedRequirements === 2 ? '#DCFCE7' : '#F1F5F9' },
                     ]}
                   >
                     <Text
                       style={[
                         styles.reqBadgeText,
-                        { color: completedRequirements === 2 ? '#34D399' : '#60A5FA' },
+                        { color: completedRequirements === 2 ? '#15803D' : '#64748B' },
                       ]}
                     >
                       {completedRequirements}/2 COMPLETED
@@ -1102,14 +1102,14 @@ export const RenewPlanModal: React.FC<RenewPlanModalProps> = ({
                 </View>
 
                 <View style={styles.reqItem}>
-                  {isUtrValid ? <CheckCircle2 size={14} color="#10B981" /> : <AlertCircle size={14} color="#F59E0B" />}
-                  <Text style={[styles.reqItemText, { color: isUtrValid ? '#10B981' : '#F59E0B' }]}>
+                  {isUtrValid ? <CheckCircle2 size={14} color="#16A34A" /> : <AlertCircle size={14} color="#F59E0B" />}
+                  <Text style={[styles.reqItemText, { color: isUtrValid ? '#15803D' : '#B45309' }]}>
                     Valid Transaction / UTR Number (Min. 6 characters)
                   </Text>
                 </View>
                 <View style={styles.reqItem}>
-                  {isScreenshotValid ? <CheckCircle2 size={14} color="#10B981" /> : <AlertCircle size={14} color="#F59E0B" />}
-                  <Text style={[styles.reqItemText, { color: isScreenshotValid ? '#10B981' : '#F59E0B' }]}>
+                  {isScreenshotValid ? <CheckCircle2 size={14} color="#16A34A" /> : <AlertCircle size={14} color="#F59E0B" />}
+                  <Text style={[styles.reqItemText, { color: isScreenshotValid ? '#15803D' : '#B45309' }]}>
                     Payment Screenshot Attached (Slip / Transaction Screen)
                   </Text>
                 </View>
@@ -1123,7 +1123,7 @@ export const RenewPlanModal: React.FC<RenewPlanModalProps> = ({
               <TouchableOpacity
                 style={[
                   styles.primaryCtaBtn,
-                  completedRequirements < 2 && { backgroundColor: '#334155' },
+                  completedRequirements < 2 && { backgroundColor: '#E2E8F0' },
                 ]}
                 onPress={handleSubmitVerification}
                 disabled={submitting || completedRequirements < 2}
@@ -1133,13 +1133,15 @@ export const RenewPlanModal: React.FC<RenewPlanModalProps> = ({
                   <ActivityIndicator size="small" color="#FFFFFF" />
                 ) : (
                   <>
-                    <Text style={styles.primaryCtaText}>Submit Verification</Text>
-                    <ArrowRight size={18} color="#FFFFFF" />
+                    <Text style={[styles.primaryCtaText, completedRequirements < 2 && { color: '#94A3B8' }]}>
+                      Submit Verification
+                    </Text>
+                    <ArrowRight size={18} color={completedRequirements === 2 ? '#FFFFFF' : '#94A3B8'} />
                   </>
                 )}
               </TouchableOpacity>
               <Text style={styles.subtleHelpText}>
-                After submission, your request status will become <Text style={{ fontWeight: '800', color: '#FFFFFF' }}>PENDING VERIFICATION</Text>. Admin will verify that your UTR and screenshot match before accepting the request.
+                After submission, your request status will become <Text style={{ fontWeight: '800', color: '#0F172A' }}>PENDING VERIFICATION</Text>. Admin will verify that your UTR and screenshot match before accepting the request.
               </Text>
             </View>
           )}
@@ -1150,7 +1152,7 @@ export const RenewPlanModal: React.FC<RenewPlanModalProps> = ({
           {currentStep === 4 && (
             <View style={styles.successStepContainer}>
               <View style={styles.successIconCircle}>
-                <CheckCircle2 size={42} color="#34D399" />
+                <CheckCircle2 size={42} color="#16A34A" />
               </View>
 
               <Text style={styles.successHeading}>Verification Submitted!</Text>
@@ -1171,18 +1173,18 @@ export const RenewPlanModal: React.FC<RenewPlanModalProps> = ({
                 </View>
                 <View style={styles.priceRow}>
                   <Text style={styles.summaryGridLabel}>UTR Number:</Text>
-                  <Text style={[styles.summaryGridValue, { color: '#38BDF8', fontWeight: '800' }]}>{utrNumber}</Text>
+                  <Text style={[styles.summaryGridValue, { color: '#0F172A', fontWeight: '800' }]}>{utrNumber}</Text>
                 </View>
                 <View style={styles.priceRow}>
                   <Text style={styles.summaryGridLabel}>New Validity:</Text>
-                  <Text style={[styles.summaryGridValue, { color: '#10B981', fontWeight: '800' }]}>
+                  <Text style={[styles.summaryGridValue, { color: '#16A34A', fontWeight: '800' }]}>
                     {calculateProposedValidity()}
                   </Text>
                 </View>
                 <View style={styles.priceRow}>
                   <Text style={styles.summaryGridLabel}>Status:</Text>
-                  <View style={[styles.qrBadge, { backgroundColor: '#1E3A8A' }]}>
-                    <Text style={[styles.qrBadgeText, { color: '#60A5FA' }]}>PENDING VERIFICATION</Text>
+                  <View style={[styles.qrBadge, { backgroundColor: '#DCFCE7' }]}>
+                    <Text style={[styles.qrBadgeText, { color: '#15803D' }]}>PENDING VERIFICATION</Text>
                   </View>
                 </View>
               </View>
@@ -1201,14 +1203,14 @@ export const RenewPlanModal: React.FC<RenewPlanModalProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0B1120',
+    backgroundColor: '#FFFFFF',
   },
   topNavbar: {
     paddingHorizontal: 16,
     paddingVertical: 14,
-    backgroundColor: '#0F172A',
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: '#E2E8F0',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -1225,12 +1227,12 @@ const styles = StyleSheet.create({
   backBtnText: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#0F172A',
   },
   brandTitle: {
     fontSize: 18,
     fontWeight: '800',
-    color: '#FFFFFF',
+    color: '#0F172A',
     letterSpacing: -0.3,
   },
   navRight: {
@@ -1239,34 +1241,34 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   orderRefBadge: {
-    backgroundColor: '#1E293B',
+    backgroundColor: '#F1F5F9',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: '#E2E8F0',
   },
   orderRefText: {
     fontSize: 11,
-    color: '#94A3B8',
+    color: '#475569',
     fontWeight: '700',
   },
   closeBtn: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#1E293B',
+    backgroundColor: '#F1F5F9',
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: '#E2E8F0',
     alignItems: 'center',
     justifyContent: 'center',
   },
   stepperContainer: {
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#0E1726',
+    backgroundColor: '#F8FAFC',
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: '#E2E8F0',
     flexDirection: 'row',
     alignItems: 'center',
   },
@@ -1280,20 +1282,20 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: '#1E293B',
+    backgroundColor: '#E2E8F0',
     alignItems: 'center',
     justifyContent: 'center',
   },
   stepCircleActive: {
-    backgroundColor: '#2563EB',
+    backgroundColor: '#16A34A',
   },
   stepCircleDone: {
-    backgroundColor: '#10B981',
+    backgroundColor: '#16A34A',
   },
   stepCircleText: {
     fontSize: 10,
     fontWeight: '800',
-    color: '#FFFFFF',
+    color: '#64748B',
   },
   stepLabel: {
     fontSize: 11,
@@ -1301,23 +1303,24 @@ const styles = StyleSheet.create({
     color: '#64748B',
   },
   stepLabelActive: {
-    color: '#FFFFFF',
+    color: '#0F172A',
     fontWeight: '800',
   },
   stepLabelDone: {
-    color: '#10B981',
+    color: '#16A34A',
   },
   stepLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#1E293B',
+    backgroundColor: '#E2E8F0',
     marginHorizontal: 4,
   },
   stepLineDone: {
-    backgroundColor: '#10B981',
+    backgroundColor: '#16A34A',
   },
   scrollArea: {
     flex: 1,
+    backgroundColor: '#FFFFFF',
   },
   scrollContent: {
     padding: 16,
@@ -1330,8 +1333,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(245, 158, 11, 0.12)',
-    borderColor: 'rgba(245, 158, 11, 0.3)',
+    backgroundColor: '#DCFCE7',
+    borderColor: '#86EFAC',
     borderWidth: 1,
     paddingHorizontal: 10,
     paddingVertical: 4,
@@ -1341,25 +1344,25 @@ const styles = StyleSheet.create({
   upgradeBadgeText: {
     fontSize: 11.5,
     fontWeight: '700',
-    color: '#F59E0B',
+    color: '#15803D',
   },
   headingTitle: {
     fontSize: 22,
     fontWeight: '900',
-    color: '#FFFFFF',
+    color: '#0F172A',
     letterSpacing: -0.4,
   },
   subTitle: {
     fontSize: 13,
-    color: '#94A3B8',
+    color: '#64748B',
     lineHeight: 18,
   },
   accountCard: {
-    backgroundColor: '#1E293B',
+    backgroundColor: '#F8FAFC',
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: '#E2E8F0',
     gap: 10,
   },
   accountCardHeader: {
@@ -1375,11 +1378,13 @@ const styles = StyleSheet.create({
   accountCardLabel: {
     fontSize: 12,
     fontWeight: '800',
-    color: '#94A3B8',
+    color: '#475569',
     letterSpacing: 0.5,
   },
   verifiedBadge: {
-    backgroundColor: '#1E3A8A',
+    backgroundColor: '#DCFCE7',
+    borderWidth: 1,
+    borderColor: '#86EFAC',
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 10,
@@ -1387,20 +1392,20 @@ const styles = StyleSheet.create({
   verifiedBadgeText: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#60A5FA',
+    color: '#15803D',
   },
   shopNameText: {
     fontSize: 18,
     fontWeight: '800',
-    color: '#FFFFFF',
+    color: '#0F172A',
   },
   accountStatsRow: {
     flexDirection: 'row',
-    backgroundColor: '#0F172A',
+    backgroundColor: '#FFFFFF',
     borderRadius: 10,
     padding: 10,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: '#E2E8F0',
   },
   accountStatCol: {
     flex: 1,
@@ -1412,7 +1417,7 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#0F172A',
     marginTop: 2,
   },
   guaranteeBox: {
@@ -1424,7 +1429,7 @@ const styles = StyleSheet.create({
   guaranteeText: {
     flex: 1,
     fontSize: 11.5,
-    color: '#94A3B8',
+    color: '#475569',
     lineHeight: 16,
   },
   sectionBlock: {
@@ -1439,7 +1444,7 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: '#2563EB',
+    backgroundColor: '#16A34A',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1451,23 +1456,23 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 14.5,
     fontWeight: '800',
-    color: '#FFFFFF',
+    color: '#0F172A',
   },
   sectionSub: {
     fontSize: 11,
     color: '#64748B',
   },
   platformCard: {
-    backgroundColor: '#1E293B',
+    backgroundColor: '#FFFFFF',
     borderRadius: 14,
     padding: 14,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: '#E2E8F0',
     gap: 6,
   },
   cardSelected: {
-    backgroundColor: 'rgba(37, 99, 235, 0.1)',
-    borderColor: '#2563EB',
+    backgroundColor: '#F0FDF4',
+    borderColor: '#16A34A',
     borderWidth: 2,
   },
   cardTopRow: {
@@ -1483,11 +1488,11 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 14,
     fontWeight: '800',
-    color: '#FFFFFF',
+    color: '#0F172A',
   },
   cardSubText: {
     fontSize: 11.5,
-    color: '#94A3B8',
+    color: '#64748B',
     marginTop: 2,
   },
   platformBadge: {
@@ -1505,12 +1510,12 @@ const styles = StyleSheet.create({
     height: 18,
     borderRadius: 9,
     borderWidth: 2,
-    borderColor: '#64748B',
+    borderColor: '#CBD5E1',
     alignItems: 'center',
     justifyContent: 'center',
   },
   radioOuterSelected: {
-    borderColor: '#2563EB',
+    borderColor: '#16A34A',
     borderWidth: 5,
   },
   radioInner: {
@@ -1521,7 +1526,7 @@ const styles = StyleSheet.create({
   },
   cardDesc: {
     fontSize: 11.5,
-    color: '#94A3B8',
+    color: '#64748B',
     lineHeight: 16,
   },
   cardPriceRow: {
@@ -1537,7 +1542,7 @@ const styles = StyleSheet.create({
   licensePrice: {
     fontSize: 13,
     fontWeight: '800',
-    color: '#38BDF8',
+    color: '#15803D',
   },
   bulletsList: {
     gap: 4,
@@ -1550,7 +1555,7 @@ const styles = StyleSheet.create({
   },
   bulletText: {
     fontSize: 11.5,
-    color: '#CBD5E1',
+    color: '#334155',
   },
   hardwareRow: {
     flexDirection: 'row',
@@ -1559,19 +1564,19 @@ const styles = StyleSheet.create({
     marginTop: 6,
     paddingTop: 6,
     borderTopWidth: 1,
-    borderTopColor: '#334155',
+    borderTopColor: '#E2E8F0',
   },
   hardwareValue: {
     fontSize: 11.5,
     fontWeight: '700',
-    color: '#94A3B8',
+    color: '#475569',
   },
   durationCard: {
-    backgroundColor: '#1E293B',
+    backgroundColor: '#FFFFFF',
     borderRadius: 14,
     padding: 14,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: '#E2E8F0',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -1598,14 +1603,14 @@ const styles = StyleSheet.create({
   durationPriceText: {
     fontSize: 15,
     fontWeight: '900',
-    color: '#FFFFFF',
+    color: '#0F172A',
   },
   summaryCard: {
-    backgroundColor: '#1E293B',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: '#E2E8F0',
     gap: 12,
   },
   summaryTitleRow: {
@@ -1616,7 +1621,7 @@ const styles = StyleSheet.create({
   summaryTitle: {
     fontSize: 14,
     fontWeight: '800',
-    color: '#FFFFFF',
+    color: '#0F172A',
   },
   summaryGrid: {
     flexDirection: 'row',
@@ -1625,9 +1630,11 @@ const styles = StyleSheet.create({
   },
   summaryGridCol: {
     width: '48%',
-    backgroundColor: '#0F172A',
+    backgroundColor: '#F8FAFC',
     padding: 10,
     borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   summaryGridLabel: {
     fontSize: 10.5,
@@ -1636,13 +1643,13 @@ const styles = StyleSheet.create({
   summaryGridValue: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#0F172A',
     marginTop: 2,
   },
   validityBox: {
-    backgroundColor: 'rgba(56, 189, 248, 0.08)',
+    backgroundColor: '#F0FDF4',
     borderWidth: 1,
-    borderColor: 'rgba(56, 189, 248, 0.25)',
+    borderColor: '#BBF7D0',
     borderRadius: 10,
     padding: 10,
     flexDirection: 'row',
@@ -1651,17 +1658,17 @@ const styles = StyleSheet.create({
   },
   validityLabel: {
     fontSize: 11,
-    color: '#94A3B8',
+    color: '#15803D',
   },
   validityValue: {
     fontSize: 13,
     fontWeight: '800',
-    color: '#38BDF8',
+    color: '#166534',
     marginTop: 2,
   },
   validitySub: {
     fontSize: 10,
-    color: '#64748B',
+    color: '#15803D',
     marginTop: 2,
   },
   priceRow: {
@@ -1671,38 +1678,38 @@ const styles = StyleSheet.create({
   },
   priceLabel: {
     fontSize: 12.5,
-    color: '#94A3B8',
+    color: '#64748B',
   },
   priceValue: {
     fontSize: 12.5,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#0F172A',
   },
   totalPayableRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     borderTopWidth: 1,
-    borderTopColor: '#334155',
+    borderTopColor: '#E2E8F0',
     paddingTop: 10,
     marginTop: 4,
   },
   totalPayableLabel: {
     fontSize: 14,
     fontWeight: '800',
-    color: '#FFFFFF',
+    color: '#0F172A',
   },
   totalPayableAmount: {
     fontSize: 18,
     fontWeight: '900',
-    color: '#10B981',
+    color: '#16A34A',
   },
   taxNotice: {
     fontSize: 10,
     color: '#64748B',
   },
   primaryCtaBtn: {
-    backgroundColor: '#2563EB',
+    backgroundColor: '#16A34A',
     borderRadius: 12,
     paddingVertical: 14,
     flexDirection: 'row',
@@ -1717,11 +1724,11 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   customBox: {
-    backgroundColor: '#1E1B4B',
+    backgroundColor: '#F0FDF4',
     borderRadius: 14,
     padding: 14,
     borderWidth: 1,
-    borderColor: '#3730A3',
+    borderColor: '#BBF7D0',
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 12,
@@ -1730,38 +1737,40 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 8,
-    backgroundColor: '#4338CA',
+    backgroundColor: '#DCFCE7',
     alignItems: 'center',
     justifyContent: 'center',
   },
   customTitle: {
     fontSize: 13,
     fontWeight: '800',
-    color: '#E0E7FF',
+    color: '#166534',
   },
   customSub: {
     fontSize: 11,
-    color: '#C7D2FE',
+    color: '#15803D',
     lineHeight: 15,
     marginTop: 2,
   },
   customLink: {
     fontSize: 11.5,
     fontWeight: '700',
-    color: '#818CF8',
+    color: '#16A34A',
     marginTop: 4,
   },
   qrCard: {
-    backgroundColor: '#1E293B',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 18,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: '#E2E8F0',
     alignItems: 'center',
     gap: 12,
   },
   scanPayPill: {
-    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    backgroundColor: '#DCFCE7',
+    borderWidth: 1,
+    borderColor: '#86EFAC',
     paddingHorizontal: 10,
     paddingVertical: 3,
     borderRadius: 12,
@@ -1769,12 +1778,14 @@ const styles = StyleSheet.create({
   scanPayPillText: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#10B981',
+    color: '#15803D',
   },
   qrContainer: {
     backgroundColor: '#FFFFFF',
     padding: 12,
     borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   qrImage: {
     width: 180,
@@ -1782,17 +1793,17 @@ const styles = StyleSheet.create({
   },
   qrInstructions: {
     fontSize: 11.5,
-    color: '#94A3B8',
+    color: '#64748B',
     textAlign: 'center',
     lineHeight: 16,
   },
   merchantUpiBox: {
     width: '100%',
-    backgroundColor: '#0F172A',
+    backgroundColor: '#F8FAFC',
     borderRadius: 10,
     padding: 12,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: '#E2E8F0',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -1800,11 +1811,11 @@ const styles = StyleSheet.create({
   merchantUpiText: {
     fontSize: 12.5,
     fontWeight: '800',
-    color: '#FFFFFF',
+    color: '#0F172A',
     marginTop: 2,
   },
   copyBtn: {
-    backgroundColor: '#2563EB',
+    backgroundColor: '#16A34A',
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 6,
@@ -1828,9 +1839,9 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   alertNotice: {
-    backgroundColor: 'rgba(245, 158, 11, 0.08)',
+    backgroundColor: '#FEF3C7',
     borderWidth: 1,
-    borderColor: 'rgba(245, 158, 11, 0.25)',
+    borderColor: '#FDE68A',
     borderRadius: 10,
     padding: 10,
     flexDirection: 'row',
@@ -1840,11 +1851,11 @@ const styles = StyleSheet.create({
   alertNoticeTitle: {
     fontSize: 11.5,
     fontWeight: '800',
-    color: '#FCD34D',
+    color: '#92400E',
   },
   alertNoticeSub: {
     fontSize: 10.5,
-    color: '#FDE68A',
+    color: '#B45309',
     marginTop: 2,
   },
   paymentAppsRow: {
@@ -1853,10 +1864,10 @@ const styles = StyleSheet.create({
   },
   paymentAppBtn: {
     flex: 1,
-    backgroundColor: '#1E293B',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: '#E2E8F0',
     padding: 10,
     alignItems: 'center',
     gap: 6,
@@ -1876,12 +1887,12 @@ const styles = StyleSheet.create({
   appNameText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#0F172A',
   },
   proofRequiredCard: {
-    backgroundColor: 'rgba(239, 68, 68, 0.08)',
+    backgroundColor: '#FEF2F2',
     borderWidth: 1,
-    borderColor: 'rgba(239, 68, 68, 0.25)',
+    borderColor: '#FECACA',
     borderRadius: 14,
     padding: 14,
     gap: 6,
@@ -1894,7 +1905,7 @@ const styles = StyleSheet.create({
   proofTitleText: {
     fontSize: 12.5,
     fontWeight: '800',
-    color: '#F87171',
+    color: '#DC2626',
   },
   proofBulletsList: {
     gap: 2,
@@ -1902,7 +1913,7 @@ const styles = StyleSheet.create({
   },
   proofBulletText: {
     fontSize: 11.5,
-    color: '#FCA5A5',
+    color: '#B91C1C',
     lineHeight: 16,
   },
   processStepsText: {
@@ -1916,11 +1927,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   supportBox: {
-    backgroundColor: '#0F172A',
+    backgroundColor: '#F8FAFC',
     borderRadius: 12,
     padding: 12,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: '#E2E8F0',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -1928,7 +1939,7 @@ const styles = StyleSheet.create({
   supportPhone: {
     fontSize: 11.5,
     fontWeight: '800',
-    color: '#FFFFFF',
+    color: '#0F172A',
     marginTop: 2,
   },
   supportActionsRow: {
@@ -1936,7 +1947,9 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   waBtn: {
-    backgroundColor: '#065F46',
+    backgroundColor: '#DCFCE7',
+    borderWidth: 1,
+    borderColor: '#86EFAC',
     paddingHorizontal: 8,
     paddingVertical: 6,
     borderRadius: 6,
@@ -1947,12 +1960,12 @@ const styles = StyleSheet.create({
   waBtnText: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#34D399',
+    color: '#15803D',
   },
   callBtn: {
-    backgroundColor: '#1E293B',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: '#E2E8F0',
     paddingHorizontal: 8,
     paddingVertical: 6,
     borderRadius: 6,
@@ -1963,10 +1976,12 @@ const styles = StyleSheet.create({
   callBtnText: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#CBD5E1',
+    color: '#475569',
   },
   qrBadge: {
-    backgroundColor: '#1E3A8A',
+    backgroundColor: '#DCFCE7',
+    borderWidth: 1,
+    borderColor: '#86EFAC',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
@@ -1974,7 +1989,7 @@ const styles = StyleSheet.create({
   qrBadgeText: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#60A5FA',
+    color: '#15803D',
   },
   inputGroup: {
     gap: 6,
@@ -1987,20 +2002,20 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 12,
     fontWeight: '800',
-    color: '#E2E8F0',
+    color: '#0F172A',
   },
   inputLabelRight: {
     fontSize: 10.5,
-    color: '#60A5FA',
+    color: '#16A34A',
   },
   textInput: {
-    backgroundColor: '#1E293B',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: '#CBD5E1',
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    color: '#FFFFFF',
+    color: '#0F172A',
     fontSize: 13,
     fontWeight: '700',
   },
@@ -2009,9 +2024,9 @@ const styles = StyleSheet.create({
     color: '#64748B',
   },
   uploadDropzone: {
-    backgroundColor: '#1E293B',
+    backgroundColor: '#F8FAFC',
     borderWidth: 2,
-    borderColor: '#475569',
+    borderColor: '#CBD5E1',
     borderStyle: 'dashed',
     borderRadius: 14,
     padding: 24,
@@ -2023,25 +2038,25 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#0F172A',
+    backgroundColor: '#DCFCE7',
     alignItems: 'center',
     justifyContent: 'center',
   },
   uploadDropTitle: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#0F172A',
   },
   uploadDropSub: {
     fontSize: 11,
     color: '#64748B',
   },
   screenshotPreviewBox: {
-    backgroundColor: '#1E293B',
+    backgroundColor: '#F0FDF4',
     borderRadius: 12,
     padding: 10,
     borderWidth: 1,
-    borderColor: '#10B981',
+    borderColor: '#16A34A',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
@@ -2054,32 +2069,32 @@ const styles = StyleSheet.create({
   screenshotNameText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#0F172A',
   },
   screenshotAttachedText: {
     fontSize: 11,
-    color: '#10B981',
+    color: '#16A34A',
     fontWeight: '600',
   },
   removeProofBtn: {
-    backgroundColor: '#0F172A',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#475569',
+    borderColor: '#FCA5A5',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
   },
   removeProofBtnText: {
     fontSize: 11,
-    color: '#EF4444',
+    color: '#DC2626',
     fontWeight: '700',
   },
   requirementsCard: {
-    backgroundColor: '#1E293B',
+    backgroundColor: '#FFFFFF',
     borderRadius: 14,
     padding: 14,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: '#E2E8F0',
     gap: 8,
   },
   reqHeaderRow: {
@@ -2090,7 +2105,7 @@ const styles = StyleSheet.create({
   reqTitle: {
     fontSize: 12,
     fontWeight: '800',
-    color: '#E2E8F0',
+    color: '#0F172A',
   },
   reqBadge: {
     paddingHorizontal: 8,
@@ -2112,7 +2127,7 @@ const styles = StyleSheet.create({
   },
   reqWarning: {
     fontSize: 10.5,
-    color: '#FCD34D',
+    color: '#B45309',
     marginTop: 2,
   },
   successStepContainer: {
@@ -2124,24 +2139,24 @@ const styles = StyleSheet.create({
     width: 68,
     height: 68,
     borderRadius: 34,
-    backgroundColor: '#065F46',
+    backgroundColor: '#DCFCE7',
     alignItems: 'center',
     justifyContent: 'center',
   },
   successHeading: {
     fontSize: 20,
     fontWeight: '900',
-    color: '#FFFFFF',
+    color: '#0F172A',
   },
   successSub: {
     fontSize: 12.5,
-    color: '#94A3B8',
+    color: '#64748B',
     textAlign: 'center',
   },
   successRefBox: {
-    backgroundColor: '#1E293B',
+    backgroundColor: '#F8FAFC',
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: '#E2E8F0',
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 6,
@@ -2149,15 +2164,15 @@ const styles = StyleSheet.create({
   successRefText: {
     fontSize: 16,
     fontWeight: '900',
-    color: '#38BDF8',
+    color: '#16A34A',
   },
   successDetailsCard: {
     width: '100%',
-    backgroundColor: '#1E293B',
+    backgroundColor: '#FFFFFF',
     borderRadius: 14,
     padding: 14,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: '#E2E8F0',
     gap: 8,
   },
 });

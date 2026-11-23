@@ -54,12 +54,18 @@ public class CurrentUser {
 
     public boolean isSuperAdmin() {
         User u = get();
-        return u != null && (u.getRole() == UserRole.SUPER_ADMIN || u.getRole() == UserRole.PLATFORM_ADMIN || "superadmin".equalsIgnoreCase(u.getUsername()));
+        return u != null && (u.getRole() == UserRole.SUPER_ADMIN || u.getRole() == UserRole.PLATFORM_ADMIN || u.isSuperAdmin() || "superadmin".equalsIgnoreCase(u.getUsername()));
+    }
+
+    public void requireSuperAdmin() {
+        if (!isSuperAdmin()) {
+            throw new AccessDeniedException("Access denied: Super Admin privileges required for this platform resource.");
+        }
     }
 
     public boolean isOwner() {
         User u = get();
-        return isSuperAdmin() || u.getRole() == UserRole.OWNER || (u.getBranch() == null && u.getRole() == UserRole.ADMIN);
+        return isSuperAdmin() || (u != null && (u.getRole() == UserRole.OWNER || (u.getBranch() == null && u.getRole() == UserRole.ADMIN)));
     }
 
     public void requireOwner() {

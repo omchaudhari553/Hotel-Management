@@ -39,7 +39,16 @@ export const BusinessManagementPage: React.FC = () => {
   const [selectedDetail, setSelectedDetail] = useState<BusinessDetail | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
 
-  const [editForm, setEditForm] = useState({
+  const [editForm, setEditForm] = useState<{
+    name: string;
+    ownerName: string;
+    email: string;
+    phone: string;
+    city: string;
+    state: string;
+    gstin: string;
+    accountType: 'SINGLE' | 'MULTI_BRANCH';
+  }>({
     name: '',
     ownerName: '',
     email: '',
@@ -47,6 +56,7 @@ export const BusinessManagementPage: React.FC = () => {
     city: '',
     state: '',
     gstin: '',
+    accountType: 'SINGLE',
   });
 
   const handleOpenEditModal = (b: BusinessSummary) => {
@@ -59,6 +69,7 @@ export const BusinessManagementPage: React.FC = () => {
       city: b.city || '',
       state: b.state || '',
       gstin: '',
+      accountType: (b.accountType as any) || 'SINGLE',
     });
     setShowEditModal(true);
   };
@@ -105,9 +116,10 @@ export const BusinessManagementPage: React.FC = () => {
     pinCode: '411001',
     gstin: '',
     businessType: 'HOTEL',
+    accountType: 'SINGLE',
     products: ['HOTEL'],
     username: '',
-    password: 'Owner@123'
+    password: 'Client@12345'
   });
 
   const loadBusinesses = async () => {
@@ -138,7 +150,14 @@ export const BusinessManagementPage: React.FC = () => {
 
   const handleCreateBusiness = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.email) return;
+    if (!form.name || !form.email) {
+      showAlert('Business name and email are required.', 'Validation Error', 'error');
+      return;
+    }
+    if (!form.username || !form.username.trim()) {
+      showAlert('Customer Login Username is required. Please set a unique username for this customer.', 'Validation Error', 'error');
+      return;
+    }
 
     setActionLoading(true);
     try {
@@ -156,14 +175,19 @@ export const BusinessManagementPage: React.FC = () => {
         pinCode: '411001',
         gstin: '',
         businessType: 'HOTEL',
+        accountType: 'SINGLE',
         products: ['HOTEL'],
         username: '',
-        password: 'Owner@123'
+        password: 'Client@12345'
       });
-      showAlert(`Business "${form.name}" registered successfully!`, 'Business Created', 'success');
+      showAlert(
+        `Business "${form.name}" registered successfully as ${form.accountType === 'MULTI_BRANCH' ? 'Multi-Branch (Owner)' : 'Single User'}!\n\nProvide these credentials to customer:\nUsername: ${form.username}\nPassword: ${form.password}`,
+        'Customer Created',
+        'success'
+      );
       loadBusinesses();
     } catch (err: any) {
-      showAlert(err.response?.data?.message || 'Failed to create business.', 'Creation Error', 'error');
+      showAlert(err.response?.data?.message || err.message || 'Failed to create business.', 'Creation Error', 'error');
     } finally {
       setActionLoading(false);
     }
@@ -262,6 +286,7 @@ export const BusinessManagementPage: React.FC = () => {
               <tr>
                 <th className="py-3 px-4">Business</th>
                 <th className="py-3 px-4">Owner & Contact</th>
+                <th className="py-3 px-4">Account Mode</th>
                 <th className="py-3 px-4">Location</th>
                 <th className="py-3 px-4">Subscribed Products</th>
                 <th className="py-3 px-4">Branches</th>
@@ -272,11 +297,11 @@ export const BusinessManagementPage: React.FC = () => {
             <tbody className="divide-y divide-slate-800/60">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="py-8 text-center text-slate-400">Loading businesses from database...</td>
+                  <td colSpan={8} className="py-8 text-center text-slate-400">Loading businesses from database...</td>
                 </tr>
               ) : businesses.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-8 text-center text-slate-500">No businesses match the search query.</td>
+                  <td colSpan={8} className="py-8 text-center text-slate-500">No businesses match the search query.</td>
                 </tr>
               ) : (
                 businesses.map((b) => (
@@ -291,6 +316,17 @@ export const BusinessManagementPage: React.FC = () => {
                     <td className="py-3 px-4">
                       <p className="text-slate-200 font-medium">{b.ownerName || 'N/A'}</p>
                       <p className="text-[11px] text-slate-400">{b.email || b.phone || 'No email'}</p>
+                    </td>
+                    <td className="py-3 px-4">
+                      {b.accountType === 'MULTI_BRANCH' ? (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-400 border border-purple-500/30 inline-flex items-center gap-1">
+                          Multi-Branch (Owner)
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 inline-flex items-center gap-1">
+                          Single User
+                        </span>
+                      )}
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-1 text-slate-300">
@@ -535,26 +571,101 @@ export const BusinessManagementPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Owner Initial Credentials */}
-              <div className="pt-2 border-t border-slate-800 grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Owner Login Username</label>
-                  <input
-                    type="text"
-                    value={form.username}
-                    onChange={(e) => setForm({ ...form, username: e.target.value })}
-                    placeholder="Leave empty for auto-generated"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
-                  />
+              {/* Account Type Selection (Single vs Multiple) */}
+              <div className="pt-2 border-t border-slate-800">
+                <label className="block text-xs font-semibold text-slate-300 mb-2">
+                  Customer Account Type / ग्राहक खाते प्रकार <span className="text-red-400">*</span>
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Single User Option */}
+                  <div
+                    onClick={() => setForm({ ...form, accountType: 'SINGLE' })}
+                    className={`p-3 rounded-xl border cursor-pointer transition-all flex items-start gap-2.5 ${
+                      form.accountType !== 'MULTI_BRANCH'
+                        ? 'bg-emerald-500/10 border-emerald-500/50 text-white'
+                        : 'bg-slate-950 border-slate-800 text-slate-400'
+                    }`}
+                  >
+                    <div className="mt-0.5">
+                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                        form.accountType !== 'MULTI_BRANCH' ? 'border-emerald-400 bg-emerald-500/20' : 'border-slate-600'
+                      }`}>
+                        {form.accountType !== 'MULTI_BRANCH' && <div className="w-2 h-2 rounded-full bg-emerald-400" />}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-white">Single User (सिंगल युझर)</p>
+                      <p className="text-[10px] text-slate-400 mt-0.5 leading-snug">
+                        Single hotel/business billing & POS dashboard. थेट बिलिंग व ऑपरेशन्स डॅशबोर्ड.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Multi-Branch Option */}
+                  <div
+                    onClick={() => setForm({ ...form, accountType: 'MULTI_BRANCH' })}
+                    className={`p-3 rounded-xl border cursor-pointer transition-all flex items-start gap-2.5 ${
+                      form.accountType === 'MULTI_BRANCH'
+                        ? 'bg-purple-500/10 border-purple-500/50 text-white'
+                        : 'bg-slate-950 border-slate-800 text-slate-400'
+                    }`}
+                  >
+                    <div className="mt-0.5">
+                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                        form.accountType === 'MULTI_BRANCH' ? 'border-purple-400 bg-purple-500/20' : 'border-slate-600'
+                      }`}>
+                        {form.accountType === 'MULTI_BRANCH' && <div className="w-2 h-2 rounded-full bg-purple-400" />}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-white">Multiple Branches (मल्टिपल शाखा)</p>
+                      <p className="text-[10px] text-slate-400 mt-0.5 leading-snug">
+                        Admin / Owner mode with multi-branch management & branch switcher.
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Initial Password</label>
-                  <input
-                    type="password"
-                    value={form.password}
-                    onChange={(e) => setForm({ ...form, password: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
-                  />
+              </div>
+
+              {/* Customer Initial Credentials */}
+              <div className="pt-2 border-t border-slate-800">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-xs font-semibold text-slate-200">
+                    Customer Login Credentials (ग्राहकाला द्यायचे लॉगिन तपशील) <span className="text-red-400">*</span>
+                  </label>
+                  <span className="text-[10px] text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded-full font-medium">
+                    हे युझरनेम आणि पासवर्ड ग्राहकाला द्यावे
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-400 mb-1">
+                      Unique Login Username <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={form.username}
+                      onChange={(e) => setForm({ ...form, username: e.target.value.trim().toLowerCase() })}
+                      placeholder="e.g. rajesh_hotel or city_cafe"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    />
+                    <p className="text-[10px] text-slate-500 mt-1">Unique across all customers (संपूर्ण सिस्टीममध्ये युनिक असावे)</p>
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-400 mb-1">
+                      Initial Password <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={form.password}
+                      onChange={(e) => setForm({ ...form, password: e.target.value })}
+                      placeholder="Client@12345"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    />
+                    <p className="text-[10px] text-slate-500 mt-1">Default: Client@12345</p>
+                  </div>
                 </div>
               </div>
 
@@ -757,6 +868,44 @@ export const BusinessManagementPage: React.FC = () => {
                     onChange={(e) => setEditForm({ ...editForm, state: e.target.value })}
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
                   />
+                </div>
+              </div>
+
+              {/* Account Mode in Edit Modal */}
+              <div className="pt-2 border-t border-slate-800">
+                <label className="block text-xs font-semibold text-slate-300 mb-2">
+                  Account Mode / ग्राहक खाते प्रकार
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div
+                    onClick={() => setEditForm({ ...editForm, accountType: 'SINGLE' })}
+                    className={`p-3 rounded-xl border cursor-pointer transition-all flex items-center justify-between ${
+                      editForm.accountType !== 'MULTI_BRANCH'
+                        ? 'bg-emerald-500/10 border-emerald-500/50 text-white'
+                        : 'bg-slate-950 border-slate-800 text-slate-400'
+                    }`}
+                  >
+                    <div>
+                      <p className="text-xs font-bold">Single User</p>
+                      <p className="text-[10px] text-slate-400">Single Hotel POS</p>
+                    </div>
+                    {editForm.accountType !== 'MULTI_BRANCH' && <Check className="w-4 h-4 text-emerald-400" />}
+                  </div>
+
+                  <div
+                    onClick={() => setEditForm({ ...editForm, accountType: 'MULTI_BRANCH' })}
+                    className={`p-3 rounded-xl border cursor-pointer transition-all flex items-center justify-between ${
+                      editForm.accountType === 'MULTI_BRANCH'
+                        ? 'bg-purple-500/10 border-purple-500/50 text-white'
+                        : 'bg-slate-950 border-slate-800 text-slate-400'
+                    }`}
+                  >
+                    <div>
+                      <p className="text-xs font-bold">Multiple Branches</p>
+                      <p className="text-[10px] text-slate-400">Admin / Owner</p>
+                    </div>
+                    {editForm.accountType === 'MULTI_BRANCH' && <Check className="w-4 h-4 text-purple-400" />}
+                  </div>
                 </div>
               </div>
 

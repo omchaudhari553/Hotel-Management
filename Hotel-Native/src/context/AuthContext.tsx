@@ -7,8 +7,8 @@ interface AuthContextType {
   token: string | null;
   business: Business | null;
   isLoading: boolean;
-  login: (credentials: { usernameOrEmail: string; password: string }) => Promise<void>;
-  register: (details: any) => Promise<void>;
+  login: (credentials: { usernameOrEmail: string; password: string }) => Promise<{ user: User; token: string }>;
+  register: (details: any) => Promise<{ user: User; token: string }>;
   logout: () => Promise<void>;
   setBusiness: (business: Business) => void;
 }
@@ -37,23 +37,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     restoreSession();
   }, []);
 
-  const login = async (credentials: { usernameOrEmail: string; password: string }) => {
+  const login = async (credentials: { usernameOrEmail: string; password: string }): Promise<{ user: User; token: string }> => {
     setIsLoading(true);
     try {
       const res = await authService.login(credentials);
       setUser(res.user);
       setToken(res.token);
+      return res;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const register = async (details: any) => {
+  const register = async (details: any): Promise<{ user: User; token: string }> => {
     setIsLoading(true);
     try {
       const res = await authService.register(details);
       setUser(res.user);
       setToken(res.token);
+      return res;
     } finally {
       setIsLoading(false);
     }

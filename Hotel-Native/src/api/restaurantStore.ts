@@ -154,55 +154,13 @@ let dynamicMenuItems: MenuItemData[] = deduplicateMenuItems(INITIAL_MENU_ITEMS);
 
 
 
-// Seeded Tables per branch (matching database records)
+// Initial Tables per branch (Clean empty state for fresh users/logins; populated via backend database)
 export const BRANCH_TABLES_INITIAL: { [branchId: number]: TableItem[] } = {
-  // Branch 1: Main Branch (16 tables)
-  1: [
-    { id: '1', tableNumber: 'Table 01', section: 'Main Dining', capacity: 4, status: 'AVAILABLE', branchId: 1 },
-    { id: '2', tableNumber: 'Table 02', section: 'Main Dining', capacity: 4, status: 'AVAILABLE', branchId: 1 },
-    { id: '3', tableNumber: 'Table 03', section: 'Main Dining', capacity: 4, status: 'AVAILABLE', branchId: 1 },
-    { id: '4', tableNumber: 'Table 04', section: 'Main Dining', capacity: 4, status: 'AVAILABLE', branchId: 1 },
-    { id: '5', tableNumber: 'Table 05', section: 'Main Dining', capacity: 4, status: 'AVAILABLE', branchId: 1 },
-    { id: '6', tableNumber: 'Table 06', section: 'Main Dining', capacity: 4, status: 'AVAILABLE', branchId: 1 },
-    { id: '7', tableNumber: 'Table 07', section: 'Main Dining', capacity: 4, status: 'AVAILABLE', branchId: 1 },
-    { id: '8', tableNumber: 'Table 08', section: 'Main Dining', capacity: 4, status: 'AVAILABLE', branchId: 1 },
-    { id: '11', tableNumber: 'Table 09', section: 'Main Dining', capacity: 4, status: 'AVAILABLE', branchId: 1 },
-    { id: '12', tableNumber: 'TB-TBL-8881', section: 'Main Dining', capacity: 4, status: 'AVAILABLE', branchId: 1 },
-    { id: '14', tableNumber: 'Table 11', section: 'Main Dining', capacity: 4, status: 'AVAILABLE', branchId: 1 },
-    { id: '24', tableNumber: 'Table 12', section: 'Main Dining', capacity: 4, status: 'AVAILABLE', branchId: 1 },
-    { id: '29', tableNumber: 'Table 13', section: 'Main Dining', capacity: 4, status: 'AVAILABLE', branchId: 1 },
-    { id: '30', tableNumber: 'Table 14', section: 'Main Dining', capacity: 4, status: 'AVAILABLE', branchId: 1 },
-    { id: '32', tableNumber: 'Table 15', section: 'Terrace', capacity: 6, status: 'AVAILABLE', branchId: 1 },
-    { id: '33', tableNumber: 'Table 16', section: 'Private Dining', capacity: 8, status: 'AVAILABLE', branchId: 1 },
-  ],
-  // Branch 2: Nashik Branch (6 tables)
-  2: [
-    { id: '13', tableNumber: 'NSK-TBL-01', section: 'Rooftop', capacity: 4, status: 'AVAILABLE', branchId: 2 },
-    { id: '16', tableNumber: 'Table 02', section: 'Terrace', capacity: 4, status: 'AVAILABLE', branchId: 2 },
-    { id: '25', tableNumber: 'Table 03', section: 'Main Dining', capacity: 4, status: 'AVAILABLE', branchId: 2 },
-    { id: '26', tableNumber: 'Table 04', section: 'Main Dining', capacity: 4, status: 'AVAILABLE', branchId: 2 },
-    { id: '27', tableNumber: 'Table 05', section: 'Terrace', capacity: 4, status: 'AVAILABLE', branchId: 2 },
-    { id: '28', tableNumber: 'Table 06', section: 'Private Dining', capacity: 6, status: 'AVAILABLE', branchId: 2 },
-  ],
-  // Branch 3: Karvenagar Branch (4 tables)
-  3: [
-    { id: '34', tableNumber: 'Table 01', section: 'Main Dining', capacity: 4, status: 'AVAILABLE', branchId: 3 },
-    { id: '35', tableNumber: 'Table 02', section: 'Main Dining', capacity: 4, status: 'AVAILABLE', branchId: 3 },
-    { id: '36', tableNumber: 'Table 03', section: 'Main Dining', capacity: 4, status: 'AVAILABLE', branchId: 3 },
-    { id: '37', tableNumber: 'Table 04', section: 'Main Dining', capacity: 4, status: 'AVAILABLE', branchId: 3 },
-  ],
-  // Branch 4: Trimbakeshwar (0 tables)
+  1: [],
+  2: [],
+  3: [],
   4: [],
-  // Branch 5: Mumbai Branch (7 tables)
-  5: [
-    { id: '17', tableNumber: 'Table 01', section: 'Main Dining', capacity: 4, status: 'AVAILABLE', branchId: 5 },
-    { id: '18', tableNumber: 'Table 02', section: 'Main Dining', capacity: 4, status: 'AVAILABLE', branchId: 5 },
-    { id: '19', tableNumber: 'Table 03', section: 'Main Dining', capacity: 4, status: 'AVAILABLE', branchId: 5 },
-    { id: '20', tableNumber: 'Table 04', section: 'Main Dining', capacity: 4, status: 'AVAILABLE', branchId: 5 },
-    { id: '21', tableNumber: 'Table 05', section: 'Main Dining', capacity: 4, status: 'AVAILABLE', branchId: 5 },
-    { id: '22', tableNumber: 'Table 06', section: 'Main Dining', capacity: 4, status: 'AVAILABLE', branchId: 5 },
-    { id: '23', tableNumber: 'Table 07', section: 'Main Dining', capacity: 4, status: 'AVAILABLE', branchId: 5 },
-  ],
+  5: [],
 };
 
 // Seeded KOTs for Branch 1
@@ -523,12 +481,14 @@ const getViteLocalStorageData = (bId: number) => {
       if (Array.isArray(parsed)) {
         parsed.forEach((k: any) => {
           if (k.branchId && Number(k.branchId) !== bId) return;
+          if (!k.items || !Array.isArray(k.items) || k.items.length === 0) return;
           const rawItems: KOTOrderItem[] = (k.items || []).map((it: any) => ({
             name: it.itemName || it.name || 'Dish',
             quantity: Number(it.quantity || it.qty || 1),
             price: Number(it.unitPrice || it.price || 0),
           }));
-          const totalQty = rawItems.reduce((acc, i) => acc + i.quantity, 0) || 1;
+          const totalQty = rawItems.reduce((acc, i) => acc + i.quantity, 0);
+          if (totalQty <= 0) return;
           const rawStatus = String(k.status || 'PENDING').toUpperCase();
           const kitchenStatus: KOTTicket['kitchenStatus'] =
             rawStatus === 'PREPARING'
@@ -817,7 +777,13 @@ export const restaurantStore = {
         try {
           const cached = await AsyncStorage.getItem(`@RESTAURANT_TABLES_B${bId}`);
           if (cached) {
-            branchTablesMap[bId] = JSON.parse(cached);
+            const parsed = JSON.parse(cached);
+            if (Array.isArray(parsed) && parsed.some((t: any) => t.tableNumber === 'TB-TBL-8881' || t.tableNumber === 'NSK-TBL-01')) {
+              branchTablesMap[bId] = [];
+              AsyncStorage.removeItem(`@RESTAURANT_TABLES_B${bId}`).catch(() => {});
+            } else {
+              branchTablesMap[bId] = parsed;
+            }
           } else {
             branchTablesMap[bId] = BRANCH_TABLES_INITIAL[bId] || [];
           }
@@ -909,6 +875,12 @@ export const restaurantStore = {
 
           const backendKots: KOTTicket[] = rawList
             .filter((kot: any) => !kot.branchId || Number(kot.branchId) === bId)
+            .filter((kot: any) => {
+              const rawItems = kot.items || [];
+              if (!Array.isArray(rawItems) || rawItems.length === 0) return false;
+              const totalQty = rawItems.reduce((acc: number, i: any) => acc + Number(i.quantity || i.qty || 0), 0);
+              return totalQty > 0;
+            })
             .map((kot: any) => {
               const rawItems: KOTOrderItem[] = (kot.items || []).map((it: any) => ({
                 name: it.itemName || it.name || it.description || 'Dish',

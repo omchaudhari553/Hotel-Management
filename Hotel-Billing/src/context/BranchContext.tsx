@@ -247,7 +247,27 @@ export const BranchProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 export const useBranch = () => {
   const context = useContext(BranchContext);
   if (!context) {
-    throw new Error('useBranch must be used within a BranchProvider');
+    const fallbackBranch: Branch = {
+      id: 1,
+      name: 'Main Branch',
+      code: 'MAIN-01',
+      status: 'ACTIVE',
+    };
+    return {
+      branches: [fallbackBranch],
+      mainBranches: [fallbackBranch],
+      selectedMainBranch: fallbackBranch,
+      mainBranch: fallbackBranch,
+      subBranches: [],
+      selectedSubBranch: null,
+      selectedBranch: fallbackBranch,
+      selectedBranchId: 1,
+      setSelectedMainBranchId: () => {},
+      setSelectedBranchId: () => {},
+      setSelectedSubBranchId: () => {},
+      loading: false,
+      refreshBranches: async () => {},
+    };
   }
   return context;
 };

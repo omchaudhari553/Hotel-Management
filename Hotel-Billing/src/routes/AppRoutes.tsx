@@ -101,7 +101,7 @@ const HotelModuleRoute: React.FC<{ moduleCode: string; children: React.ReactNode
       if (code === 'HOTEL_OVERVIEW') {
         return parsed['HOTEL_OVERVIEW'] !== false && parsed['HOTEL_DASHBOARD'] !== false;
       }
-      if (code === 'HOTEL_SETTINGS') {
+      if (code === 'HOTEL_SETTINGS' || code === 'HOTEL_REPORTS') {
         return parsed['HOTEL_SETTINGS'] !== false && parsed['HOTEL_REPORTS'] !== false && parsed['REPORTS'] !== false;
       }
       if (code === 'HOTEL_KOT') {
@@ -172,30 +172,30 @@ const HotelModuleRoute: React.FC<{ moduleCode: string; children: React.ReactNode
   }, [moduleCode]);
 
   if (!enabled) {
-  const isOverview = moduleCode === 'HOTEL_OVERVIEW';
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '65vh', textAlign: 'center', padding: '32px' }}>
-      <div style={{ width: '64px', height: '64px', borderRadius: '20px', backgroundColor: 'rgba(239, 68, 68, 0.12)', color: '#EF4444', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', fontSize: '28px', border: '1px solid rgba(239, 68, 68, 0.25)' }}>
-        🔒
+    const isOverview = moduleCode === 'HOTEL_OVERVIEW';
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '65vh', textAlign: 'center', padding: '32px' }}>
+        <div style={{ width: '64px', height: '64px', borderRadius: '20px', backgroundColor: 'rgba(239, 68, 68, 0.12)', color: '#EF4444', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', fontSize: '28px', border: '1px solid rgba(239, 68, 68, 0.25)' }}>
+          🔒
+        </div>
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0F172A', marginBottom: '8px' }}>
+          हा विभाग सेंट्रल सुपर ॲडमिन कडून डिसेबल (Disabled) केला आहे
+        </h2>
+        <p style={{ fontSize: '0.85rem', color: '#64748B', maxWidth: '440px', lineHeight: 1.6, marginBottom: '22px' }}>
+          This operational module has been disabled from Product Management in the Central Super Admin Panel. Please contact the platform super administrator to re-enable it.
+        </p>
+        <button
+          type="button"
+          onClick={() => { window.location.href = isOverview ? '/choose-industry' : '/hotel/dashboard'; }}
+          style={{ padding: '10px 24px', backgroundColor: '#4F46E5', color: '#FFFFFF', borderRadius: '10px', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem', boxShadow: '0 4px 12px rgba(79, 70, 229, 0.3)' }}
+        >
+          {isOverview ? 'उद्योग निवडा (Choose Industry)' : 'हॉटेल डॅशबोर्डवर परत जा (Hotel Dashboard)'}
+        </button>
       </div>
-      <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0F172A', marginBottom: '8px' }}>
-        हा विभाग सेंट्रल सुपर ॲडमिन कडून डिसेबल (Disabled) केला आहे
-      </h2>
-      <p style={{ fontSize: '0.85rem', color: '#64748B', maxWidth: '440px', lineHeight: 1.6, marginBottom: '22px' }}>
-        This operational module has been disabled from Product Management in the Central Super Admin Panel. Please contact the platform super administrator to re-enable it.
-      </p>
-      <button
-        type="button"
-        onClick={() => { window.location.href = isOverview ? '/choose-industry' : '/hotel/dashboard'; }}
-        style={{ padding: '10px 24px', backgroundColor: '#4F46E5', color: '#FFFFFF', borderRadius: '10px', border: 'none', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem', boxShadow: '0 4px 12px rgba(79, 70, 229, 0.3)' }}
-      >
-        {isOverview ? 'उद्योग निवडा (Choose Industry)' : 'हॉटेल डॅशबोर्डवर परत जा (Hotel Dashboard)'}
-      </button>
-    </div>
-  );
-}
+    );
+  }
 
-return <>{children}</>;
+  return <>{children}</>;
 };
 
 export const AppRoutes: React.FC = () => {
@@ -340,7 +340,7 @@ export const AppRoutes: React.FC = () => {
           path="/hotelreport"
           element={
             <IndustryGuard requiredIndustry="HOTEL">
-              <HotelModuleRoute moduleCode="HOTEL_SETTINGS">
+              <HotelModuleRoute moduleCode="HOTEL_REPORTS">
                 <HotelReport />
               </HotelModuleRoute>
             </IndustryGuard>

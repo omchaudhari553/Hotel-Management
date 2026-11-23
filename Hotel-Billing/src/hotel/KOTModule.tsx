@@ -168,7 +168,18 @@ export const KOTModule = () => {
       try {
         const stored = localStorage.getItem("pending_kots");
         if (stored) {
-          localPending = JSON.parse(stored);
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            // Prune out any ghost/empty records with no items
+            localPending = parsed.filter((loc: any) => {
+              if (!loc || !Array.isArray(loc.items) || loc.items.length === 0) return false;
+              const totalQty = loc.items.reduce((acc: number, it: any) => acc + (Number(it.quantity || it.qty) || 0), 0);
+              return totalQty > 0;
+            });
+            if (localPending.length !== parsed.length) {
+              localStorage.setItem("pending_kots", JSON.stringify(localPending));
+            }
+          }
         }
       } catch (_) {}
 
@@ -232,6 +243,9 @@ export const KOTModule = () => {
 
       // 2. Incorporate localStorage pending_kots if missing
       localPending.forEach((loc) => {
+        if (!loc.items || !Array.isArray(loc.items) || loc.items.length === 0) return;
+        const totalQty = loc.items.reduce((acc: number, it: any) => acc + (Number(it.quantity || it.qty) || 0), 0);
+        if (totalQty <= 0) return;
         if (!hasOrder(loc.orderId || loc.id, loc.kotNumber)) {
           mergedList.push({
             id: loc.id || Date.now(),
@@ -250,10 +264,10 @@ export const KOTModule = () => {
               id: it.id || idx + 1,
               name: it.itemName || it.name || "Item",
               itemName: it.itemName || it.name || "Item",
-              quantity: it.quantity || it.qty || 1,
-              qty: it.quantity || it.qty || 1,
-              unitPrice: it.price || it.unitPrice || 0,
-              price: it.price || it.unitPrice || 0,
+              quantity: Number(it.quantity || it.qty) || 1,
+              qty: Number(it.quantity || it.qty) || 1,
+              unitPrice: Number(it.price || it.unitPrice) || 0,
+              price: Number(it.price || it.unitPrice) || 0,
             })),
           });
         }
@@ -292,7 +306,14 @@ export const KOTModule = () => {
         }
       });
 
-      setKots(mergedList);
+      // Purge any empty KOTs without items or with 0 quantity
+      const validKots = mergedList.filter((k) => {
+        if (!k.items || !Array.isArray(k.items) || k.items.length === 0) return false;
+        const totalQty = k.items.reduce((sum, it) => sum + (Number(it.quantity || it.qty) || 0), 0);
+        return totalQty > 0;
+      });
+
+      setKots(validKots);
     } catch (err) {
       console.error("Failed to load KOTs from backend:", err);
     } finally {
@@ -416,6 +437,12 @@ export const KOTModule = () => {
     const selDay = selectedDate.getDate();
 
     return kots.filter((kot) => {
+      // Exclude empty KOTs / KOTs with 0 items or 0 quantity
+      const items = kot.items || [];
+      if (!Array.isArray(items) || items.length === 0) return false;
+      const totalQuantity = items.reduce((sum, it) => sum + (Number(it.quantity || it.qty) || 0), 0);
+      if (totalQuantity <= 0) return false;
+
       // Exclude payment-settled / paid bills from KOT module
       const billingInfo = getKotBillingInfo(kot);
       const isSettledOrPaid =

@@ -41,7 +41,8 @@ public class SubscriptionAccessFilter extends OncePerRequestFilter {
         }
 
         // Whitelisted paths for management, authentication, renewals, notifications
-        if (path.startsWith("/api/v1/subscriptions") ||
+        if (path.startsWith("/api/v1/superadmin") ||
+                path.startsWith("/api/v1/subscriptions") ||
                 path.startsWith("/api/v1/hotel/subscription") ||
                 path.startsWith("/api/v1/admin") ||
                 path.startsWith("/api/v1/owner") ||
@@ -60,7 +61,7 @@ public class SubscriptionAccessFilter extends OncePerRequestFilter {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof User user) {
             // Super Admin / Platform Owner is never restricted
-            if (user.getRole() != null && user.getRole().name().equals("OWNER") && user.getBranch() == null) {
+            if (user.isSuperAdmin() || (user.getRole() != null && user.getRole().name().equals("OWNER") && user.getBranch() == null)) {
                 filterChain.doFilter(request, response);
                 return;
             }
