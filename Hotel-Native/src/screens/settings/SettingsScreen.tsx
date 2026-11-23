@@ -486,38 +486,55 @@ export const SettingsScreen: React.FC<{ navigation?: any; route?: any }> = ({ na
     });
   }, []);
 
-  const isBranchUser = Boolean(
-    user?.branchId ||
-    (user?.role && !['OWNER', 'ADMIN', 'SUPER_ADMIN'].includes(String(user.role).toUpperCase()) && user?.branchId) ||
-    user?.role === 'BRANCH' ||
-    user?.role === 'BRANCH_MANAGER' ||
-    user?.role === 'BRANCH_CASHIER'
-  );
   const { language, setLanguage, t, formatDate, formatTime, toDevanagari, translateStatus } = useLanguage();
   const { activeBranch, activeBranchNumId, branches } = useBranch();
   const { themeMode, setThemeMode, isDark } = useAppTheme();
   const styles = useMemo(() => getStyles(isDark, width), [isDark, width]);
 
-  // Sub-branch check: Sub-branches do not manage enterprise licenses
-  const isSubBranch = Boolean(
+  const userRole = String(user?.role || '').toUpperCase();
+  const mainBranch = useMemo(() => {
+    if (!branches || branches.length === 0) return null;
+    return branches.find((b: any) => !b.parentBranchId) || branches[0];
+  }, [branches]);
+
+  const hasBranchAssignment = Boolean(
+    user?.branchId ||
+    (user as any)?.isBranchUser ||
+    (user as any)?.isSubBranchUser ||
+    ((user as any)?.branchName && String((user as any).branchName).trim().length > 0) ||
+    userRole === 'BRANCH' ||
+    userRole === 'BRANCH_ADMIN' ||
+    userRole === 'BRANCH_MANAGER' ||
+    userRole === 'BRANCH_CASHIER' ||
+    userRole === 'BRANCH_STAFF' ||
+    userRole === 'SUB_BRANCH' ||
+    userRole.includes('BRANCH') ||
     activeBranch?.parentBranchId ||
     (activeBranch?.name && /sub/i.test(activeBranch.name)) ||
     (activeBranch?.type && /sub/i.test(activeBranch.type)) ||
-    user?.role === 'SUB_BRANCH' ||
-    user?.role === 'BRANCH_CASHIER' ||
-    (user as any)?.isSubBranchUser
+    (mainBranch?.id && activeBranch?.id && Number(activeBranch.id) !== Number(mainBranch.id))
   );
 
-  const userRole = String(user?.role || '').toUpperCase();
-  const isAdminOrOwner = ['OWNER', 'ADMIN', 'SUPER_ADMIN'].includes(userRole) || !user?.role;
-  const isSingleUser = userMode === 'SINGLE' || (!activeBranch?.parentBranchId && (branches?.length ?? 1) <= 1) || (user as any)?.accountType === 'SINGLE' || (user as any)?.role === 'SINGLE_USER';
-  const isOtherStaff = Boolean(
-    user?.role &&
-    ['CASHIER', 'BRANCH_CASHIER', 'STAFF', 'WAITER', 'KITCHEN', 'BRANCH_MANAGER', 'MANAGER'].includes(userRole)
+  const isSubBranch = hasBranchAssignment;
+  const isBranchUser = hasBranchAssignment;
+
+  const isSingleUser = !hasBranchAssignment && (
+    userMode === 'SINGLE' ||
+    (user as any)?.accountType === 'SINGLE' ||
+    (user as any)?.role === 'SINGLE_USER'
   );
 
-  // License Hero Card visibility: Always visible for Single User & Admin/Owner (hidden for sub-branches)
-  const showLicenseHeroCard = !isSubBranch && (isSingleUser || (isAdminOrOwner && !isOtherStaff));
+  const isAdminOrOwner = !hasBranchAssignment && (
+    ['OWNER', 'SUPER_ADMIN'].includes(userRole) ||
+    userRole === 'ADMIN' ||
+    (user as any)?.roles?.includes('ROLE_OWNER') ||
+    (user as any)?.roles?.includes('ROLE_ADMIN') ||
+    (user as any)?.isOwner === true
+  );
+
+  // Enterprise features (Bank Details, Licence & Subscription) visibility: Always visible for Single User & Admin/Owner (strictly hidden for sub-branches)
+  const showEnterpriseFeatures = !isSubBranch && (isSingleUser || isAdminOrOwner);
+  const showLicenseHeroCard = showEnterpriseFeatures;
 
   // Scroll ref for smooth jumping to selected setting
   const mainScrollRef = useRef<any>(null);
@@ -541,9 +558,19 @@ export const SettingsScreen: React.FC<{ navigation?: any; route?: any }> = ({ na
   // React to initialTab changes via route params
   useEffect(() => {
     if (route?.params?.initialTab && route.params.initialTab !== 'server') {
-      setActiveTab(route.params.initialTab);
+      if (route.params.initialTab === 'licence' && !showEnterpriseFeatures) {
+        setActiveTab('profile');
+      } else {
+        setActiveTab(route.params.initialTab);
+      }
     }
-  }, [route?.params?.initialTab]);
+  }, [route?.params?.initialTab, showEnterpriseFeatures]);
+
+  useEffect(() => {
+    if (!showEnterpriseFeatures && activeTab === 'licence') {
+      setActiveTab('profile');
+    }
+  }, [showEnterpriseFeatures, activeTab]);
 
   // Central Server Configuration State (Background connectivity & sync)
   const [serverHostInput, setServerHostInput] = useState<string>('');
@@ -2269,7 +2296,7 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
         { key: 'printer', label: getNavItemLabel('printer'), desc: getNavItemDesc('printer'), icon: Printer },
         { key: 'notifications', label: getNavItemLabel('notifications'), desc: getNavItemDesc('notifications'), icon: Bell },
         { key: 'system', label: getNavItemLabel('system'), desc: getNavItemDesc('system'), icon: SlidersHorizontal },
-        { key: 'licence', label: getNavItemLabel('licence'), desc: getNavItemDesc('licence'), icon: Shield },
+        ...(showEnterpriseFeatures ? [{ key: 'licence' as SettingsTabKey, label: getNavItemLabel('licence'), desc: getNavItemDesc('licence'), icon: Shield }] : []),
         { key: 'reports', label: getNavItemLabel('reports'), desc: getNavItemDesc('reports'), icon: BarChart3 },
         { key: 'gst-reports', label: getNavItemLabel('gst-reports'), desc: getNavItemDesc('gst-reports'), icon: FileText },
       ];
@@ -2282,7 +2309,7 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
         item.label.toLowerCase().includes(q) ||
         item.desc.toLowerCase().includes(q)
     );
-  }, [searchQuery, language, matchingSettings]);
+  }, [searchQuery, language, matchingSettings, showEnterpriseFeatures]);
 
   // Dropdown Picker Modal
   const renderDropdownPickerModal = () => {
@@ -6339,9 +6366,9 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
             )}
 
             {/* ----------------------------------------------------
-                LICENCE & SUBSCRIPTION TAB (Placed After System Preferences)
+                LICENCE & SUBSCRIPTION TAB (Placed After System Preferences; Strictly hidden for Sub-Branches)
             ---------------------------------------------------- */}
-            {activeTab === 'licence' && (
+            {showEnterpriseFeatures && activeTab === 'licence' && (
               <View style={[styles.settingsCard, { padding: 20 }]}>
                 {/* Header Row Matching Image 1 */}
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: '#E2E8F0', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
@@ -6659,95 +6686,99 @@ Kitchen Spices & Oils,Groceries,950,15 Nov 2026,MB-1,Cash,Garam masala & sunflow
                 </View>
 
                 {/* ====================================================
-                    BANK DETAILS SECTION (Directly beneath Hotel Profile)
+                    BANK DETAILS SECTION (Visible only for Single User & Admin/Owner; Strictly hidden for Sub-Branches)
                 ==================================================== */}
-                <View style={{ height: 1, backgroundColor: isDark ? '#2A364F' : '#E2E8F0', marginVertical: 18 }} />
+                {showEnterpriseFeatures && (
+                  <>
+                    <View style={{ height: 1, backgroundColor: isDark ? '#2A364F' : '#E2E8F0', marginVertical: 18 }} />
 
-                <View style={{ marginBottom: 14 }}>
-                  <Text style={[styles.cardTitle, { fontSize: 16 }]}>{t('bankDetails', 'Bank Details')}</Text>
-                  <Text style={styles.cardSubtitle}>
-                    {t('bankDetailsSubtitle', 'Bank account information for billing, payouts, and payment references.')}
-                  </Text>
-                </View>
+                    <View style={{ marginBottom: 14 }}>
+                      <Text style={[styles.cardTitle, { fontSize: 16 }]}>{t('bankDetails', 'Bank Details')}</Text>
+                      <Text style={styles.cardSubtitle}>
+                        {t('bankDetailsSubtitle', 'Bank account information for billing, payouts, and payment references.')}
+                      </Text>
+                    </View>
 
-                {/* Bank Row 1: Bank Name & Account Holder Name */}
-                <View style={styles.formRow}>
-                  <View style={styles.formCol}>
-                    <Text style={styles.fieldLabel}>{t('bankName', 'Bank Name')}</Text>
-                    <TextInput
-                      style={styles.textInput}
-                      value={bankName}
-                      onChangeText={setBankName}
-                      placeholder="e.g. State Bank of India"
-                      placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
-                    />
-                  </View>
+                    {/* Bank Row 1: Bank Name & Account Holder Name */}
+                    <View style={styles.formRow}>
+                      <View style={styles.formCol}>
+                        <Text style={styles.fieldLabel}>{t('bankName', 'Bank Name')}</Text>
+                        <TextInput
+                          style={styles.textInput}
+                          value={bankName}
+                          onChangeText={setBankName}
+                          placeholder="e.g. State Bank of India"
+                          placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
+                        />
+                      </View>
 
-                  <View style={styles.formCol}>
-                    <Text style={styles.fieldLabel}>{t('accountHolderName', 'Account Holder Name')}</Text>
-                    <TextInput
-                      style={styles.textInput}
-                      value={accountHolderName}
-                      onChangeText={setAccountHolderName}
-                      placeholder="e.g. Royal Palace Hotel"
-                      placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
-                    />
-                  </View>
-                </View>
+                      <View style={styles.formCol}>
+                        <Text style={styles.fieldLabel}>{t('accountHolderName', 'Account Holder Name')}</Text>
+                        <TextInput
+                          style={styles.textInput}
+                          value={accountHolderName}
+                          onChangeText={setAccountHolderName}
+                          placeholder="e.g. Royal Palace Hotel"
+                          placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
+                        />
+                      </View>
+                    </View>
 
-                {/* Bank Row 2: Account Number & IFSC Code */}
-                <View style={styles.formRow}>
-                  <View style={styles.formCol}>
-                    <Text style={styles.fieldLabel}>{t('accountNumber', 'Account Number')}</Text>
-                    <TextInput
-                      style={styles.textInput}
-                      value={accountNumber}
-                      onChangeText={setAccountNumber}
-                      placeholder="e.g. 123456789012"
-                      keyboardType="numeric"
-                      placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
-                    />
-                  </View>
+                    {/* Bank Row 2: Account Number & IFSC Code */}
+                    <View style={styles.formRow}>
+                      <View style={styles.formCol}>
+                        <Text style={styles.fieldLabel}>{t('accountNumber', 'Account Number')}</Text>
+                        <TextInput
+                          style={styles.textInput}
+                          value={accountNumber}
+                          onChangeText={setAccountNumber}
+                          placeholder="e.g. 123456789012"
+                          keyboardType="numeric"
+                          placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
+                        />
+                      </View>
 
-                  <View style={styles.formCol}>
-                    <Text style={styles.fieldLabel}>{t('ifscCode', 'IFSC Code')}</Text>
-                    <TextInput
-                      style={styles.textInput}
-                      value={ifscCode}
-                      onChangeText={(val) => setIfscCode(val.toUpperCase())}
-                      placeholder="e.g. SBIN0001234"
-                      autoCapitalize="characters"
-                      placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
-                    />
-                  </View>
-                </View>
+                      <View style={styles.formCol}>
+                        <Text style={styles.fieldLabel}>{t('ifscCode', 'IFSC Code')}</Text>
+                        <TextInput
+                          style={styles.textInput}
+                          value={ifscCode}
+                          onChangeText={(val) => setIfscCode(val.toUpperCase())}
+                          placeholder="e.g. SBIN0001234"
+                          autoCapitalize="characters"
+                          placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
+                        />
+                      </View>
+                    </View>
 
-                {/* Bank Row 3: UPI ID & Bank Mobile Number */}
-                <View style={styles.formRow}>
-                  <View style={styles.formCol}>
-                    <Text style={styles.fieldLabel}>{t('upiId', 'UPI ID / VPA')}</Text>
-                    <TextInput
-                      style={styles.textInput}
-                      value={upiId}
-                      onChangeText={setUpiId}
-                      placeholder="e.g. royalpalace@upi"
-                      placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
-                    />
-                  </View>
+                    {/* Bank Row 3: UPI ID & Bank Mobile Number */}
+                    <View style={styles.formRow}>
+                      <View style={styles.formCol}>
+                        <Text style={styles.fieldLabel}>{t('upiId', 'UPI ID / VPA')}</Text>
+                        <TextInput
+                          style={styles.textInput}
+                          value={upiId}
+                          onChangeText={setUpiId}
+                          placeholder="e.g. royalpalace@upi"
+                          placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
+                        />
+                      </View>
 
-                  <View style={styles.formCol}>
-                    <Text style={styles.fieldLabel}>{t('bankPhone', 'Bank Registered Mobile Number')}</Text>
-                    <TextInput
-                      style={styles.textInput}
-                      value={bankPhone}
-                      onChangeText={(val) => setBankPhone(val.replace(/\D/g, '').slice(0, 10))}
-                      placeholder="10-digit mobile number"
-                      keyboardType="phone-pad"
-                      maxLength={10}
-                      placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
-                    />
-                  </View>
-                </View>
+                      <View style={styles.formCol}>
+                        <Text style={styles.fieldLabel}>{t('bankPhone', 'Bank Registered Mobile Number')}</Text>
+                        <TextInput
+                          style={styles.textInput}
+                          value={bankPhone}
+                          onChangeText={(val) => setBankPhone(val.replace(/\D/g, '').slice(0, 10))}
+                          placeholder="10-digit mobile number"
+                          keyboardType="phone-pad"
+                          maxLength={10}
+                          placeholderTextColor={isDark ? '#64748B' : '#9CA3AF'}
+                        />
+                      </View>
+                    </View>
+                  </>
+                )}
 
                 <View style={[styles.cardActionsRow, { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 10 }]}>
                   {profileSavedNotice && (

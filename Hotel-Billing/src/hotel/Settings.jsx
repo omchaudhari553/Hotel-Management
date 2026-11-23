@@ -13,6 +13,7 @@ import { licenceService } from "../services/licenceService";
 import { useLanguage } from "../context/LanguageContext";
 import { dialogService } from "../context/DialogContext";
 import { useAuth } from "../context/AuthContext";
+import { useBranch } from "../context/BranchContext";
 import HotelReport from "./hotelreport";
 import GstReportComponent from "./GstReportComponent";
 import {
@@ -698,14 +699,71 @@ function Popup({
 
 export default function Settings() {
   const { user } = useAuth();
-  const isBranchUser = Boolean(
+  let branchContextData = null;
+  try {
+    branchContextData = useBranch();
+  } catch (e) {
+    // If rendered outside BranchProvider
+  }
+  const selectedBranch = branchContextData?.selectedBranch;
+  const selectedSubBranchId = branchContextData?.selectedSubBranchId;
+  const mainBranch = branchContextData?.mainBranch || branchContextData?.selectedMainBranch;
+
+  const userRole = String(user?.role || '').toUpperCase();
+  const hasBranchAssignment = Boolean(
     user?.branchId ||
     user?.isBranchUser ||
-    (user?.role && !['OWNER', 'ADMIN', 'SUPER_ADMIN'].includes(String(user.role).toUpperCase()) && user?.branchId)
+    user?.isSubBranchUser ||
+    (user?.branchName && String(user.branchName).trim().length > 0) ||
+    userRole === 'BRANCH' ||
+    userRole === 'BRANCH_ADMIN' ||
+    userRole === 'BRANCH_MANAGER' ||
+    userRole === 'BRANCH_CASHIER' ||
+    userRole === 'BRANCH_STAFF' ||
+    userRole === 'SUB_BRANCH' ||
+    userRole.includes('BRANCH') ||
+    Boolean(selectedSubBranchId) ||
+    Boolean(selectedBranch?.parentBranchId) ||
+    (selectedBranch?.name && /sub/i.test(selectedBranch.name)) ||
+    (selectedBranch?.type && /sub/i.test(selectedBranch.type)) ||
+    (mainBranch?.id && selectedBranch?.id && Number(selectedBranch.id) !== Number(mainBranch.id))
   );
 
-  const [activeSection, setActiveSection] =
-    useState("profile");
+  // A sub-branch or assigned branch user can NEVER be single user or main enterprise owner
+  const isSubBranch = hasBranchAssignment;
+  const isSingleUser = !hasBranchAssignment && (
+    user?.accountType === 'SINGLE' ||
+    userRole === 'SINGLE_USER' ||
+    localStorage.getItem('ajalkar_user_mode') === 'SINGLE'
+  );
+  const isAdminOrOwner = !hasBranchAssignment && (
+    ['OWNER', 'SUPER_ADMIN'].includes(userRole) ||
+    userRole === 'ADMIN' ||
+    user?.roles?.includes('ROLE_OWNER') ||
+    user?.roles?.includes('ROLE_ADMIN') ||
+    user?.isOwner === true
+  );
+
+  // Enterprise features (Bank Details, Licence & Subscription, Hero Card):
+  // Visible ONLY for Single User & Main Admin/Owner; Strictly HIDDEN for Sub-Branches
+  const showEnterpriseFeatures = !isSubBranch && (isSingleUser || isAdminOrOwner);
+
+  const visibleSections = React.useMemo(() => {
+    return SETTINGS_SECTIONS.filter((section) => {
+      if (section.id === 'licence' && !showEnterpriseFeatures) {
+        return false;
+      }
+      return true;
+    });
+  }, [showEnterpriseFeatures]);
+
+  const [activeSection, setActiveSection] = useState("profile");
+
+  useEffect(() => {
+    if (!showEnterpriseFeatures && activeSection === 'licence') {
+      setActiveSection('profile');
+    }
+  }, [showEnterpriseFeatures, activeSection]);
   const [reportsSubView, setReportsSubView] = useState("gst");
 
   const [profile, setProfile] =
@@ -1825,7 +1883,7 @@ export default function Settings() {
       }),
       settingsService.saveSetting("billing", "config", JSON.stringify(billing)),
       settingsService.saveSetting("BUSINESS", "LOGO", hotelLogo || ""),
-      settingsService.saveSetting("BANK", "DETAILS", JSON.stringify(bankDetails)),
+      ...(showEnterpriseFeatures ? [settingsService.saveSetting("BANK", "DETAILS", JSON.stringify(bankDetails))] : []),
     ]).then(() => {
       setLastSaved(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
       setSavedNotice(true);
@@ -2266,72 +2324,74 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* BANK DETAILS SECTION (Directly beneath Hotel Profile) */}
-        <div className="settings-card" style={{ marginTop: '20px' }}>
-          <div className="card-heading">
-            <div>
-              <h2>{t('bankDetails', 'Bank Details')}</h2>
-              <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748B' }}>
-                {t('bankDetailsSubtitle', 'Bank account information for billing, payouts, and payment references.')}
-              </p>
+        {/* BANK DETAILS SECTION (Visible ONLY for Single User & Admin/Owner; Strictly HIDDEN for Sub-Branches) */}
+        {showEnterpriseFeatures && (
+          <div className="settings-card" style={{ marginTop: '20px' }}>
+            <div className="card-heading">
+              <div>
+                <h2>{t('bankDetails', 'Bank Details')}</h2>
+                <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748B' }}>
+                  {t('bankDetailsSubtitle', 'Bank account information for billing, payouts, and payment references.')}
+                </p>
+              </div>
+              <span style={{ fontSize: '0.72rem', fontWeight: 700, background: '#F1F5F9', color: '#64748B', padding: '4px 10px', borderRadius: '6px' }}>
+                OPTIONAL
+              </span>
             </div>
-            <span style={{ fontSize: '0.72rem', fontWeight: 700, background: '#F1F5F9', color: '#64748B', padding: '4px 10px', borderRadius: '6px' }}>
-              OPTIONAL
-            </span>
+
+            <div className="settings-grid">
+              <InputField
+                label={t('bankName', 'Bank Name')}
+                value={bankDetails.bankName || ''}
+                placeholder="e.g. State Bank of India"
+                onChange={(value) => setBankDetails(prev => ({ ...prev, bankName: value }))}
+              />
+
+              <InputField
+                label={t('accountHolderName', 'Account Holder Name')}
+                value={bankDetails.accountHolderName || ''}
+                placeholder="e.g. Royal Palace Hotel"
+                onChange={(value) => setBankDetails(prev => ({ ...prev, accountHolderName: value }))}
+              />
+
+              <InputField
+                label={t('accountNumber', 'Account Number')}
+                value={bankDetails.accountNumber || ''}
+                placeholder="e.g. 123456789012"
+                onChange={(value) => {
+                  const digits = value.replace(/\D/g, "");
+                  setBankDetails(prev => ({ ...prev, accountNumber: digits }));
+                }}
+              />
+
+              <InputField
+                label={t('ifscCode', 'IFSC Code')}
+                value={bankDetails.ifscCode || ''}
+                placeholder="e.g. SBIN0001234"
+                maxLength={11}
+                onChange={(value) => setBankDetails(prev => ({ ...prev, ifscCode: value.toUpperCase() }))}
+              />
+
+              <InputField
+                label={t('upiId', 'UPI ID / VPA')}
+                value={bankDetails.upiId || ''}
+                placeholder="e.g. royalpalace@upi"
+                onChange={(value) => setBankDetails(prev => ({ ...prev, upiId: value }))}
+              />
+
+              <InputField
+                label={t('bankPhone', 'Bank Registered Phone Number')}
+                value={bankDetails.bankPhone || ''}
+                placeholder="10-digit mobile number"
+                maxLength={10}
+                onChange={(value) => {
+                  const digits = value.replace(/\D/g, "").slice(0, 10);
+                  setBankDetails(prev => ({ ...prev, bankPhone: digits }));
+                }}
+              />
+            </div>
           </div>
-
-          <div className="settings-grid">
-            <InputField
-              label={t('bankName', 'Bank Name')}
-              value={bankDetails.bankName || ''}
-              placeholder="e.g. State Bank of India"
-              onChange={(value) => setBankDetails(prev => ({ ...prev, bankName: value }))}
-            />
-
-            <InputField
-              label={t('accountHolderName', 'Account Holder Name')}
-              value={bankDetails.accountHolderName || ''}
-              placeholder="e.g. Royal Palace Hotel"
-              onChange={(value) => setBankDetails(prev => ({ ...prev, accountHolderName: value }))}
-            />
-
-            <InputField
-              label={t('accountNumber', 'Account Number')}
-              value={bankDetails.accountNumber || ''}
-              placeholder="e.g. 123456789012"
-              onChange={(value) => {
-                const digits = value.replace(/\D/g, "");
-                setBankDetails(prev => ({ ...prev, accountNumber: digits }));
-              }}
-            />
-
-            <InputField
-              label={t('ifscCode', 'IFSC Code')}
-              value={bankDetails.ifscCode || ''}
-              placeholder="e.g. SBIN0001234"
-              maxLength={11}
-              onChange={(value) => setBankDetails(prev => ({ ...prev, ifscCode: value.toUpperCase() }))}
-            />
-
-            <InputField
-              label={t('upiId', 'UPI ID / VPA')}
-              value={bankDetails.upiId || ''}
-              placeholder="e.g. royalpalace@upi"
-              onChange={(value) => setBankDetails(prev => ({ ...prev, upiId: value }))}
-            />
-
-            <InputField
-              label={t('bankPhone', 'Bank Registered Phone Number')}
-              value={bankDetails.bankPhone || ''}
-              placeholder="10-digit mobile number"
-              maxLength={10}
-              onChange={(value) => {
-                const digits = value.replace(/\D/g, "").slice(0, 10);
-                setBankDetails(prev => ({ ...prev, bankPhone: digits }));
-              }}
-            />
-          </div>
-        </div>
+        )}
 
         <div className="profile-meter">
           <div className="profile-meter-top">
@@ -4667,7 +4727,7 @@ export default function Settings() {
     }
 
     if (activeSection === "licence") {
-      return renderLicence();
+      return showEnterpriseFeatures ? renderLicence() : renderProfile();
     }
 
     if (activeSection === "gst") {
@@ -5699,8 +5759,8 @@ export default function Settings() {
         {lastSaved && <div className="toolbar-chip">{t('saved', 'Saved')} {lastSaved}</div>}
       </div>
 
-      {/* Top Hero Banner Matching Image 1: Licensed Enterprise Version */}
-      {!isBranchUser && (
+      {/* Top Hero Banner Matching Image 1: Licensed Enterprise Version (Hidden for Sub-Branches) */}
+      {showEnterpriseFeatures && (
         <div
           style={{
             background: "#FFFFFF",
@@ -5836,7 +5896,7 @@ export default function Settings() {
         <aside
           className="settings-sidebar"
         >
-          {SETTINGS_SECTIONS.filter(sectionMatchesSearch).map(
+          {visibleSections.filter(sectionMatchesSearch).map(
             (section) => (
               <button
                 type="button"
@@ -5882,7 +5942,7 @@ export default function Settings() {
         </aside>
 
         <main className="settings-content">
-          {search.trim() && !sectionMatchesSearch(SETTINGS_SECTIONS.find((item) => item.id === activeSection) || SETTINGS_SECTIONS[0]) ? (
+          {search.trim() && !sectionMatchesSearch(visibleSections.find((item) => item.id === activeSection) || visibleSections[0]) ? (
             <div className="settings-card empty-search">{t('noMatchingSettings', 'No matching settings found. Try another search term.')}</div>
           ) : renderContent()}
 

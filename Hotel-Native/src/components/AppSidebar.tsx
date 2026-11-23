@@ -86,12 +86,24 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   const insets = useSafeAreaInsets();
   const { t, language } = useLanguage();
   const { user, business } = useAuth();
+  const { activeBranch } = useBranch();
+  const userRole = String(user?.role || '').toUpperCase();
   const isBranchUser = Boolean(
     user?.branchId ||
-    (user?.role && !['OWNER', 'ADMIN', 'SUPER_ADMIN'].includes(String(user.role).toUpperCase()) && user?.branchId) ||
-    user?.role === 'BRANCH'
+    (user as any)?.isBranchUser ||
+    (user as any)?.isSubBranchUser ||
+    ((user as any)?.branchName && String((user as any).branchName).trim().length > 0) ||
+    userRole === 'BRANCH' ||
+    userRole === 'BRANCH_ADMIN' ||
+    userRole === 'BRANCH_MANAGER' ||
+    userRole === 'BRANCH_CASHIER' ||
+    userRole === 'BRANCH_STAFF' ||
+    userRole === 'SUB_BRANCH' ||
+    userRole.includes('BRANCH') ||
+    activeBranch?.parentBranchId ||
+    (activeBranch?.name && /sub/i.test(activeBranch.name)) ||
+    (activeBranch?.type && /sub/i.test(activeBranch.type))
   );
-  const { activeBranch } = useBranch();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [userMode, setUserMode] = useState<string>('SINGLE');
 
