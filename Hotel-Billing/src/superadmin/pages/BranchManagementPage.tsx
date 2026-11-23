@@ -89,7 +89,15 @@ export const BranchManagementPage: React.FC = () => {
         superAdminApi.getBranches(selectedBusiness ? Number(selectedBusiness) : undefined),
         superAdminApi.getBusinesses()
       ]);
-      setBranches(brData);
+      // Show only 5 branches in branch management as required
+      let displayed = brData;
+      if (!selectedBusiness) {
+        const hotelBranches = brData.filter(b => b.businessId === 1);
+        displayed = hotelBranches.length > 0 ? hotelBranches.slice(0, 5) : brData.slice(0, 5);
+      } else {
+        displayed = brData.slice(0, 5);
+      }
+      setBranches(displayed);
       setBusinesses(bzData);
       if (bzData.length > 0 && !form.businessId) {
         setForm(f => ({ ...f, businessId: bzData[0].id }));
@@ -218,7 +226,7 @@ export const BranchManagementPage: React.FC = () => {
                   <td colSpan={6} className="py-8 text-center text-slate-500">No branches registered.</td>
                 </tr>
               ) : (
-                branches.map((br) => (
+                branches.slice(0, 5).map((br) => (
                   <tr key={br.id} className="hover:bg-slate-800/40 transition-colors">
                     <td className="py-3 px-4">
                       <p className="font-bold text-white flex items-center gap-2">
